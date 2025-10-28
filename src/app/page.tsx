@@ -3,43 +3,116 @@ import React, { useCallback, useMemo, useState } from "react";
 import ReactFlow, {
   addEdge,
   Background,
-  Controls,
-  MiniMap,
   ReactFlowProvider,
   useEdgesState,
   useNodesState,
+  useReactFlow,
+  XYPosition,
   Node as RFNode,
   Edge as RFEdge,
   Connection,
+  NodeProps,
 } from "reactflow";
 import "reactflow/dist/style.css";
 
 type NodeData = { value?: number; op?: string; mode?: string; label?: string };
+
+// custom node components
+function NumberNode({ id, data }: NodeProps<NodeData>) {
+  const { setNodes } = useReactFlow();
+  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = Number(e.target.value);
+    setNodes((nds) =>
+      nds.map((n) =>
+        n.id === id ? { ...n, data: { ...n.data, value: v } } : n
+      )
+    );
+  };
+  return (
+    <div className="p-2 bg-gray text-white shadow rounded border">
+      <div className="text-xs font-medium">Number</div>
+      <input
+        value={data?.value ?? 0}
+        type="number"
+        onChange={onChange}
+        className="mt-1 w-32 border px-2 py-1 rounded"
+      />
+    </div>
+  );
+}
+
+function OperationNode({ id, data }: NodeProps<NodeData>) {
+  const { setNodes } = useReactFlow();
+  const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const op = e.target.value;
+    setNodes((nds) =>
+      nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, op } } : n))
+    );
+  };
+  return (
+    <div className="p-2 bg-gray text-white shadow rounded border">
+      <div className="text-xs font-medium">Operation</div>
+      <select
+        value={data?.op ?? "add"}
+        onChange={onChange}
+        className="mt-1 w-32 border px-2 py-1 rounded"
+      >
+        <option value="add">Add</option>
+        <option value="subtract">Subtract</option>
+        <option value="multiply">Multiply</option>
+        <option value="divide">Divide</option>
+      </select>
+    </div>
+  );
+}
+
+function VizNode({ id, data }: NodeProps<NodeData>) {
+  const { setNodes } = useReactFlow();
+  const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const mode = e.target.value;
+    setNodes((nds) =>
+      nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, mode } } : n))
+    );
+  };
+  return (
+    <div className="p-2 bg-gray text-white shadow rounded border">
+      <div className="text-xs font-medium">Visualization</div>
+      <select
+        value={data?.mode ?? "text"}
+        onChange={onChange}
+        className="mt-1 w-32 border px-2 py-1 rounded"
+      >
+        <option value="text">Text</option>
+        <option value="table">Table</option>
+      </select>
+    </div>
+  );
+}
 
 const initialNodes: RFNode<NodeData>[] = [
   {
     id: "1",
     position: { x: 50, y: 50 },
     data: { value: 10, label: "Node 1" },
-    type: "default",
+    type: "numberNode",
   },
   {
     id: "2",
     position: { x: 50, y: 200 },
     data: { value: 5, label: "Node 2" },
-    type: "default",
+    type: "numberNode",
   },
   {
     id: "3",
     position: { x: 300, y: 120 },
     data: { op: "add", label: "Node 3 (op)" },
-    type: "default",
+    type: "opNode",
   },
   {
     id: "4",
     position: { x: 600, y: 120 },
     data: { mode: "text", label: "Node 4 (viz)" },
-    type: "default",
+    type: "vizNode",
   },
 ];
 
@@ -53,61 +126,70 @@ function Canvas() {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [show, setShow] = useState(false);
+  const { project } = useReactFlow();
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds: RFEdge[]) => addEdge(params, eds)),
     [setEdges]
   );
 
-  const payload = useMemo(() => {
-    return {
-      nodes: nodes.map((n: RFNode<NodeData>) => ({ id: n.id, data: n.data })),
-      edges: edges.map((e: RFEdge) => ({
+  const payload = useMemo(
+    () => ({
+      nodes: nodes.map((n) => ({ id: n.id, data: n.data })),
+      edges: edges.map((e) => ({
         id: e.id,
         source: e.source,
         target: e.target,
       })),
-    };
-  }, [nodes, edges]);
+    }),
+    [nodes, edges]
+  );
 
-  // simple UI to edit node values inline using prompt (minimal)
-  const editNode = (id: string) => {
-    const n = nodes.find((x) => x.id === id);
-    if (!n) return;
-    if (id === "3") {
-      const op = prompt(
-        "Enter operation (add, subtract, multiply, divide)",
-        String(n.data.op ?? "add")
-      );
-      if (op)
-        setNodes((nds) =>
-          nds.map((m) => (m.id === id ? { ...m, data: { ...m.data, op } } : m))
-        );
-    } else if (id === "4") {
-      const mode = prompt(
-        "Enter viz mode (text/table)",
-        String(n.data.mode ?? "text")
-      );
-      if (mode)
-        setNodes((nds) =>
-          nds.map((m) =>
-            m.id === id ? { ...m, data: { ...m.data, mode } } : m
-          )
-        );
-    } else {
-      const v = prompt("Enter number", String(n.data.value ?? 0));
-      if (v !== null)
-        setNodes((nds) =>
-          nds.map((m) =>
-            m.id === id ? { ...m, data: { ...m.data, value: Number(v) } } : m
-          )
-        );
-    }
+  const nodeTypes = useMemo(
+    () => ({ numberNode: NumberNode, opNode: OperationNode, vizNode: VizNode }),
+    []
+  );
+
+  const [nextId, setNextId] = useState(5);
+  const addNode = (type: "numberNode" | "opNode" | "vizNode") => {
+    const id = String(nextId);
+    setNextId((s) => s + 1);
+    const position: XYPosition = project
+      ? project({ x: 100, y: 100 })
+      : { x: 400 + nextId * 10, y: 120 + (nextId % 3) * 40 };
+    const baseData: NodeData =
+      type === "numberNode"
+        ? { value: 0, label: `Node ${id}` }
+        : type === "opNode"
+        ? { op: "add", label: `Op ${id}` }
+        : { mode: "text", label: `Viz ${id}` };
+    const newNode: RFNode<NodeData> = { id, position, data: baseData, type };
+    setNodes((nds) => nds.concat(newNode));
   };
 
   return (
     <div className="h-screen flex">
-      <div className="w-1/2 border-r flex flex-col">
+      <div className="w-1/2 border-r flex flex-col relative">
+        <div className="absolute left-2 top-4 z-10 flex flex-col gap-2">
+          <button
+            onClick={() => addNode("numberNode")}
+            className="bg-gray text-white border px-3 py-2 rounded shadow"
+          >
+            + Number
+          </button>
+          <button
+            onClick={() => addNode("opNode")}
+            className="bg-gray text-white border px-3 py-2 rounded shadow"
+          >
+            + Operation
+          </button>
+          <button
+            onClick={() => addNode("vizNode")}
+            className="bg-gray text-white border px-3 py-2 rounded shadow"
+          >
+            + Viz
+          </button>
+        </div>
         <div className="flex-1">
           <ReactFlow
             nodes={nodes}
@@ -115,16 +197,16 @@ function Canvas() {
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
-            onNodeClick={(_, node) => editNode(node.id)}
+            nodeTypes={nodeTypes}
             fitView
           >
             <Background />
-            <Controls />
+            {/* <Controls /> */}
           </ReactFlow>
         </div>
         <div className="p-3 border-t bg-white flex items-center justify-between">
           <div className="text-sm text-gray-600">
-            Canvas (click nodes to edit)
+            Canvas (use toolbar to add nodes)
           </div>
           <div>
             <button
@@ -136,10 +218,9 @@ function Canvas() {
           </div>
         </div>
       </div>
+
       <div className="w-1/2 p-4">
-        <pre className="text-white">
-          {JSON.stringify(payload || "{}", null, 2)}
-        </pre>
+        <pre>{JSON.stringify(payload || "{}", null, 2)}</pre>
       </div>
     </div>
   );
