@@ -7,14 +7,30 @@ import (
 
 // Engine is the workflow execution engine
 type Engine struct {
-	workflow *Workflow
+	workflow   *Workflow
+	nodeMap    map[string]*Node     // Map of node ID to node for O(1) lookup
+	inputsMap  map[string][]string  // Map of node ID to input source IDs for O(1) lookup
 }
 
 // NewEngine creates a new workflow execution engine
 func NewEngine(workflow *Workflow) *Engine {
-	return &Engine{
-		workflow: workflow,
+	engine := &Engine{
+		workflow:  workflow,
+		nodeMap:   make(map[string]*Node),
+		inputsMap: make(map[string][]string),
 	}
+	
+	// Build node map for O(1) lookups
+	for i := range workflow.Nodes {
+		engine.nodeMap[workflow.Nodes[i].ID] = &workflow.Nodes[i]
+	}
+	
+	// Build inputs map for O(1) lookups
+	for _, edge := range workflow.Edges {
+		engine.inputsMap[edge.Target] = append(engine.inputsMap[edge.Target], edge.Source)
+	}
+	
+	return engine
 }
 
 // Execute runs the workflow and returns the execution result
@@ -266,12 +282,11 @@ func (e *Engine) executeVisualizationNode(node *Node, results map[string]*NodeRe
 func (e *Engine) getNodeInputs(nodeID string, results map[string]*NodeResult) []interface{} {
 	var inputs []interface{}
 
-	// Find edges that target this node
-	for _, edge := range e.workflow.Edges {
-		if edge.Target == nodeID {
-			if result, ok := results[edge.Source]; ok && result.Error == nil {
-				inputs = append(inputs, result.Value)
-			}
+	// Use the pre-built inputs map for O(1) lookup
+	sourceIDs := e.inputsMap[nodeID]
+	for _, sourceID := range sourceIDs {
+		if result, ok := results[sourceID]; ok && result.Error == nil {
+			inputs = append(inputs, result.Value)
 		}
 	}
 
@@ -280,12 +295,7 @@ func (e *Engine) getNodeInputs(nodeID string, results map[string]*NodeResult) []
 
 // getNodeByID retrieves a node by its ID
 func (e *Engine) getNodeByID(nodeID string) *Node {
-	for i := range e.workflow.Nodes {
-		if e.workflow.Nodes[i].ID == nodeID {
-			return &e.workflow.Nodes[i]
-		}
-	}
-	return nil
+	return e.nodeMap[nodeID]
 }
 
 // inferNodeType infers the node type from node data
