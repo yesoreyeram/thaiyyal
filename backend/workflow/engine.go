@@ -26,7 +26,48 @@ func (e *Engine) Execute() (*Result, error) {
 		Errors:      []string{},
 	}
 
-	// Build adjacency map and in-degree count for topological sort
+	// Infer node types if not explicitly set
+	e.inferNodeTypes()
+
+	// Build execution plan using topological sort
+	executionOrder, err := e.buildExecutionOrder()
+	if err != nil {
+		return result, err
+	}
+
+	// Execute nodes in topological order
+	if err := e.executeNodes(executionOrder, result); err != nil {
+		return result, err
+	}
+
+	// Set final output
+	e.setFinalOutput(result)
+
+	return result, nil
+}
+
+// inferNodeTypes determines node types from their data fields if not explicitly set
+func (e *Engine) inferNodeTypes() {
+	for i := range e.payload.Nodes {
+		node := &e.payload.Nodes[i]
+		if node.Type != "" {
+			continue // Type already set
+		}
+
+		// Infer type from data fields
+		if node.Data.Value != nil {
+			node.Type = NodeTypeNumber
+		} else if node.Data.Op != nil {
+			node.Type = NodeTypeOperation
+		} else if node.Data.Mode != nil {
+			node.Type = NodeTypeVisualization
+		}
+	}
+}
+
+// buildExecutionOrder creates a topological sort of nodes using Kahn's algorithm
+func (e *Engine) buildExecutionOrder() ([]string, error) {
+	// Build node map
 	nodeMap := make(map[string]Node)
 	for _, node := range e.payload.Nodes {
 		nodeMap[node.ID] = node
@@ -71,99 +112,122 @@ func (e *Engine) Execute() (*Result, error) {
 
 	// Check for cycles
 	if len(executionOrder) != len(e.payload.Nodes) {
-		return result, fmt.Errorf("workflow contains cycles or disconnected nodes")
+		return nil, fmt.Errorf("workflow contains cycles or disconnected nodes")
 	}
 
-	// Execute nodes in topological order
+	return executionOrder, nil
+}
+
+// executeNodes executes all nodes in the given order
+func (e *Engine) executeNodes(executionOrder []string, result *Result) error {
+	nodeMap := make(map[string]Node)
+	for _, node := range e.payload.Nodes {
+		nodeMap[node.ID] = node
+	}
+
 	for _, nodeID := range executionOrder {
 		node := nodeMap[nodeID]
-		value, err := e.executeNode(node, result.NodeResults, adjacency)
+		value, err := e.executeNode(node, result.NodeResults)
 		if err != nil {
 			errMsg := fmt.Sprintf("error executing node %s: %v", nodeID, err)
 			result.Errors = append(result.Errors, errMsg)
-			return result, fmt.Errorf("error executing node %s: %w", nodeID, err)
+			return fmt.Errorf("error executing node %s: %w", nodeID, err)
 		}
 		result.NodeResults[nodeID] = value
 	}
 
-	// Find the final output (nodes with no outgoing edges)
-	finalNodes := []string{}
-	for _, node := range e.payload.Nodes {
-		if len(adjacency[node.ID]) == 0 {
-			finalNodes = append(finalNodes, node.ID)
-		}
-	}
-
-	if len(finalNodes) > 0 {
-		// Use the last final node as the output
-		result.FinalOutput = result.NodeResults[finalNodes[len(finalNodes)-1]]
-	}
-
-	return result, nil
+	return nil
 }
 
 // executeNode executes a single node based on its type
-func (e *Engine) executeNode(node Node, nodeResults map[string]interface{}, adjacency map[string][]string) (interface{}, error) {
-	// Determine node type by checking which data fields are set
-	if node.Data.Value != nil {
-		// Number node - return the value directly
-		return *node.Data.Value, nil
+func (e *Engine) executeNode(node Node, nodeResults map[string]interface{}) (interface{}, error) {
+	switch node.Type {
+	case NodeTypeNumber:
+		return e.executeNumberNode(node)
+	case NodeTypeOperation:
+		return e.executeOperationNode(node, nodeResults)
+	case NodeTypeVisualization:
+		return e.executeVisualizationNode(node, nodeResults)
+	default:
+		return nil, fmt.Errorf("unknown node type '%s' for node %s", node.Type, node.ID)
+	}
+}
+
+// executeNumberNode executes a number input node
+func (e *Engine) executeNumberNode(node Node) (interface{}, error) {
+	if node.Data.Value == nil {
+		return nil, fmt.Errorf("number node %s missing value", node.ID)
+	}
+	return *node.Data.Value, nil
+}
+
+// executeOperationNode executes an arithmetic operation node
+func (e *Engine) executeOperationNode(node Node, nodeResults map[string]interface{}) (interface{}, error) {
+	if node.Data.Op == nil {
+		return nil, fmt.Errorf("operation node %s missing operation", node.ID)
 	}
 
-	if node.Data.Op != nil {
-		// Operation node - get inputs from incoming edges
-		inputs, err := e.getNodeInputs(node.ID, nodeResults)
-		if err != nil {
-			return nil, err
-		}
-
-		if len(inputs) < 2 {
-			return nil, fmt.Errorf("operation node %s requires at least 2 inputs, got %d", node.ID, len(inputs))
-		}
-
-		// Perform operation on the first two inputs
-		left, ok1 := inputs[0].(float64)
-		right, ok2 := inputs[1].(float64)
-		if !ok1 || !ok2 {
-			return nil, fmt.Errorf("operation node %s inputs must be numbers", node.ID)
-		}
-
-		switch *node.Data.Op {
-		case "add":
-			return left + right, nil
-		case "subtract":
-			return left - right, nil
-		case "multiply":
-			return left * right, nil
-		case "divide":
-			if right == 0 {
-				return nil, fmt.Errorf("division by zero in node %s", node.ID)
-			}
-			return left / right, nil
-		default:
-			return nil, fmt.Errorf("unknown operation: %s", *node.Data.Op)
-		}
+	// Get inputs from incoming edges
+	inputs, err := e.getNodeInputs(node.ID, nodeResults)
+	if err != nil {
+		return nil, err
 	}
 
-	if node.Data.Mode != nil {
-		// Visualization node - return formatted output
-		inputs, err := e.getNodeInputs(node.ID, nodeResults)
-		if err != nil {
-			return nil, err
-		}
-
-		if len(inputs) == 0 {
-			return nil, fmt.Errorf("visualization node %s requires at least 1 input", node.ID)
-		}
-
-		// Return the input value with visualization metadata
-		return map[string]interface{}{
-			"mode":  *node.Data.Mode,
-			"value": inputs[0],
-		}, nil
+	if len(inputs) < 2 {
+		return nil, fmt.Errorf("operation node %s requires at least 2 inputs, got %d", node.ID, len(inputs))
 	}
 
-	return nil, fmt.Errorf("unknown node type for node %s", node.ID)
+	// Extract numeric values
+	left, ok1 := inputs[0].(float64)
+	right, ok2 := inputs[1].(float64)
+	if !ok1 || !ok2 {
+		return nil, fmt.Errorf("operation node %s inputs must be numbers", node.ID)
+	}
+
+	// Perform the operation
+	return e.performOperation(*node.Data.Op, left, right, node.ID)
+}
+
+// performOperation executes the specified arithmetic operation
+func (e *Engine) performOperation(op string, left, right float64, nodeID string) (float64, error) {
+	switch OperationType(op) {
+	case OperationAdd:
+		return left + right, nil
+	case OperationSubtract:
+		return left - right, nil
+	case OperationMultiply:
+		return left * right, nil
+	case OperationDivide:
+		if right == 0 {
+			return 0, fmt.Errorf("division by zero in node %s", nodeID)
+		}
+		return left / right, nil
+	default:
+		return 0, fmt.Errorf("unknown operation: %s", op)
+	}
+}
+
+// executeVisualizationNode executes a visualization node
+func (e *Engine) executeVisualizationNode(node Node, nodeResults map[string]interface{}) (interface{}, error) {
+	if node.Data.Mode == nil {
+		return nil, fmt.Errorf("visualization node %s missing mode", node.ID)
+	}
+
+	// Get inputs from incoming edges
+	inputs, err := e.getNodeInputs(node.ID, nodeResults)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(inputs) == 0 {
+		return nil, fmt.Errorf("visualization node %s requires at least 1 input", node.ID)
+	}
+
+	// Return the input value with visualization metadata
+	return map[string]interface{}{
+		"mode":  *node.Data.Mode,
+		"value": inputs[0],
+	}, nil
 }
 
 // getNodeInputs retrieves the input values for a node from its predecessors
@@ -182,4 +246,25 @@ func (e *Engine) getNodeInputs(nodeID string, nodeResults map[string]interface{}
 	}
 
 	return inputs, nil
+}
+
+// setFinalOutput determines and sets the final output of the workflow
+func (e *Engine) setFinalOutput(result *Result) {
+	// Find nodes with no outgoing edges (terminal nodes)
+	hasOutgoing := make(map[string]bool)
+	for _, edge := range e.payload.Edges {
+		hasOutgoing[edge.Source] = true
+	}
+
+	finalNodes := []string{}
+	for _, node := range e.payload.Nodes {
+		if !hasOutgoing[node.ID] {
+			finalNodes = append(finalNodes, node.ID)
+		}
+	}
+
+	if len(finalNodes) > 0 {
+		// Use the last final node as the output
+		result.FinalOutput = result.NodeResults[finalNodes[len(finalNodes)-1]]
+	}
 }

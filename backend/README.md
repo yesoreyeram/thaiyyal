@@ -5,6 +5,7 @@ A Go-based workflow execution engine that parses and executes JSON workflow payl
 ## Features
 
 - **JSON Payload Parsing**: Accepts workflow definitions as JSON
+- **Explicit Node Types**: Support for explicit type definition with automatic type inference fallback
 - **DAG Execution**: Executes workflows using topological sorting to ensure correct node execution order
 - **Node Types**:
   - **Number Nodes**: Input nodes that provide numeric values
@@ -12,6 +13,7 @@ A Go-based workflow execution engine that parses and executes JSON workflow payl
   - **Visualization Nodes**: Format and present final results (text, table modes)
 - **Cycle Detection**: Prevents execution of workflows with circular dependencies
 - **Error Handling**: Comprehensive error reporting for invalid workflows or execution failures
+- **Type Safety**: Strongly typed constants for node types, operations, and visualization modes
 
 ## Usage
 
@@ -28,13 +30,13 @@ import (
 )
 
 func main() {
-    // Define a workflow payload
+    // Define a workflow payload with explicit types
     payload := `{
         "nodes": [
-            {"id": "1", "data": {"value": 10}},
-            {"id": "2", "data": {"value": 5}},
-            {"id": "3", "data": {"op": "add"}},
-            {"id": "4", "data": {"mode": "text"}}
+            {"id": "1", "type": "number", "data": {"value": 10}},
+            {"id": "2", "type": "number", "data": {"value": 5}},
+            {"id": "3", "type": "operation", "data": {"op": "add"}},
+            {"id": "4", "type": "visualization", "data": {"mode": "text"}}
         ],
         "edges": [
             {"id": "e1-3", "source": "1", "target": "3"},
@@ -77,15 +79,16 @@ This will execute multiple example workflows including:
 
 The workflow engine expects a JSON payload with the following structure:
 
+### With Explicit Types (Recommended)
+
 ```json
 {
   "nodes": [
     {
       "id": "unique-node-id",
+      "type": "number",       // explicit type: "number", "operation", or "visualization"
       "data": {
-        "value": 10,          // for number nodes
-        "op": "add",          // for operation nodes (add, subtract, multiply, divide)
-        "mode": "text",       // for visualization nodes (text, table)
+        "value": 10,
         "label": "Node Name"  // optional label
       }
     }
@@ -100,12 +103,51 @@ The workflow engine expects a JSON payload with the following structure:
 }
 ```
 
+### With Type Inference (Backward Compatible)
+
+The engine can also infer types from data fields if the `type` field is omitted:
+
+```json
+{
+  "nodes": [
+    {
+      "id": "unique-node-id",
+      "data": {
+        "value": 10           // presence of "value" infers type "number"
+      }
+    }
+  ],
+  "edges": [...]
+}
+```
+
 ## Node Types
+
+### Type Constants
+
+The package provides strongly-typed constants for all node types:
+
+```go
+// Node types
+workflow.NodeTypeNumber         // "number"
+workflow.NodeTypeOperation      // "operation"
+workflow.NodeTypeVisualization  // "visualization"
+
+// Operation types
+workflow.OperationAdd       // "add"
+workflow.OperationSubtract  // "subtract"
+workflow.OperationMultiply  // "multiply"
+workflow.OperationDivide    // "divide"
+
+// Visualization modes
+workflow.VisualizationModeText  // "text"
+workflow.VisualizationModeTable // "table"
+```
 
 ### Number Node
 Provides a numeric input value.
 ```json
-{"id": "1", "data": {"value": 42}}
+{"id": "1", "type": "number", "data": {"value": 42}}
 ```
 
 ### Operation Node
@@ -118,7 +160,7 @@ Supported operations:
 - `divide`: Division
 
 ```json
-{"id": "2", "data": {"op": "add"}}
+{"id": "2", "type": "operation", "data": {"op": "add"}}
 ```
 
 ### Visualization Node
@@ -129,7 +171,7 @@ Supported modes:
 - `table`: Tabular output
 
 ```json
-{"id": "3", "data": {"mode": "text"}}
+{"id": "3", "type": "visualization", "data": {"mode": "text"}}
 ```
 
 ## Result Format
@@ -171,17 +213,40 @@ The test suite includes:
 - Cycle detection
 - Error handling (division by zero, missing inputs, invalid operations)
 - Visualization modes
+- Type inference tests
+- Explicit type tests
+- Mixed explicit and inferred type tests
 
 ## Implementation Details
 
 ### Execution Algorithm
 
 1. **Parse JSON**: Unmarshal the payload into Go structs
-2. **Build Graph**: Create adjacency list and calculate in-degrees
-3. **Topological Sort**: Use Kahn's algorithm to determine execution order
-4. **Cycle Detection**: Verify all nodes can be executed (no cycles)
-5. **Execute Nodes**: Process nodes in topological order
-6. **Collect Results**: Gather intermediate and final results
+2. **Infer Types**: Determine node types from data fields if not explicitly set
+3. **Build Graph**: Create adjacency list and calculate in-degrees
+4. **Topological Sort**: Use Kahn's algorithm to determine execution order
+5. **Cycle Detection**: Verify all nodes can be executed (no cycles)
+6. **Execute Nodes**: Process nodes in topological order using type-specific executors
+7. **Collect Results**: Gather intermediate and final results
+
+### Code Organization
+
+The codebase is organized for readability and maintainability:
+
+- **types.go**: All type definitions, constants, and data structures
+- **engine.go**: Core execution engine with separate methods for each concern
+- **engine_test.go**: Comprehensive execution tests
+- **integration_test.go**: Frontend compatibility tests
+- **types_test.go**: Type system and constant tests
+
+### Type Inference
+
+The engine automatically infers node types based on data fields:
+- Presence of `value` field → `NodeTypeNumber`
+- Presence of `op` field → `NodeTypeOperation`
+- Presence of `mode` field → `NodeTypeVisualization`
+
+This provides backward compatibility with payloads that don't specify explicit types.
 
 ### Error Handling
 
@@ -192,6 +257,7 @@ The engine handles various error conditions:
 - Division by zero
 - Unknown operations
 - Type mismatches
+- Invalid node types
 
 All errors are reported in the result structure with descriptive messages.
 
