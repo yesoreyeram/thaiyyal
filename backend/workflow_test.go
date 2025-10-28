@@ -316,3 +316,253 @@ func TestVisualizationModes(t *testing.T) {
 		})
 	}
 }
+
+// Test text input node
+func TestTextInputNode(t *testing.T) {
+	payload := `{
+		"nodes": [
+			{"id": "1", "data": {"text": "Hello World"}}
+		],
+		"edges": []
+	}`
+
+	engine, _ := NewEngine([]byte(payload))
+	result, err := engine.Execute()
+	if err != nil {
+		t.Fatalf("Execute failed: %v", err)
+	}
+
+	if result.NodeResults["1"] != "Hello World" {
+		t.Errorf("Expected 'Hello World', got %v", result.NodeResults["1"])
+	}
+}
+
+// Test text operation node - uppercase
+func TestTextOperationUppercase(t *testing.T) {
+	payload := `{
+		"nodes": [
+			{"id": "1", "data": {"text": "hello world"}},
+			{"id": "2", "data": {"text_op": "uppercase"}}
+		],
+		"edges": [
+			{"id": "e1", "source": "1", "target": "2"}
+		]
+	}`
+
+	engine, _ := NewEngine([]byte(payload))
+	result, err := engine.Execute()
+	if err != nil {
+		t.Fatalf("Execute failed: %v", err)
+	}
+
+	if result.NodeResults["2"] != "HELLO WORLD" {
+		t.Errorf("Expected 'HELLO WORLD', got %v", result.NodeResults["2"])
+	}
+}
+
+// Test text operation node - lowercase
+func TestTextOperationLowercase(t *testing.T) {
+	payload := `{
+		"nodes": [
+			{"id": "1", "data": {"text": "HELLO WORLD"}},
+			{"id": "2", "data": {"text_op": "lowercase"}}
+		],
+		"edges": [
+			{"id": "e1", "source": "1", "target": "2"}
+		]
+	}`
+
+	engine, _ := NewEngine([]byte(payload))
+	result, err := engine.Execute()
+	if err != nil {
+		t.Fatalf("Execute failed: %v", err)
+	}
+
+	if result.NodeResults["2"] != "hello world" {
+		t.Errorf("Expected 'hello world', got %v", result.NodeResults["2"])
+	}
+}
+
+// Test text operation node - titlecase
+func TestTextOperationTitlecase(t *testing.T) {
+	payload := `{
+		"nodes": [
+			{"id": "1", "data": {"text": "hello world from go"}},
+			{"id": "2", "data": {"text_op": "titlecase"}}
+		],
+		"edges": [
+			{"id": "e1", "source": "1", "target": "2"}
+		]
+	}`
+
+	engine, _ := NewEngine([]byte(payload))
+	result, err := engine.Execute()
+	if err != nil {
+		t.Fatalf("Execute failed: %v", err)
+	}
+
+	if result.NodeResults["2"] != "Hello World From Go" {
+		t.Errorf("Expected 'Hello World From Go', got %v", result.NodeResults["2"])
+	}
+}
+
+// Test text operation node - camelcase
+func TestTextOperationCamelcase(t *testing.T) {
+	payload := `{
+		"nodes": [
+			{"id": "1", "data": {"text": "hello world from go"}},
+			{"id": "2", "data": {"text_op": "camelcase"}}
+		],
+		"edges": [
+			{"id": "e1", "source": "1", "target": "2"}
+		]
+	}`
+
+	engine, _ := NewEngine([]byte(payload))
+	result, err := engine.Execute()
+	if err != nil {
+		t.Fatalf("Execute failed: %v", err)
+	}
+
+	if result.NodeResults["2"] != "helloWorldFromGo" {
+		t.Errorf("Expected 'helloWorldFromGo', got %v", result.NodeResults["2"])
+	}
+}
+
+// Test text operation node - inversecase
+func TestTextOperationInversecase(t *testing.T) {
+	payload := `{
+		"nodes": [
+			{"id": "1", "data": {"text": "HeLLo WoRLd"}},
+			{"id": "2", "data": {"text_op": "inversecase"}}
+		],
+		"edges": [
+			{"id": "e1", "source": "1", "target": "2"}
+		]
+	}`
+
+	engine, _ := NewEngine([]byte(payload))
+	result, err := engine.Execute()
+	if err != nil {
+		t.Fatalf("Execute failed: %v", err)
+	}
+
+	if result.NodeResults["2"] != "hEllO wOrlD" {
+		t.Errorf("Expected 'hEllO wOrlD', got %v", result.NodeResults["2"])
+	}
+}
+
+// Test chained text operations
+func TestChainedTextOperations(t *testing.T) {
+	// Input: "hello world" -> camelcase -> inversecase
+	// Expected: "helloWorld" -> "HELLOwORLD"
+	payload := `{
+		"nodes": [
+			{"id": "1", "data": {"text": "hello world"}},
+			{"id": "2", "data": {"text_op": "camelcase"}},
+			{"id": "3", "data": {"text_op": "inversecase"}}
+		],
+		"edges": [
+			{"id": "e1", "source": "1", "target": "2"},
+			{"id": "e2", "source": "2", "target": "3"}
+		]
+	}`
+
+	engine, _ := NewEngine([]byte(payload))
+	result, err := engine.Execute()
+	if err != nil {
+		t.Fatalf("Execute failed: %v", err)
+	}
+
+	// First operation: camelcase "hello world" -> "helloWorld"
+	if result.NodeResults["2"] != "helloWorld" {
+		t.Errorf("Expected 'helloWorld' at node 2, got %v", result.NodeResults["2"])
+	}
+
+	// Second operation: inversecase "helloWorld" -> "HELLOwORLD"
+	if result.NodeResults["3"] != "HELLOwORLD" {
+		t.Errorf("Expected 'HELLOwORLD' at node 3, got %v", result.NodeResults["3"])
+	}
+}
+
+// Test text operation with non-text input (should fail)
+func TestTextOperationNonTextInput(t *testing.T) {
+	payload := `{
+		"nodes": [
+			{"id": "1", "data": {"value": 42}},
+			{"id": "2", "data": {"text_op": "uppercase"}}
+		],
+		"edges": [
+			{"id": "e1", "source": "1", "target": "2"}
+		]
+	}`
+
+	engine, _ := NewEngine([]byte(payload))
+	_, err := engine.Execute()
+	if err == nil {
+		t.Error("Expected error when text operation receives non-text input")
+	}
+	if err != nil && err.Error() != "error executing node 2: text operation input must be text/string" {
+		t.Errorf("Expected specific error message, got: %v", err)
+	}
+}
+
+// Test explicit text node types
+func TestExplicitTextNodeTypes(t *testing.T) {
+	payload := `{
+		"nodes": [
+			{"id": "1", "type": "text_input", "data": {"text": "test"}},
+			{"id": "2", "type": "text_operation", "data": {"text_op": "uppercase"}}
+		],
+		"edges": [
+			{"id": "e1", "source": "1", "target": "2"}
+		]
+	}`
+
+	engine, _ := NewEngine([]byte(payload))
+	result, err := engine.Execute()
+	if err != nil {
+		t.Fatalf("Execute failed: %v", err)
+	}
+
+	if result.NodeResults["2"] != "TEST" {
+		t.Errorf("Expected 'TEST', got %v", result.NodeResults["2"])
+	}
+}
+
+// Test complex chained text operations
+func TestComplexTextChain(t *testing.T) {
+	// "HELLO WORLD" -> lowercase -> titlecase -> camelcase
+	// "HELLO WORLD" -> "hello world" -> "Hello World" -> "helloWorld"
+	payload := `{
+		"nodes": [
+			{"id": "1", "data": {"text": "HELLO WORLD"}},
+			{"id": "2", "data": {"text_op": "lowercase"}},
+			{"id": "3", "data": {"text_op": "titlecase"}},
+			{"id": "4", "data": {"text_op": "camelcase"}}
+		],
+		"edges": [
+			{"id": "e1", "source": "1", "target": "2"},
+			{"id": "e2", "source": "2", "target": "3"},
+			{"id": "e3", "source": "3", "target": "4"}
+		]
+	}`
+
+	engine, _ := NewEngine([]byte(payload))
+	result, err := engine.Execute()
+	if err != nil {
+		t.Fatalf("Execute failed: %v", err)
+	}
+
+	if result.NodeResults["2"] != "hello world" {
+		t.Errorf("Step 1: Expected 'hello world', got %v", result.NodeResults["2"])
+	}
+
+	if result.NodeResults["3"] != "Hello World" {
+		t.Errorf("Step 2: Expected 'Hello World', got %v", result.NodeResults["3"])
+	}
+
+	if result.NodeResults["4"] != "helloWorld" {
+		t.Errorf("Step 3: Expected 'helloWorld', got %v", result.NodeResults["4"])
+	}
+}

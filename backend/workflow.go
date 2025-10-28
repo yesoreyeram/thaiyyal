@@ -12,6 +12,8 @@ const (
 	NodeTypeNumber        NodeType = "number"
 	NodeTypeOperation     NodeType = "operation"
 	NodeTypeVisualization NodeType = "visualization"
+	NodeTypeTextInput     NodeType = "text_input"
+	NodeTypeTextOperation NodeType = "text_operation"
 )
 
 // Payload represents the JSON payload from the frontend
@@ -29,10 +31,12 @@ type Node struct {
 
 // NodeData contains the node-specific configuration
 type NodeData struct {
-	Value *float64 `json:"value,omitempty"`
-	Op    *string  `json:"op,omitempty"`
-	Mode  *string  `json:"mode,omitempty"`
-	Label *string  `json:"label,omitempty"`
+	Value  *float64 `json:"value,omitempty"`   // for number nodes
+	Op     *string  `json:"op,omitempty"`      // for operation nodes
+	Mode   *string  `json:"mode,omitempty"`    // for visualization nodes
+	Label  *string  `json:"label,omitempty"`   // optional label
+	Text   *string  `json:"text,omitempty"`    // for text input nodes
+	TextOp *string  `json:"text_op,omitempty"` // for text operation nodes
 }
 
 // Edge represents a connection between nodes
@@ -118,6 +122,10 @@ func (e *Engine) inferNodeTypes() {
 			e.nodes[i].Type = NodeTypeOperation
 		} else if e.nodes[i].Data.Mode != nil {
 			e.nodes[i].Type = NodeTypeVisualization
+		} else if e.nodes[i].Data.Text != nil {
+			e.nodes[i].Type = NodeTypeTextInput
+		} else if e.nodes[i].Data.TextOp != nil {
+			e.nodes[i].Type = NodeTypeTextOperation
 		}
 	}
 }
@@ -180,6 +188,10 @@ func (e *Engine) executeNode(node Node) (interface{}, error) {
 		return e.executeOperationNode(node)
 	case NodeTypeVisualization:
 		return e.executeVisualizationNode(node)
+	case NodeTypeTextInput:
+		return e.executeTextInputNode(node)
+	case NodeTypeTextOperation:
+		return e.executeTextOperationNode(node)
 	default:
 		return nil, fmt.Errorf("unknown node type: %s", node.Type)
 	}
@@ -245,6 +257,145 @@ func (e *Engine) executeVisualizationNode(node Node) (interface{}, error) {
 		"mode":  *node.Data.Mode,
 		"value": inputs[0],
 	}, nil
+}
+
+// executeTextInputNode returns the text value
+func (e *Engine) executeTextInputNode(node Node) (interface{}, error) {
+	if node.Data.Text == nil {
+		return nil, fmt.Errorf("text input node missing text")
+	}
+	return *node.Data.Text, nil
+}
+
+// executeTextOperationNode performs text transformation
+func (e *Engine) executeTextOperationNode(node Node) (interface{}, error) {
+	if node.Data.TextOp == nil {
+		return nil, fmt.Errorf("text operation node missing text_op")
+	}
+
+	// Get input from predecessor node
+	inputs := e.getNodeInputs(node.ID)
+	if len(inputs) == 0 {
+		return nil, fmt.Errorf("text operation needs at least 1 input")
+	}
+
+	// Validate that input is a string
+	inputText, ok := inputs[0].(string)
+	if !ok {
+		return nil, fmt.Errorf("text operation input must be text/string")
+	}
+
+	// Perform text operation
+	switch *node.Data.TextOp {
+	case "uppercase":
+		return toUpperCase(inputText), nil
+	case "lowercase":
+		return toLowerCase(inputText), nil
+	case "titlecase":
+		return toTitleCase(inputText), nil
+	case "camelcase":
+		return toCamelCase(inputText), nil
+	case "inversecase":
+		return toInverseCase(inputText), nil
+	default:
+		return nil, fmt.Errorf("unknown text operation: %s", *node.Data.TextOp)
+	}
+}
+
+// Text transformation helper functions
+func toUpperCase(s string) string {
+	result := []rune{}
+	for _, r := range s {
+		if r >= 'a' && r <= 'z' {
+			result = append(result, r-32)
+		} else {
+			result = append(result, r)
+		}
+	}
+	return string(result)
+}
+
+func toLowerCase(s string) string {
+	result := []rune{}
+	for _, r := range s {
+		if r >= 'A' && r <= 'Z' {
+			result = append(result, r+32)
+		} else {
+			result = append(result, r)
+		}
+	}
+	return string(result)
+}
+
+func toTitleCase(s string) string {
+	result := []rune{}
+	capitalizeNext := true
+	for _, r := range s {
+		if r == ' ' || r == '\t' || r == '\n' {
+			result = append(result, r)
+			capitalizeNext = true
+		} else if capitalizeNext && r >= 'a' && r <= 'z' {
+			result = append(result, r-32)
+			capitalizeNext = false
+		} else if !capitalizeNext && r >= 'A' && r <= 'Z' {
+			result = append(result, r+32)
+			capitalizeNext = false
+		} else {
+			result = append(result, r)
+			capitalizeNext = false
+		}
+	}
+	return string(result)
+}
+
+func toCamelCase(s string) string {
+	result := []rune{}
+	capitalizeNext := false
+	firstChar := true
+
+	for _, r := range s {
+		if r == ' ' || r == '_' || r == '-' {
+			capitalizeNext = true
+			continue
+		}
+
+		if firstChar {
+			if r >= 'A' && r <= 'Z' {
+				result = append(result, r+32)
+			} else {
+				result = append(result, r)
+			}
+			firstChar = false
+		} else if capitalizeNext {
+			if r >= 'a' && r <= 'z' {
+				result = append(result, r-32)
+			} else {
+				result = append(result, r)
+			}
+			capitalizeNext = false
+		} else {
+			if r >= 'A' && r <= 'Z' {
+				result = append(result, r+32)
+			} else {
+				result = append(result, r)
+			}
+		}
+	}
+	return string(result)
+}
+
+func toInverseCase(s string) string {
+	result := []rune{}
+	for _, r := range s {
+		if r >= 'a' && r <= 'z' {
+			result = append(result, r-32)
+		} else if r >= 'A' && r <= 'Z' {
+			result = append(result, r+32)
+		} else {
+			result = append(result, r)
+		}
+	}
+	return string(result)
 }
 
 // getNodeInputs returns input values for a node from its predecessors
