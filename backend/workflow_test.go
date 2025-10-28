@@ -2,6 +2,8 @@ package workflow
 
 import (
 	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 )
 
@@ -564,5 +566,254 @@ func TestComplexTextChain(t *testing.T) {
 
 	if result.NodeResults["4"] != "helloWorld" {
 		t.Errorf("Step 3: Expected 'helloWorld', got %v", result.NodeResults["4"])
+	}
+}
+
+// Test HTTP node with successful response
+func TestHTTPNodeSuccess(t *testing.T) {
+	// Create test server
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("Hello from server"))
+	}))
+	defer server.Close()
+
+	payload := map[string]interface{}{
+		"nodes": []interface{}{
+			map[string]interface{}{"id": "1", "data": map[string]interface{}{"url": server.URL}},
+		},
+		"edges": []interface{}{},
+	}
+	jsonData, _ := json.Marshal(payload)
+
+	engine, _ := NewEngine(jsonData)
+	result, err := engine.Execute()
+	if err != nil {
+		t.Fatalf("Execute failed: %v", err)
+	}
+
+	if result.NodeResults["1"] != "Hello from server" {
+		t.Errorf("Expected 'Hello from server', got %v", result.NodeResults["1"])
+	}
+}
+
+// Test HTTP node with error status code
+func TestHTTPNodeErrorStatus(t *testing.T) {
+	// Create test server that returns 404
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+		w.Write([]byte("Not found"))
+	}))
+	defer server.Close()
+
+	payload := map[string]interface{}{
+		"nodes": []interface{}{
+			map[string]interface{}{"id": "1", "data": map[string]interface{}{"url": server.URL}},
+		},
+		"edges": []interface{}{},
+	}
+	jsonData, _ := json.Marshal(payload)
+
+	engine, _ := NewEngine(jsonData)
+	_, err := engine.Execute()
+	if err == nil {
+		t.Error("Expected error for 404 status code")
+	}
+	if err != nil && err.Error() != "error executing node 1: HTTP request returned error status: 404" {
+		t.Logf("Got error: %v", err)
+	}
+}
+
+// Test HTTP node with invalid URL
+func TestHTTPNodeInvalidURL(t *testing.T) {
+	payload := `{
+		"nodes": [
+			{"id": "1", "data": {"url": "http://invalid-url-that-does-not-exist.local"}}
+		],
+		"edges": []
+	}`
+
+	engine, _ := NewEngine([]byte(payload))
+	_, err := engine.Execute()
+	if err == nil {
+		t.Error("Expected error for invalid URL")
+	}
+}
+
+// Test HTTP node output passed to text operation
+func TestHTTPNodeToTextOperation(t *testing.T) {
+	// Create test server
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("hello world"))
+	}))
+	defer server.Close()
+
+	payload := map[string]interface{}{
+		"nodes": []interface{}{
+			map[string]interface{}{"id": "1", "data": map[string]interface{}{"url": server.URL}},
+			map[string]interface{}{"id": "2", "data": map[string]interface{}{"text_op": "uppercase"}},
+		},
+		"edges": []interface{}{
+			map[string]interface{}{"id": "e1", "source": "1", "target": "2"},
+		},
+	}
+	jsonData, _ := json.Marshal(payload)
+
+	engine, _ := NewEngine(jsonData)
+	result, err := engine.Execute()
+	if err != nil {
+		t.Fatalf("Execute failed: %v", err)
+	}
+
+	// Check HTTP node result
+	if result.NodeResults["1"] != "hello world" {
+		t.Errorf("Expected 'hello world' from HTTP, got %v", result.NodeResults["1"])
+	}
+
+	// Check text operation result
+	if result.NodeResults["2"] != "HELLO WORLD" {
+		t.Errorf("Expected 'HELLO WORLD' from text operation, got %v", result.NodeResults["2"])
+	}
+}
+
+// Test HTTP node error followed by text operation (should fail)
+func TestHTTPNodeErrorToTextOperation(t *testing.T) {
+	// Create test server that returns error
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte("Server error"))
+	}))
+	defer server.Close()
+
+	payload := map[string]interface{}{
+		"nodes": []interface{}{
+			map[string]interface{}{"id": "1", "data": map[string]interface{}{"url": server.URL}},
+			map[string]interface{}{"id": "2", "data": map[string]interface{}{"text_op": "uppercase"}},
+		},
+		"edges": []interface{}{
+			map[string]interface{}{"id": "e1", "source": "1", "target": "2"},
+		},
+	}
+	jsonData, _ := json.Marshal(payload)
+
+	engine, _ := NewEngine(jsonData)
+	_, err := engine.Execute()
+	if err == nil {
+		t.Error("Expected error when HTTP node fails")
+	}
+}
+
+// Test chained HTTP to multiple text operations
+func TestHTTPNodeToChainedTextOperations(t *testing.T) {
+	// Create test server
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("HELLO WORLD"))
+	}))
+	defer server.Close()
+
+	payload := map[string]interface{}{
+		"nodes": []interface{}{
+			map[string]interface{}{"id": "1", "data": map[string]interface{}{"url": server.URL}},
+			map[string]interface{}{"id": "2", "data": map[string]interface{}{"text_op": "lowercase"}},
+			map[string]interface{}{"id": "3", "data": map[string]interface{}{"text_op": "titlecase"}},
+		},
+		"edges": []interface{}{
+			map[string]interface{}{"id": "e1", "source": "1", "target": "2"},
+			map[string]interface{}{"id": "e2", "source": "2", "target": "3"},
+		},
+	}
+	jsonData, _ := json.Marshal(payload)
+
+	engine, _ := NewEngine(jsonData)
+	result, err := engine.Execute()
+	if err != nil {
+		t.Fatalf("Execute failed: %v", err)
+	}
+
+	// HELLO WORLD -> hello world -> Hello World
+	if result.NodeResults["1"] != "HELLO WORLD" {
+		t.Errorf("HTTP result: Expected 'HELLO WORLD', got %v", result.NodeResults["1"])
+	}
+
+	if result.NodeResults["2"] != "hello world" {
+		t.Errorf("Lowercase result: Expected 'hello world', got %v", result.NodeResults["2"])
+	}
+
+	if result.NodeResults["3"] != "Hello World" {
+		t.Errorf("Titlecase result: Expected 'Hello World', got %v", result.NodeResults["3"])
+	}
+}
+
+// Test explicit HTTP node type
+func TestExplicitHTTPNodeType(t *testing.T) {
+	// Create test server
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("test response"))
+	}))
+	defer server.Close()
+
+	payload := map[string]interface{}{
+		"nodes": []interface{}{
+			map[string]interface{}{"id": "1", "type": "http", "data": map[string]interface{}{"url": server.URL}},
+		},
+		"edges": []interface{}{},
+	}
+	jsonData, _ := json.Marshal(payload)
+
+	engine, _ := NewEngine(jsonData)
+	result, err := engine.Execute()
+	if err != nil {
+		t.Fatalf("Execute failed: %v", err)
+	}
+
+	if result.NodeResults["1"] != "test response" {
+		t.Errorf("Expected 'test response', got %v", result.NodeResults["1"])
+	}
+}
+
+// Test HTTP node with different status codes
+func TestHTTPNodeStatusCodes(t *testing.T) {
+	tests := []struct {
+		name       string
+		statusCode int
+		shouldFail bool
+	}{
+		{"200 OK", http.StatusOK, false},
+		{"201 Created", http.StatusCreated, false},
+		{"204 No Content", http.StatusNoContent, false},
+		{"400 Bad Request", http.StatusBadRequest, true},
+		{"404 Not Found", http.StatusNotFound, true},
+		{"500 Internal Server Error", http.StatusInternalServerError, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(tt.statusCode)
+				w.Write([]byte("response body"))
+			}))
+			defer server.Close()
+
+			payload := map[string]interface{}{
+				"nodes": []interface{}{
+					map[string]interface{}{"id": "1", "data": map[string]interface{}{"url": server.URL}},
+				},
+				"edges": []interface{}{},
+			}
+			jsonData, _ := json.Marshal(payload)
+
+			engine, _ := NewEngine(jsonData)
+			_, err := engine.Execute()
+
+			if tt.shouldFail && err == nil {
+				t.Errorf("Expected error for status code %d", tt.statusCode)
+			}
+			if !tt.shouldFail && err != nil {
+				t.Errorf("Unexpected error for status code %d: %v", tt.statusCode, err)
+			}
+		})
 	}
 }

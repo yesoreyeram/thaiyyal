@@ -3,6 +3,8 @@ package workflow
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 )
 
 // NodeType represents the type of a workflow node
@@ -14,6 +16,7 @@ const (
 	NodeTypeVisualization NodeType = "visualization"
 	NodeTypeTextInput     NodeType = "text_input"
 	NodeTypeTextOperation NodeType = "text_operation"
+	NodeTypeHTTP          NodeType = "http"
 )
 
 // Payload represents the JSON payload from the frontend
@@ -37,6 +40,7 @@ type NodeData struct {
 	Label  *string  `json:"label,omitempty"`   // optional label
 	Text   *string  `json:"text,omitempty"`    // for text input nodes
 	TextOp *string  `json:"text_op,omitempty"` // for text operation nodes
+	URL    *string  `json:"url,omitempty"`     // for HTTP nodes
 }
 
 // Edge represents a connection between nodes
@@ -126,6 +130,8 @@ func (e *Engine) inferNodeTypes() {
 			e.nodes[i].Type = NodeTypeTextInput
 		} else if e.nodes[i].Data.TextOp != nil {
 			e.nodes[i].Type = NodeTypeTextOperation
+		} else if e.nodes[i].Data.URL != nil {
+			e.nodes[i].Type = NodeTypeHTTP
 		}
 	}
 }
@@ -192,6 +198,8 @@ func (e *Engine) executeNode(node Node) (interface{}, error) {
 		return e.executeTextInputNode(node)
 	case NodeTypeTextOperation:
 		return e.executeTextOperationNode(node)
+	case NodeTypeHTTP:
+		return e.executeHTTPNode(node)
 	default:
 		return nil, fmt.Errorf("unknown node type: %s", node.Type)
 	}
@@ -300,6 +308,33 @@ func (e *Engine) executeTextOperationNode(node Node) (interface{}, error) {
 	default:
 		return nil, fmt.Errorf("unknown text operation: %s", *node.Data.TextOp)
 	}
+}
+
+// executeHTTPNode performs HTTP request and returns response body
+func (e *Engine) executeHTTPNode(node Node) (interface{}, error) {
+	if node.Data.URL == nil {
+		return nil, fmt.Errorf("HTTP node missing url")
+	}
+
+	// Make HTTP GET request
+	resp, err := http.Get(*node.Data.URL)
+	if err != nil {
+		return nil, fmt.Errorf("HTTP request failed: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// Check for error status codes
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return nil, fmt.Errorf("HTTP request returned error status: %d", resp.StatusCode)
+	}
+
+	// Read response body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	return string(body), nil
 }
 
 // Text transformation helper functions
