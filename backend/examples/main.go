@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/yesoreyeram/thaiyyal/backend/workflow"
+	"github.com/yesoreyeram/thaiyyal/backend"
 )
 
 func main() {
