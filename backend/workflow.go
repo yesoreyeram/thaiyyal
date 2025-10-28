@@ -34,13 +34,15 @@ type Node struct {
 
 // NodeData contains the node-specific configuration
 type NodeData struct {
-	Value  *float64 `json:"value,omitempty"`   // for number nodes
-	Op     *string  `json:"op,omitempty"`      // for operation nodes
-	Mode   *string  `json:"mode,omitempty"`    // for visualization nodes
-	Label  *string  `json:"label,omitempty"`   // optional label
-	Text   *string  `json:"text,omitempty"`    // for text input nodes
-	TextOp *string  `json:"text_op,omitempty"` // for text operation nodes
-	URL    *string  `json:"url,omitempty"`     // for HTTP nodes
+	Value     *float64 `json:"value,omitempty"`     // for number nodes
+	Op        *string  `json:"op,omitempty"`        // for operation nodes
+	Mode      *string  `json:"mode,omitempty"`      // for visualization nodes
+	Label     *string  `json:"label,omitempty"`     // optional label
+	Text      *string  `json:"text,omitempty"`      // for text input nodes
+	TextOp    *string  `json:"text_op,omitempty"`   // for text operation nodes
+	URL       *string  `json:"url,omitempty"`       // for HTTP nodes
+	Separator *string  `json:"separator,omitempty"` // for concat text operation
+	RepeatN   *int     `json:"repeat_n,omitempty"`  // for repeat text operation
 }
 
 // Edge represents a connection between nodes
@@ -281,13 +283,68 @@ func (e *Engine) executeTextOperationNode(node Node) (interface{}, error) {
 		return nil, fmt.Errorf("text operation node missing text_op")
 	}
 
-	// Get input from predecessor node
+	// Get input from predecessor node(s)
 	inputs := e.getNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("text operation needs at least 1 input")
 	}
 
-	// Validate that input is a string
+	// Handle concat operation (can accept multiple inputs)
+	if *node.Data.TextOp == "concat" {
+		// Validate all inputs are strings
+		textInputs := []string{}
+		for i, input := range inputs {
+			text, ok := input.(string)
+			if !ok {
+				return nil, fmt.Errorf("concat operation input %d must be text/string", i)
+			}
+			textInputs = append(textInputs, text)
+		}
+
+		// Get separator (default to empty string)
+		separator := ""
+		if node.Data.Separator != nil {
+			separator = *node.Data.Separator
+		}
+
+		// Concatenate all inputs
+		result := ""
+		for i, text := range textInputs {
+			if i > 0 {
+				result += separator
+			}
+			result += text
+		}
+		return result, nil
+	}
+
+	// Handle repeat operation
+	if *node.Data.TextOp == "repeat" {
+		// Validate single input is a string
+		inputText, ok := inputs[0].(string)
+		if !ok {
+			return nil, fmt.Errorf("repeat operation input must be text/string")
+		}
+
+		// Get repeat count (required)
+		if node.Data.RepeatN == nil {
+			return nil, fmt.Errorf("repeat operation requires repeat_n field")
+		}
+
+		repeatCount := *node.Data.RepeatN
+		if repeatCount < 0 {
+			return nil, fmt.Errorf("repeat_n must be non-negative, got %d", repeatCount)
+		}
+
+		// Repeat the text
+		result := ""
+		for i := 0; i < repeatCount; i++ {
+			result += inputText
+		}
+		return result, nil
+	}
+
+	// For other operations, validate single input is a string
 	inputText, ok := inputs[0].(string)
 	if !ok {
 		return nil, fmt.Errorf("text operation input must be text/string")

@@ -817,3 +817,308 @@ func TestHTTPNodeStatusCodes(t *testing.T) {
 		})
 	}
 }
+
+// Test concat operation with two inputs
+func TestTextOperationConcat(t *testing.T) {
+	payload := `{
+		"nodes": [
+			{"id": "1", "data": {"text": "Hello"}},
+			{"id": "2", "data": {"text": "World"}},
+			{"id": "3", "data": {"text_op": "concat"}}
+		],
+		"edges": [
+			{"id": "e1", "source": "1", "target": "3"},
+			{"id": "e2", "source": "2", "target": "3"}
+		]
+	}`
+
+	engine, _ := NewEngine([]byte(payload))
+	result, err := engine.Execute()
+	if err != nil {
+		t.Fatalf("Execute failed: %v", err)
+	}
+
+	if result.NodeResults["3"] != "HelloWorld" {
+		t.Errorf("Expected 'HelloWorld', got %v", result.NodeResults["3"])
+	}
+}
+
+// Test concat operation with separator
+func TestTextOperationConcatWithSeparator(t *testing.T) {
+	payload := map[string]interface{}{
+		"nodes": []interface{}{
+			map[string]interface{}{"id": "1", "data": map[string]interface{}{"text": "Hello"}},
+			map[string]interface{}{"id": "2", "data": map[string]interface{}{"text": "World"}},
+			map[string]interface{}{"id": "3", "data": map[string]interface{}{"text_op": "concat", "separator": " "}},
+		},
+		"edges": []interface{}{
+			map[string]interface{}{"id": "e1", "source": "1", "target": "3"},
+			map[string]interface{}{"id": "e2", "source": "2", "target": "3"},
+		},
+	}
+	jsonData, _ := json.Marshal(payload)
+
+	engine, _ := NewEngine(jsonData)
+	result, err := engine.Execute()
+	if err != nil {
+		t.Fatalf("Execute failed: %v", err)
+	}
+
+	if result.NodeResults["3"] != "Hello World" {
+		t.Errorf("Expected 'Hello World', got %v", result.NodeResults["3"])
+	}
+}
+
+// Test concat with multiple inputs and custom separator
+func TestTextOperationConcatMultiple(t *testing.T) {
+	payload := map[string]interface{}{
+		"nodes": []interface{}{
+			map[string]interface{}{"id": "1", "data": map[string]interface{}{"text": "one"}},
+			map[string]interface{}{"id": "2", "data": map[string]interface{}{"text": "two"}},
+			map[string]interface{}{"id": "3", "data": map[string]interface{}{"text": "three"}},
+			map[string]interface{}{"id": "4", "data": map[string]interface{}{"text_op": "concat", "separator": ", "}},
+		},
+		"edges": []interface{}{
+			map[string]interface{}{"id": "e1", "source": "1", "target": "4"},
+			map[string]interface{}{"id": "e2", "source": "2", "target": "4"},
+			map[string]interface{}{"id": "e3", "source": "3", "target": "4"},
+		},
+	}
+	jsonData, _ := json.Marshal(payload)
+
+	engine, _ := NewEngine(jsonData)
+	result, err := engine.Execute()
+	if err != nil {
+		t.Fatalf("Execute failed: %v", err)
+	}
+
+	if result.NodeResults["4"] != "one, two, three" {
+		t.Errorf("Expected 'one, two, three', got %v", result.NodeResults["4"])
+	}
+}
+
+// Test concat with non-text input (should fail)
+func TestTextOperationConcatNonTextInput(t *testing.T) {
+	payload := `{
+		"nodes": [
+			{"id": "1", "data": {"value": 42}},
+			{"id": "2", "data": {"text": "World"}},
+			{"id": "3", "data": {"text_op": "concat"}}
+		],
+		"edges": [
+			{"id": "e1", "source": "1", "target": "3"},
+			{"id": "e2", "source": "2", "target": "3"}
+		]
+	}`
+
+	engine, _ := NewEngine([]byte(payload))
+	_, err := engine.Execute()
+	if err == nil {
+		t.Error("Expected error when concat receives non-text input")
+	}
+}
+
+// Test repeat operation
+func TestTextOperationRepeat(t *testing.T) {
+	repeatN := 3
+	payload := map[string]interface{}{
+		"nodes": []interface{}{
+			map[string]interface{}{"id": "1", "data": map[string]interface{}{"text": "Ha"}},
+			map[string]interface{}{"id": "2", "data": map[string]interface{}{"text_op": "repeat", "repeat_n": repeatN}},
+		},
+		"edges": []interface{}{
+			map[string]interface{}{"id": "e1", "source": "1", "target": "2"},
+		},
+	}
+	jsonData, _ := json.Marshal(payload)
+
+	engine, _ := NewEngine(jsonData)
+	result, err := engine.Execute()
+	if err != nil {
+		t.Fatalf("Execute failed: %v", err)
+	}
+
+	if result.NodeResults["2"] != "HaHaHa" {
+		t.Errorf("Expected 'HaHaHa', got %v", result.NodeResults["2"])
+	}
+}
+
+// Test repeat operation with zero count
+func TestTextOperationRepeatZero(t *testing.T) {
+	repeatN := 0
+	payload := map[string]interface{}{
+		"nodes": []interface{}{
+			map[string]interface{}{"id": "1", "data": map[string]interface{}{"text": "Hello"}},
+			map[string]interface{}{"id": "2", "data": map[string]interface{}{"text_op": "repeat", "repeat_n": repeatN}},
+		},
+		"edges": []interface{}{
+			map[string]interface{}{"id": "e1", "source": "1", "target": "2"},
+		},
+	}
+	jsonData, _ := json.Marshal(payload)
+
+	engine, _ := NewEngine(jsonData)
+	result, err := engine.Execute()
+	if err != nil {
+		t.Fatalf("Execute failed: %v", err)
+	}
+
+	if result.NodeResults["2"] != "" {
+		t.Errorf("Expected empty string, got %v", result.NodeResults["2"])
+	}
+}
+
+// Test repeat operation without repeat_n (should fail)
+func TestTextOperationRepeatMissingN(t *testing.T) {
+	payload := `{
+		"nodes": [
+			{"id": "1", "data": {"text": "Hello"}},
+			{"id": "2", "data": {"text_op": "repeat"}}
+		],
+		"edges": [
+			{"id": "e1", "source": "1", "target": "2"}
+		]
+	}`
+
+	engine, _ := NewEngine([]byte(payload))
+	_, err := engine.Execute()
+	if err == nil {
+		t.Error("Expected error when repeat_n is missing")
+	}
+}
+
+// Test repeat with negative count (should fail)
+func TestTextOperationRepeatNegative(t *testing.T) {
+	repeatN := -1
+	payload := map[string]interface{}{
+		"nodes": []interface{}{
+			map[string]interface{}{"id": "1", "data": map[string]interface{}{"text": "Hello"}},
+			map[string]interface{}{"id": "2", "data": map[string]interface{}{"text_op": "repeat", "repeat_n": repeatN}},
+		},
+		"edges": []interface{}{
+			map[string]interface{}{"id": "e1", "source": "1", "target": "2"},
+		},
+	}
+	jsonData, _ := json.Marshal(payload)
+
+	engine, _ := NewEngine(jsonData)
+	_, err := engine.Execute()
+	if err == nil {
+		t.Error("Expected error for negative repeat_n")
+	}
+}
+
+// Test chained concat and repeat operations
+func TestConcatAndRepeatChained(t *testing.T) {
+	repeatN := 2
+	payload := map[string]interface{}{
+		"nodes": []interface{}{
+			map[string]interface{}{"id": "1", "data": map[string]interface{}{"text": "Hello"}},
+			map[string]interface{}{"id": "2", "data": map[string]interface{}{"text": "World"}},
+			map[string]interface{}{"id": "3", "data": map[string]interface{}{"text_op": "concat", "separator": " "}},
+			map[string]interface{}{"id": "4", "data": map[string]interface{}{"text_op": "repeat", "repeat_n": repeatN}},
+		},
+		"edges": []interface{}{
+			map[string]interface{}{"id": "e1", "source": "1", "target": "3"},
+			map[string]interface{}{"id": "e2", "source": "2", "target": "3"},
+			map[string]interface{}{"id": "e3", "source": "3", "target": "4"},
+		},
+	}
+	jsonData, _ := json.Marshal(payload)
+
+	engine, _ := NewEngine(jsonData)
+	result, err := engine.Execute()
+	if err != nil {
+		t.Fatalf("Execute failed: %v", err)
+	}
+
+	// "Hello" + " " + "World" = "Hello World"
+	// "Hello World" repeated 2 times = "Hello WorldHello World"
+	if result.NodeResults["3"] != "Hello World" {
+		t.Errorf("Concat result: Expected 'Hello World', got %v", result.NodeResults["3"])
+	}
+
+	if result.NodeResults["4"] != "Hello WorldHello World" {
+		t.Errorf("Repeat result: Expected 'Hello WorldHello World', got %v", result.NodeResults["4"])
+	}
+}
+
+// Test HTTP output to concat
+func TestHTTPToConcat(t *testing.T) {
+	// Create test server
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("API"))
+	}))
+	defer server.Close()
+
+	payload := map[string]interface{}{
+		"nodes": []interface{}{
+			map[string]interface{}{"id": "1", "data": map[string]interface{}{"url": server.URL}},
+			map[string]interface{}{"id": "2", "data": map[string]interface{}{"text": "Response"}},
+			map[string]interface{}{"id": "3", "data": map[string]interface{}{"text_op": "concat", "separator": ": "}},
+		},
+		"edges": []interface{}{
+			map[string]interface{}{"id": "e1", "source": "1", "target": "3"},
+			map[string]interface{}{"id": "e2", "source": "2", "target": "3"},
+		},
+	}
+	jsonData, _ := json.Marshal(payload)
+
+	engine, _ := NewEngine(jsonData)
+	result, err := engine.Execute()
+	if err != nil {
+		t.Fatalf("Execute failed: %v", err)
+	}
+
+	if result.NodeResults["3"] != "API: Response" {
+		t.Errorf("Expected 'API: Response', got %v", result.NodeResults["3"])
+	}
+}
+
+// Test complex workflow: HTTP -> uppercase -> repeat -> concat
+func TestComplexTextWorkflow(t *testing.T) {
+	// Create test server
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte("hi"))
+	}))
+	defer server.Close()
+
+	repeatN := 3
+	payload := map[string]interface{}{
+		"nodes": []interface{}{
+			map[string]interface{}{"id": "1", "data": map[string]interface{}{"url": server.URL}},
+			map[string]interface{}{"id": "2", "data": map[string]interface{}{"text_op": "uppercase"}},
+			map[string]interface{}{"id": "3", "data": map[string]interface{}{"text_op": "repeat", "repeat_n": repeatN}},
+			map[string]interface{}{"id": "4", "data": map[string]interface{}{"text": "!!!"}},
+			map[string]interface{}{"id": "5", "data": map[string]interface{}{"text_op": "concat"}},
+		},
+		"edges": []interface{}{
+			map[string]interface{}{"id": "e1", "source": "1", "target": "2"},
+			map[string]interface{}{"id": "e2", "source": "2", "target": "3"},
+			map[string]interface{}{"id": "e3", "source": "3", "target": "5"},
+			map[string]interface{}{"id": "e4", "source": "4", "target": "5"},
+		},
+	}
+	jsonData, _ := json.Marshal(payload)
+
+	engine, _ := NewEngine(jsonData)
+	result, err := engine.Execute()
+	if err != nil {
+		t.Fatalf("Execute failed: %v", err)
+	}
+
+	// "hi" -> "HI" -> "HIHIHI" -> "HIHIHI" + "!!!" = "HIHIHI!!!"
+	if result.NodeResults["2"] != "HI" {
+		t.Errorf("Uppercase: Expected 'HI', got %v", result.NodeResults["2"])
+	}
+
+	if result.NodeResults["3"] != "HIHIHI" {
+		t.Errorf("Repeat: Expected 'HIHIHI', got %v", result.NodeResults["3"])
+	}
+
+	if result.NodeResults["5"] != "HIHIHI!!!" {
+		t.Errorf("Concat: Expected 'HIHIHI!!!', got %v", result.NodeResults["5"])
+	}
+}
