@@ -1,0 +1,520 @@
+# Workflow Node Types Reference
+
+This document provides a comprehensive reference of all node types in the Thaiyyal workflow engine, including implemented nodes and planned nodes for observability and analytics pipelines.
+
+## Implementation Status Legend
+
+- ✅ **Implemented** - Fully implemented and tested
+- 🚧 **In Progress** - Partially implemented
+- 📋 **Planned** - Documented but not yet implemented
+
+---
+
+## Currently Implemented Nodes
+
+| Node Type | Description | Inputs | Outputs | Example | Status |
+|-----------|-------------|--------|---------|---------|--------|
+| **Number** | Numeric input node | None | `number` | `{"data": {"value": 42}}` | ✅ |
+| **Operation** | Arithmetic operations (add, subtract, multiply, divide) | 2+ `number` | `number` | `{"data": {"op": "add"}}` | ✅ |
+| **Visualization** | Output formatting for display | 1+ `any` | `object` with mode and value | `{"data": {"mode": "text"}}` | ✅ |
+| **Text Input** | Text string input | None | `string` | `{"data": {"text": "Hello"}}` | ✅ |
+| **Text Operation** | Text transformations | 1+ `string` | `string` | See operations below | ✅ |
+| **HTTP** | HTTP GET request | None | `string` (response body) | `{"data": {"url": "https://api.example.com"}}` | ✅ |
+
+### Text Operations (Sub-types)
+
+| Operation | Description | Additional Fields | Example Input | Example Output |
+|-----------|-------------|-------------------|---------------|----------------|
+| `uppercase` | Convert to uppercase | None | "hello" | "HELLO" |
+| `lowercase` | Convert to lowercase | None | "HELLO" | "hello" |
+| `titlecase` | Capitalize each word | None | "hello world" | "Hello World" |
+| `camelcase` | Convert to camelCase | None | "hello world" | "helloWorld" |
+| `inversecase` | Swap character case | None | "HeLLo" | "hEllO" |
+| `concat` | Concatenate multiple inputs | `separator` (optional) | ["Hello", "World"] | "HelloWorld" or "Hello World" |
+| `repeat` | Repeat text n times | `repeat_n` (required) | "Ha" with n=3 | "HaHaHa" |
+
+---
+
+## Planned Nodes for Observability & Analytics
+
+### Data Ingestion & Connectors
+
+| Node Type | Description | Inputs | Outputs | Example Config | Priority | Status |
+|-----------|-------------|--------|---------|----------------|----------|--------|
+| **Prometheus Query** | Query Prometheus metrics | Time range params | Array of metric samples | `{"query": "up", "start": "1h"}` | High | 📋 |
+| **Loki Query** | Query Loki logs | Time range, label filters | Array of log lines | `{"query": "{app=\"web\"}", "limit": 100}` | High | 📋 |
+| **Database Query** | SQL query execution | Query params | Array of rows | `{"sql": "SELECT * FROM metrics", "db": "postgres"}` | Medium | 📋 |
+| **Elasticsearch Query** | Query Elasticsearch | Query DSL | Array of documents | `{"index": "logs-*", "query": {...}}` | Medium | 📋 |
+| **ClickHouse Query** | Query ClickHouse | SQL query | Array of rows | `{"sql": "SELECT * FROM events"}` | Medium | 📋 |
+| **S3 Reader** | Read objects from S3 | Bucket/key | Object content | `{"bucket": "logs", "key": "file.json"}` | Low | 📋 |
+| **Kafka Consumer** | Consume Kafka messages | Topic, group | Message batch | `{"topic": "metrics", "group": "processor"}` | Medium | 📋 |
+
+### Data Transformation
+
+| Node Type | Description | Inputs | Outputs | Example Config | Priority | Status |
+|-----------|-------------|--------|---------|----------------|----------|--------|
+| **JSON Parse** | Parse JSON string | `string` | `object` | `{"strict": true}` | High | 📋 |
+| **JSON Path** | Extract fields via JSONPath | `object` | `any` | `{"path": "$.data.items[*].name"}` | High | 📋 |
+| **JQ Transform** | Transform using jq syntax | `object` | `any` | `{"filter": ".items | map(.name)"}` | Medium | 📋 |
+| **CSV Parse** | Parse CSV to array | `string` | `array` | `{"delimiter": ",", "headers": true}` | Medium | 📋 |
+| **Template** | String interpolation | Multiple inputs | `string` | `{"template": "Alert: {{.metric}} = {{.value}}"}` | High | 📋 |
+| **Regex Extract** | Extract using regex | `string` | `object` with captures | `{"pattern": "error: (.+)", "group": 1}` | Medium | 📋 |
+| **Filter** | Filter array elements | `array` | `array` | `{"condition": "value > 100"}` | High | 📋 |
+| **Map** | Transform each array element | `array` | `array` | `{"transform": "uppercase"}` | High | 📋 |
+| **Reduce** | Aggregate array values | `array` | `any` | `{"operation": "sum"}` | Medium | 📋 |
+
+### Analytics & Aggregation
+
+| Node Type | Description | Inputs | Outputs | Example Config | Priority | Status |
+|-----------|-------------|--------|---------|----------------|----------|--------|
+| **Statistical** | Calculate statistics | Array of numbers | Object with stats | `{"operations": ["mean", "p95", "stddev"]}` | High | 📋 |
+| **Time Bucket** | Group by time windows | Array with timestamps | Bucketed array | `{"window": "5m", "aggregation": "avg"}` | High | 📋 |
+| **Moving Average** | Calculate moving average | Array of numbers | Array of numbers | `{"window": 10}` | Medium | 📋 |
+| **Anomaly Detection** | Detect anomalies | Array of numbers | Array with scores | `{"method": "zscore", "threshold": 3}` | Medium | 📋 |
+| **Correlation** | Calculate correlation | 2 number arrays | Number (correlation) | `{"method": "pearson"}` | Low | 📋 |
+| **Group By** | Group and aggregate | Array of objects | Grouped object | `{"key": "host", "aggregation": "count"}` | High | 📋 |
+
+### Control Flow & Looping
+
+| Node Type | Description | Inputs | Outputs | Example Config | Priority | Status |
+|-----------|-------------|--------|---------|----------------|----------|--------|
+| **If/Condition** | Conditional branching | 1+ inputs | Same as input | `{"condition": "value > 100"}` | High | 📋 |
+| **Switch** | Multi-way branching | 1 input | Same as input | `{"cases": [{"when": "==error", "output": "error_port"}]}` | High | 📋 |
+| **For Each** | Iterate over array | Array | Array (processed) | `{"max_iterations": 1000}` | High | 📋 |
+| **While Loop** | Loop with condition | 1+ inputs | Last iteration output | `{"condition": "count < 10", "max_iterations": 100}` | Medium | 📋 |
+| **Parallel** | Execute in parallel | Array | Array (results) | `{"max_concurrency": 10}` | Medium | 📋 |
+| **Join/Merge** | Combine multiple inputs | Multiple inputs | Combined output | `{"strategy": "all", "timeout": "30s"}` | High | 📋 |
+| **Split** | Split into multiple paths | 1 input | Multiple outputs | `{"paths": ["path1", "path2"]}` | Medium | 📋 |
+| **Delay** | Wait/pause execution | 1+ inputs | Same as input | `{"duration": "5s"}` | Low | 📋 |
+
+### Output & Actions
+
+| Node Type | Description | Inputs | Outputs | Example Config | Priority | Status |
+|-----------|-------------|--------|---------|----------------|----------|--------|
+| **HTTP POST** | Send HTTP POST request | `object` or `string` | Response object | `{"url": "https://webhook.site", "headers": {...}}` | High | 📋 |
+| **Slack Alert** | Send Slack message | `string` or `object` | Status object | `{"webhook": "...", "channel": "#alerts"}` | High | 📋 |
+| **Email** | Send email | `string` or `object` | Status object | `{"to": "ops@example.com", "subject": "Alert"}` | Medium | 📋 |
+| **PagerDuty** | Create PagerDuty incident | `object` | Incident ID | `{"severity": "critical", "service": "web"}` | Medium | 📋 |
+| **Write to Database** | Insert/update data | `object` or `array` | Row count | `{"table": "metrics", "operation": "insert"}` | Medium | 📋 |
+| **S3 Writer** | Write to S3 | `string` or `binary` | Object URL | `{"bucket": "archives", "key": "data.json"}` | Low | 📋 |
+| **Kafka Producer** | Publish to Kafka | `object` or `string` | Offset | `{"topic": "events", "partition": 0}` | Medium | 📋 |
+
+### State & Memory
+
+| Node Type | Description | Inputs | Outputs | Example Config | Priority | Status |
+|-----------|-------------|--------|---------|----------------|----------|--------|
+| **Cache Get** | Retrieve from cache | Key | Cached value or null | `{"key": "last_value", "ttl": "5m"}` | Medium | 📋 |
+| **Cache Set** | Store in cache | Value | Success status | `{"key": "last_value", "ttl": "5m"}` | Medium | 📋 |
+| **Counter** | Increment counter | Optional delta | Current count | `{"name": "requests", "reset": "daily"}` | Low | 📋 |
+| **Accumulator** | Accumulate values | Values | Accumulated result | `{"operation": "sum", "reset_on": "hour"}` | Medium | 📋 |
+
+---
+
+## Looping Patterns for Observability Pipelines
+
+### 1. For-Each Pattern (Parallel Processing)
+
+**Use Case**: Process each host's metrics independently
+
+```json
+{
+  "nodes": [
+    {
+      "id": "1",
+      "type": "prometheus_query",
+      "data": {"query": "up", "groupBy": ["host"]}
+    },
+    {
+      "id": "2",
+      "type": "for_each",
+      "data": {"max_concurrency": 5}
+    },
+    {
+      "id": "3",
+      "type": "statistical",
+      "data": {"operations": ["mean", "max"]}
+    },
+    {
+      "id": "4",
+      "type": "join",
+      "data": {"strategy": "all"}
+    }
+  ],
+  "edges": [
+    {"source": "1", "target": "2"},
+    {"source": "2", "target": "3", "scope": "iteration"},
+    {"source": "3", "target": "4", "scope": "iteration"}
+  ]
+}
+```
+
+**Benefits**:
+- Process metrics from multiple hosts in parallel
+- Independent failure handling per host
+- Scalable for large infrastructure
+
+### 2. Time Window Iteration Pattern
+
+**Use Case**: Analyze metrics across multiple time windows
+
+```json
+{
+  "nodes": [
+    {
+      "id": "1",
+      "type": "time_range_generator",
+      "data": {"start": "now-24h", "window": "1h"}
+    },
+    {
+      "id": "2",
+      "type": "for_each"
+    },
+    {
+      "id": "3",
+      "type": "prometheus_query",
+      "data": {"query": "rate(requests_total[5m])"}
+    },
+    {
+      "id": "4",
+      "type": "anomaly_detection",
+      "data": {"method": "zscore", "threshold": 3}
+    },
+    {
+      "id": "5",
+      "type": "filter",
+      "data": {"condition": "is_anomaly == true"}
+    },
+    {
+      "id": "6",
+      "type": "accumulator"
+    }
+  ]
+}
+```
+
+**Benefits**:
+- Analyze historical patterns
+- Detect anomalies across time periods
+- Build aggregate reports
+
+### 3. Retry Loop with Backoff
+
+**Use Case**: Resilient API calls with exponential backoff
+
+```json
+{
+  "nodes": [
+    {
+      "id": "1",
+      "type": "http",
+      "data": {"url": "https://api.unreliable.com/metrics"}
+    },
+    {
+      "id": "2",
+      "type": "if",
+      "data": {"condition": "status_code >= 500"}
+    },
+    {
+      "id": "3",
+      "type": "delay",
+      "data": {"duration_expr": "2^attempt * 1s"}
+    },
+    {
+      "id": "4",
+      "type": "while",
+      "data": {"condition": "attempt < 5", "increment": "attempt"}
+    }
+  ],
+  "edges": [
+    {"source": "1", "target": "2"},
+    {"source": "2", "target": "3", "condition": "true"},
+    {"source": "3", "target": "4"},
+    {"source": "4", "target": "1", "scope": "loop"}
+  ]
+}
+```
+
+**Benefits**:
+- Automatic retry on transient failures
+- Exponential backoff prevents overwhelming services
+- Configurable max attempts
+
+### 4. Consolidation/Aggregation Pattern
+
+**Use Case**: Collect metrics from multiple sources and aggregate
+
+```json
+{
+  "nodes": [
+    {
+      "id": "sources",
+      "type": "parallel",
+      "data": {
+        "branches": [
+          {"type": "prometheus_query", "query": "cpu_usage"},
+          {"type": "prometheus_query", "query": "memory_usage"},
+          {"type": "database_query", "sql": "SELECT avg(response_time)"}
+        ]
+      }
+    },
+    {
+      "id": "normalize",
+      "type": "for_each",
+      "data": {"transform": "normalize_metrics"}
+    },
+    {
+      "id": "join",
+      "type": "join",
+      "data": {"strategy": "all", "timeout": "10s"}
+    },
+    {
+      "id": "aggregate",
+      "type": "reduce",
+      "data": {"operation": "merge"}
+    },
+    {
+      "id": "alert_check",
+      "type": "if",
+      "data": {"condition": "any(values) > threshold"}
+    },
+    {
+      "id": "alert",
+      "type": "slack_alert"
+    }
+  ]
+}
+```
+
+**Benefits**:
+- Unified view of metrics from different sources
+- Parallel data collection
+- Consolidated alerting
+
+### 5. Batch Processing with Chunking
+
+**Use Case**: Process large log files in chunks
+
+```json
+{
+  "nodes": [
+    {
+      "id": "1",
+      "type": "s3_reader",
+      "data": {"bucket": "logs", "key": "access.log"}
+    },
+    {
+      "id": "2",
+      "type": "chunk",
+      "data": {"size": 1000, "by": "lines"}
+    },
+    {
+      "id": "3",
+      "type": "for_each",
+      "data": {"max_concurrency": 10}
+    },
+    {
+      "id": "4",
+      "type": "parse_log",
+      "data": {"format": "nginx"}
+    },
+    {
+      "id": "5",
+      "type": "filter",
+      "data": {"condition": "status >= 400"}
+    },
+    {
+      "id": "6",
+      "type": "accumulator",
+      "data": {"operation": "concat"}
+    },
+    {
+      "id": "7",
+      "type": "group_by",
+      "data": {"key": "status", "aggregation": "count"}
+    }
+  ]
+}
+```
+
+**Benefits**:
+- Memory-efficient processing of large files
+- Parallel chunk processing
+- Progressive results
+
+---
+
+## Types of Looping for Observability
+
+### 1. **Iteration Loops** (For-Each)
+- **Purpose**: Process each element in a collection
+- **Use Cases**:
+  - Process metrics from each host/pod/service
+  - Analyze each log file in a directory
+  - Query each time bucket independently
+- **Key Features**:
+  - Fixed number of iterations (array length)
+  - Can be parallelized
+  - Independent execution per item
+
+### 2. **Conditional Loops** (While)
+- **Purpose**: Loop until a condition is met
+- **Use Cases**:
+  - Retry failed API calls
+  - Wait for system to reach steady state
+  - Poll until data is available
+- **Key Features**:
+  - Dynamic iteration count
+  - Must have max iteration limit
+  - Condition evaluated each iteration
+
+### 3. **Recursive Loops** (Self-referencing)
+- **Purpose**: Traverse hierarchical structures
+- **Use Cases**:
+  - Process nested JSON structures
+  - Follow service dependency chains
+  - Navigate distributed traces
+- **Key Features**:
+  - Stack-based execution
+  - Depth limits required
+  - Memory considerations
+
+### 4. **Time-based Loops** (Scheduled)
+- **Purpose**: Execute at regular intervals
+- **Use Cases**:
+  - Periodic metric collection
+  - Regular health checks
+  - Scheduled reports
+- **Key Features**:
+  - Cron or interval-based
+  - Runs indefinitely
+  - External orchestration
+
+### 5. **Fan-out/Fan-in** (Parallel + Join)
+- **Purpose**: Split work, process in parallel, then combine
+- **Use Cases**:
+  - Query multiple data sources simultaneously
+  - Parallel metric aggregation
+  - Multi-region data collection
+- **Key Features**:
+  - Explicit parallelism
+  - Join/merge semantics
+  - Timeout handling
+
+### 6. **Stream Processing** (Continuous)
+- **Purpose**: Process infinite streams
+- **Use Cases**:
+  - Real-time log processing
+  - Metric streaming pipelines
+  - Event-driven workflows
+- **Key Features**:
+  - No defined end
+  - Windowing semantics
+  - Backpressure handling
+
+---
+
+## Proof of Concept: Looping Implementation
+
+See the example implementation in `backend/examples/looping_poc.go` which demonstrates:
+
+1. **Basic For-Each Loop**: Iterate over array and transform each element
+2. **Conditional Loop with Retry**: Retry logic with max attempts
+3. **Parallel Processing**: Fan-out work to multiple goroutines
+4. **Aggregation/Consolidation**: Collect and merge results from multiple sources
+
+### Running the POC
+
+```bash
+cd backend/examples
+go run looping_poc.go
+```
+
+### POC Output Examples
+
+```
+=== For-Each Loop Example ===
+Processing item: metric-1
+Processing item: metric-2
+Processing item: metric-3
+Results: [METRIC-1, METRIC-2, METRIC-3]
+
+=== Retry Loop Example ===
+Attempt 1: Failed
+Attempt 2: Failed  
+Attempt 3: Success
+Result: Data retrieved successfully
+
+=== Parallel Processing Example ===
+Querying source-1...
+Querying source-2...
+Querying source-3...
+Combined results: 150 metrics
+
+=== Consolidation Example ===
+CPU: 45%, Memory: 78%, Disk: 23%
+Alert: Memory usage high
+```
+
+---
+
+## Implementation Roadmap
+
+### Phase 1: Core Loop Support (High Priority)
+- [ ] For-Each node with parallelism control
+- [ ] If/Condition node
+- [ ] Join/Merge node
+- [ ] Basic error handling in loops
+
+### Phase 2: Advanced Control Flow (Medium Priority)
+- [ ] While loop with conditions
+- [ ] Switch/case node
+- [ ] Parallel execution node
+- [ ] Timeout and cancellation
+
+### Phase 3: Observability-Specific (High Priority)
+- [ ] Prometheus query node
+- [ ] Time bucketing node
+- [ ] Statistical aggregation node
+- [ ] Alert output nodes
+
+### Phase 4: Advanced Features (Low Priority)
+- [ ] Recursive loops with depth limits
+- [ ] Stream processing support
+- [ ] State management
+- [ ] Circuit breaker patterns
+
+---
+
+## Design Considerations
+
+### Loop Safety
+- **Max Iterations**: All loops must have maximum iteration limits
+- **Timeouts**: Loops should support timeouts to prevent infinite execution
+- **Resource Limits**: Memory and CPU constraints for loop bodies
+- **Circuit Breakers**: Fail fast when loops consistently fail
+
+### Performance
+- **Parallelism**: For-each loops should support concurrent execution
+- **Lazy Evaluation**: Don't materialize entire arrays unnecessarily
+- **Streaming**: Support streaming for large datasets
+- **Backpressure**: Handle slow downstream consumers
+
+### Debugging
+- **Loop Metadata**: Track iteration count, elapsed time
+- **Breakpoints**: Ability to pause on specific iterations
+- **Logging**: Detailed logs for loop execution
+- **Metrics**: Emit metrics about loop performance
+
+---
+
+## Contributing
+
+To add a new node type:
+
+1. Update this document with the node specification
+2. Implement the node in `backend/workflow.go`
+3. Add comprehensive tests in `backend/workflow_test.go`
+4. Update examples in `backend/examples/`
+5. Document usage patterns
+
+For questions or suggestions, please open an issue.
