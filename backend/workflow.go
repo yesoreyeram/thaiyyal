@@ -17,6 +17,9 @@ const (
 	NodeTypeTextInput     NodeType = "text_input"
 	NodeTypeTextOperation NodeType = "text_operation"
 	NodeTypeHTTP          NodeType = "http"
+	NodeTypeCondition     NodeType = "condition"
+	NodeTypeForEach       NodeType = "for_each"
+	NodeTypeWhileLoop     NodeType = "while_loop"
 )
 
 // Payload represents the JSON payload from the frontend
@@ -34,15 +37,19 @@ type Node struct {
 
 // NodeData contains the node-specific configuration
 type NodeData struct {
-	Value     *float64 `json:"value,omitempty"`     // for number nodes
-	Op        *string  `json:"op,omitempty"`        // for operation nodes
-	Mode      *string  `json:"mode,omitempty"`      // for visualization nodes
-	Label     *string  `json:"label,omitempty"`     // optional label
-	Text      *string  `json:"text,omitempty"`      // for text input nodes
-	TextOp    *string  `json:"text_op,omitempty"`   // for text operation nodes
-	URL       *string  `json:"url,omitempty"`       // for HTTP nodes
-	Separator *string  `json:"separator,omitempty"` // for concat text operation
-	RepeatN   *int     `json:"repeat_n,omitempty"`  // for repeat text operation
+	Value         *float64 `json:"value,omitempty"`          // for number nodes
+	Op            *string  `json:"op,omitempty"`             // for operation nodes
+	Mode          *string  `json:"mode,omitempty"`           // for visualization nodes
+	Label         *string  `json:"label,omitempty"`          // optional label
+	Text          *string  `json:"text,omitempty"`           // for text input nodes
+	TextOp        *string  `json:"text_op,omitempty"`        // for text operation nodes
+	URL           *string  `json:"url,omitempty"`            // for HTTP nodes
+	Separator     *string  `json:"separator,omitempty"`      // for concat text operation
+	RepeatN       *int     `json:"repeat_n,omitempty"`       // for repeat text operation
+	Condition     *string  `json:"condition,omitempty"`      // for condition nodes
+	TruePath      *string  `json:"true_path,omitempty"`      // for condition nodes (output port name)
+	FalsePath     *string  `json:"false_path,omitempty"`     // for condition nodes (output port name)
+	MaxIterations *int     `json:"max_iterations,omitempty"` // for for_each and while_loop nodes
 }
 
 // Edge represents a connection between nodes
@@ -134,7 +141,11 @@ func (e *Engine) inferNodeTypes() {
 			e.nodes[i].Type = NodeTypeTextOperation
 		} else if e.nodes[i].Data.URL != nil {
 			e.nodes[i].Type = NodeTypeHTTP
+		} else if e.nodes[i].Data.Condition != nil {
+			e.nodes[i].Type = NodeTypeCondition
 		}
+		// Note: for_each and while_loop require explicit type as they have MaxIterations
+		// which could be confused with other fields
 	}
 }
 
@@ -202,6 +213,12 @@ func (e *Engine) executeNode(node Node) (interface{}, error) {
 		return e.executeTextOperationNode(node)
 	case NodeTypeHTTP:
 		return e.executeHTTPNode(node)
+	case NodeTypeCondition:
+		return e.executeConditionNode(node)
+	case NodeTypeForEach:
+		return e.executeForEachNode(node)
+	case NodeTypeWhileLoop:
+		return e.executeWhileLoopNode(node)
 	default:
 		return nil, fmt.Errorf("unknown node type: %s", node.Type)
 	}
@@ -534,4 +551,168 @@ func (e *Engine) getFinalOutput() interface{} {
 		return e.nodeResults[finalNodeID]
 	}
 	return nil
+}
+
+// executeConditionNode evaluates a condition and passes through the input based on the result
+func (e *Engine) executeConditionNode(node Node) (interface{}, error) {
+	if node.Data.Condition == nil {
+		return nil, fmt.Errorf("condition node missing condition")
+	}
+
+	inputs := e.getNodeInputs(node.ID)
+	if len(inputs) == 0 {
+		return nil, fmt.Errorf("condition node needs at least 1 input")
+	}
+
+	input := inputs[0]
+	conditionMet := e.evaluateCondition(*node.Data.Condition, input)
+
+	// Return the input value along with metadata about which path was taken
+	return map[string]interface{}{
+		"value":         input,
+		"condition_met": conditionMet,
+		"condition":     *node.Data.Condition,
+	}, nil
+}
+
+// executeForEachNode iterates over an array input and returns processed results
+func (e *Engine) executeForEachNode(node Node) (interface{}, error) {
+	inputs := e.getNodeInputs(node.ID)
+	if len(inputs) == 0 {
+		return nil, fmt.Errorf("for_each node needs at least 1 input")
+	}
+
+	// Check if input is an array (slice)
+	inputArray, ok := inputs[0].([]interface{})
+	if !ok {
+		return nil, fmt.Errorf("for_each node requires array input, got %T", inputs[0])
+	}
+
+	// Set default max iterations
+	maxIter := 1000
+	if node.Data.MaxIterations != nil && *node.Data.MaxIterations > 0 {
+		maxIter = *node.Data.MaxIterations
+	}
+
+	// Limit iterations to prevent infinite loops
+	iterCount := len(inputArray)
+	if iterCount > maxIter {
+		return nil, fmt.Errorf("for_each exceeds max iterations: %d > %d", iterCount, maxIter)
+	}
+
+	// For now, just return the array (in a real implementation, this would
+	// iterate and execute child nodes for each element)
+	return map[string]interface{}{
+		"items":      inputArray,
+		"count":      len(inputArray),
+		"iterations": iterCount,
+	}, nil
+}
+
+// executeWhileLoopNode executes a loop while a condition is true
+func (e *Engine) executeWhileLoopNode(node Node) (interface{}, error) {
+	if node.Data.Condition == nil {
+		return nil, fmt.Errorf("while_loop node missing condition")
+	}
+
+	inputs := e.getNodeInputs(node.ID)
+	if len(inputs) == 0 {
+		return nil, fmt.Errorf("while_loop node needs at least 1 input")
+	}
+
+	// Set default max iterations
+	maxIter := 100
+	if node.Data.MaxIterations != nil && *node.Data.MaxIterations > 0 {
+		maxIter = *node.Data.MaxIterations
+	}
+
+	currentValue := inputs[0]
+	iterationCount := 0
+
+	// Loop while condition is met
+	for e.evaluateCondition(*node.Data.Condition, currentValue) && iterationCount < maxIter {
+		iterationCount++
+		// In a real implementation, this would execute child nodes
+		// For now, we'll just track iterations
+	}
+
+	if iterationCount >= maxIter {
+		return nil, fmt.Errorf("while_loop exceeded max iterations: %d", maxIter)
+	}
+
+	return map[string]interface{}{
+		"final_value": currentValue,
+		"iterations":  iterationCount,
+		"condition":   *node.Data.Condition,
+	}, nil
+}
+
+// evaluateCondition evaluates a condition string against an input value
+func (e *Engine) evaluateCondition(condition string, value interface{}) bool {
+	// Simple condition evaluation
+	// Supports: ">N", "<N", ">=N", "<=N", "==N", "!=N", "true", "false"
+	
+	if condition == "true" {
+		return true
+	}
+	if condition == "false" {
+		return false
+	}
+
+	// Check for numeric comparisons
+	numVal, ok := value.(float64)
+	if !ok {
+		// Try to get numeric value from maps
+		if m, isMap := value.(map[string]interface{}); isMap {
+			if v, exists := m["value"]; exists {
+				numVal, ok = v.(float64)
+			}
+		}
+		if !ok {
+			return false
+		}
+	}
+
+	// Parse condition
+	var threshold float64
+	var operator string
+	
+	if len(condition) >= 2 {
+		if condition[0] == '>' && condition[1] == '=' {
+			operator = ">="
+			fmt.Sscanf(condition[2:], "%f", &threshold)
+		} else if condition[0] == '<' && condition[1] == '=' {
+			operator = "<="
+			fmt.Sscanf(condition[2:], "%f", &threshold)
+		} else if condition[0] == '=' && condition[1] == '=' {
+			operator = "=="
+			fmt.Sscanf(condition[2:], "%f", &threshold)
+		} else if condition[0] == '!' && condition[1] == '=' {
+			operator = "!="
+			fmt.Sscanf(condition[2:], "%f", &threshold)
+		} else if condition[0] == '>' {
+			operator = ">"
+			fmt.Sscanf(condition[1:], "%f", &threshold)
+		} else if condition[0] == '<' {
+			operator = "<"
+			fmt.Sscanf(condition[1:], "%f", &threshold)
+		}
+	}
+
+	switch operator {
+	case ">":
+		return numVal > threshold
+	case "<":
+		return numVal < threshold
+	case ">=":
+		return numVal >= threshold
+	case "<=":
+		return numVal <= threshold
+	case "==":
+		return numVal == threshold
+	case "!=":
+		return numVal != threshold
+	default:
+		return false
+	}
 }

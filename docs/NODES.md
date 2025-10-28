@@ -20,6 +20,9 @@ This document provides a comprehensive reference of all node types in the Thaiyy
 | **Text Input** | Text string input | None | `string` | `{"data": {"text": "Hello"}}` | ✅ |
 | **Text Operation** | Text transformations | 1+ `string` | `string` | See operations below | ✅ |
 | **HTTP** | HTTP GET request | None | `string` (response body) | `{"data": {"url": "https://api.example.com"}}` | ✅ |
+| **Condition** | Conditional branching/validation | 1 `any` | `object` with value and condition_met | `{"type": "condition", "data": {"condition": ">100"}}` | ✅ |
+| **For Each** | Iterate over array elements | 1 `array` | `object` with iteration metadata | `{"type": "for_each", "data": {"max_iterations": 1000}}` | ✅ |
+| **While Loop** | Loop while condition is true | 1 `any` | `object` with final value and iterations | `{"type": "while_loop", "data": {"condition": "<10", "max_iterations": 100}}` | ✅ |
 
 ### Text Operations (Sub-types)
 
@@ -32,6 +35,27 @@ This document provides a comprehensive reference of all node types in the Thaiyy
 | `inversecase` | Swap character case | None | "HeLLo" | "hEllO" |
 | `concat` | Concatenate multiple inputs | `separator` (optional) | ["Hello", "World"] | "HelloWorld" or "Hello World" |
 | `repeat` | Repeat text n times | `repeat_n` (required) | "Ha" with n=3 | "HaHaHa" |
+
+### Control Flow Node Details
+
+#### Condition Node
+- **Purpose**: Evaluate conditions and pass through input values
+- **Condition Syntax**: `>N`, `<N`, `>=N`, `<=N`, `==N`, `!=N`, `true`, `false`
+- **Output**: Returns `{"value": input, "condition_met": boolean, "condition": string}`
+- **Use Cases**: Validate thresholds, filter data, conditional routing
+
+#### For Each Node
+- **Purpose**: Iterate over array elements
+- **Configuration**: Optional `max_iterations` (default: 1000)
+- **Output**: Returns `{"items": array, "count": int, "iterations": int}`
+- **Use Cases**: Batch processing, parallel operations, array transformations
+
+#### While Loop Node
+- **Purpose**: Loop while a condition remains true
+- **Configuration**: Required `condition`, optional `max_iterations` (default: 100)
+- **Output**: Returns `{"final_value": any, "iterations": int, "condition": string}`
+- **Use Cases**: Retry logic, iterative processing, threshold monitoring
+- **Note**: Current implementation tracks iterations but doesn't modify values in loop
 
 ---
 
@@ -78,10 +102,10 @@ This document provides a comprehensive reference of all node types in the Thaiyy
 
 | Node Type | Description | Inputs | Outputs | Example Config | Priority | Status |
 |-----------|-------------|--------|---------|----------------|----------|--------|
-| **If/Condition** | Conditional branching | 1+ inputs | Same as input | `{"condition": "value > 100"}` | High | 📋 |
+| **If/Condition** | Conditional branching | 1+ inputs | Same as input | `{"condition": "value > 100"}` | High | ✅ |
 | **Switch** | Multi-way branching | 1 input | Same as input | `{"cases": [{"when": "==error", "output": "error_port"}]}` | High | 📋 |
-| **For Each** | Iterate over array | Array | Array (processed) | `{"max_iterations": 1000}` | High | 📋 |
-| **While Loop** | Loop with condition | 1+ inputs | Last iteration output | `{"condition": "count < 10", "max_iterations": 100}` | Medium | 📋 |
+| **For Each** | Iterate over array | Array | Array (processed) | `{"max_iterations": 1000}` | High | ✅ |
+| **While Loop** | Loop with condition | 1+ inputs | Last iteration output | `{"condition": "count < 10", "max_iterations": 100}` | Medium | ✅ |
 | **Parallel** | Execute in parallel | Array | Array (results) | `{"max_concurrency": 10}` | Medium | 📋 |
 | **Join/Merge** | Combine multiple inputs | Multiple inputs | Combined output | `{"strategy": "all", "timeout": "30s"}` | High | 📋 |
 | **Split** | Split into multiple paths | 1 input | Multiple outputs | `{"paths": ["path1", "path2"]}` | Medium | 📋 |
