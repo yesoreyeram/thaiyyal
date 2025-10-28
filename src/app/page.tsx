@@ -12,6 +12,8 @@ import ReactFlow, {
   Edge as RFEdge,
   Connection,
   NodeProps,
+  Handle,
+  Position,
 } from "reactflow";
 import "reactflow/dist/style.css";
 
@@ -30,6 +32,7 @@ function NumberNode({ id, data }: NodeProps<NodeData>) {
   };
   return (
     <div className="p-2 bg-gray text-white shadow rounded border">
+      <Handle type="target" position={Position.Left} />
       <div className="text-xs font-medium">Number</div>
       <input
         value={data?.value ?? 0}
@@ -37,6 +40,7 @@ function NumberNode({ id, data }: NodeProps<NodeData>) {
         onChange={onChange}
         className="mt-1 w-32 border px-2 py-1 rounded"
       />
+      <Handle type="source" position={Position.Right} />
     </div>
   );
 }
@@ -51,6 +55,7 @@ function OperationNode({ id, data }: NodeProps<NodeData>) {
   };
   return (
     <div className="p-2 bg-gray text-white shadow rounded border">
+      <Handle type="target" position={Position.Left} />
       <div className="text-xs font-medium">Operation</div>
       <select
         value={data?.op ?? "add"}
@@ -62,6 +67,7 @@ function OperationNode({ id, data }: NodeProps<NodeData>) {
         <option value="multiply">Multiply</option>
         <option value="divide">Divide</option>
       </select>
+      <Handle type="source" position={Position.Right} />
     </div>
   );
 }
@@ -76,6 +82,7 @@ function VizNode({ id, data }: NodeProps<NodeData>) {
   };
   return (
     <div className="p-2 bg-gray text-white shadow rounded border">
+      <Handle type="target" position={Position.Left} />
       <div className="text-xs font-medium">Visualization</div>
       <select
         value={data?.mode ?? "text"}
@@ -85,6 +92,7 @@ function VizNode({ id, data }: NodeProps<NodeData>) {
         <option value="text">Text</option>
         <option value="table">Table</option>
       </select>
+      <Handle type="source" position={Position.Right} />
     </div>
   );
 }
@@ -220,7 +228,17 @@ function Canvas() {
       </div>
 
       <div className="w-1/2 p-4">
-        <pre>{JSON.stringify(payload || "{}", null, 2)}</pre>
+        <h3 className="text-lg font-medium mb-2">Generated JSON Payload</h3>
+        <div className="h-[80vh] overflow-auto p-3 bg-white rounded shadow payload-box">
+          {show ? (
+            <pre className="text-black">{JSON.stringify(payload, null, 2)}</pre>
+          ) : (
+            <div className="text-sm text-gray-500">
+              Click &quot;Show payload&quot; on the canvas to view generated
+              JSON.
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
