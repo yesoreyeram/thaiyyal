@@ -1,65 +1,154 @@
-import Image from "next/image";
+"use client";
+import React, { useCallback, useMemo, useState } from "react";
+import ReactFlow, {
+  addEdge,
+  Background,
+  Controls,
+  MiniMap,
+  ReactFlowProvider,
+  useEdgesState,
+  useNodesState,
+  Node as RFNode,
+  Edge as RFEdge,
+  Connection,
+} from "reactflow";
+import "reactflow/dist/style.css";
 
-export default function Home() {
+type NodeData = { value?: number; op?: string; mode?: string; label?: string };
+
+const initialNodes: RFNode<NodeData>[] = [
+  {
+    id: "1",
+    position: { x: 50, y: 50 },
+    data: { value: 10, label: "Node 1" },
+    type: "default",
+  },
+  {
+    id: "2",
+    position: { x: 50, y: 200 },
+    data: { value: 5, label: "Node 2" },
+    type: "default",
+  },
+  {
+    id: "3",
+    position: { x: 300, y: 120 },
+    data: { op: "add", label: "Node 3 (op)" },
+    type: "default",
+  },
+  {
+    id: "4",
+    position: { x: 600, y: 120 },
+    data: { mode: "text", label: "Node 4 (viz)" },
+    type: "default",
+  },
+];
+
+const initialEdges: RFEdge[] = [
+  { id: "e1-3", source: "1", target: "3" },
+  { id: "e2-3", source: "2", target: "3" },
+  { id: "e3-4", source: "3", target: "4" },
+];
+
+function Canvas() {
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [show, setShow] = useState(false);
+
+  const onConnect = useCallback(
+    (params: Connection) => setEdges((eds: RFEdge[]) => addEdge(params, eds)),
+    [setEdges]
+  );
+
+  const payload = useMemo(() => {
+    return {
+      nodes: nodes.map((n: RFNode<NodeData>) => ({ id: n.id, data: n.data })),
+      edges: edges.map((e: RFEdge) => ({
+        id: e.id,
+        source: e.source,
+        target: e.target,
+      })),
+    };
+  }, [nodes, edges]);
+
+  // simple UI to edit node values inline using prompt (minimal)
+  const editNode = (id: string) => {
+    const n = nodes.find((x) => x.id === id);
+    if (!n) return;
+    if (id === "3") {
+      const op = prompt(
+        "Enter operation (add, subtract, multiply, divide)",
+        String(n.data.op ?? "add")
+      );
+      if (op)
+        setNodes((nds) =>
+          nds.map((m) => (m.id === id ? { ...m, data: { ...m.data, op } } : m))
+        );
+    } else if (id === "4") {
+      const mode = prompt(
+        "Enter viz mode (text/table)",
+        String(n.data.mode ?? "text")
+      );
+      if (mode)
+        setNodes((nds) =>
+          nds.map((m) =>
+            m.id === id ? { ...m, data: { ...m.data, mode } } : m
+          )
+        );
+    } else {
+      const v = prompt("Enter number", String(n.data.value ?? 0));
+      if (v !== null)
+        setNodes((nds) =>
+          nds.map((m) =>
+            m.id === id ? { ...m, data: { ...m.data, value: Number(v) } } : m
+          )
+        );
+    }
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="h-screen flex">
+      <div className="w-1/2 border-r flex flex-col">
+        <div className="flex-1">
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onNodeClick={(_, node) => editNode(node.id)}
+            fitView
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            <Background />
+            <Controls />
+          </ReactFlow>
         </div>
-      </main>
+        <div className="p-3 border-t bg-white flex items-center justify-between">
+          <div className="text-sm text-gray-600">
+            Canvas (click nodes to edit)
+          </div>
+          <div>
+            <button
+              onClick={() => setShow((s) => !s)}
+              className="bg-blue-600 text-white px-4 py-2 rounded"
+            >
+              Show payload
+            </button>
+          </div>
+        </div>
+      </div>
+      <div className="w-1/2 p-4">
+        <pre className="text-white">
+          {JSON.stringify(payload || "{}", null, 2)}
+        </pre>
+      </div>
     </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <ReactFlowProvider>
+      <Canvas />
+    </ReactFlowProvider>
   );
 }
