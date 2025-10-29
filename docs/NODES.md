@@ -281,6 +281,22 @@ This document provides a comprehensive reference of all node types in the Thaiyy
 | **Split** | Split into multiple paths | 1 input | Multiple outputs | `{"paths": ["path1", "path2"]}` | Medium | ✅ |
 | **Delay** | Wait/pause execution | 1+ inputs | Same as input | `{"duration": "5s"}` | Low | ✅ |
 | **Cache** | Cache get/set operations | Value (for set) | Cached value or status | `{"cache_op": "get", "cache_key": "key1", "ttl": "5m"}` | Medium | ✅ |
+| **Retry** | Retry failed operations with backoff | 1+ inputs | Result or error | `{"max_attempts": 3, "backoff": "exponential"}` | High | 📋 |
+| **Try-Catch** | Handle errors gracefully | 1+ inputs | Value or fallback | `{"fallback_value": null}` | High | 📋 |
+| **Timeout** | Enforce time limits | 1+ inputs | Result or timeout error | `{"timeout": "30s"}` | Medium | 📋 |
+| **Throttle** | Rate limit execution | 1+ inputs | Same as input (delayed) | `{"rate": "100/s", "burst": 10}` | High | 📋 |
+| **Batch** | Collect items into batches | Array or stream | Batched arrays | `{"batch_size": 100, "batch_timeout": "5s"}` | High | 📋 |
+| **Filter** | Filter array elements | Array | Filtered array | `{"condition": "value > 100"}` | High | 📋 |
+| **Route** | Content-based routing | 1 input | Routed to path | `{"routes": [{"condition": "critical", "path": "alert"}]}` | High | 📋 |
+| **Map** | Transform array elements | Array | Transformed array | `{"operation": "uppercase", "parallel": true}` | High | 📋 |
+| **Reduce** | Aggregate array to value | Array | Single value | `{"operation": "sum"}` | High | 📋 |
+| **Window** | Time-based windowing | Array with timestamps | Windowed arrays | `{"window_type": "tumbling", "window_size": "5m"}` | High | 📋 |
+| **Barrier** | Wait for N inputs | Multiple inputs | Combined when all arrive | `{"wait_for": "all", "timeout": "30s"}` | Medium | 📋 |
+| **Debounce** | Emit only after stabilization | 1+ inputs | Stabilized value | `{"wait_time": "30s"}` | Medium | 📋 |
+| **Gate** | Control flow with external signal | 1+ inputs | Same as input (if open) | `{"gate_id": "maintenance", "default_state": "open"}` | Medium | 📋 |
+| **Until** | Loop until condition true | 1 input | Final value | `{"condition": "ready == true", "max_iterations": 100}` | Medium | 📋 |
+| **Multiplex** | Fan-out to multiple outputs | 1 input | Multiple copies | `{"outputs": ["path1", "path2", "path3"]}` | Medium | 📋 |
+| **Alert** | Trigger alerts | 1+ inputs | Alert status | `{"severity": "critical", "title": "High CPU"}` | High | 📋 |
 
 ### Output & Actions
 
