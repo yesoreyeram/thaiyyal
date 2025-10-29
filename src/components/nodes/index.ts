@@ -2,6 +2,7 @@
 export { TextInputNode } from './TextInputNode';
 export { TextOperationNode } from './TextOperationNode';
 export { HttpNode } from './HttpNode';
+export { HttpPaginationNode } from './HttpPaginationNode';
 export { ConditionNode } from './ConditionNode';
 
 // Export from AllNodes
