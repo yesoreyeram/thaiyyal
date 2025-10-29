@@ -1,3 +1,59 @@
+// Package workflow provides a workflow execution engine for visual workflow builders.
+//
+// The engine accepts JSON payloads containing node and edge definitions, performs
+// topological sorting to determine execution order, and executes nodes sequentially
+// in a directed acyclic graph (DAG) structure.
+//
+// # Architecture
+//
+// The workflow engine consists of:
+//   - Type system: 23 node types organized by category (I/O, operations, control flow, state, resilience)
+//   - Execution engine: Parses JSON, infers types, sorts nodes, executes in order
+//   - State management: Variables, accumulators, counters, and cache scoped to workflow execution
+//
+// # Node Categories
+//
+// Basic I/O: Number, TextInput, Visualization
+// Operations: Operation, TextOperation, HTTP
+// Control Flow: Condition, ForEach, WhileLoop
+// State & Memory: Variable, Extract, Transform, Accumulator, Counter
+// Advanced Control: Switch, Parallel, Join, Split, Delay, Cache
+// Resilience: Retry, TryCatch, Timeout
+//
+// # Example Usage
+//
+//	payload := `{
+//	  "nodes": [
+//	    {"id": "1", "data": {"value": 10}},
+//	    {"id": "2", "data": {"value": 5}},
+//	    {"id": "3", "data": {"op": "add"}}
+//	  ],
+//	  "edges": [
+//	    {"source": "1", "target": "3"},
+//	    {"source": "2", "target": "3"}
+//	  ]
+//	}`
+//
+//	engine, err := workflow.NewEngine([]byte(payload))
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//
+//	result, err := engine.Execute()
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//
+//	fmt.Printf("Result: %v\n", result.FinalOutput) // Output: 15
+//
+// # Design Principles
+//
+//   - Simplicity: Single package, no external dependencies
+//   - Testability: Comprehensive test coverage (142+ tests)
+//   - Type Safety: Strong typing with type inference support
+//   - Error Handling: Descriptive errors with context
+//
+// See ARCHITECTURE.md for detailed architecture documentation.
 package workflow
 
 import (
