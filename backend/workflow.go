@@ -35,6 +35,10 @@ const (
 	NodeTypeSplit         NodeType = "split"          // Split to multiple paths
 	NodeTypeDelay         NodeType = "delay"          // Delay execution
 	NodeTypeCache         NodeType = "cache"          // Cache get/set operations
+	// Error Handling & Resilience nodes
+	NodeTypeRetry         NodeType = "retry"          // Retry with backoff
+	NodeTypeTryCatch      NodeType = "try_catch"      // Error handling with fallback
+	NodeTypeTimeout       NodeType = "timeout"        // Enforce time limits
 )
 
 // Payload represents the JSON payload from the frontend
@@ -80,12 +84,23 @@ type NodeData struct {
 	DefaultPath   *string      `json:"default_path,omitempty"`   // for switch node (default case)
 	MaxConcurrency *int        `json:"max_concurrency,omitempty"` // for parallel node
 	JoinStrategy  *string      `json:"join_strategy,omitempty"`  // for join node (all/any/first)
-	Timeout       *string      `json:"timeout,omitempty"`        // for join/parallel nodes
+	Timeout       *string      `json:"timeout,omitempty"`        // for join/parallel/timeout nodes
 	Paths         []string     `json:"paths,omitempty"`          // for split node
 	Duration      *string      `json:"duration,omitempty"`       // for delay node
 	CacheOp       *string      `json:"cache_op,omitempty"`       // for cache node (get/set)
 	CacheKey      *string      `json:"cache_key,omitempty"`      // for cache node
 	TTL           *string      `json:"ttl,omitempty"`            // for cache node
+	// Error Handling & Resilience fields
+	MaxAttempts      *int      `json:"max_attempts,omitempty"`      // for retry node
+	BackoffStrategy  *string   `json:"backoff_strategy,omitempty"`  // for retry node (exponential/linear/constant)
+	InitialDelay     *string   `json:"initial_delay,omitempty"`     // for retry node
+	MaxDelay         *string   `json:"max_delay,omitempty"`         // for retry node
+	Multiplier       *float64  `json:"multiplier,omitempty"`        // for retry node (backoff multiplier)
+	RetryOnErrors    []string  `json:"retry_on_errors,omitempty"`   // for retry node (error patterns to retry on)
+	FallbackValue    interface{} `json:"fallback_value,omitempty"` // for try-catch node
+	ContinueOnError  *bool     `json:"continue_on_error,omitempty"` // for try-catch node
+	ErrorOutputPath  *string   `json:"error_output_path,omitempty"` // for try-catch node
+	TimeoutAction    *string   `json:"timeout_action,omitempty"`    // for timeout node (error/continue_with_partial)
 }
 
 // SwitchCase represents a case in a switch node
@@ -223,6 +238,12 @@ func (e *Engine) inferNodeTypes() {
 			e.nodes[i].Type = NodeTypeDelay
 		} else if e.nodes[i].Data.CacheOp != nil && e.nodes[i].Data.CacheKey != nil {
 			e.nodes[i].Type = NodeTypeCache
+		} else if e.nodes[i].Data.MaxAttempts != nil || e.nodes[i].Data.BackoffStrategy != nil {
+			e.nodes[i].Type = NodeTypeRetry
+		} else if e.nodes[i].Data.FallbackValue != nil || e.nodes[i].Data.ContinueOnError != nil {
+			e.nodes[i].Type = NodeTypeTryCatch
+		} else if e.nodes[i].Data.Timeout != nil && e.nodes[i].Data.TimeoutAction != nil {
+			e.nodes[i].Type = NodeTypeTimeout
 		}
 		// Note: for_each, while_loop, and parallel require explicit type as they have ambiguous fields
 	}
@@ -320,6 +341,15 @@ func (e *Engine) executeNode(node Node) (interface{}, error) {
 		return e.executeDelayNode(node)
 	case NodeTypeCache:
 		return e.executeCacheNode(node)
+	case NodeTypeRetry:
+		inputs := e.getNodeInputs(node.ID)
+		return e.executeRetryNode(&node, inputs)
+	case NodeTypeTryCatch:
+		inputs := e.getNodeInputs(node.ID)
+		return e.executeTryCatchNode(&node, inputs)
+	case NodeTypeTimeout:
+		inputs := e.getNodeInputs(node.ID)
+		return e.executeTimeoutNode(&node, inputs)
 	default:
 		return nil, fmt.Errorf("unknown node type: %s", node.Type)
 	}
