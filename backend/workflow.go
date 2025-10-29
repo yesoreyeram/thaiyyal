@@ -20,6 +20,12 @@ const (
 	NodeTypeCondition     NodeType = "condition"
 	NodeTypeForEach       NodeType = "for_each"
 	NodeTypeWhileLoop     NodeType = "while_loop"
+	// State & Memory nodes
+	NodeTypeVariable      NodeType = "variable"       // Store/retrieve variables
+	NodeTypeExtract       NodeType = "extract"        // Extract fields from objects
+	NodeTypeTransform     NodeType = "transform"      // Transform data structures
+	NodeTypeAccumulator   NodeType = "accumulator"    // Accumulate values over time
+	NodeTypeCounter       NodeType = "counter"        // Increment/decrement counter
 )
 
 // Payload represents the JSON payload from the frontend
@@ -50,6 +56,16 @@ type NodeData struct {
 	TruePath      *string  `json:"true_path,omitempty"`      // for condition nodes (output port name)
 	FalsePath     *string  `json:"false_path,omitempty"`     // for condition nodes (output port name)
 	MaxIterations *int     `json:"max_iterations,omitempty"` // for for_each and while_loop nodes
+	// State & Memory fields
+	VarName       *string                `json:"var_name,omitempty"`       // for variable nodes (variable name)
+	VarOp         *string                `json:"var_op,omitempty"`         // for variable nodes (get/set)
+	Field         *string                `json:"field,omitempty"`          // for extract nodes (field path)
+	Fields        []string               `json:"fields,omitempty"`         // for extract nodes (multiple fields)
+	TransformType *string                `json:"transform_type,omitempty"` // for transform nodes (to_array, to_object, etc.)
+	InitialValue  interface{}            `json:"initial_value,omitempty"`  // for accumulator/counter initial value
+	AccumOp       *string                `json:"accum_op,omitempty"`       // for accumulator operation (sum, product, concat, etc.)
+	CounterOp     *string                `json:"counter_op,omitempty"`     // for counter operation (increment, decrement, reset)
+	Delta         *float64               `json:"delta,omitempty"`          // for counter delta value
 }
 
 // Edge represents a connection between nodes
@@ -71,6 +87,10 @@ type Engine struct {
 	nodes       []Node
 	edges       []Edge
 	nodeResults map[string]interface{}
+	// State management
+	variables   map[string]interface{} // stores variables across nodes
+	accumulator interface{}            // stores accumulated value
+	counter     float64                // stores counter value
 }
 
 // NewEngine creates a new workflow engine from JSON payload
@@ -84,6 +104,9 @@ func NewEngine(payloadJSON []byte) (*Engine, error) {
 		nodes:       payload.Nodes,
 		edges:       payload.Edges,
 		nodeResults: make(map[string]interface{}),
+		variables:   make(map[string]interface{}),
+		accumulator: nil,
+		counter:     0,
 	}, nil
 }
 
@@ -143,6 +166,16 @@ func (e *Engine) inferNodeTypes() {
 			e.nodes[i].Type = NodeTypeHTTP
 		} else if e.nodes[i].Data.Condition != nil {
 			e.nodes[i].Type = NodeTypeCondition
+		} else if e.nodes[i].Data.VarName != nil && e.nodes[i].Data.VarOp != nil {
+			e.nodes[i].Type = NodeTypeVariable
+		} else if e.nodes[i].Data.Field != nil || len(e.nodes[i].Data.Fields) > 0 {
+			e.nodes[i].Type = NodeTypeExtract
+		} else if e.nodes[i].Data.TransformType != nil {
+			e.nodes[i].Type = NodeTypeTransform
+		} else if e.nodes[i].Data.AccumOp != nil {
+			e.nodes[i].Type = NodeTypeAccumulator
+		} else if e.nodes[i].Data.CounterOp != nil {
+			e.nodes[i].Type = NodeTypeCounter
 		}
 		// Note: for_each and while_loop require explicit type as they have MaxIterations
 		// which could be confused with other fields
@@ -219,6 +252,16 @@ func (e *Engine) executeNode(node Node) (interface{}, error) {
 		return e.executeForEachNode(node)
 	case NodeTypeWhileLoop:
 		return e.executeWhileLoopNode(node)
+	case NodeTypeVariable:
+		return e.executeVariableNode(node)
+	case NodeTypeExtract:
+		return e.executeExtractNode(node)
+	case NodeTypeTransform:
+		return e.executeTransformNode(node)
+	case NodeTypeAccumulator:
+		return e.executeAccumulatorNode(node)
+	case NodeTypeCounter:
+		return e.executeCounterNode(node)
 	default:
 		return nil, fmt.Errorf("unknown node type: %s", node.Type)
 	}
@@ -715,4 +758,328 @@ func (e *Engine) evaluateCondition(condition string, value interface{}) bool {
 	default:
 		return false
 	}
+}
+
+// executeVariableNode handles variable get/set operations
+func (e *Engine) executeVariableNode(node Node) (interface{}, error) {
+	if node.Data.VarName == nil {
+		return nil, fmt.Errorf("variable node missing var_name")
+	}
+	if node.Data.VarOp == nil {
+		return nil, fmt.Errorf("variable node missing var_op (get or set)")
+	}
+
+	varName := *node.Data.VarName
+	varOp := *node.Data.VarOp
+
+	switch varOp {
+	case "set":
+		// Get input value from predecessor nodes
+		inputs := e.getNodeInputs(node.ID)
+		if len(inputs) == 0 {
+			return nil, fmt.Errorf("variable set operation requires input value")
+		}
+		value := inputs[0]
+		e.variables[varName] = value
+		return map[string]interface{}{
+			"var_name":  varName,
+			"operation": "set",
+			"value":     value,
+		}, nil
+
+	case "get":
+		// Retrieve value from variables
+		value, exists := e.variables[varName]
+		if !exists {
+			return nil, fmt.Errorf("variable '%s' not found", varName)
+		}
+		return map[string]interface{}{
+			"var_name":  varName,
+			"operation": "get",
+			"value":     value,
+		}, nil
+
+	default:
+		return nil, fmt.Errorf("unsupported variable operation: %s (use 'get' or 'set')", varOp)
+	}
+}
+
+// executeExtractNode extracts fields from input objects
+func (e *Engine) executeExtractNode(node Node) (interface{}, error) {
+	inputs := e.getNodeInputs(node.ID)
+	if len(inputs) == 0 {
+		return nil, fmt.Errorf("extract node requires input")
+	}
+
+	input := inputs[0]
+	inputMap, ok := input.(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("extract node requires object input, got %T", input)
+	}
+
+	// Single field extraction
+	if node.Data.Field != nil {
+		field := *node.Data.Field
+		value, exists := inputMap[field]
+		if !exists {
+			return nil, fmt.Errorf("field '%s' not found in input object", field)
+		}
+		return map[string]interface{}{
+			"field": field,
+			"value": value,
+		}, nil
+	}
+
+	// Multiple fields extraction
+	if len(node.Data.Fields) > 0 {
+		result := make(map[string]interface{})
+		for _, field := range node.Data.Fields {
+			value, exists := inputMap[field]
+			if exists {
+				result[field] = value
+			}
+		}
+		return result, nil
+	}
+
+	return nil, fmt.Errorf("extract node requires 'field' or 'fields' configuration")
+}
+
+// executeTransformNode transforms data structures
+func (e *Engine) executeTransformNode(node Node) (interface{}, error) {
+	if node.Data.TransformType == nil {
+		return nil, fmt.Errorf("transform node missing transform_type")
+	}
+
+	inputs := e.getNodeInputs(node.ID)
+	if len(inputs) == 0 {
+		return nil, fmt.Errorf("transform node requires input")
+	}
+
+	transformType := *node.Data.TransformType
+
+	switch transformType {
+	case "to_array":
+		// Convert single value or multiple inputs to array
+		return inputs, nil
+
+	case "to_object":
+		// Convert array of key-value pairs to object
+		input := inputs[0]
+		arr, ok := input.([]interface{})
+		if !ok {
+			return nil, fmt.Errorf("to_object requires array input, got %T", input)
+		}
+		result := make(map[string]interface{})
+		for i := 0; i < len(arr)-1; i += 2 {
+			key, ok := arr[i].(string)
+			if !ok {
+				return nil, fmt.Errorf("to_object requires string keys")
+			}
+			result[key] = arr[i+1]
+		}
+		return result, nil
+
+	case "flatten":
+		// Flatten nested arrays
+		input := inputs[0]
+		arr, ok := input.([]interface{})
+		if !ok {
+			return nil, fmt.Errorf("flatten requires array input, got %T", input)
+		}
+		var flattened []interface{}
+		var flatten func(interface{})
+		flatten = func(item interface{}) {
+			if subArr, ok := item.([]interface{}); ok {
+				for _, sub := range subArr {
+					flatten(sub)
+				}
+			} else {
+				flattened = append(flattened, item)
+			}
+		}
+		for _, item := range arr {
+			flatten(item)
+		}
+		return flattened, nil
+
+	case "keys":
+		// Extract keys from object
+		input := inputs[0]
+		obj, ok := input.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("keys transform requires object input, got %T", input)
+		}
+		keys := make([]interface{}, 0, len(obj))
+		for k := range obj {
+			keys = append(keys, k)
+		}
+		return keys, nil
+
+	case "values":
+		// Extract values from object
+		input := inputs[0]
+		obj, ok := input.(map[string]interface{})
+		if !ok {
+			return nil, fmt.Errorf("values transform requires object input, got %T", input)
+		}
+		values := make([]interface{}, 0, len(obj))
+		for _, v := range obj {
+			values = append(values, v)
+		}
+		return values, nil
+
+	default:
+		return nil, fmt.Errorf("unsupported transform type: %s", transformType)
+	}
+}
+
+// executeAccumulatorNode accumulates values over successive calls
+func (e *Engine) executeAccumulatorNode(node Node) (interface{}, error) {
+	if node.Data.AccumOp == nil {
+		return nil, fmt.Errorf("accumulator node missing accum_op")
+	}
+
+	accumOp := *node.Data.AccumOp
+	inputs := e.getNodeInputs(node.ID)
+
+	// Initialize accumulator if needed
+	if e.accumulator == nil {
+		if node.Data.InitialValue != nil {
+			e.accumulator = node.Data.InitialValue
+		} else {
+			// Default initial values
+			switch accumOp {
+			case "sum", "count":
+				e.accumulator = 0.0
+			case "product":
+				e.accumulator = 1.0
+			case "concat":
+				e.accumulator = ""
+			case "array":
+				e.accumulator = []interface{}{}
+			default:
+				e.accumulator = nil
+			}
+		}
+	}
+
+	// If no inputs, return current accumulator
+	if len(inputs) == 0 {
+		return map[string]interface{}{
+			"operation": accumOp,
+			"value":     e.accumulator,
+		}, nil
+	}
+
+	input := inputs[0]
+
+	switch accumOp {
+	case "sum":
+		accum, ok := e.accumulator.(float64)
+		if !ok {
+			return nil, fmt.Errorf("accumulator value is not a number")
+		}
+		num, ok := input.(float64)
+		if !ok {
+			return nil, fmt.Errorf("sum accumulator requires numeric input, got %T", input)
+		}
+		e.accumulator = accum + num
+
+	case "product":
+		accum, ok := e.accumulator.(float64)
+		if !ok {
+			return nil, fmt.Errorf("accumulator value is not a number")
+		}
+		num, ok := input.(float64)
+		if !ok {
+			return nil, fmt.Errorf("product accumulator requires numeric input, got %T", input)
+		}
+		e.accumulator = accum * num
+
+	case "concat":
+		accum, ok := e.accumulator.(string)
+		if !ok {
+			return nil, fmt.Errorf("accumulator value is not a string")
+		}
+		str, ok := input.(string)
+		if !ok {
+			return nil, fmt.Errorf("concat accumulator requires string input, got %T", input)
+		}
+		e.accumulator = accum + str
+
+	case "array":
+		accum, ok := e.accumulator.([]interface{})
+		if !ok {
+			return nil, fmt.Errorf("accumulator value is not an array")
+		}
+		e.accumulator = append(accum, input)
+
+	case "count":
+		accum, ok := e.accumulator.(float64)
+		if !ok {
+			return nil, fmt.Errorf("accumulator value is not a number")
+		}
+		e.accumulator = accum + 1
+
+	default:
+		return nil, fmt.Errorf("unsupported accumulator operation: %s", accumOp)
+	}
+
+	return map[string]interface{}{
+		"operation": accumOp,
+		"value":     e.accumulator,
+	}, nil
+}
+
+// executeCounterNode handles counter increment/decrement/reset operations
+func (e *Engine) executeCounterNode(node Node) (interface{}, error) {
+	if node.Data.CounterOp == nil {
+		return nil, fmt.Errorf("counter node missing counter_op")
+	}
+
+	counterOp := *node.Data.CounterOp
+
+	// Initialize counter if needed
+	if node.Data.InitialValue != nil {
+		if val, ok := node.Data.InitialValue.(float64); ok {
+			e.counter = val
+		}
+	}
+
+	switch counterOp {
+	case "increment":
+		delta := 1.0
+		if node.Data.Delta != nil {
+			delta = *node.Data.Delta
+		}
+		e.counter += delta
+
+	case "decrement":
+		delta := 1.0
+		if node.Data.Delta != nil {
+			delta = *node.Data.Delta
+		}
+		e.counter -= delta
+
+	case "reset":
+		resetValue := 0.0
+		if node.Data.InitialValue != nil {
+			if val, ok := node.Data.InitialValue.(float64); ok {
+				resetValue = val
+			}
+		}
+		e.counter = resetValue
+
+	case "get":
+		// Just return current counter value
+
+	default:
+		return nil, fmt.Errorf("unsupported counter operation: %s (use increment, decrement, reset, or get)", counterOp)
+	}
+
+	return map[string]interface{}{
+		"operation": counterOp,
+		"value":     e.counter,
+	}, nil
 }
