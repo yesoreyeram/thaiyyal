@@ -123,6 +123,7 @@ Created `src/app/PAGES_README.md`:
 ## Metrics
 
 ### Code Distribution
+
 | Category | Before | After | Change |
 |----------|--------|-------|--------|
 | Main file | 1,173 lines | 284 lines | -76% |
