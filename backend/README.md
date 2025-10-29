@@ -4,12 +4,12 @@ A simple, easy-to-understand Go workflow execution engine that parses and execut
 
 ## Features
 
-- **Simple & Readable**: Single file implementation (~1100 lines)
+- **Simple & Readable**: Distributed across focused files (~1500 lines total)
 - **Easy to Understand**: Straightforward code flow without complex patterns
 - **JSON Payload Parsing**: Accepts workflow definitions as JSON
 - **DAG Execution**: Uses topological sorting to execute nodes in correct order
 - **Type Inference**: Automatically determines node types from data
-- **Node Types** (14 types):
+- **Node Types** (20 types):
   - **Number Nodes**: Provide numeric input values
   - **Operation Nodes**: Perform arithmetic (add, subtract, multiply, divide)
   - **Visualization Nodes**: Format output for display (text, table)
@@ -19,17 +19,24 @@ A simple, easy-to-understand Go workflow execution engine that parses and execut
   - **Condition Nodes**: Evaluate conditions and pass through values
   - **For Each Nodes**: Iterate over array elements
   - **While Loop Nodes**: Loop while conditions are true
-  - **Variable Nodes**: Store and retrieve values across workflow (NEW ✨)
-  - **Extract Nodes**: Extract fields from objects (NEW ✨)
-  - **Transform Nodes**: Transform data structures (to_array, to_object, flatten, keys, values) (NEW ✨)
-  - **Accumulator Nodes**: Accumulate values over time (sum, product, concat, array, count) (NEW ✨)
-  - **Counter Nodes**: Simple counter with increment/decrement/reset (NEW ✨)
-- **State Management**: Variables, accumulators, and counters for stateful workflows
+  - **Variable Nodes**: Store and retrieve values across workflow
+  - **Extract Nodes**: Extract fields from objects
+  - **Transform Nodes**: Transform data structures (to_array, to_object, flatten, keys, values)
+  - **Accumulator Nodes**: Accumulate values over time (sum, product, concat, array, count)
+  - **Counter Nodes**: Simple counter with increment/decrement/reset
+  - **Switch Nodes**: Multi-way branching based on value or condition (NEW ✨)
+  - **Parallel Nodes**: Execute multiple branches concurrently with concurrency control (NEW ✨)
+  - **Join Nodes**: Combine outputs from multiple nodes with strategies (all/any/first) (NEW ✨)
+  - **Split Nodes**: Split single input to multiple output paths (NEW ✨)
+  - **Delay Nodes**: Pause execution for specified duration (NEW ✨)
+  - **Cache Nodes**: Get/set cached values with TTL and LRU eviction (NEW ✨)
+- **State Management**: Variables, accumulators, counters, and cache for stateful workflows
 - **Cycle Detection**: Prevents execution of workflows with circular dependencies
-- **Comprehensive Tests**: 96 test cases covering all functionality
+- **Comprehensive Tests**: 142+ test cases (including sub-tests) covering all functionality
   - 40 standard tests
   - 39 control flow tests
   - 17 state/memory tests
+  - 46+ advanced control flow tests (table-driven with multiple scenarios)
 
 ## Quick Start
 

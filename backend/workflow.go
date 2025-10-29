@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sync"
+	"time"
 )
 
 // NodeType represents the type of a workflow node
@@ -26,6 +28,13 @@ const (
 	NodeTypeTransform     NodeType = "transform"      // Transform data structures
 	NodeTypeAccumulator   NodeType = "accumulator"    // Accumulate values over time
 	NodeTypeCounter       NodeType = "counter"        // Increment/decrement counter
+	// Advanced Control Flow nodes
+	NodeTypeSwitch        NodeType = "switch"         // Multi-way branching
+	NodeTypeParallel      NodeType = "parallel"       // Parallel execution
+	NodeTypeJoin          NodeType = "join"           // Combine multiple inputs
+	NodeTypeSplit         NodeType = "split"          // Split to multiple paths
+	NodeTypeDelay         NodeType = "delay"          // Delay execution
+	NodeTypeCache         NodeType = "cache"          // Cache get/set operations
 )
 
 // Payload represents the JSON payload from the frontend
@@ -66,6 +75,24 @@ type NodeData struct {
 	AccumOp       *string                `json:"accum_op,omitempty"`       // for accumulator operation (sum, product, concat, etc.)
 	CounterOp     *string                `json:"counter_op,omitempty"`     // for counter operation (increment, decrement, reset)
 	Delta         *float64               `json:"delta,omitempty"`          // for counter delta value
+	// Advanced Control Flow fields
+	Cases         []SwitchCase `json:"cases,omitempty"`          // for switch node (case definitions)
+	DefaultPath   *string      `json:"default_path,omitempty"`   // for switch node (default case)
+	MaxConcurrency *int        `json:"max_concurrency,omitempty"` // for parallel node
+	JoinStrategy  *string      `json:"join_strategy,omitempty"`  // for join node (all/any/first)
+	Timeout       *string      `json:"timeout,omitempty"`        // for join/parallel nodes
+	Paths         []string     `json:"paths,omitempty"`          // for split node
+	Duration      *string      `json:"duration,omitempty"`       // for delay node
+	CacheOp       *string      `json:"cache_op,omitempty"`       // for cache node (get/set)
+	CacheKey      *string      `json:"cache_key,omitempty"`      // for cache node
+	TTL           *string      `json:"ttl,omitempty"`            // for cache node
+}
+
+// SwitchCase represents a case in a switch node
+type SwitchCase struct {
+	When       string  `json:"when"`        // condition or value to match
+	Value      interface{} `json:"value,omitempty"` // value to match (for value matching)
+	OutputPath *string `json:"output_path,omitempty"` // output port name
 }
 
 // Edge represents a connection between nodes
@@ -82,6 +109,12 @@ type Result struct {
 	Errors      []string               `json:"errors,omitempty"`
 }
 
+// CacheEntry represents a cached value with expiration
+type CacheEntry struct {
+	Value      interface{}
+	Expiration time.Time
+}
+
 // Engine is the workflow execution engine
 type Engine struct {
 	nodes       []Node
@@ -91,6 +124,9 @@ type Engine struct {
 	variables   map[string]interface{} // stores variables across nodes
 	accumulator interface{}            // stores accumulated value
 	counter     float64                // stores counter value
+	// Cache management
+	cache       map[string]*CacheEntry  // stores cached values with TTL
+	cacheMutex  sync.RWMutex            // protects cache access
 }
 
 // NewEngine creates a new workflow engine from JSON payload
@@ -107,6 +143,7 @@ func NewEngine(payloadJSON []byte) (*Engine, error) {
 		variables:   make(map[string]interface{}),
 		accumulator: nil,
 		counter:     0,
+		cache:       make(map[string]*CacheEntry),
 	}, nil
 }
 
@@ -176,9 +213,18 @@ func (e *Engine) inferNodeTypes() {
 			e.nodes[i].Type = NodeTypeAccumulator
 		} else if e.nodes[i].Data.CounterOp != nil {
 			e.nodes[i].Type = NodeTypeCounter
+		} else if len(e.nodes[i].Data.Cases) > 0 {
+			e.nodes[i].Type = NodeTypeSwitch
+		} else if e.nodes[i].Data.JoinStrategy != nil {
+			e.nodes[i].Type = NodeTypeJoin
+		} else if len(e.nodes[i].Data.Paths) > 0 {
+			e.nodes[i].Type = NodeTypeSplit
+		} else if e.nodes[i].Data.Duration != nil {
+			e.nodes[i].Type = NodeTypeDelay
+		} else if e.nodes[i].Data.CacheOp != nil && e.nodes[i].Data.CacheKey != nil {
+			e.nodes[i].Type = NodeTypeCache
 		}
-		// Note: for_each and while_loop require explicit type as they have MaxIterations
-		// which could be confused with other fields
+		// Note: for_each, while_loop, and parallel require explicit type as they have ambiguous fields
 	}
 }
 
@@ -262,6 +308,18 @@ func (e *Engine) executeNode(node Node) (interface{}, error) {
 		return e.executeAccumulatorNode(node)
 	case NodeTypeCounter:
 		return e.executeCounterNode(node)
+	case NodeTypeSwitch:
+		return e.executeSwitchNode(node)
+	case NodeTypeParallel:
+		return e.executeParallelNode(node)
+	case NodeTypeJoin:
+		return e.executeJoinNode(node)
+	case NodeTypeSplit:
+		return e.executeSplitNode(node)
+	case NodeTypeDelay:
+		return e.executeDelayNode(node)
+	case NodeTypeCache:
+		return e.executeCacheNode(node)
 	default:
 		return nil, fmt.Errorf("unknown node type: %s", node.Type)
 	}

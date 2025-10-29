@@ -28,6 +28,12 @@ This document provides a comprehensive reference of all node types in the Thaiyy
 | **Transform** | Transform data structures | 1 `any` | Varies by transform type | `{"type": "transform", "data": {"transform_type": "to_array"}}` | ✅ |
 | **Accumulator** | Accumulate values over time | 1 `any` | `object` with operation and accumulated value | `{"type": "accumulator", "data": {"accum_op": "sum"}}` | ✅ |
 | **Counter** | Increment/decrement/reset counter | None | `object` with operation and counter value | `{"type": "counter", "data": {"counter_op": "increment"}}` | ✅ |
+| **Switch** | Multi-way branching based on value/condition | 1 `any` | `object` with matched case info | `{"type": "switch", "data": {"cases": [{"when": ">100"}]}}` | ✅ |
+| **Parallel** | Execute multiple branches concurrently | Multiple `any` | `object` with results array | `{"type": "parallel", "data": {"max_concurrency": 10}}` | ✅ |
+| **Join** | Combine outputs from multiple nodes | Multiple `any` | `object` with combined values | `{"type": "join", "data": {"join_strategy": "all"}}` | ✅ |
+| **Split** | Split single input to multiple paths | 1 `any` | `object` with path outputs | `{"type": "split", "data": {"paths": ["a", "b"]}}` | ✅ |
+| **Delay** | Pause execution for specified duration | 1 `any` | Same as input with delay metadata | `{"type": "delay", "data": {"duration": "5s"}}` | ✅ |
+| **Cache** | Get/set cached values with TTL | 1 `any` (for set) | `object` with cache operation result | `{"type": "cache", "data": {"cache_op": "get", "cache_key": "k1"}}` | ✅ |
 
 ### Text Operations (Sub-types)
 
@@ -267,13 +273,14 @@ This document provides a comprehensive reference of all node types in the Thaiyy
 | Node Type | Description | Inputs | Outputs | Example Config | Priority | Status |
 |-----------|-------------|--------|---------|----------------|----------|--------|
 | **If/Condition** | Conditional branching | 1+ inputs | Same as input | `{"condition": "value > 100"}` | High | ✅ |
-| **Switch** | Multi-way branching | 1 input | Same as input | `{"cases": [{"when": "==error", "output": "error_port"}]}` | High | 📋 |
+| **Switch** | Multi-way branching | 1 input | Same as input | `{"cases": [{"when": ">100", "output_path": "high"}]}` | High | ✅ |
 | **For Each** | Iterate over array | Array | Array (processed) | `{"max_iterations": 1000}` | High | ✅ |
 | **While Loop** | Loop with condition | 1+ inputs | Last iteration output | `{"condition": "count < 10", "max_iterations": 100}` | Medium | ✅ |
-| **Parallel** | Execute in parallel | Array | Array (results) | `{"max_concurrency": 10}` | Medium | 📋 |
-| **Join/Merge** | Combine multiple inputs | Multiple inputs | Combined output | `{"strategy": "all", "timeout": "30s"}` | High | 📋 |
-| **Split** | Split into multiple paths | 1 input | Multiple outputs | `{"paths": ["path1", "path2"]}` | Medium | 📋 |
-| **Delay** | Wait/pause execution | 1+ inputs | Same as input | `{"duration": "5s"}` | Low | 📋 |
+| **Parallel** | Execute in parallel | Array | Array (results) | `{"max_concurrency": 10}` | Medium | ✅ |
+| **Join/Merge** | Combine multiple inputs | Multiple inputs | Combined output | `{"join_strategy": "all"}` | High | ✅ |
+| **Split** | Split into multiple paths | 1 input | Multiple outputs | `{"paths": ["path1", "path2"]}` | Medium | ✅ |
+| **Delay** | Wait/pause execution | 1+ inputs | Same as input | `{"duration": "5s"}` | Low | ✅ |
+| **Cache** | Cache get/set operations | Value (for set) | Cached value or status | `{"cache_op": "get", "cache_key": "key1", "ttl": "5m"}` | Medium | ✅ |
 
 ### Output & Actions
 
