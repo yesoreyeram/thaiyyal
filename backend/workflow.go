@@ -39,6 +39,8 @@ const (
 	NodeTypeRetry         NodeType = "retry"          // Retry with backoff
 	NodeTypeTryCatch      NodeType = "try_catch"      // Error handling with fallback
 	NodeTypeTimeout       NodeType = "timeout"        // Enforce time limits
+	// HTTP Pagination node
+	NodeTypeHTTPPagination NodeType = "http_pagination" // HTTP pagination with page numbers
 )
 
 // Payload represents the JSON payload from the frontend
@@ -101,6 +103,14 @@ type NodeData struct {
 	ContinueOnError  *bool     `json:"continue_on_error,omitempty"` // for try-catch node
 	ErrorOutputPath  *string   `json:"error_output_path,omitempty"` // for try-catch node
 	TimeoutAction    *string   `json:"timeout_action,omitempty"`    // for timeout node (error/continue_with_partial)
+	// HTTP Pagination fields
+	BaseURL       *string `json:"base_url,omitempty"`       // for http_pagination node (URL with {page} placeholder)
+	StartPage     *int    `json:"start_page,omitempty"`     // for http_pagination node (default: 1)
+	PageSize      *int    `json:"page_size,omitempty"`      // for http_pagination node (items per page)
+	MaxPages      *int    `json:"max_pages,omitempty"`      // for http_pagination node (max number of pages)
+	TotalItems    *int    `json:"total_items,omitempty"`    // for http_pagination node (total items to fetch)
+	PageParam     *string `json:"page_param,omitempty"`     // for http_pagination node (page parameter name, default: "page")
+	BreakOnError  *bool   `json:"break_on_error,omitempty"` // for http_pagination node (stop on first error, default: true)
 }
 
 // SwitchCase represents a case in a switch node
@@ -216,6 +226,8 @@ func (e *Engine) inferNodeTypes() {
 			e.nodes[i].Type = NodeTypeTextOperation
 		} else if e.nodes[i].Data.URL != nil {
 			e.nodes[i].Type = NodeTypeHTTP
+		} else if e.nodes[i].Data.BaseURL != nil {
+			e.nodes[i].Type = NodeTypeHTTPPagination
 		} else if e.nodes[i].Data.Condition != nil {
 			e.nodes[i].Type = NodeTypeCondition
 		} else if e.nodes[i].Data.VarName != nil && e.nodes[i].Data.VarOp != nil {
@@ -313,6 +325,8 @@ func (e *Engine) executeNode(node Node) (interface{}, error) {
 		return e.executeTextOperationNode(node)
 	case NodeTypeHTTP:
 		return e.executeHTTPNode(node)
+	case NodeTypeHTTPPagination:
+		return e.executeHTTPPaginationNode(node)
 	case NodeTypeCondition:
 		return e.executeConditionNode(node)
 	case NodeTypeForEach:
@@ -540,6 +554,191 @@ func (e *Engine) executeHTTPNode(node Node) (interface{}, error) {
 	}
 
 	return string(body), nil
+}
+
+// executeHTTPPaginationNode performs paginated HTTP requests and consolidates results
+func (e *Engine) executeHTTPPaginationNode(node Node) (interface{}, error) {
+	if node.Data.BaseURL == nil {
+		return nil, fmt.Errorf("http_pagination node missing base_url")
+	}
+
+	baseURL := *node.Data.BaseURL
+	
+	// Set defaults
+	startPage := 1
+	if node.Data.StartPage != nil {
+		startPage = *node.Data.StartPage
+	}
+
+	pageParam := "page"
+	if node.Data.PageParam != nil {
+		pageParam = *node.Data.PageParam
+	}
+
+	breakOnError := true
+	if node.Data.BreakOnError != nil {
+		breakOnError = *node.Data.BreakOnError
+	}
+
+	// Determine number of pages to fetch
+	var numPages int
+	if node.Data.MaxPages != nil {
+		numPages = *node.Data.MaxPages
+	} else if node.Data.TotalItems != nil && node.Data.PageSize != nil {
+		// Calculate pages from total items and page size
+		totalItems := *node.Data.TotalItems
+		pageSize := *node.Data.PageSize
+		numPages = (totalItems + pageSize - 1) / pageSize // Ceiling division
+	} else {
+		return nil, fmt.Errorf("http_pagination node requires either max_pages or both total_items and page_size")
+	}
+
+	if numPages <= 0 {
+		return nil, fmt.Errorf("http_pagination node requires at least 1 page")
+	}
+
+	// Collect results and errors
+	var results []interface{}
+	var errors []string
+	successCount := 0
+	errorCount := 0
+
+	// Iterate through pages
+	for page := startPage; page < startPage+numPages; page++ {
+		// Build URL with page parameter
+		url := baseURL
+		// Replace {page} placeholder if exists
+		if containsPlaceholder(url, "{page}") {
+			url = replacePlaceholder(url, "{page}", fmt.Sprintf("%d", page))
+		} else if containsPlaceholder(url, "{"+pageParam+"}") {
+			url = replacePlaceholder(url, "{"+pageParam+"}", fmt.Sprintf("%d", page))
+		} else {
+			// Append as query parameter
+			separator := "?"
+			if containsQueryString(url) {
+				separator = "&"
+			}
+			url = fmt.Sprintf("%s%s%s=%d", url, separator, pageParam, page)
+		}
+
+		// Make HTTP GET request
+		resp, err := http.Get(url)
+		if err != nil {
+			errorMsg := fmt.Sprintf("page %d: HTTP request failed: %v", page, err)
+			errors = append(errors, errorMsg)
+			errorCount++
+			if breakOnError {
+				return map[string]interface{}{
+					"success":       false,
+					"error":         errorMsg,
+					"pages_fetched": successCount,
+					"total_pages":   numPages,
+					"results":       results,
+					"errors":        errors,
+				}, fmt.Errorf("pagination failed on page %d: %w", page, err)
+			}
+			continue
+		}
+
+		// Check for error status codes
+		if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+			resp.Body.Close()
+			errorMsg := fmt.Sprintf("page %d: HTTP request returned error status: %d", page, resp.StatusCode)
+			errors = append(errors, errorMsg)
+			errorCount++
+			if breakOnError {
+				return map[string]interface{}{
+					"success":       false,
+					"error":         errorMsg,
+					"pages_fetched": successCount,
+					"total_pages":   numPages,
+					"results":       results,
+					"errors":        errors,
+				}, fmt.Errorf("pagination failed on page %d: status %d", page, resp.StatusCode)
+			}
+			continue
+		}
+
+		// Read response body
+		body, err := io.ReadAll(resp.Body)
+		resp.Body.Close()
+		if err != nil {
+			errorMsg := fmt.Sprintf("page %d: failed to read response body: %v", page, err)
+			errors = append(errors, errorMsg)
+			errorCount++
+			if breakOnError {
+				return map[string]interface{}{
+					"success":       false,
+					"error":         errorMsg,
+					"pages_fetched": successCount,
+					"total_pages":   numPages,
+					"results":       results,
+					"errors":        errors,
+				}, fmt.Errorf("pagination failed on page %d: %w", page, err)
+			}
+			continue
+		}
+
+		// Add to results
+		results = append(results, string(body))
+		successCount++
+	}
+
+	// Return consolidated results
+	return map[string]interface{}{
+		"success":       errorCount == 0,
+		"pages_fetched": successCount,
+		"total_pages":   numPages,
+		"results":       results,
+		"errors":        errors,
+		"error_count":   errorCount,
+	}, nil
+}
+
+// Helper functions for HTTP pagination
+func containsPlaceholder(s, placeholder string) bool {
+	return len(s) > 0 && len(placeholder) > 0 && 
+		(s == placeholder || 
+		 (len(s) > len(placeholder) && 
+		  (s[:len(placeholder)] == placeholder || 
+		   s[len(s)-len(placeholder):] == placeholder ||
+		   containsSubstring(s, placeholder))))
+}
+
+func containsSubstring(s, substr string) bool {
+	if len(substr) > len(s) {
+		return false
+	}
+	for i := 0; i <= len(s)-len(substr); i++ {
+		if s[i:i+len(substr)] == substr {
+			return true
+		}
+	}
+	return false
+}
+
+func replacePlaceholder(s, placeholder, value string) string {
+	result := ""
+	i := 0
+	for i < len(s) {
+		if i+len(placeholder) <= len(s) && s[i:i+len(placeholder)] == placeholder {
+			result += value
+			i += len(placeholder)
+		} else {
+			result += string(s[i])
+			i++
+		}
+	}
+	return result
+}
+
+func containsQueryString(url string) bool {
+	for i := 0; i < len(url); i++ {
+		if url[i] == '?' {
+			return true
+		}
+	}
+	return false
 }
 
 // Text transformation helper functions

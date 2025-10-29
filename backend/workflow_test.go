@@ -2,8 +2,11 @@ package workflow
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
+	"strings"
 	"testing"
 )
 
@@ -1121,4 +1124,467 @@ func TestComplexTextWorkflow(t *testing.T) {
 	if result.NodeResults["5"] != "HIHIHI!!!" {
 		t.Errorf("Concat: Expected 'HIHIHI!!!', got %v", result.NodeResults["5"])
 	}
+}
+
+// ====================================
+// HTTP Pagination Node Tests
+// ====================================
+
+// Test HTTP pagination with max_pages
+func TestHTTPPaginationWithMaxPages(t *testing.T) {
+	// Track pages requested
+	pagesRequested := []int{}
+	
+	// Create test server
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Extract page parameter
+		page := r.URL.Query().Get("page")
+		if page == "" {
+			page = "1"
+		}
+		pageNum, _ := strconv.Atoi(page)
+		pagesRequested = append(pagesRequested, pageNum)
+		
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(fmt.Sprintf(`{"page":%s,"data":["item1","item2"]}`, page)))
+	}))
+	defer server.Close()
+
+	payload := map[string]interface{}{
+		"nodes": []interface{}{
+			map[string]interface{}{
+				"id": "1",
+				"type": "http_pagination",
+				"data": map[string]interface{}{
+					"base_url":  server.URL,
+					"max_pages": 5,
+				},
+			},
+		},
+		"edges": []interface{}{},
+	}
+	jsonData, _ := json.Marshal(payload)
+
+	engine, _ := NewEngine(jsonData)
+	result, err := engine.Execute()
+	if err != nil {
+		t.Fatalf("Execute failed: %v", err)
+	}
+
+	// Check result
+	nodeResult := result.NodeResults["1"].(map[string]interface{})
+	
+	if !nodeResult["success"].(bool) {
+		t.Errorf("Expected success to be true")
+	}
+	
+	if nodeResult["pages_fetched"].(int) != 5 {
+		t.Errorf("Expected 5 pages fetched, got %v", nodeResult["pages_fetched"])
+	}
+	
+	results := nodeResult["results"].([]interface{})
+	if len(results) != 5 {
+		t.Errorf("Expected 5 results, got %d", len(results))
+	}
+
+	if len(pagesRequested) != 5 {
+		t.Errorf("Expected 5 pages requested, got %d", len(pagesRequested))
+	}
+}
+
+// Test HTTP pagination with total_items and page_size
+func TestHTTPPaginationWithTotalItems(t *testing.T) {
+	pagesRequested := []int{}
+	
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		page := r.URL.Query().Get("page")
+		if page == "" {
+			page = "1"
+		}
+		pageNum, _ := strconv.Atoi(page)
+		pagesRequested = append(pagesRequested, pageNum)
+		
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(fmt.Sprintf(`{"page":%s,"items":10}`, page)))
+	}))
+	defer server.Close()
+
+	payload := map[string]interface{}{
+		"nodes": []interface{}{
+			map[string]interface{}{
+				"id": "1",
+				"type": "http_pagination",
+				"data": map[string]interface{}{
+					"base_url":    server.URL,
+					"total_items": 50,
+					"page_size":   10,
+				},
+			},
+		},
+		"edges": []interface{}{},
+	}
+	jsonData, _ := json.Marshal(payload)
+
+	engine, _ := NewEngine(jsonData)
+	result, err := engine.Execute()
+	if err != nil {
+		t.Fatalf("Execute failed: %v", err)
+	}
+
+	nodeResult := result.NodeResults["1"].(map[string]interface{})
+	
+	// Should fetch 5 pages (50 items / 10 items per page = 5)
+	if nodeResult["pages_fetched"].(int) != 5 {
+		t.Errorf("Expected 5 pages fetched, got %v", nodeResult["pages_fetched"])
+	}
+	
+	if len(pagesRequested) != 5 {
+		t.Errorf("Expected 5 pages requested, got %d", len(pagesRequested))
+	}
+}
+
+// Test HTTP pagination with URL placeholder
+func TestHTTPPaginationWithPlaceholder(t *testing.T) {
+	pagesRequested := []int{}
+	
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Extract page from path
+		path := r.URL.Path
+		parts := strings.Split(path, "/")
+		if len(parts) > 0 {
+			page := parts[len(parts)-1]
+			pageNum, _ := strconv.Atoi(page)
+			pagesRequested = append(pagesRequested, pageNum)
+			
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte(fmt.Sprintf(`{"page":%s}`, page)))
+		}
+	}))
+	defer server.Close()
+
+	payload := map[string]interface{}{
+		"nodes": []interface{}{
+			map[string]interface{}{
+				"id": "1",
+				"type": "http_pagination",
+				"data": map[string]interface{}{
+					"base_url":  server.URL + "/api/items/{page}",
+					"max_pages": 3,
+				},
+			},
+		},
+		"edges": []interface{}{},
+	}
+	jsonData, _ := json.Marshal(payload)
+
+	engine, _ := NewEngine(jsonData)
+	result, err := engine.Execute()
+	if err != nil {
+		t.Fatalf("Execute failed: %v", err)
+	}
+
+	nodeResult := result.NodeResults["1"].(map[string]interface{})
+	
+	if nodeResult["pages_fetched"].(int) != 3 {
+		t.Errorf("Expected 3 pages fetched, got %v", nodeResult["pages_fetched"])
+	}
+	
+	// Check that pages 1, 2, 3 were requested
+	expectedPages := []int{1, 2, 3}
+	if !intSlicesEqual(pagesRequested, expectedPages) {
+		t.Errorf("Expected pages %v, got %v", expectedPages, pagesRequested)
+	}
+}
+
+// Test HTTP pagination with custom start page
+func TestHTTPPaginationWithStartPage(t *testing.T) {
+	pagesRequested := []int{}
+	
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		page := r.URL.Query().Get("page")
+		pageNum, _ := strconv.Atoi(page)
+		pagesRequested = append(pagesRequested, pageNum)
+		
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(fmt.Sprintf(`{"page":%s}`, page)))
+	}))
+	defer server.Close()
+
+	payload := map[string]interface{}{
+		"nodes": []interface{}{
+			map[string]interface{}{
+				"id": "1",
+				"type": "http_pagination",
+				"data": map[string]interface{}{
+					"base_url":   server.URL,
+					"start_page": 5,
+					"max_pages":  3,
+				},
+			},
+		},
+		"edges": []interface{}{},
+	}
+	jsonData, _ := json.Marshal(payload)
+
+	engine, _ := NewEngine(jsonData)
+	result, err := engine.Execute()
+	if err != nil {
+		t.Fatalf("Execute failed: %v", err)
+	}
+
+	nodeResult := result.NodeResults["1"].(map[string]interface{})
+	
+	if nodeResult["pages_fetched"].(int) != 3 {
+		t.Errorf("Expected 3 pages fetched, got %v", nodeResult["pages_fetched"])
+	}
+	
+	// Should request pages 5, 6, 7
+	expectedPages := []int{5, 6, 7}
+	if !intSlicesEqual(pagesRequested, expectedPages) {
+		t.Errorf("Expected pages %v, got %v", expectedPages, pagesRequested)
+	}
+}
+
+// Test HTTP pagination breaks on error
+func TestHTTPPaginationBreakOnError(t *testing.T) {
+	requestCount := 0
+	
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requestCount++
+		page := r.URL.Query().Get("page")
+		pageNum, _ := strconv.Atoi(page)
+		
+		// Fail on page 3
+		if pageNum == 3 {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("Server error"))
+			return
+		}
+		
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(fmt.Sprintf(`{"page":%s}`, page)))
+	}))
+	defer server.Close()
+
+	payload := map[string]interface{}{
+		"nodes": []interface{}{
+			map[string]interface{}{
+				"id": "1",
+				"type": "http_pagination",
+				"data": map[string]interface{}{
+					"base_url":       server.URL,
+					"max_pages":      5,
+					"break_on_error": true,
+				},
+			},
+		},
+		"edges": []interface{}{},
+	}
+	jsonData, _ := json.Marshal(payload)
+
+	engine, _ := NewEngine(jsonData)
+	result, err := engine.Execute()
+	
+	// Should return error since break_on_error is true
+	if err == nil {
+		t.Error("Expected error when page 3 fails")
+	}
+	
+	// Should have made 3 requests (pages 1, 2, 3)
+	if requestCount != 3 {
+		t.Errorf("Expected 3 requests, got %d", requestCount)
+	}
+	
+	// Check partial results in result - only if result is not nil
+	if result != nil && result.NodeResults["1"] != nil {
+		nodeResult := result.NodeResults["1"].(map[string]interface{})
+		if nodeResult["success"].(bool) {
+			t.Error("Expected success to be false")
+		}
+		
+		if nodeResult["pages_fetched"].(int) != 2 {
+			t.Errorf("Expected 2 pages fetched before error, got %v", nodeResult["pages_fetched"])
+		}
+	}
+}
+
+// Test HTTP pagination continues on error
+func TestHTTPPaginationContinueOnError(t *testing.T) {
+	requestCount := 0
+	
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requestCount++
+		page := r.URL.Query().Get("page")
+		pageNum, _ := strconv.Atoi(page)
+		
+		// Fail on page 2
+		if pageNum == 2 {
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("Not found"))
+			return
+		}
+		
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(fmt.Sprintf(`{"page":%s}`, page)))
+	}))
+	defer server.Close()
+
+	payload := map[string]interface{}{
+		"nodes": []interface{}{
+			map[string]interface{}{
+				"id": "1",
+				"type": "http_pagination",
+				"data": map[string]interface{}{
+					"base_url":       server.URL,
+					"max_pages":      4,
+					"break_on_error": false,
+				},
+			},
+		},
+		"edges": []interface{}{},
+	}
+	jsonData, _ := json.Marshal(payload)
+
+	engine, _ := NewEngine(jsonData)
+	result, err := engine.Execute()
+	
+	// Should not return error since break_on_error is false
+	if err != nil {
+		t.Errorf("Expected no error with break_on_error=false, got: %v", err)
+	}
+	
+	// Should have made 4 requests (all pages)
+	if requestCount != 4 {
+		t.Errorf("Expected 4 requests, got %d", requestCount)
+	}
+	
+	nodeResult := result.NodeResults["1"].(map[string]interface{})
+	
+	// Should have 3 successful pages (1, 3, 4)
+	if nodeResult["pages_fetched"].(int) != 3 {
+		t.Errorf("Expected 3 pages fetched, got %v", nodeResult["pages_fetched"])
+	}
+	
+	// Should have 1 error
+	if nodeResult["error_count"].(int) != 1 {
+		t.Errorf("Expected 1 error, got %v", nodeResult["error_count"])
+	}
+	
+	// success should be false because there was an error
+	if nodeResult["success"].(bool) {
+		t.Error("Expected success to be false when there are errors")
+	}
+}
+
+// Test HTTP pagination with custom page parameter name
+func TestHTTPPaginationCustomPageParam(t *testing.T) {
+	var capturedParam string
+	
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Should have "p" parameter instead of "page"
+		if r.URL.Query().Has("p") {
+			capturedParam = "p"
+		}
+		
+		pageNum := r.URL.Query().Get("p")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(fmt.Sprintf(`{"p":%s}`, pageNum)))
+	}))
+	defer server.Close()
+
+	payload := map[string]interface{}{
+		"nodes": []interface{}{
+			map[string]interface{}{
+				"id": "1",
+				"type": "http_pagination",
+				"data": map[string]interface{}{
+					"base_url":   server.URL,
+					"max_pages":  2,
+					"page_param": "p",
+				},
+			},
+		},
+		"edges": []interface{}{},
+	}
+	jsonData, _ := json.Marshal(payload)
+
+	engine, _ := NewEngine(jsonData)
+	_, err := engine.Execute()
+	if err != nil {
+		t.Fatalf("Execute failed: %v", err)
+	}
+	
+	if capturedParam != "p" {
+		t.Errorf("Expected custom page param 'p', got '%s'", capturedParam)
+	}
+}
+
+// Test HTTP pagination missing required fields
+func TestHTTPPaginationMissingFields(t *testing.T) {
+	tests := []struct {
+		name string
+		data map[string]interface{}
+		expectedError string
+	}{
+		{
+			name: "missing base_url",
+			data: map[string]interface{}{
+				"max_pages": 5,
+			},
+			expectedError: "http_pagination node missing base_url",
+		},
+		{
+			name: "missing both max_pages and total_items",
+			data: map[string]interface{}{
+				"base_url": "http://example.com",
+			},
+			expectedError: "http_pagination node requires either max_pages or both total_items and page_size",
+		},
+		{
+			name: "missing page_size with total_items",
+			data: map[string]interface{}{
+				"base_url":    "http://example.com",
+				"total_items": 50,
+			},
+			expectedError: "http_pagination node requires either max_pages or both total_items and page_size",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			payload := map[string]interface{}{
+				"nodes": []interface{}{
+					map[string]interface{}{
+						"id":   "1",
+						"type": "http_pagination",
+						"data": tt.data,
+					},
+				},
+				"edges": []interface{}{},
+			}
+			jsonData, _ := json.Marshal(payload)
+
+			engine, _ := NewEngine(jsonData)
+			_, err := engine.Execute()
+			
+			if err == nil {
+				t.Errorf("Expected error for %s", tt.name)
+			} else if !strings.Contains(err.Error(), tt.expectedError) {
+				t.Errorf("Expected error containing '%s', got: %v", tt.expectedError, err)
+			}
+		})
+	}
+}
+
+// Helper function to compare int slices
+func intSlicesEqual(a, b []int) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }
