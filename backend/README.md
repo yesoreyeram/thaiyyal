@@ -9,13 +9,14 @@ A simple, easy-to-understand Go workflow execution engine that parses and execut
 - **JSON Payload Parsing**: Accepts workflow definitions as JSON
 - **DAG Execution**: Uses topological sorting to execute nodes in correct order
 - **Type Inference**: Automatically determines node types from data
-- **Node Types** (20 types):
+- **Node Types** (21 types):
   - **Number Nodes**: Provide numeric input values
   - **Operation Nodes**: Perform arithmetic (add, subtract, multiply, divide)
   - **Visualization Nodes**: Format output for display (text, table)
   - **Text Input Nodes**: Provide text string inputs
   - **Text Operation Nodes**: Transform text (uppercase, lowercase, titlecase, camelcase, inversecase, concat, repeat)
   - **HTTP Nodes**: Execute HTTP GET requests and return response body
+  - **HTTP Pagination Nodes**: Fetch multiple pages from paginated APIs automatically (NEW ✨)
   - **Condition Nodes**: Evaluate conditions and pass through values
   - **For Each Nodes**: Iterate over array elements
   - **While Loop Nodes**: Loop while conditions are true
@@ -24,19 +25,20 @@ A simple, easy-to-understand Go workflow execution engine that parses and execut
   - **Transform Nodes**: Transform data structures (to_array, to_object, flatten, keys, values)
   - **Accumulator Nodes**: Accumulate values over time (sum, product, concat, array, count)
   - **Counter Nodes**: Simple counter with increment/decrement/reset
-  - **Switch Nodes**: Multi-way branching based on value or condition (NEW ✨)
-  - **Parallel Nodes**: Execute multiple branches concurrently with concurrency control (NEW ✨)
-  - **Join Nodes**: Combine outputs from multiple nodes with strategies (all/any/first) (NEW ✨)
-  - **Split Nodes**: Split single input to multiple output paths (NEW ✨)
-  - **Delay Nodes**: Pause execution for specified duration (NEW ✨)
-  - **Cache Nodes**: Get/set cached values with TTL and LRU eviction (NEW ✨)
+  - **Switch Nodes**: Multi-way branching based on value or condition
+  - **Parallel Nodes**: Execute multiple branches concurrently with concurrency control
+  - **Join Nodes**: Combine outputs from multiple nodes with strategies (all/any/first)
+  - **Split Nodes**: Split single input to multiple output paths
+  - **Delay Nodes**: Pause execution for specified duration
+  - **Cache Nodes**: Get/set cached values with TTL and LRU eviction
 - **State Management**: Variables, accumulators, counters, and cache for stateful workflows
 - **Cycle Detection**: Prevents execution of workflows with circular dependencies
-- **Comprehensive Tests**: 142+ test cases (including sub-tests) covering all functionality
+- **Comprehensive Tests**: 150+ test cases (including sub-tests) covering all functionality
   - 40 standard tests
   - 39 control flow tests
   - 17 state/memory tests
   - 46+ advanced control flow tests (table-driven with multiple scenarios)
+  - 8 HTTP pagination tests
 
 ## Quick Start
 
@@ -187,6 +189,42 @@ payload := `{
 // (0 iterations because 150 is not < 100)
 ```
 
+### HTTP Pagination Node
+
+```go
+// Fetch 5 pages of data from a paginated API
+payload := `{
+  "nodes": [
+    {"id": "1", "type": "http_pagination", "data": {
+      "base_url": "https://api.example.com/items",
+      "max_pages": 5
+    }}
+  ],
+  "edges": []
+}`
+// Result: {
+//   "success": true,
+//   "pages_fetched": 5,
+//   "total_pages": 5,
+//   "results": ["page1_data", "page2_data", "page3_data", "page4_data", "page5_data"],
+//   "errors": [],
+//   "error_count": 0
+// }
+
+// Alternative: Use total_items and page_size
+payload := `{
+  "nodes": [
+    {"id": "1", "type": "http_pagination", "data": {
+      "base_url": "https://api.example.com/users",
+      "total_items": 50,
+      "page_size": 10
+    }}
+  ],
+  "edges": []
+}`
+// Automatically fetches 5 pages (50 items ÷ 10 per page = 5 pages)
+```
+
 ### Complex Workflow with Condition
 
 ```go
@@ -239,6 +277,16 @@ The engine accepts JSON payloads with this structure:
         
         // HTTP node:
         "url": "https://api.example.com/data",
+        
+        // HTTP Pagination node:
+        "base_url": "https://api.example.com/items",  // required - URL with optional {page} placeholder
+        "max_pages": 5,                               // option 1: number of pages to fetch
+        // OR
+        "total_items": 50,                            // option 2: total items to fetch
+        "page_size": 10,                              // option 2: items per page
+        "start_page": 1,                              // optional - starting page (default: 1)
+        "page_param": "page",                         // optional - query param name (default: "page")
+        "break_on_error": true,                       // optional - stop on first error (default: true)
         
         // Condition node:
         "condition": ">100",    // >N, <N, >=N, <=N, ==N, !=N, true, false
@@ -566,6 +614,9 @@ All errors include descriptive messages.
 ## Learn More
 
 - See [`docs/NODES.md`](../docs/NODES.md) for complete node type reference
+- See [`docs/HTTP_PAGINATION.md`](../docs/HTTP_PAGINATION.md) for HTTP Pagination node documentation
 - See [`INTEGRATION.md`](INTEGRATION.md) for frontend integration guide
 - See [`examples/looping_poc.go`](examples/looping_poc.go) for looping patterns
+- See [`examples/http_pagination_example.go`](examples/http_pagination_example.go) for HTTP pagination examples
+
 
