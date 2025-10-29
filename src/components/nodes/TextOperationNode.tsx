@@ -33,13 +33,14 @@ export function TextOperationNode({ id, data }: NodeProps<TextOperationNodeData>
   };
 
   return (
-    <div className="p-2 bg-green-700 text-white shadow rounded border">
-      <Handle type="target" position={Position.Left} />
-      <div className="text-xs font-medium">Text Operation</div>
+    <div className="px-3 py-2 bg-gradient-to-br from-emerald-600 to-emerald-700 text-white shadow-lg rounded-lg border border-emerald-500 hover:border-emerald-400 transition-all">
+      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
+      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Text Operation")}</div>
       <select
-        value={data?.text_op ?? "uppercase"}
+        value={String(data?.text_op ?? "uppercase")}
         onChange={onOpChange}
-        className="mt-1 w-40 border px-2 py-1 rounded text-black text-sm"
+        className="w-32 text-xs border border-emerald-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-emerald-400 focus:outline-none"
+        aria-label="Text operation type"
       >
         <option value="uppercase">Uppercase</option>
         <option value="lowercase">Lowercase</option>
@@ -51,23 +52,25 @@ export function TextOperationNode({ id, data }: NodeProps<TextOperationNodeData>
       </select>
       {data?.text_op === "concat" && (
         <input
-          value={data?.separator ?? ""}
+          value={String(data?.separator ?? "")}
           type="text"
           onChange={onSeparatorChange}
-          className="mt-1 w-40 border px-2 py-1 rounded text-black text-sm"
+          className="mt-1 w-32 text-xs border border-emerald-600 px-2 py-1 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-400 focus:outline-none"
           placeholder="Separator..."
+          aria-label="Separator"
         />
       )}
       {data?.text_op === "repeat" && (
         <input
-          value={data?.repeat_n ?? 1}
+          value={Number(data?.repeat_n ?? 1)}
           type="number"
           onChange={onRepeatNChange}
-          className="mt-1 w-40 border px-2 py-1 rounded text-black text-sm"
+          className="mt-1 w-32 text-xs border border-emerald-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-emerald-400 focus:outline-none"
           placeholder="Repeat count..."
+          aria-label="Repeat count"
         />
       )}
-      <Handle type="source" position={Position.Right} />
+      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
     </div>
   );
 }
