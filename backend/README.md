@@ -16,7 +16,7 @@ A simple, easy-to-understand Go workflow execution engine that parses and execut
   - **Text Input Nodes**: Provide text string inputs
   - **Text Operation Nodes**: Transform text (uppercase, lowercase, titlecase, camelcase, inversecase, concat, repeat)
   - **HTTP Nodes**: Execute HTTP GET requests and return response body
-  - **HTTP Pagination Nodes**: Fetch multiple pages from paginated APIs automatically (NEW ✨)
+  - **HTTP Pagination Nodes**: Fetch multiple pages from paginated APIs automatically
   - **Condition Nodes**: Evaluate conditions and pass through values
   - **For Each Nodes**: Iterate over array elements
   - **While Loop Nodes**: Loop while conditions are true
@@ -33,7 +33,7 @@ A simple, easy-to-understand Go workflow execution engine that parses and execut
   - **Cache Nodes**: Get/set cached values with TTL and LRU eviction
 - **State Management**: Variables, accumulators, counters, and cache for stateful workflows
 - **Cycle Detection**: Prevents execution of workflows with circular dependencies
-- **Comprehensive Tests**: 150+ test cases (including sub-tests) covering all functionality
+- **Comprehensive Tests**: 153 test cases (including sub-tests) covering all functionality
   - 40 standard tests
   - 39 control flow tests
   - 17 state/memory tests
@@ -278,15 +278,20 @@ The engine accepts JSON payloads with this structure:
         // HTTP node:
         "url": "https://api.example.com/data",
         
-        // HTTP Pagination node:
+        // HTTP Pagination node (use EITHER max_pages OR total_items+page_size):
         "base_url": "https://api.example.com/items",  // required - URL with optional {page} placeholder
-        "max_pages": 5,                               // option 1: number of pages to fetch
-        // OR
-        "total_items": 50,                            // option 2: total items to fetch
-        "page_size": 10,                              // option 2: items per page
-        "start_page": 1,                              // optional - starting page (default: 1)
-        "page_param": "page",                         // optional - query param name (default: "page")
-        "break_on_error": true,                       // optional - stop on first error (default: true)
+        
+        // Configuration option 1 - Specify exact number of pages:
+        "max_pages": 5,                               // number of pages to fetch
+        
+        // Configuration option 2 - Calculate pages from total items (mutually exclusive with max_pages):
+        "total_items": 50,                            // total items to fetch
+        "page_size": 10,                              // items per page (requires total_items)
+        
+        // Optional settings:
+        "start_page": 1,                              // starting page (default: 1)
+        "page_param": "page",                         // query param name (default: "page")
+        "break_on_error": true,                       // stop on first error (default: true)
         
         // Condition node:
         "condition": ">100",    // >N, <N, >=N, <=N, ==N, !=N, true, false
