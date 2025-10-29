@@ -40,11 +40,10 @@ import {
   TimeoutNode,
 } from "../components/nodes";
 
-type NodeData = Record<string, any>;
+type NodeData = Record<string, unknown>;
 
 // Context Menu Component
 function NodeContextMenu({
-  nodeId,
   x,
   y,
   onClose,
@@ -52,7 +51,6 @@ function NodeContextMenu({
   onDuplicate,
   onDelete,
 }: {
-  nodeId: string;
   x: number;
   y: number;
   onClose: () => void;
@@ -139,9 +137,9 @@ function NumberNode({ id, data }: NodeProps<NodeData>) {
   return (
     <div className="px-3 py-2 bg-gradient-to-br from-gray-700 to-gray-800 text-white shadow-lg rounded-lg border border-gray-600 hover:border-gray-500 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-300">{data?.label || "Number"}</div>
+      <div className="text-xs font-semibold mb-1 text-gray-300">{String(data?.label || "Number")}</div>
       <input
-        value={data?.value ?? 0}
+        value={Number(data?.value ?? 0)}
         type="number"
         onChange={onChange}
         className="w-24 text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
@@ -163,9 +161,9 @@ function OperationNode({ id, data }: NodeProps<NodeData>) {
   return (
     <div className="px-3 py-2 bg-gradient-to-br from-gray-700 to-gray-800 text-white shadow-lg rounded-lg border border-gray-600 hover:border-gray-500 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-300">{data?.label || "Operation"}</div>
+      <div className="text-xs font-semibold mb-1 text-gray-300">{String(data?.label || "Operation")}</div>
       <select
-        value={data?.op ?? "add"}
+        value={String(data?.op ?? "add")}
         onChange={onChange}
         className="w-24 text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
         aria-label="Operation type"
@@ -191,9 +189,9 @@ function VizNode({ id, data }: NodeProps<NodeData>) {
   return (
     <div className="px-3 py-2 bg-gradient-to-br from-gray-700 to-gray-800 text-white shadow-lg rounded-lg border border-gray-600 hover:border-gray-500 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-300">{data?.label || "Visualization"}</div>
+      <div className="text-xs font-semibold mb-1 text-gray-300">{String(data?.label || "Visualization")}</div>
       <select
-        value={data?.mode ?? "text"}
+        value={String(data?.mode ?? "text")}
         onChange={onChange}
         className="w-24 text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none"
         aria-label="Visualization mode"
@@ -378,7 +376,7 @@ function Canvas() {
 
   const [nextId, setNextId] = useState(5);
   
-  const addNode = useCallback((type: string, defaultData: any, label: string) => {
+  const addNode = useCallback((type: string, defaultData: Record<string, unknown>, label: string) => {
     const id = String(nextId);
     setNextId((s) => s + 1);
     const position: XYPosition = project
@@ -395,7 +393,7 @@ function Canvas() {
     const node = nodes.find((n) => n.id === contextMenu.nodeId);
     if (node) {
       setRenamingNode(contextMenu.nodeId);
-      setRenameValue(node.data?.label || "");
+      setRenameValue(String(node.data?.label || ""));
     }
     setContextMenu(null);
   }, [contextMenu, nodes]);
@@ -591,7 +589,6 @@ function Canvas() {
       {/* Context Menu */}
       {contextMenu && (
         <NodeContextMenu
-          nodeId={contextMenu.nodeId}
           x={contextMenu.x}
           y={contextMenu.y}
           onClose={() => setContextMenu(null)}

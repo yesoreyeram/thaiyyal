@@ -21,9 +21,9 @@ export function HttpNode({ id, data }: NodeProps<HttpNodeData>) {
   return (
     <div className="px-3 py-2 bg-gradient-to-br from-purple-700 to-purple-800 text-white shadow-lg rounded-lg border border-purple-600 hover:border-purple-500 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{data?.label || "HTTP Request"}</div>
+      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "HTTP Request")}</div>
       <input
-        value={data?.url ?? ""}
+        value={String(data?.url ?? "")}
         type="text"
         onChange={onChange}
         className="w-36 text-xs border border-purple-600 px-2 py-1 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-400 focus:outline-none"

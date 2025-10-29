@@ -24,9 +24,9 @@ export function ForEachNode({ id, data }: NodeProps<ForEachNodeData>) {
   return (
     <div className="px-3 py-2 bg-gradient-to-br from-amber-700 to-amber-800 text-white shadow-lg rounded-lg border border-amber-600 hover:border-amber-500 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{data?.label || "For Each"}</div>
+      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "For Each")}</div>
       <input
-        value={data?.max_iterations ?? 1000}
+        value={Number(data?.max_iterations ?? 1000)}
         type="number"
         onChange={onChange}
         className="w-24 text-xs border border-amber-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-amber-400 focus:outline-none"
@@ -68,9 +68,9 @@ export function WhileLoopNode({ id, data }: NodeProps<WhileLoopNodeData>) {
   return (
     <div className="px-3 py-2 bg-gradient-to-br from-amber-600 to-amber-700 text-white shadow-lg rounded-lg border border-amber-500 hover:border-amber-400 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{data?.label || "While Loop"}</div>
+      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "While Loop")}</div>
       <input
-        value={data?.condition ?? ">0"}
+        value={String(data?.condition ?? ">0")}
         type="text"
         onChange={onConditionChange}
         className="w-24 text-xs border border-amber-600 px-2 py-1 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-2 focus:ring-amber-400 focus:outline-none"
@@ -78,7 +78,7 @@ export function WhileLoopNode({ id, data }: NodeProps<WhileLoopNodeData>) {
         aria-label="Loop condition"
       />
       <input
-        value={data?.max_iterations ?? 100}
+        value={Number(data?.max_iterations ?? 1000)}
         type="number"
         onChange={onMaxIterChange}
         className="mt-1 w-24 text-xs border border-amber-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-amber-400 focus:outline-none"
@@ -122,16 +122,16 @@ export function VariableNode({ id, data }: NodeProps<VariableNodeData>) {
   return (
     <div className="px-3 py-2 bg-gradient-to-br from-sky-600 to-sky-700 text-white shadow-lg rounded-lg border border-sky-500 hover:border-sky-400 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{data?.label || "Variable"}</div>
+      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Variable")}</div>
       <input
-        value={data?.var_name ?? ""}
+        value={String(data?.var_name ?? "")}
         type="text"
         onChange={onNameChange}
         className="w-24 text-xs border border-sky-600 px-2 py-1 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-2 focus:ring-sky-400 focus:outline-none"
         placeholder="Variable name"
       />
       <select
-        value={data?.var_op ?? "get"}
+        value={String(data?.var_op ?? "get")}
         onChange={onOpChange}
         className="w-24 text-xs border border-sky-600 px-2 py-1 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-2 focus:ring-sky-400 focus:outline-none"
       >
@@ -164,9 +164,9 @@ export function ExtractNode({ id, data }: NodeProps<ExtractNodeData>) {
   return (
     <div className="px-3 py-2 bg-gradient-to-br from-sky-700 to-sky-800 text-white shadow-lg rounded-lg border border-sky-600 hover:border-sky-500 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{data?.label || "Extract"}</div>
+      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Extract")}</div>
       <input
-        value={data?.field ?? ""}
+        value={String(data?.field ?? "")}
         type="text"
         onChange={onChange}
         className="w-28 text-xs border border-sky-600 px-2 py-1 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-2 focus:ring-sky-400 focus:outline-none"
@@ -197,9 +197,9 @@ export function TransformNode({ id, data }: NodeProps<TransformNodeData>) {
   return (
     <div className="px-3 py-2 bg-gradient-to-br from-sky-800 to-sky-900 text-white shadow-lg rounded-lg border border-sky-700 hover:border-sky-600 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{data?.label || "Transform"}</div>
+      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Transform")}</div>
       <select
-        value={data?.transform_type ?? "to_array"}
+        value={String(data?.transform_type ?? "to_array")}
         onChange={onChange}
         className="w-28 text-xs border border-sky-700 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-sky-400 focus:outline-none"
       >
@@ -216,7 +216,7 @@ export function TransformNode({ id, data }: NodeProps<TransformNodeData>) {
 
 type AccumulatorNodeData = {
   accum_op?: string;
-  initial_value?: any;
+  initial_value?: unknown;
   label?: string;
 };
 
@@ -235,9 +235,9 @@ export function AccumulatorNode({ id, data }: NodeProps<AccumulatorNodeData>) {
   return (
     <div className="px-3 py-2 bg-gradient-to-br from-indigo-600 to-indigo-700 text-white shadow-lg rounded-lg border border-indigo-500 hover:border-indigo-400 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{data?.label || "Accumulator"}</div>
+      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Accumulator")}</div>
       <select
-        value={data?.accum_op ?? "sum"}
+        value={String(data?.accum_op ?? "sum")}
         onChange={onChange}
         className="w-24 text-xs border border-indigo-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-indigo-400 focus:outline-none"
       >
@@ -283,9 +283,9 @@ export function CounterNode({ id, data }: NodeProps<CounterNodeData>) {
   return (
     <div className="px-3 py-2 bg-gradient-to-br from-indigo-700 to-indigo-800 text-white shadow-lg rounded-lg border border-indigo-600 hover:border-indigo-500 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{data?.label || "Counter"}</div>
+      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Counter")}</div>
       <select
-        value={data?.counter_op ?? "increment"}
+        value={String(data?.counter_op ?? "increment")}
         onChange={onOpChange}
         className="w-24 text-xs border border-indigo-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
       >
@@ -296,7 +296,7 @@ export function CounterNode({ id, data }: NodeProps<CounterNodeData>) {
       </select>
       {(data?.counter_op === "increment" || data?.counter_op === "decrement") && (
         <input
-          value={data?.delta ?? 1}
+          value={Number(data?.delta ?? 1)}
           type="number"
           onChange={onDeltaChange}
           className="w-24 text-xs border border-indigo-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
@@ -311,7 +311,7 @@ export function CounterNode({ id, data }: NodeProps<CounterNodeData>) {
 // ===== ADVANCED CONTROL FLOW NODES =====
 
 type SwitchNodeData = {
-  cases?: Array<{ when: string; value?: any; output_path?: string }>;
+  cases?: Array<{ when: string; value?: unknown; output_path?: string }>;
   default_path?: string;
   label?: string;
 };
@@ -331,9 +331,9 @@ export function SwitchNode({ id, data }: NodeProps<SwitchNodeData>) {
   return (
     <div className="px-3 py-2 bg-gradient-to-br from-orange-600 to-orange-700 text-white shadow-lg rounded-lg border border-orange-500 hover:border-orange-400 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{data?.label || "Switch"}</div>
+      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Switch")}</div>
       <input
-        value={data?.default_path ?? "default"}
+        value={String(data?.default_path ?? "default")}
         type="text"
         onChange={onDefaultPathChange}
         className="w-24 text-xs border border-orange-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-orange-400 focus:outline-none"
@@ -365,9 +365,9 @@ export function ParallelNode({ id, data }: NodeProps<ParallelNodeData>) {
   return (
     <div className="px-3 py-2 bg-gradient-to-br from-orange-700 to-orange-800 text-white shadow-lg rounded-lg border border-orange-600 hover:border-orange-500 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{data?.label || "Parallel"}</div>
+      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Parallel")}</div>
       <input
-        value={data?.max_concurrency ?? 10}
+        value={Number(data?.max_concurrency ?? 10)}
         type="number"
         onChange={onChange}
         className="w-24 text-xs border border-orange-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
@@ -399,9 +399,9 @@ export function JoinNode({ id, data }: NodeProps<JoinNodeData>) {
   return (
     <div className="px-3 py-2 bg-gradient-to-br from-orange-800 to-orange-900 text-white shadow-lg rounded-lg border border-orange-700 hover:border-orange-600 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{data?.label || "Join"}</div>
+      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Join")}</div>
       <select
-        value={data?.join_strategy ?? "all"}
+        value={String(data?.join_strategy ?? "all")}
         onChange={onChange}
         className="w-24 text-xs border border-orange-700 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-orange-600 focus:outline-none"
       >
@@ -419,13 +419,11 @@ type SplitNodeData = {
   label?: string;
 };
 
-export function SplitNode({ id, data }: NodeProps<SplitNodeData>) {
-  const { setNodes } = useReactFlow();
-
+export function SplitNode({ data }: NodeProps<SplitNodeData>) {
   return (
     <div className="px-3 py-2 bg-gradient-to-br from-pink-600 to-pink-700 text-white shadow-lg rounded-lg border border-pink-500 hover:border-pink-400 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{data?.label || "Split"}</div>
+      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Split")}</div>
       <div className="text-xs mt-1">Paths: {data?.paths?.length ?? 2}</div>
       <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
     </div>
@@ -452,9 +450,9 @@ export function DelayNode({ id, data }: NodeProps<DelayNodeData>) {
   return (
     <div className="px-3 py-2 bg-gradient-to-br from-pink-700 to-pink-800 text-white shadow-lg rounded-lg border border-pink-600 hover:border-pink-500 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{data?.label || "Delay"}</div>
+      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Delay")}</div>
       <input
-        value={data?.duration ?? "1s"}
+        value={String(data?.duration ?? "1s")}
         type="text"
         onChange={onChange}
         className="w-24 text-xs border border-pink-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-pink-500 focus:outline-none"
@@ -505,9 +503,9 @@ export function CacheNode({ id, data }: NodeProps<CacheNodeData>) {
   return (
     <div className="px-3 py-2 bg-gradient-to-br from-pink-800 to-pink-900 text-white shadow-lg rounded-lg border border-pink-700 hover:border-pink-600 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{data?.label || "Cache"}</div>
+      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Cache")}</div>
       <select
-        value={data?.cache_op ?? "get"}
+        value={String(data?.cache_op ?? "get")}
         onChange={onOpChange}
         className="w-24 text-xs border border-pink-700 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-pink-600 focus:outline-none"
       >
@@ -516,7 +514,7 @@ export function CacheNode({ id, data }: NodeProps<CacheNodeData>) {
         <option value="delete">Delete</option>
       </select>
       <input
-        value={data?.cache_key ?? ""}
+        value={String(data?.cache_key ?? "")}
         type="text"
         onChange={onKeyChange}
         className="w-24 text-xs border border-pink-700 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-pink-600 focus:outline-none"
@@ -524,7 +522,7 @@ export function CacheNode({ id, data }: NodeProps<CacheNodeData>) {
       />
       {data?.cache_op === "set" && (
         <input
-          value={data?.ttl ?? "5m"}
+          value={String(data?.ttl ?? "5m")}
           type="text"
           onChange={onTTLChange}
           className="w-24 text-xs border border-pink-700 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-pink-600 focus:outline-none"
@@ -580,16 +578,16 @@ export function RetryNode({ id, data }: NodeProps<RetryNodeData>) {
   return (
     <div className="px-3 py-2 bg-gradient-to-br from-red-600 to-red-700 text-white shadow-lg rounded-lg border border-red-500 hover:border-red-400 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{data?.label || "Retry"}</div>
+      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Retry")}</div>
       <input
-        value={data?.max_attempts ?? 3}
+        value={Number(data?.max_attempts ?? 3)}
         type="number"
         onChange={onAttemptsChange}
         className="w-24 text-xs border border-red-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-red-400 focus:outline-none"
         placeholder="Max attempts"
       />
       <select
-        value={data?.backoff_strategy ?? "exponential"}
+        value={String(data?.backoff_strategy ?? "exponential")}
         onChange={onStrategyChange}
         className="w-24 text-xs border border-red-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-red-400 focus:outline-none"
       >
@@ -598,7 +596,7 @@ export function RetryNode({ id, data }: NodeProps<RetryNodeData>) {
         <option value="constant">Constant</option>
       </select>
       <input
-        value={data?.initial_delay ?? "1s"}
+        value={String(data?.initial_delay ?? "1s")}
         type="text"
         onChange={onInitialDelayChange}
         className="w-24 text-xs border border-red-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-red-400 focus:outline-none"
@@ -610,7 +608,7 @@ export function RetryNode({ id, data }: NodeProps<RetryNodeData>) {
 }
 
 type TryCatchNodeData = {
-  fallback_value?: any;
+  fallback_value?: unknown;
   continue_on_error?: boolean;
   error_output_path?: string;
   label?: string;
@@ -631,7 +629,7 @@ export function TryCatchNode({ id, data }: NodeProps<TryCatchNodeData>) {
   return (
     <div className="px-3 py-2 bg-gradient-to-br from-red-700 to-red-800 text-white shadow-lg rounded-lg border border-red-600 hover:border-red-500 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{data?.label || "Try-Catch"}</div>
+      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Try-Catch")}</div>
       <label className="flex items-center gap-1 mt-1">
         <input
           type="checkbox"
@@ -676,16 +674,16 @@ export function TimeoutNode({ id, data }: NodeProps<TimeoutNodeData>) {
   return (
     <div className="px-3 py-2 bg-gradient-to-br from-red-800 to-red-900 text-white shadow-lg rounded-lg border border-red-700 hover:border-red-600 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{data?.label || "Timeout"}</div>
+      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Timeout")}</div>
       <input
-        value={data?.timeout ?? "30s"}
+        value={String(data?.timeout ?? "30s")}
         type="text"
         onChange={onTimeoutChange}
         className="w-24 text-xs border border-red-700 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-red-600 focus:outline-none"
         placeholder="30s, 5m..."
       />
       <select
-        value={data?.timeout_action ?? "error"}
+        value={String(data?.timeout_action ?? "error")}
         onChange={onActionChange}
         className="w-24 text-xs border border-red-700 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-red-600 focus:outline-none"
       >
