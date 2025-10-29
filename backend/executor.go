@@ -38,9 +38,19 @@ import "fmt"
 //   - interface{}: Result of node execution (type depends on node)
 //   - error: If node type unknown or execution fails
 func (e *Engine) executeNode(node Node) (interface{}, error) {
+	// Interpolate templates in node data before execution (except for context nodes)
+	if node.Type != NodeTypeContextVariable && node.Type != NodeTypeContextConstant {
+		e.interpolateNodeData(&node.Data)
+	}
+
 	// Dispatch to appropriate executor based on node type
 	// This switch implements the Strategy Pattern
 	switch node.Type {
+	// Context nodes (executed first to populate context)
+	case NodeTypeContextVariable:
+		return e.executeContextVariableNode(node)
+	case NodeTypeContextConstant:
+		return e.executeContextConstantNode(node)
 	// Basic I/O nodes
 	case NodeTypeNumber:
 		return e.executeNumberNode(node)
@@ -190,6 +200,13 @@ func inferNodeTypeFromData(data NodeData) NodeType {
 	}
 	if data.CacheOp != nil && data.CacheKey != nil {
 		return NodeTypeCache
+	}
+
+	// Context nodes
+	if data.ContextName != nil && data.ContextValue != nil {
+		// Default to variable, frontend should specify explicitly
+		// This is a best-effort inference
+		return NodeTypeContextVariable
 	}
 
 	// Error handling & resilience nodes

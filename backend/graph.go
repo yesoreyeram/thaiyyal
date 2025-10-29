@@ -42,12 +42,25 @@ func (e *Engine) topologicalSort() ([]string, error) {
 
 	// Find all nodes with no dependencies (in-degree = 0)
 	// These are the starting points for execution
+	// Process in deterministic order (sorted by node ID) for reproducibility
 	queue := []string{}
+	orphanNodes := []string{}
 	for nodeID, degree := range inDegree {
 		if degree == 0 {
-			queue = append(queue, nodeID)
+			orphanNodes = append(orphanNodes, nodeID)
 		}
 	}
+	
+	// Sort orphan nodes by ID to ensure deterministic execution order
+	// This is important for context nodes that need to execute before other nodes
+	for i := 0; i < len(orphanNodes); i++ {
+		for j := i + 1; j < len(orphanNodes); j++ {
+			if orphanNodes[i] > orphanNodes[j] {
+				orphanNodes[i], orphanNodes[j] = orphanNodes[j], orphanNodes[i]
+			}
+		}
+	}
+	queue = append(queue, orphanNodes...)
 
 	// Process nodes in topological order
 	order := []string{}
@@ -110,8 +123,10 @@ func (e *Engine) getNodeInputs(nodeID string) []interface{} {
 
 // getFinalOutput determines the final output of the workflow.
 // The final output is the result of a terminal node (node with no outgoing edges).
+// Context nodes (context_variable, context_constant) are excluded from being final output
+// unless they are the ONLY nodes in the workflow.
 //
-// If multiple terminal nodes exist, returns the first one found.
+// If multiple terminal nodes exist, returns the first non-context one found.
 // If no terminal nodes exist (all nodes have outgoing edges), returns nil.
 //
 // Returns:
@@ -130,7 +145,20 @@ func (e *Engine) getFinalOutput() interface{} {
 		terminalNodes[edge.Source] = false
 	}
 
-	// Return result from the first terminal node found
+	// First pass: Try to find a non-context terminal node
+	for nodeID, isTerminal := range terminalNodes {
+		if isTerminal {
+			node := e.getNode(nodeID)
+			if node.Type != NodeTypeContextVariable && node.Type != NodeTypeContextConstant {
+				if result, ok := e.nodeResults[nodeID]; ok {
+					return result
+				}
+			}
+		}
+	}
+	
+	// Second pass: If no non-context terminal found, return any terminal (including context)
+	// This handles the case where workflow contains only context nodes
 	for nodeID, isTerminal := range terminalNodes {
 		if isTerminal {
 			if result, ok := e.nodeResults[nodeID]; ok {
