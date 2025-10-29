@@ -78,7 +78,7 @@ export function WhileLoopNode({ id, data }: NodeProps<WhileLoopNodeData>) {
         aria-label="Loop condition"
       />
       <input
-        value={Number(data?.max_iterations ?? 1000)}
+        value={Number(data?.max_iterations ?? 100)}
         type="number"
         onChange={onMaxIterChange}
         className="mt-1 w-24 text-xs border border-amber-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-amber-400 focus:outline-none"
