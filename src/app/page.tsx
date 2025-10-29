@@ -38,6 +38,8 @@ import {
   RetryNode,
   TryCatchNode,
   TimeoutNode,
+  ContextVariableNode,
+  ContextConstantNode,
 } from "../components/nodes";
 
 type NodeData = Record<string, unknown>;
@@ -304,6 +306,14 @@ const nodeCategories = [
       { type: "delayNode", label: "Delay", icon: "⏸️", defaultData: { duration: "1s" } },
     ],
   },
+  {
+    name: "Context",
+    icon: "🎯",
+    nodes: [
+      { type: "contextVariableNode", label: "Variable", icon: "📦", defaultData: { context_name: "", context_value: "" } },
+      { type: "contextConstantNode", label: "Constant", icon: "🔒", defaultData: { context_name: "", context_value: "" } },
+    ],
+  },
 ];
 
 function Canvas() {
@@ -370,6 +380,8 @@ function Canvas() {
       retryNode: createCompactNode(RetryNode, showContextMenu),
       tryCatchNode: createCompactNode(TryCatchNode, showContextMenu),
       timeoutNode: createCompactNode(TimeoutNode, showContextMenu),
+      contextVariableNode: createCompactNode(ContextVariableNode, showContextMenu),
+      contextConstantNode: createCompactNode(ContextConstantNode, showContextMenu),
     }),
     [showContextMenu]
   );

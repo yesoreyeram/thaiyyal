@@ -3,6 +3,8 @@ export { TextInputNode } from './TextInputNode';
 export { TextOperationNode } from './TextOperationNode';
 export { HttpNode } from './HttpNode';
 export { ConditionNode } from './ConditionNode';
+export { ContextVariableNode } from './ContextVariableNode';
+export { ContextConstantNode } from './ContextConstantNode';
 
 // Export from AllNodes
 export {
