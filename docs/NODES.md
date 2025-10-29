@@ -23,6 +23,11 @@ This document provides a comprehensive reference of all node types in the Thaiyy
 | **Condition** | Conditional branching/validation | 1 `any` | `object` with value and condition_met | `{"type": "condition", "data": {"condition": ">100"}}` | ✅ |
 | **For Each** | Iterate over array elements | 1 `array` | `object` with iteration metadata | `{"type": "for_each", "data": {"max_iterations": 1000}}` | ✅ |
 | **While Loop** | Loop while condition is true | 1 `any` | `object` with final value and iterations | `{"type": "while_loop", "data": {"condition": "<10", "max_iterations": 100}}` | ✅ |
+| **Variable** | Store/retrieve values across workflow | 1 `any` (for set) / None (for get) | `object` with var_name, operation, value | `{"data": {"var_name": "x", "var_op": "set"}}` | ✅ |
+| **Extract** | Extract fields from objects | 1 `object` | `object` with extracted fields | `{"type": "extract", "data": {"field": "name"}}` | ✅ |
+| **Transform** | Transform data structures | 1 `any` | Varies by transform type | `{"type": "transform", "data": {"transform_type": "to_array"}}` | ✅ |
+| **Accumulator** | Accumulate values over time | 1 `any` | `object` with operation and accumulated value | `{"type": "accumulator", "data": {"accum_op": "sum"}}` | ✅ |
+| **Counter** | Increment/decrement/reset counter | None | `object` with operation and counter value | `{"type": "counter", "data": {"counter_op": "increment"}}` | ✅ |
 
 ### Text Operations (Sub-types)
 
@@ -56,6 +61,165 @@ This document provides a comprehensive reference of all node types in the Thaiyy
 - **Output**: Returns `{"final_value": any, "iterations": int, "condition": string}`
 - **Use Cases**: Retry logic, iterative processing, threshold monitoring
 - **Note**: Current implementation tracks iterations but doesn't modify values in loop
+
+### State & Memory Node Details
+
+#### Variable Node
+- **Purpose**: Store and retrieve values across the workflow execution
+- **Operations**:
+  - `set`: Store a value with a given name
+  - `get`: Retrieve a previously stored value
+- **Configuration**: 
+  - `var_name`: Name of the variable (required)
+  - `var_op`: Operation to perform - "set" or "get" (required)
+- **Output**: Returns `{"var_name": string, "operation": string, "value": any}`
+- **Use Cases**: 
+  - Store intermediate calculation results
+  - Share data between disconnected parts of workflow
+  - Cache values for reuse
+- **Example**:
+  ```json
+  {
+    "nodes": [
+      {"id": "1", "data": {"value": 42}},
+      {"id": "2", "data": {"var_name": "result", "var_op": "set"}},
+      {"id": "3", "data": {"var_name": "result", "var_op": "get"}}
+    ],
+    "edges": [
+      {"source": "1", "target": "2"},
+      {"source": "2", "target": "3"}
+    ]
+  }
+  ```
+
+#### Extract Node
+- **Purpose**: Extract specific fields from objects
+- **Configuration**:
+  - `field`: Extract single field (string)
+  - `fields`: Extract multiple fields (array of strings)
+- **Input**: Object/map
+- **Output**: 
+  - Single field: `{"field": string, "value": any}`
+  - Multiple fields: Object with requested fields
+- **Use Cases**:
+  - Extract specific metrics from API responses
+  - Filter object properties
+  - Destructure complex data
+- **Example**:
+  ```json
+  {
+    "nodes": [
+      {"id": "1", "type": "variable", "data": {"var_name": "user", "var_op": "get"}},
+      {"id": "2", "type": "extract", "data": {"fields": ["name", "email"]}}
+    ],
+    "edges": [{"source": "1", "target": "2"}]
+  }
+  ```
+
+#### Transform Node
+- **Purpose**: Transform data structures between different formats
+- **Transform Types**:
+  - `to_array`: Convert inputs to array
+  - `to_object`: Convert array of key-value pairs to object
+  - `flatten`: Flatten nested arrays
+  - `keys`: Extract keys from object
+  - `values`: Extract values from object
+- **Configuration**: `transform_type` (required)
+- **Use Cases**:
+  - Prepare data for different node types
+  - Restructure API responses
+  - Aggregate multiple inputs
+- **Examples**:
+  ```json
+  // to_array: Collect multiple inputs
+  {
+    "nodes": [
+      {"id": "1", "data": {"value": 10}},
+      {"id": "2", "data": {"value": 20}},
+      {"id": "3", "type": "transform", "data": {"transform_type": "to_array"}}
+    ],
+    "edges": [
+      {"source": "1", "target": "3"},
+      {"source": "2", "target": "3"}
+    ]
+  }
+  
+  // keys: Extract object keys
+  {
+    "nodes": [
+      {"id": "1", "type": "variable", "data": {"var_name": "metrics", "var_op": "get"}},
+      {"id": "2", "type": "transform", "data": {"transform_type": "keys"}}
+    ],
+    "edges": [{"source": "1", "target": "2"}]
+  }
+  ```
+
+#### Accumulator Node
+- **Purpose**: Accumulate values across multiple node executions
+- **Operations**:
+  - `sum`: Sum numeric values
+  - `product`: Multiply numeric values
+  - `concat`: Concatenate strings
+  - `array`: Collect values into array
+  - `count`: Count number of values
+- **Configuration**:
+  - `accum_op`: Operation to perform (required)
+  - `initial_value`: Starting value (optional)
+- **Output**: Returns `{"operation": string, "value": any}`
+- **Use Cases**:
+  - Calculate running totals
+  - Build result arrays
+  - Count processed items
+  - Concatenate log messages
+- **Example**:
+  ```json
+  {
+    "nodes": [
+      {"id": "1", "data": {"value": 10}},
+      {"id": "2", "type": "accumulator", "data": {"accum_op": "sum"}},
+      {"id": "3", "data": {"value": 20}},
+      {"id": "4", "type": "accumulator", "data": {"accum_op": "sum"}}
+    ],
+    "edges": [
+      {"source": "1", "target": "2"},
+      {"source": "2", "target": "3"},
+      {"source": "3", "target": "4"}
+    ]
+  }
+  // Result: {"operation": "sum", "value": 30}
+  ```
+
+#### Counter Node
+- **Purpose**: Simple counter with increment/decrement/reset operations
+- **Operations**:
+  - `increment`: Increase counter (default delta: 1)
+  - `decrement`: Decrease counter (default delta: 1)
+  - `reset`: Reset to initial value (default: 0)
+  - `get`: Get current counter value
+- **Configuration**:
+  - `counter_op`: Operation to perform (required)
+  - `delta`: Amount to increment/decrement (optional, default: 1)
+  - `initial_value`: Value for reset operation (optional, default: 0)
+- **Output**: Returns `{"operation": string, "value": number}`
+- **Use Cases**:
+  - Track number of iterations
+  - Count events or occurrences
+  - Generate sequence numbers
+- **Example**:
+  ```json
+  {
+    "nodes": [
+      {"id": "1", "type": "counter", "data": {"counter_op": "increment"}},
+      {"id": "2", "type": "counter", "data": {"counter_op": "increment"}},
+      {"id": "3", "type": "counter", "data": {"counter_op": "get"}}
+    ],
+    "edges": [
+      {"source": "1", "target": "2"},
+      {"source": "2", "target": "3"}
+    ]
+  }
+  // Result: {"operation": "get", "value": 2}
+  ```
 
 ---
 
@@ -127,10 +291,13 @@ This document provides a comprehensive reference of all node types in the Thaiyy
 
 | Node Type | Description | Inputs | Outputs | Example Config | Priority | Status |
 |-----------|-------------|--------|---------|----------------|----------|--------|
+| **Variable** | Store/retrieve values | Value (for set) / None (for get) | Object with var_name and value | `{"var_name": "x", "var_op": "set"}` | High | ✅ |
+| **Extract** | Extract fields from objects | Object | Object with extracted fields | `{"field": "name"}` or `{"fields": ["name", "age"]}` | High | ✅ |
+| **Transform** | Transform data structures | Any | Varies by type | `{"transform_type": "to_array"}` | High | ✅ |
+| **Accumulator** | Accumulate values | Values | Accumulated result | `{"accum_op": "sum"}` | High | ✅ |
+| **Counter** | Increment/decrement counter | None | Current count | `{"counter_op": "increment", "delta": 1}` | High | ✅ |
 | **Cache Get** | Retrieve from cache | Key | Cached value or null | `{"key": "last_value", "ttl": "5m"}` | Medium | 📋 |
 | **Cache Set** | Store in cache | Value | Success status | `{"key": "last_value", "ttl": "5m"}` | Medium | 📋 |
-| **Counter** | Increment counter | Optional delta | Current count | `{"name": "requests", "reset": "daily"}` | Low | 📋 |
-| **Accumulator** | Accumulate values | Values | Accumulated result | `{"operation": "sum", "reset_on": "hour"}` | Medium | 📋 |
 
 ---
 

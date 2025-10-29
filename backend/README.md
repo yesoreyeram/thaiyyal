@@ -4,23 +4,32 @@ A simple, easy-to-understand Go workflow execution engine that parses and execut
 
 ## Features
 
-- **Simple & Readable**: Single file implementation (~700 lines)
+- **Simple & Readable**: Single file implementation (~1100 lines)
 - **Easy to Understand**: Straightforward code flow without complex patterns
 - **JSON Payload Parsing**: Accepts workflow definitions as JSON
 - **DAG Execution**: Uses topological sorting to execute nodes in correct order
 - **Type Inference**: Automatically determines node types from data
-- **Node Types**:
+- **Node Types** (14 types):
   - **Number Nodes**: Provide numeric input values
   - **Operation Nodes**: Perform arithmetic (add, subtract, multiply, divide)
   - **Visualization Nodes**: Format output for display (text, table)
   - **Text Input Nodes**: Provide text string inputs
   - **Text Operation Nodes**: Transform text (uppercase, lowercase, titlecase, camelcase, inversecase, concat, repeat)
   - **HTTP Nodes**: Execute HTTP GET requests and return response body
-  - **Condition Nodes**: Evaluate conditions and pass through values (NEW ✨)
-  - **For Each Nodes**: Iterate over array elements (NEW ✨)
-  - **While Loop Nodes**: Loop while conditions are true (NEW ✨)
+  - **Condition Nodes**: Evaluate conditions and pass through values
+  - **For Each Nodes**: Iterate over array elements
+  - **While Loop Nodes**: Loop while conditions are true
+  - **Variable Nodes**: Store and retrieve values across workflow (NEW ✨)
+  - **Extract Nodes**: Extract fields from objects (NEW ✨)
+  - **Transform Nodes**: Transform data structures (to_array, to_object, flatten, keys, values) (NEW ✨)
+  - **Accumulator Nodes**: Accumulate values over time (sum, product, concat, array, count) (NEW ✨)
+  - **Counter Nodes**: Simple counter with increment/decrement/reset (NEW ✨)
+- **State Management**: Variables, accumulators, and counters for stateful workflows
 - **Cycle Detection**: Prevents execution of workflows with circular dependencies
-- **Comprehensive Tests**: 79 test cases covering all functionality including 39 control flow tests
+- **Comprehensive Tests**: 96 test cases covering all functionality
+  - 40 standard tests
+  - 39 control flow tests
+  - 17 state/memory tests
 
 ## Quick Start
 
@@ -74,9 +83,10 @@ go run main.go
 
 ```
 backend/
-├── workflow.go                    # Main workflow engine (single file, ~700 lines)
+├── workflow.go                    # Main workflow engine (single file, ~1100 lines)
 ├── workflow_test.go              # Standard tests (40 tests)
 ├── workflow_controlflow_test.go  # Control flow tests (39 tests)
+├── workflow_state_test.go        # State/memory tests (17 tests)
 ├── examples/
 │   ├── main.go                   # Example usage
 │   └── looping_poc.go           # Looping patterns POC
@@ -233,6 +243,27 @@ The engine accepts JSON payloads with this structure:
         "condition": "<10",     // required
         "max_iterations": 100,  // optional, default: 100
         
+        // Variable node:
+        "var_name": "myvar",    // required - name of the variable
+        "var_op": "set",        // required - "set" or "get"
+        
+        // Extract node:
+        "field": "name",        // extract single field
+        // OR
+        "fields": ["name", "email"],  // extract multiple fields
+        
+        // Transform node:
+        "transform_type": "to_array",  // required - to_array, to_object, flatten, keys, values
+        
+        // Accumulator node:
+        "accum_op": "sum",      // required - sum, product, concat, array, count
+        "initial_value": 0,     // optional - starting value
+        
+        // Counter node:
+        "counter_op": "increment",  // required - increment, decrement, reset, get
+        "delta": 1,             // optional - amount to increment/decrement
+        "initial_value": 0,     // optional - reset value
+        
         "label": "My Node"      // optional label for all nodes
       }
     }
@@ -245,6 +276,81 @@ The engine accepts JSON payloads with this structure:
     }
   ]
 }
+```
+
+### State & Memory Node Usage Examples
+
+#### Variable Node Example
+```json
+{
+  "nodes": [
+    {"id": "1", "data": {"value": 100}},
+    {"id": "2", "data": {"var_name": "result", "var_op": "set"}},
+    {"id": "3", "data": {"var_name": "result", "var_op": "get"}},
+    {"id": "4", "type": "extract", "data": {"field": "value"}}
+  ],
+  "edges": [
+    {"source": "1", "target": "2"},
+    {"source": "2", "target": "3"},
+    {"source": "3", "target": "4"}
+  ]
+}
+```
+
+#### Accumulator Example
+```json
+{
+  "nodes": [
+    {"id": "1", "data": {"value": 10}},
+    {"id": "2", "type": "accumulator", "data": {"accum_op": "sum"}},
+    {"id": "3", "data": {"value": 20}},
+    {"id": "4", "type": "accumulator", "data": {"accum_op": "sum"}},
+    {"id": "5", "data": {"value": 30}},
+    {"id": "6", "type": "accumulator", "data": {"accum_op": "sum"}}
+  ],
+  "edges": [
+    {"source": "1", "target": "2"},
+    {"source": "2", "target": "3"},
+    {"source": "3", "target": "4"},
+    {"source": "4", "target": "5"},
+    {"source": "5", "target": "6"}
+  ]
+}
+// Result: {"operation": "sum", "value": 60}
+```
+
+#### Counter Example
+```json
+{
+  "nodes": [
+    {"id": "1", "type": "counter", "data": {"counter_op": "increment", "delta": 5}},
+    {"id": "2", "type": "counter", "data": {"counter_op": "increment"}},
+    {"id": "3", "type": "counter", "data": {"counter_op": "get"}}
+  ],
+  "edges": [
+    {"source": "1", "target": "2"},
+    {"source": "2", "target": "3"}
+  ]
+}
+// Result: {"operation": "get", "value": 6}
+```
+
+#### Transform Example
+```json
+{
+  "nodes": [
+    {"id": "1", "data": {"value": 10}},
+    {"id": "2", "data": {"value": 20}},
+    {"id": "3", "data": {"value": 30}},
+    {"id": "4", "type": "transform", "data": {"transform_type": "to_array"}}
+  ],
+  "edges": [
+    {"source": "1", "target": "4"},
+    {"source": "2", "target": "4"},
+    {"source": "3", "target": "4"}
+  ]
+}
+// Result: [10, 20, 30]
 ```
 
 ## How It Works
@@ -262,6 +368,11 @@ The engine accepts JSON payloads with this structure:
    - **Condition nodes**: Evaluate conditions and pass through values
    - **For Each nodes**: Process array elements
    - **While Loop nodes**: Loop while condition is true
+   - **Variable nodes**: Store or retrieve values from workflow state
+   - **Extract nodes**: Extract specific fields from object inputs
+   - **Transform nodes**: Transform data structures (arrays, objects, etc.)
+   - **Accumulator nodes**: Accumulate values across multiple executions
+   - **Counter nodes**: Maintain a counter with increment/decrement operations
 5. **Return Results**: Collect all node results and determine final output
 
 ## Testing
