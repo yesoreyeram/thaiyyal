@@ -26,6 +26,7 @@ export function NodePalette({ isOpen, onClose, categories, onAddNode }: NodePale
     new Set(categories.map(c => c.name))
   );
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const paletteRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -34,14 +35,22 @@ export function NodePalette({ isOpen, onClose, categories, onAddNode }: NodePale
       }
     };
 
+    const handleClickOutside = (e: MouseEvent) => {
+      if (isOpen && paletteRef.current && !paletteRef.current.contains(e.target as Node)) {
+        onClose();
+      }
+    };
+
     if (isOpen) {
       document.addEventListener("keydown", handleEscape);
+      document.addEventListener("mousedown", handleClickOutside);
       // Focus search input when palette opens
       setTimeout(() => searchInputRef.current?.focus(), 100);
     }
 
     return () => {
       document.removeEventListener("keydown", handleEscape);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen, onClose]);
 
@@ -74,7 +83,7 @@ export function NodePalette({ isOpen, onClose, categories, onAddNode }: NodePale
   if (!isOpen) return null;
 
   return (
-    <div className="absolute left-4 bottom-12 z-10 bg-gray-900 border border-gray-700 rounded-lg shadow-2xl max-h-[calc(100vh-200px)] overflow-hidden w-64 flex flex-col">
+    <div ref={paletteRef} className="absolute left-4 bottom-12 z-10 bg-gray-900 border border-gray-700 rounded-lg shadow-2xl max-h-[calc(100vh-200px)] overflow-hidden w-64 flex flex-col">
       {/* Header with Search */}
       <div className="sticky top-0 bg-gray-900 border-b border-gray-700 p-3">
         <div className="flex items-center justify-between mb-2">

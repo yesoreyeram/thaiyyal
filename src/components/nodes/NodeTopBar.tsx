@@ -65,7 +65,7 @@ export function NodeTopBar({ title, onInfo, onOptions, onTitleChange, compact = 
   };
 
   return (
-    <div className="flex items-center justify-between gap-1 mb-1.5 pb-1.5 border-b border-white/10 bg-black/20 -mx-3 -mt-2 px-2 pt-1.5 rounded-t-lg">
+    <div className="flex items-center justify-between gap-1 mb-1 pb-1 border-b border-white/10 bg-black/20 -mx-3 -mt-2 px-2 pt-1 rounded-t-lg">
       {isEditing ? (
         <input
           ref={inputRef}

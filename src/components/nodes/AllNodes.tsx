@@ -175,18 +175,18 @@ export function VariableNode({ id, data, ...props }: NodeProps<VariableNodeData>
       className="bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all"
     >
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="flex flex-col gap-1">
+      <div className="flex items-center gap-1">
         <input
           value={String(data?.var_name ?? "")}
           type="text"
           onChange={onNameChange}
-          className="w-24 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-1 focus:ring-blue-400 focus:outline-none"
-          placeholder="Variable name"
+          className="w-20 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-1 focus:ring-blue-400 focus:outline-none"
+          placeholder="Name"
         />
         <select
           value={String(data?.var_op ?? "get")}
           onChange={onOpChange}
-          className="w-24 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-1 focus:ring-blue-400 focus:outline-none"
+          className="w-16 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-1 focus:ring-blue-400 focus:outline-none"
         >
           <option value="get">Get</option>
           <option value="set">Set</option>

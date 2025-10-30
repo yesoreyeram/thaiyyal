@@ -76,11 +76,12 @@ export function NodeResizeHandle({
   return (
     <div
       onMouseDown={handleMouseDown}
-      className={`absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize group ${
+      className={`nodrag absolute bottom-0 right-0 w-4 h-4 cursor-nwse-resize group ${
         isDragging ? 'z-50' : 'z-10'
       }`}
       aria-label="Resize node"
       title="Drag to resize"
+      style={{ pointerEvents: 'all' }}
     >
       <div className="absolute bottom-0.5 right-0.5 w-3 h-3 opacity-40 group-hover:opacity-70 transition-opacity">
         <svg
