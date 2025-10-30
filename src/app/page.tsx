@@ -41,6 +41,8 @@ import {
   ContextVariableNode,
   ContextConstantNode,
   DeleteConfirmDialog,
+  NodeWrapper,
+  getNodeInfo,
 } from "../components/nodes";
 
 type NodeData = Record<string, unknown>;
@@ -131,7 +133,7 @@ function createCompactNode(
 }
 
 // Original three node components with dark theme
-function NumberNode({ id, data }: NodeProps<NodeData>) {
+function NumberNode({ id, data, ...props }: NodeProps<NodeData>) {
   const { setNodes } = useReactFlow();
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = Number(e.target.value);
@@ -141,10 +143,18 @@ function NumberNode({ id, data }: NodeProps<NodeData>) {
       )
     );
   };
+
+  const nodeInfo = getNodeInfo("numberNode");
+  const onShowOptions = (props as any).onShowOptions;
+
   return (
-    <div className="px-3 py-2 bg-gradient-to-br from-gray-700 to-gray-800 text-white shadow-lg rounded-lg border border-gray-600 hover:border-gray-500 transition-all">
+    <NodeWrapper
+      title={String(data?.label || "Number")}
+      nodeInfo={nodeInfo}
+      onShowOptions={onShowOptions}
+      className="bg-gradient-to-br from-gray-700 to-gray-800 text-white shadow-lg rounded-lg border border-gray-600 hover:border-gray-500 transition-all"
+    >
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-300">{String(data?.label || "Number")}</div>
       <input
         value={Number(data?.value ?? 0)}
         type="number"
@@ -153,11 +163,11 @@ function NumberNode({ id, data }: NodeProps<NodeData>) {
         aria-label="Number value"
       />
       <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
-    </div>
+    </NodeWrapper>
   );
 }
 
-function OperationNode({ id, data }: NodeProps<NodeData>) {
+function OperationNode({ id, data, ...props }: NodeProps<NodeData>) {
   const { setNodes } = useReactFlow();
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const op = e.target.value;
@@ -165,10 +175,18 @@ function OperationNode({ id, data }: NodeProps<NodeData>) {
       nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, op } } : n))
     );
   };
+
+  const nodeInfo = getNodeInfo("opNode");
+  const onShowOptions = (props as any).onShowOptions;
+
   return (
-    <div className="px-3 py-2 bg-gradient-to-br from-gray-700 to-gray-800 text-white shadow-lg rounded-lg border border-gray-600 hover:border-gray-500 transition-all">
+    <NodeWrapper
+      title={String(data?.label || "Operation")}
+      nodeInfo={nodeInfo}
+      onShowOptions={onShowOptions}
+      className="bg-gradient-to-br from-gray-700 to-gray-800 text-white shadow-lg rounded-lg border border-gray-600 hover:border-gray-500 transition-all"
+    >
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-300">{String(data?.label || "Operation")}</div>
       <select
         value={String(data?.op ?? "add")}
         onChange={onChange}
@@ -181,11 +199,11 @@ function OperationNode({ id, data }: NodeProps<NodeData>) {
         <option value="divide">Divide</option>
       </select>
       <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
-    </div>
+    </NodeWrapper>
   );
 }
 
-function VizNode({ id, data }: NodeProps<NodeData>) {
+function VizNode({ id, data, ...props }: NodeProps<NodeData>) {
   const { setNodes } = useReactFlow();
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const mode = e.target.value;
@@ -193,10 +211,18 @@ function VizNode({ id, data }: NodeProps<NodeData>) {
       nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, mode } } : n))
     );
   };
+
+  const nodeInfo = getNodeInfo("vizNode");
+  const onShowOptions = (props as any).onShowOptions;
+
   return (
-    <div className="px-3 py-2 bg-gradient-to-br from-gray-700 to-gray-800 text-white shadow-lg rounded-lg border border-gray-600 hover:border-gray-500 transition-all">
+    <NodeWrapper
+      title={String(data?.label || "Visualization")}
+      nodeInfo={nodeInfo}
+      onShowOptions={onShowOptions}
+      className="bg-gradient-to-br from-gray-700 to-gray-800 text-white shadow-lg rounded-lg border border-gray-600 hover:border-gray-500 transition-all"
+    >
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-300">{String(data?.label || "Visualization")}</div>
       <select
         value={String(data?.mode ?? "text")}
         onChange={onChange}
@@ -207,7 +233,7 @@ function VizNode({ id, data }: NodeProps<NodeData>) {
         <option value="table">Table</option>
       </select>
       <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
-    </div>
+    </NodeWrapper>
   );
 }
 
