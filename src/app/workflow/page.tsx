@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState, useEffect } from "react";
 import ReactFlow, {
   addEdge,
   Background,
@@ -37,12 +37,35 @@ import {
   RetryNode,
   TryCatchNode,
   TimeoutNode,
+  NodeContextMenu,
+  DeleteConfirmDialog,
 } from "../../components/nodes";
+import { AppNavBar } from "../../components/AppNavBar";
+import { WorkflowNavBar } from "../../components/WorkflowNavBar";
+import { WorkflowStatusBar } from "../../components/WorkflowStatusBar";
+import { NodePalette } from "../../components/NodePalette";
+import { JSONPayloadModal } from "../../components/JSONPayloadModal";
+import { useRouter } from "next/navigation";
 
 type NodeData = Record<string, unknown>;
 
-// Original three node components
-function NumberNode({ id, data }: NodeProps<NodeData>) {
+// Extended props to include onShowOptions
+type NodePropsWithOptions = NodeProps<NodeData> & {
+  onShowOptions?: (x: number, y: number) => void;
+};
+
+// Higher-order component to add context menu to nodes
+const withContextMenu = (Component: React.ComponentType<NodePropsWithOptions>, handleContextMenu: (nodeId: string, x: number, y: number) => void) => {
+  return (props: NodeProps<NodeData>) => {
+    const onShowOptions = (x: number, y: number) => {
+      handleContextMenu(props.id, x, y);
+    };
+    return <Component {...(props as NodePropsWithOptions)} onShowOptions={onShowOptions} />;
+  };
+};
+
+// Original three node components - Updated to use NodeWrapper
+function NumberNode({ id, data, onShowOptions, ...props }: NodePropsWithOptions) {
   const { setNodes } = useReactFlow();
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = Number(e.target.value);
@@ -52,22 +75,40 @@ function NumberNode({ id, data }: NodeProps<NodeData>) {
       )
     );
   };
+
+  const handleTitleChange = (newTitle: string) => {
+    setNodes((nds) =>
+      nds.map((n) =>
+        n.id === id ? { ...n, data: { ...n.data, label: newTitle } } : n
+      )
+    );
+  };
+
+  // Import NodeWrapper at top
+  const { NodeWrapper, getNodeInfo } = require("../../components/nodes");
+  const nodeInfo = getNodeInfo("numberNode");
+
   return (
-    <div className="p-2 bg-gray-700 text-white shadow rounded border border-gray-600">
-      <Handle type="target" position={Position.Left} />
-      <div className="text-xs font-medium">Number</div>
+    <NodeWrapper
+      title={String(data?.label || "Number")}
+      nodeInfo={nodeInfo}
+      onShowOptions={onShowOptions}
+      onTitleChange={handleTitleChange}
+      className="bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all"
+    >
+      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <input
         value={typeof data?.value === "number" ? data.value : 0}
         type="number"
         onChange={onChange}
-        className="mt-1 w-32 border px-2 py-1 rounded bg-gray-800 text-white border-gray-600"
+        className="w-24 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
       />
-      <Handle type="source" position={Position.Right} />
-    </div>
+      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+    </NodeWrapper>
   );
 }
 
-function OperationNode({ id, data }: NodeProps<NodeData>) {
+function OperationNode({ id, data, onShowOptions, ...props }: NodePropsWithOptions) {
   const { setNodes } = useReactFlow();
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const op = e.target.value;
@@ -75,26 +116,43 @@ function OperationNode({ id, data }: NodeProps<NodeData>) {
       nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, op } } : n))
     );
   };
+
+  const handleTitleChange = (newTitle: string) => {
+    setNodes((nds) =>
+      nds.map((n) =>
+        n.id === id ? { ...n, data: { ...n.data, label: newTitle } } : n
+      )
+    );
+  };
+
+  const { NodeWrapper, getNodeInfo } = require("../../components/nodes");
+  const nodeInfo = getNodeInfo("opNode");
+
   return (
-    <div className="p-2 bg-gray-700 text-white shadow rounded border border-gray-600">
-      <Handle type="target" position={Position.Left} />
-      <div className="text-xs font-medium">Operation</div>
+    <NodeWrapper
+      title={String(data?.label || "Operation")}
+      nodeInfo={nodeInfo}
+      onShowOptions={onShowOptions}
+      onTitleChange={handleTitleChange}
+      className="bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all"
+    >
+      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <select
         value={typeof data?.op === "string" ? data.op : "add"}
         onChange={onChange}
-        className="mt-1 w-32 border px-2 py-1 rounded bg-gray-800 text-white border-gray-600"
+        className="w-24 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
       >
         <option value="add">Add</option>
         <option value="subtract">Subtract</option>
         <option value="multiply">Multiply</option>
         <option value="divide">Divide</option>
       </select>
-      <Handle type="source" position={Position.Right} />
-    </div>
+      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+    </NodeWrapper>
   );
 }
 
-function VizNode({ id, data }: NodeProps<NodeData>) {
+function VizNode({ id, data, onShowOptions, ...props }: NodePropsWithOptions) {
   const { setNodes } = useReactFlow();
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const mode = e.target.value;
@@ -102,20 +160,37 @@ function VizNode({ id, data }: NodeProps<NodeData>) {
       nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, mode } } : n))
     );
   };
+
+  const handleTitleChange = (newTitle: string) => {
+    setNodes((nds) =>
+      nds.map((n) =>
+        n.id === id ? { ...n, data: { ...n.data, label: newTitle } } : n
+      )
+    );
+  };
+
+  const { NodeWrapper, getNodeInfo } = require("../../components/nodes");
+  const nodeInfo = getNodeInfo("vizNode");
+
   return (
-    <div className="p-2 bg-gray-700 text-white shadow rounded border border-gray-600">
-      <Handle type="target" position={Position.Left} />
-      <div className="text-xs font-medium">Visualization</div>
+    <NodeWrapper
+      title={String(data?.label || "Visualization")}
+      nodeInfo={nodeInfo}
+      onShowOptions={onShowOptions}
+      onTitleChange={handleTitleChange}
+      className="bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all"
+    >
+      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <select
         value={typeof data?.mode === "string" ? data.mode : "text"}
         onChange={onChange}
-        className="mt-1 w-32 border px-2 py-1 rounded bg-gray-800 text-white border-gray-600"
+        className="w-24 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
       >
         <option value="text">Text</option>
         <option value="table">Table</option>
       </select>
-      <Handle type="source" position={Position.Right} />
-    </div>
+      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+    </NodeWrapper>
   );
 }
 
@@ -334,16 +409,24 @@ const nodeCategories = [
 ];
 
 function Canvas() {
+  const router = useRouter();
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [showPayload, setShowPayload] = useState(false);
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
-  const { project } = useReactFlow();
+  const [workflowTitle, setWorkflowTitle] = useState("Untitled Workflow");
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; nodeId: string } | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ nodeId: string; nodeName: string } | null>(null);
+  const { project, getNodes } = useReactFlow();
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds: RFEdge[]) => addEdge(params, eds)),
     [setEdges]
   );
+
+  const handleNodeContextMenu = useCallback((nodeId: string, x: number, y: number) => {
+    setContextMenu({ x, y, nodeId });
+  }, []);
 
   const payload = useMemo(
     () => ({
@@ -359,147 +442,167 @@ function Canvas() {
 
   const nodeTypes = useMemo(
     () => ({
-      numberNode: NumberNode,
-      opNode: OperationNode,
-      vizNode: VizNode,
-      textInputNode: TextInputNode,
-      textOpNode: TextOperationNode,
-      httpNode: HttpNode,
-      conditionNode: ConditionNode,
-      forEachNode: ForEachNode,
-      whileLoopNode: WhileLoopNode,
-      variableNode: VariableNode,
-      extractNode: ExtractNode,
-      transformNode: TransformNode,
-      accumulatorNode: AccumulatorNode,
-      counterNode: CounterNode,
-      switchNode: SwitchNode,
-      parallelNode: ParallelNode,
-      joinNode: JoinNode,
-      splitNode: SplitNode,
-      delayNode: DelayNode,
-      cacheNode: CacheNode,
-      retryNode: RetryNode,
-      tryCatchNode: TryCatchNode,
-      timeoutNode: TimeoutNode,
+      numberNode: withContextMenu(NumberNode, handleNodeContextMenu),
+      opNode: withContextMenu(OperationNode, handleNodeContextMenu),
+      vizNode: withContextMenu(VizNode, handleNodeContextMenu),
+      textInputNode: withContextMenu(TextInputNode, handleNodeContextMenu),
+      textOpNode: withContextMenu(TextOperationNode, handleNodeContextMenu),
+      httpNode: withContextMenu(HttpNode, handleNodeContextMenu),
+      conditionNode: withContextMenu(ConditionNode, handleNodeContextMenu),
+      forEachNode: withContextMenu(ForEachNode, handleNodeContextMenu),
+      whileLoopNode: withContextMenu(WhileLoopNode, handleNodeContextMenu),
+      variableNode: withContextMenu(VariableNode, handleNodeContextMenu),
+      extractNode: withContextMenu(ExtractNode, handleNodeContextMenu),
+      transformNode: withContextMenu(TransformNode, handleNodeContextMenu),
+      accumulatorNode: withContextMenu(AccumulatorNode, handleNodeContextMenu),
+      counterNode: withContextMenu(CounterNode, handleNodeContextMenu),
+      switchNode: withContextMenu(SwitchNode, handleNodeContextMenu),
+      parallelNode: withContextMenu(ParallelNode, handleNodeContextMenu),
+      joinNode: withContextMenu(JoinNode, handleNodeContextMenu),
+      splitNode: withContextMenu(SplitNode, handleNodeContextMenu),
+      delayNode: withContextMenu(DelayNode, handleNodeContextMenu),
+      cacheNode: withContextMenu(CacheNode, handleNodeContextMenu),
+      retryNode: withContextMenu(RetryNode, handleNodeContextMenu),
+      tryCatchNode: withContextMenu(TryCatchNode, handleNodeContextMenu),
+      timeoutNode: withContextMenu(TimeoutNode, handleNodeContextMenu),
     }),
-    []
+    [handleNodeContextMenu]
   );
 
   const [nextId, setNextId] = useState(5);
 
+  // Check for overlapping nodes
+  const findNonOverlappingPosition = (basePosition: XYPosition): XYPosition => {
+    const existingNodes = getNodes();
+    const nodeWidth = 150;
+    const nodeHeight = 80;
+    const padding = 20;
+    
+    let position = { ...basePosition };
+    let attempts = 0;
+    const maxAttempts = 50;
+    
+    while (attempts < maxAttempts) {
+      const overlaps = existingNodes.some(node => {
+        const dx = Math.abs(node.position.x - position.x);
+        const dy = Math.abs(node.position.y - position.y);
+        return dx < (nodeWidth + padding) && dy < (nodeHeight + padding);
+      });
+      
+      if (!overlaps) {
+        return position;
+      }
+      
+      // Try offset positions
+      position = {
+        x: basePosition.x + (attempts * 30),
+        y: basePosition.y + ((attempts % 5) * 25),
+      };
+      attempts++;
+    }
+    
+    return position;
+  };
+
   const addNode = (type: string, defaultData: Record<string, unknown>) => {
     const id = String(nextId);
     setNextId((s) => s + 1);
-    const position: XYPosition = project
-      ? project({ x: 100, y: 100 })
-      : { x: 400 + nextId * 10, y: 120 + (nextId % 3) * 40 };
+    
+    // Get viewport dimensions (accounting for nav bars: 14px app + 12px workflow + 7px status = 33px total)
+    const navHeight = 112; // Total height of both navs + status bar
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight - navHeight;
+    
+    // Get base position at center of visible viewport
+    const basePosition: XYPosition = project
+      ? project({ x: viewportWidth / 2 - 75, y: viewportHeight / 2 })
+      : { x: 400, y: 200 };
+    
+    // Find non-overlapping position
+    const position = findNonOverlappingPosition(basePosition);
 
     const baseData: NodeData = { ...defaultData, label: `${type} ${id}` };
     const newNode: RFNode<NodeData> = { id, position, data: baseData, type };
     setNodes((nds) => nds.concat(newNode));
-    setIsPaletteOpen(false); // Close palette after adding a node
+  };
+
+  const handleNewWorkflow = () => {
+    router.push('/');
+  };
+
+  const handleOpenWorkflow = () => {
+    // TODO: Open workflow modal
+  };
+
+  const handleSave = () => {
+    // TODO: Save workflow
+    console.log('Save workflow', payload);
+  };
+
+  const handleDelete = () => {
+    // TODO: Delete workflow
+  };
+
+  const handleRun = () => {
+    // TODO: Run workflow
+    console.log('Run workflow', payload);
+  };
+
+  const handleDeleteNode = (nodeId: string) => {
+    const node = nodes.find((n) => n.id === nodeId);
+    if (node) {
+      setDeleteConfirm({ nodeId, nodeName: String(node.data?.label || `Node ${nodeId}`) });
+    }
+    setContextMenu(null);
+  };
+
+  const confirmDelete = () => {
+    if (deleteConfirm) {
+      setNodes((nds) => nds.filter((n) => n.id !== deleteConfirm.nodeId));
+      setEdges((eds) => eds.filter((e) => e.source !== deleteConfirm.nodeId && e.target !== deleteConfirm.nodeId));
+    }
+    setDeleteConfirm(null);
   };
 
   return (
     <div className="h-screen flex flex-col bg-gray-950">
-      {/* Top Bar */}
-      <div className="h-14 bg-gray-900 border-b border-gray-700 flex items-center justify-between px-4">
-        <div className="flex items-center gap-4">
-          <h1 className="text-xl font-bold text-white">Workflow Builder</h1>
-          <div className="text-sm text-gray-400">
-            {nodes.length} nodes, {edges.length} connections
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={() => setShowPayload((s) => !s)}
-            className="bg-gray-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm transition-colors"
-          >
-            {showPayload ? "Hide" : "View"} JSON Payload
-          </button>
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm transition-colors">
-            ▶︎
-          </button>
-        </div>
-      </div>
+      {/* Application Nav Bar */}
+      <AppNavBar
+        onNewWorkflow={handleNewWorkflow}
+        onOpenWorkflow={handleOpenWorkflow}
+      />
+
+      {/* Workflow Nav Bar */}
+      <WorkflowNavBar
+        workflowTitle={workflowTitle}
+        onTitleChange={setWorkflowTitle}
+        onSave={handleSave}
+        onShowJSON={() => setShowPayload(true)}
+        onDelete={handleDelete}
+        onRun={handleRun}
+      />
 
       {/* Main Content */}
       <div className="flex-1 relative">
-        {/* Add Node Button (when palette is closed) */}
+        {/* Add Node Button - Bottom Left */}
         {!isPaletteOpen && (
           <button
             onClick={() => setIsPaletteOpen(true)}
-            className="absolute left-4 top-4 z-10 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all hover:scale-110"
+            className="absolute left-4 bottom-4 z-10 bg-gray-800 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg shadow-lg transition-all border border-gray-700 hover:border-gray-600 text-sm font-medium flex items-center gap-1.5"
             title="Add Node"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2}
-              stroke="currentColor"
-              className="w-6 h-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 4.5v15m7.5-7.5h-15"
-              />
-            </svg>
+            <span className="text-base">+</span>
+            <span>Add Node</span>
           </button>
         )}
 
-        {/* Collapsible Floating Node Palette */}
-        {isPaletteOpen && (
-          <div className="absolute left-4 top-4 z-10 bg-gray-900 border border-gray-700 rounded-lg shadow-2xl max-h-[calc(100vh-120px)] overflow-y-auto w-64">
-            <div className="sticky top-0 bg-gray-900 border-b border-gray-700 p-3 flex items-center justify-between">
-              <div className="text-sm font-bold text-white">Add Nodes</div>
-              <button
-                onClick={() => setIsPaletteOpen(false)}
-                className="text-gray-400 hover:text-white transition-colors"
-                title="Close"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                  className="w-5 h-5"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-
-            {nodeCategories.map((category) => (
-              <div
-                key={category.name}
-                className="p-3 border-b border-gray-800 last:border-b-0"
-              >
-                <div className="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">
-                  {category.name}
-                </div>
-                <div className="flex flex-col gap-1">
-                  {category.nodes.map((config) => (
-                    <button
-                      key={config.type}
-                      onClick={() => addNode(config.type, config.defaultData)}
-                      className={`${config.color} hover:opacity-80 text-white px-3 py-2 rounded text-sm transition-all text-left`}
-                    >
-                      + {config.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        {/* Node Palette with Search */}
+        <NodePalette
+          isOpen={isPaletteOpen}
+          onClose={() => setIsPaletteOpen(false)}
+          categories={nodeCategories}
+          onAddNode={addNode}
+        />
 
         {/* React Flow Canvas */}
         <ReactFlow
@@ -515,40 +618,38 @@ function Canvas() {
           <Background className="bg-gray-950" />
         </ReactFlow>
 
-        {/* JSON Payload Panel */}
-        {showPayload && (
-          <div className="absolute right-4 top-4 bottom-4 w-96 bg-gray-900 border border-gray-700 rounded-lg shadow-2xl overflow-hidden flex flex-col">
-            <div className="bg-gray-800 border-b border-gray-700 p-3 flex items-center justify-between">
-              <div className="text-sm font-bold text-white">JSON Payload</div>
-              <button
-                onClick={() => setShowPayload(false)}
-                className="text-gray-400 hover:text-white transition-colors"
-                title="Close"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                  className="w-5 h-5"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </div>
-            <div className="flex-1 overflow-auto p-4">
-              <pre className="text-gray-300 text-xs">
-                {JSON.stringify(payload, null, 2)}
-              </pre>
-            </div>
-          </div>
-        )}
+        {/* JSON Payload Modal */}
+        <JSONPayloadModal
+          isOpen={showPayload}
+          onClose={() => setShowPayload(false)}
+          payload={payload}
+        />
       </div>
+
+      {/* Context Menu */}
+      {contextMenu && (
+        <NodeContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          onClose={() => setContextMenu(null)}
+          onDelete={() => handleDeleteNode(contextMenu.nodeId)}
+        />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {deleteConfirm && (
+        <DeleteConfirmDialog
+          nodeName={deleteConfirm.nodeName}
+          onConfirm={confirmDelete}
+          onCancel={() => setDeleteConfirm(null)}
+        />
+      )}
+
+      {/* Bottom Status Bar */}
+      <WorkflowStatusBar
+        nodeCount={nodes.length}
+        edgeCount={edges.length}
+      />
     </div>
   );
 }

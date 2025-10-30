@@ -28,6 +28,8 @@ export {
 // Export new UI components
 export { NodeTopBar } from './NodeTopBar';
 export { NodeInfoPopup } from './NodeInfoPopup';
+export { NodeDescriptionModal } from './NodeDescriptionModal';
+export { NodeContextMenu } from './NodeContextMenu';
 export { NodeResizeHandle } from './NodeResizeHandle';
 export { DeleteConfirmDialog } from './DeleteConfirmDialog';
 export { NodeWrapper } from './NodeWrapper';

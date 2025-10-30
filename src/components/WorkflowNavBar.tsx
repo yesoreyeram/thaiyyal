@@ -54,7 +54,7 @@ export function WorkflowNavBar({
   };
 
   return (
-    <div className="h-12 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-6">
+    <div className="h-12 bg-gray-900 border-b border-gray-800 flex items-center justify-between px-6">
       <div className="flex items-center gap-3">
         {isEditing ? (
           <input
@@ -64,13 +64,13 @@ export function WorkflowNavBar({
             onChange={(e) => setEditValue(e.target.value)}
             onBlur={handleSubmit}
             onKeyDown={handleKeyDown}
-            className="px-3 py-1 bg-gray-900 border border-gray-600 rounded-lg text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[200px]"
+            className="px-3 py-1 bg-gray-800 border border-gray-600 rounded-lg text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[200px]"
             aria-label="Workflow title"
           />
         ) : (
           <button
             onClick={() => setIsEditing(true)}
-            className="px-3 py-1 text-white text-sm font-medium hover:bg-gray-700 rounded-lg transition-colors flex items-center gap-2 group"
+            className="px-3 py-1 text-white text-sm font-medium hover:bg-gray-800 rounded-lg transition-colors flex items-center gap-2 group"
             title="Click to edit workflow title"
             aria-label="Edit workflow title"
           >
@@ -87,10 +87,10 @@ export function WorkflowNavBar({
         )}
       </div>
       
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         <button
           onClick={onSave}
-          className="p-2 bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white rounded-lg transition-all"
+          className="p-2 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-lg transition-all"
           title="Save Workflow (Ctrl+S)"
           aria-label="Save Workflow"
         >
@@ -99,7 +99,7 @@ export function WorkflowNavBar({
         
         <button
           onClick={onShowJSON}
-          className="p-2 bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white rounded-lg transition-all"
+          className="p-2 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-lg transition-all"
           title="Show JSON Payload"
           aria-label="Show JSON Payload"
         >
@@ -108,7 +108,7 @@ export function WorkflowNavBar({
         
         <button
           onClick={onDelete}
-          className="p-2 bg-gray-700 hover:bg-gray-600 text-red-400 hover:text-red-300 rounded-lg transition-all"
+          className="p-2 bg-gray-800 hover:bg-gray-700 text-red-400 hover:text-red-300 rounded-lg transition-all"
           title="Delete Workflow"
           aria-label="Delete Workflow"
         >
