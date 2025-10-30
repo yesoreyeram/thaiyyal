@@ -640,7 +640,7 @@ function WorkflowEditor() {
         hasUnsavedChanges={hasUnsavedChanges}
       />
 
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden relative">
         <div 
           className="absolute left-4 top-4 z-10 w-64 bg-gray-900/95 backdrop-blur-sm border border-gray-700 rounded-xl shadow-2xl overflow-hidden"
           role="toolbar"

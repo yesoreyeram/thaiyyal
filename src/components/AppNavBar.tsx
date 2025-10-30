@@ -23,6 +23,15 @@ export function AppNavBar({ onNewWorkflow, onOpenWorkflow }: AppNavBarProps) {
       
       <div className="flex items-center gap-2">
         <button
+          onClick={onOpenWorkflow}
+          className="p-2 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-lg transition-all"
+          title="Open Workflow"
+          aria-label="Open Workflow"
+        >
+          <span>📂</span>
+        </button>
+        
+        <button
           onClick={onNewWorkflow}
           className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-all flex items-center gap-2 hover:shadow-lg hover:shadow-blue-500/20"
           title="Create New Workflow"
@@ -30,16 +39,6 @@ export function AppNavBar({ onNewWorkflow, onOpenWorkflow }: AppNavBarProps) {
         >
           <span>📄</span>
           <span>New Workflow</span>
-        </button>
-        
-        <button
-          onClick={onOpenWorkflow}
-          className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium rounded-lg transition-all flex items-center gap-2"
-          title="Open Workflow"
-          aria-label="Open Workflow"
-        >
-          <span>📂</span>
-          <span>Open Workflow</span>
         </button>
       </div>
     </div>
