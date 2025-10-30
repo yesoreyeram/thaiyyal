@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState, useEffect } from "react";
 import ReactFlow, {
   addEdge,
   Background,
@@ -38,11 +38,17 @@ import {
   TryCatchNode,
   TimeoutNode,
 } from "../../components/nodes";
+import { AppNavBar } from "../../components/AppNavBar";
+import { WorkflowNavBar } from "../../components/WorkflowNavBar";
+import { WorkflowStatusBar } from "../../components/WorkflowStatusBar";
+import { NodePalette } from "../../components/NodePalette";
+import { JSONPayloadModal } from "../../components/JSONPayloadModal";
+import { useRouter } from "next/navigation";
 
 type NodeData = Record<string, unknown>;
 
-// Original three node components
-function NumberNode({ id, data }: NodeProps<NodeData>) {
+// Original three node components - Updated to use NodeWrapper
+function NumberNode({ id, data, ...props }: NodeProps<NodeData>) {
   const { setNodes } = useReactFlow();
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = Number(e.target.value);
@@ -52,22 +58,41 @@ function NumberNode({ id, data }: NodeProps<NodeData>) {
       )
     );
   };
+
+  const handleTitleChange = (newTitle: string) => {
+    setNodes((nds) =>
+      nds.map((n) =>
+        n.id === id ? { ...n, data: { ...n.data, label: newTitle } } : n
+      )
+    );
+  };
+
+  // Import NodeWrapper at top
+  const { NodeWrapper, getNodeInfo } = require("../../components/nodes");
+  const nodeInfo = getNodeInfo("numberNode");
+  const onShowOptions = (props as any).onShowOptions;
+
   return (
-    <div className="p-2 bg-gray-700 text-white shadow rounded border border-gray-600">
-      <Handle type="target" position={Position.Left} />
-      <div className="text-xs font-medium">Number</div>
+    <NodeWrapper
+      title={String(data?.label || "Number")}
+      nodeInfo={nodeInfo}
+      onShowOptions={onShowOptions}
+      onTitleChange={handleTitleChange}
+      className="bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all"
+    >
+      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <input
         value={typeof data?.value === "number" ? data.value : 0}
         type="number"
         onChange={onChange}
-        className="mt-1 w-32 border px-2 py-1 rounded bg-gray-800 text-white border-gray-600"
+        className="w-24 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
       />
-      <Handle type="source" position={Position.Right} />
-    </div>
+      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+    </NodeWrapper>
   );
 }
 
-function OperationNode({ id, data }: NodeProps<NodeData>) {
+function OperationNode({ id, data, ...props }: NodeProps<NodeData>) {
   const { setNodes } = useReactFlow();
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const op = e.target.value;
@@ -75,26 +100,44 @@ function OperationNode({ id, data }: NodeProps<NodeData>) {
       nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, op } } : n))
     );
   };
+
+  const handleTitleChange = (newTitle: string) => {
+    setNodes((nds) =>
+      nds.map((n) =>
+        n.id === id ? { ...n, data: { ...n.data, label: newTitle } } : n
+      )
+    );
+  };
+
+  const { NodeWrapper, getNodeInfo } = require("../../components/nodes");
+  const nodeInfo = getNodeInfo("opNode");
+  const onShowOptions = (props as any).onShowOptions;
+
   return (
-    <div className="p-2 bg-gray-700 text-white shadow rounded border border-gray-600">
-      <Handle type="target" position={Position.Left} />
-      <div className="text-xs font-medium">Operation</div>
+    <NodeWrapper
+      title={String(data?.label || "Operation")}
+      nodeInfo={nodeInfo}
+      onShowOptions={onShowOptions}
+      onTitleChange={handleTitleChange}
+      className="bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all"
+    >
+      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <select
         value={typeof data?.op === "string" ? data.op : "add"}
         onChange={onChange}
-        className="mt-1 w-32 border px-2 py-1 rounded bg-gray-800 text-white border-gray-600"
+        className="w-24 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
       >
         <option value="add">Add</option>
         <option value="subtract">Subtract</option>
         <option value="multiply">Multiply</option>
         <option value="divide">Divide</option>
       </select>
-      <Handle type="source" position={Position.Right} />
-    </div>
+      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+    </NodeWrapper>
   );
 }
 
-function VizNode({ id, data }: NodeProps<NodeData>) {
+function VizNode({ id, data, ...props }: NodeProps<NodeData>) {
   const { setNodes } = useReactFlow();
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const mode = e.target.value;
@@ -102,20 +145,38 @@ function VizNode({ id, data }: NodeProps<NodeData>) {
       nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, mode } } : n))
     );
   };
+
+  const handleTitleChange = (newTitle: string) => {
+    setNodes((nds) =>
+      nds.map((n) =>
+        n.id === id ? { ...n, data: { ...n.data, label: newTitle } } : n
+      )
+    );
+  };
+
+  const { NodeWrapper, getNodeInfo } = require("../../components/nodes");
+  const nodeInfo = getNodeInfo("vizNode");
+  const onShowOptions = (props as any).onShowOptions;
+
   return (
-    <div className="p-2 bg-gray-700 text-white shadow rounded border border-gray-600">
-      <Handle type="target" position={Position.Left} />
-      <div className="text-xs font-medium">Visualization</div>
+    <NodeWrapper
+      title={String(data?.label || "Visualization")}
+      nodeInfo={nodeInfo}
+      onShowOptions={onShowOptions}
+      onTitleChange={handleTitleChange}
+      className="bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all"
+    >
+      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <select
         value={typeof data?.mode === "string" ? data.mode : "text"}
         onChange={onChange}
-        className="mt-1 w-32 border px-2 py-1 rounded bg-gray-800 text-white border-gray-600"
+        className="w-24 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
       >
         <option value="text">Text</option>
         <option value="table">Table</option>
       </select>
-      <Handle type="source" position={Position.Right} />
-    </div>
+      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+    </NodeWrapper>
   );
 }
 
