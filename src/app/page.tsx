@@ -47,6 +47,14 @@ import {
 
 type NodeData = Record<string, unknown>;
 
+// Extended node props type to include onShowOptions
+type ExtendedNodeProps = NodeProps<NodeData> & {
+  onShowOptions?: (x: number, y: number) => void;
+};
+
+// Reusable class names
+const BASE_NODE_CLASSES = "bg-gradient-to-br from-gray-700 to-gray-800 text-white shadow-lg rounded-lg border border-gray-600 hover:border-gray-500 transition-all";
+
 // Context Menu Component
 function NodeContextMenu({
   x,
@@ -111,7 +119,7 @@ function NodeContextMenu({
 
 // Compact node wrapper with context menu
 function createCompactNode(
-  Component: React.ComponentType<NodeProps<NodeData>>,
+  Component: React.ComponentType<ExtendedNodeProps>,
   showMenu: (id: string, x: number, y: number) => void
 ) {
   return function CompactNodeWrapper(props: NodeProps<NodeData>) {
@@ -124,16 +132,21 @@ function createCompactNode(
       showMenu(props.id, x, y);
     };
 
+    const extendedProps: ExtendedNodeProps = {
+      ...props,
+      onShowOptions: handleShowOptions
+    };
+
     return (
       <div onContextMenu={handleContextMenu} className="compact-node-wrapper">
-        <Component {...props as any} onShowOptions={handleShowOptions} />
+        <Component {...extendedProps} />
       </div>
     );
   };
 }
 
 // Original three node components with dark theme
-function NumberNode({ id, data, ...props }: NodeProps<NodeData>) {
+function NumberNode({ id, data, ...props }: ExtendedNodeProps) {
   const { setNodes } = useReactFlow();
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = Number(e.target.value);
@@ -145,14 +158,14 @@ function NumberNode({ id, data, ...props }: NodeProps<NodeData>) {
   };
 
   const nodeInfo = getNodeInfo("numberNode");
-  const onShowOptions = (props as any).onShowOptions;
+  const onShowOptions = props.onShowOptions;
 
   return (
     <NodeWrapper
       title={String(data?.label || "Number")}
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
-      className="bg-gradient-to-br from-gray-700 to-gray-800 text-white shadow-lg rounded-lg border border-gray-600 hover:border-gray-500 transition-all"
+      className={BASE_NODE_CLASSES}
     >
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <input
@@ -167,7 +180,7 @@ function NumberNode({ id, data, ...props }: NodeProps<NodeData>) {
   );
 }
 
-function OperationNode({ id, data, ...props }: NodeProps<NodeData>) {
+function OperationNode({ id, data, ...props }: ExtendedNodeProps) {
   const { setNodes } = useReactFlow();
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const op = e.target.value;
@@ -177,14 +190,14 @@ function OperationNode({ id, data, ...props }: NodeProps<NodeData>) {
   };
 
   const nodeInfo = getNodeInfo("opNode");
-  const onShowOptions = (props as any).onShowOptions;
+  const onShowOptions = props.onShowOptions;
 
   return (
     <NodeWrapper
       title={String(data?.label || "Operation")}
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
-      className="bg-gradient-to-br from-gray-700 to-gray-800 text-white shadow-lg rounded-lg border border-gray-600 hover:border-gray-500 transition-all"
+      className={BASE_NODE_CLASSES}
     >
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <select
@@ -203,7 +216,7 @@ function OperationNode({ id, data, ...props }: NodeProps<NodeData>) {
   );
 }
 
-function VizNode({ id, data, ...props }: NodeProps<NodeData>) {
+function VizNode({ id, data, ...props }: ExtendedNodeProps) {
   const { setNodes } = useReactFlow();
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const mode = e.target.value;
@@ -213,14 +226,14 @@ function VizNode({ id, data, ...props }: NodeProps<NodeData>) {
   };
 
   const nodeInfo = getNodeInfo("vizNode");
-  const onShowOptions = (props as any).onShowOptions;
+  const onShowOptions = props.onShowOptions;
 
   return (
     <NodeWrapper
       title={String(data?.label || "Visualization")}
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
-      className="bg-gradient-to-br from-gray-700 to-gray-800 text-white shadow-lg rounded-lg border border-gray-600 hover:border-gray-500 transition-all"
+      className={BASE_NODE_CLASSES}
     >
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <select
