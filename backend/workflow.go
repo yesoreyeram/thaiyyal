@@ -69,6 +69,7 @@
 package workflow
 
 import (
+"context"
 "encoding/json"
 "fmt"
 "sync"
@@ -302,36 +303,73 @@ contextConstants: make(map[string]interface{}),
 // Returns:
 //   - *Result: Contains node results, final output, and any errors
 //   - error: If execution fails at any step
+// Execute runs the workflow and returns the result.
+// The workflow execution is protected by a timeout configured in MaxExecutionTime.
+// If the workflow takes longer than the timeout, execution is cancelled and an error is returned.
+//
+// Returns:
+//   - *Result: Workflow execution results including node outputs and final output
+//   - error: If execution fails, times out, or encounters an error
 func (e *Engine) Execute() (*Result, error) {
-result := &Result{
-NodeResults: make(map[string]interface{}),
-Errors:      []string{},
-}
+	result := &Result{
+		NodeResults: make(map[string]interface{}),
+		Errors:      []string{},
+	}
 
-// Step 1: Infer node types if not set
-e.inferNodeTypes()
+	// Step 1: Infer node types if not set
+	e.inferNodeTypes()
 
-// Step 2: Get execution order using topological sort
-executionOrder, err := e.topologicalSort()
-if err != nil {
-return result, err
-}
+	// Step 2: Get execution order using topological sort
+	executionOrder, err := e.topologicalSort()
+	if err != nil {
+		return result, err
+	}
 
-// Step 3: Execute each node in order
-for _, nodeID := range executionOrder {
-node := e.getNode(nodeID)
-value, err := e.executeNode(node)
-if err != nil {
-errMsg := fmt.Sprintf("error executing node %s: %v", nodeID, err)
-result.Errors = append(result.Errors, errMsg)
-return result, fmt.Errorf("%s", errMsg)
-}
-e.nodeResults[nodeID] = value
-}
+	// Step 3: Create context with timeout for workflow execution
+	ctx, cancel := context.WithTimeout(context.Background(), e.config.MaxExecutionTime)
+	defer cancel()
 
-// Step 4: Copy results and set final output
-result.NodeResults = e.nodeResults
-result.FinalOutput = e.getFinalOutput()
+	// Use a channel to communicate execution completion
+	done := make(chan error, 1)
 
-return result, nil
+	// Execute workflow in a goroutine
+	go func() {
+		// Execute each node in order
+		for _, nodeID := range executionOrder {
+			// Check if context was cancelled (timeout or parent cancellation)
+			select {
+			case <-ctx.Done():
+				done <- ctx.Err()
+				return
+			default:
+			}
+
+			node := e.getNode(nodeID)
+			value, err := e.executeNode(node)
+			if err != nil {
+				errMsg := fmt.Sprintf("error executing node %s: %v", nodeID, err)
+				result.Errors = append(result.Errors, errMsg)
+				done <- fmt.Errorf("%s", errMsg)
+				return
+			}
+			e.nodeResults[nodeID] = value
+		}
+		done <- nil
+	}()
+
+	// Wait for execution to complete or timeout
+	select {
+	case err := <-done:
+		if err != nil {
+			return result, err
+		}
+	case <-ctx.Done():
+		return result, fmt.Errorf("workflow execution timeout: exceeded %v", e.config.MaxExecutionTime)
+	}
+
+	// Step 4: Copy results and set final output
+	result.NodeResults = e.nodeResults
+	result.FinalOutput = e.getFinalOutput()
+
+	return result, nil
 }
