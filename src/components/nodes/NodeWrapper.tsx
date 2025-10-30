@@ -12,6 +12,7 @@ export interface NodeWrapperProps {
     outputs?: string[];
   };
   onShowOptions?: (x: number, y: number) => void;
+  onTitleChange?: (newTitle: string) => void;
   className?: string;
   enableResize?: boolean;
 }
@@ -21,6 +22,7 @@ export function NodeWrapper({
   children,
   nodeInfo,
   onShowOptions,
+  onTitleChange,
   className = "",
   enableResize = true,
 }: NodeWrapperProps) {
@@ -53,25 +55,30 @@ export function NodeWrapper({
 
   return (
     <div ref={nodeRef} className={`relative ${className}`}>
-      <div className="px-3 py-2">
+      <div className="px-2.5 py-1.5">
         <NodeTopBar
           title={title}
           onInfo={nodeInfo ? () => handleShowInfo() : undefined}
           onOptions={handleShowOptions}
+          onTitleChange={onTitleChange}
         />
         {children}
       </div>
       {enableResize && <NodeResizeHandle />}
       {showInfo && nodeInfo && (
-        <NodeInfoPopup
-          title={title}
-          description={nodeInfo.description}
-          inputs={nodeInfo.inputs}
-          outputs={nodeInfo.outputs}
-          onClose={handleCloseInfo}
-          x={infoPosition.x}
-          y={infoPosition.y}
-        />
+        <>
+          {/* Backdrop blur effect */}
+          <div className="fixed inset-0 bg-black/20 backdrop-blur-[1px] z-40" onClick={handleCloseInfo} />
+          <NodeInfoPopup
+            title={title}
+            description={nodeInfo.description}
+            inputs={nodeInfo.inputs}
+            outputs={nodeInfo.outputs}
+            onClose={handleCloseInfo}
+            x={infoPosition.x}
+            y={infoPosition.y}
+          />
+        </>
       )}
     </div>
   );

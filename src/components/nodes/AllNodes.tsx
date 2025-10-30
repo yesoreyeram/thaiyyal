@@ -23,6 +23,14 @@ export function ForEachNode({ id, data, ...props }: NodeProps<ForEachNodeData>) 
     );
   };
 
+  const handleTitleChange = (newTitle: string) => {
+    setNodes((nds) =>
+      nds.map((n) =>
+        n.id === id ? { ...n, data: { ...n.data, label: newTitle } } : n
+      )
+    );
+  };
+
   const nodeInfo = getNodeInfo("forEachNode");
   const onShowOptions = (props as any).onShowOptions;
 
@@ -31,14 +39,15 @@ export function ForEachNode({ id, data, ...props }: NodeProps<ForEachNodeData>) 
       title={String(data?.label || "For Each")}
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
-      className="bg-gradient-to-br from-amber-700 to-amber-800 text-white shadow-lg rounded-lg border border-amber-600 hover:border-amber-500 transition-all"
+      onTitleChange={handleTitleChange}
+      className="bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all"
     >
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <input
         value={Number(data?.max_iterations ?? 1000)}
         type="number"
         onChange={onChange}
-        className="w-24 text-xs border border-amber-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-amber-400 focus:outline-none"
+        className="w-24 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
         placeholder="Max iterations"
         aria-label="Max iterations"
       />
@@ -53,7 +62,7 @@ type WhileLoopNodeData = {
   label?: string;
 };
 
-export function WhileLoopNode({ id, data }: NodeProps<WhileLoopNodeData>) {
+export function WhileLoopNode({ id, data, ...props }: NodeProps<WhileLoopNodeData>) {
   const { setNodes } = useReactFlow();
   
   const onConditionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,28 +83,46 @@ export function WhileLoopNode({ id, data }: NodeProps<WhileLoopNodeData>) {
     );
   };
 
+  const handleTitleChange = (newTitle: string) => {
+    setNodes((nds) =>
+      nds.map((n) =>
+        n.id === id ? { ...n, data: { ...n.data, label: newTitle } } : n
+      )
+    );
+  };
+
+  const nodeInfo = getNodeInfo("whileLoopNode");
+  const onShowOptions = (props as any).onShowOptions;
+
   return (
-    <div className="px-3 py-2 bg-gradient-to-br from-amber-600 to-amber-700 text-white shadow-lg rounded-lg border border-amber-500 hover:border-amber-400 transition-all">
+    <NodeWrapper
+      title={String(data?.label || "While Loop")}
+      nodeInfo={nodeInfo}
+      onShowOptions={onShowOptions}
+      onTitleChange={handleTitleChange}
+      className="bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all"
+    >
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "While Loop")}</div>
-      <input
-        value={String(data?.condition ?? ">0")}
-        type="text"
-        onChange={onConditionChange}
-        className="w-24 text-xs border border-amber-600 px-2 py-1 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-2 focus:ring-amber-400 focus:outline-none"
-        placeholder="Condition"
-        aria-label="Loop condition"
-      />
-      <input
-        value={Number(data?.max_iterations ?? 100)}
-        type="number"
-        onChange={onMaxIterChange}
-        className="mt-1 w-24 text-xs border border-amber-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-amber-400 focus:outline-none"
-        placeholder="Max iterations"
-        aria-label="Max iterations"
-      />
+      <div className="flex flex-col gap-1">
+        <input
+          value={String(data?.condition ?? ">0")}
+          type="text"
+          onChange={onConditionChange}
+          className="w-24 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-1 focus:ring-blue-400 focus:outline-none"
+          placeholder="Condition"
+          aria-label="Loop condition"
+        />
+        <input
+          value={Number(data?.max_iterations ?? 100)}
+          type="number"
+          onChange={onMaxIterChange}
+          className="w-24 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
+          placeholder="Max iterations"
+          aria-label="Max iterations"
+        />
+      </div>
       <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
-    </div>
+    </NodeWrapper>
   );
 }
 
@@ -107,7 +134,7 @@ type VariableNodeData = {
   label?: string;
 };
 
-export function VariableNode({ id, data }: NodeProps<VariableNodeData>) {
+export function VariableNode({ id, data, ...props }: NodeProps<VariableNodeData>) {
   const { setNodes } = useReactFlow();
   
   const onNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -128,27 +155,45 @@ export function VariableNode({ id, data }: NodeProps<VariableNodeData>) {
     );
   };
 
+  const handleTitleChange = (newTitle: string) => {
+    setNodes((nds) =>
+      nds.map((n) =>
+        n.id === id ? { ...n, data: { ...n.data, label: newTitle } } : n
+      )
+    );
+  };
+
+  const nodeInfo = getNodeInfo("variableNode");
+  const onShowOptions = (props as any).onShowOptions;
+
   return (
-    <div className="px-3 py-2 bg-gradient-to-br from-sky-600 to-sky-700 text-white shadow-lg rounded-lg border border-sky-500 hover:border-sky-400 transition-all">
+    <NodeWrapper
+      title={String(data?.label || "Variable")}
+      nodeInfo={nodeInfo}
+      onShowOptions={onShowOptions}
+      onTitleChange={handleTitleChange}
+      className="bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all"
+    >
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Variable")}</div>
-      <input
-        value={String(data?.var_name ?? "")}
-        type="text"
-        onChange={onNameChange}
-        className="w-24 text-xs border border-sky-600 px-2 py-1 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-2 focus:ring-sky-400 focus:outline-none"
-        placeholder="Variable name"
-      />
-      <select
-        value={String(data?.var_op ?? "get")}
-        onChange={onOpChange}
-        className="w-24 text-xs border border-sky-600 px-2 py-1 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-2 focus:ring-sky-400 focus:outline-none"
-      >
-        <option value="get">Get</option>
-        <option value="set">Set</option>
-      </select>
+      <div className="flex flex-col gap-1">
+        <input
+          value={String(data?.var_name ?? "")}
+          type="text"
+          onChange={onNameChange}
+          className="w-24 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-1 focus:ring-blue-400 focus:outline-none"
+          placeholder="Variable name"
+        />
+        <select
+          value={String(data?.var_op ?? "get")}
+          onChange={onOpChange}
+          className="w-24 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-1 focus:ring-blue-400 focus:outline-none"
+        >
+          <option value="get">Get</option>
+          <option value="set">Set</option>
+        </select>
+      </div>
       <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
-    </div>
+    </NodeWrapper>
   );
 }
 
