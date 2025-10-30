@@ -40,6 +40,7 @@ import {
   TimeoutNode,
   ContextVariableNode,
   ContextConstantNode,
+  DeleteConfirmDialog,
 } from "../components/nodes";
 
 type NodeData = Record<string, unknown>;
@@ -117,9 +118,13 @@ function createCompactNode(
       showMenu(props.id, e.clientX, e.clientY);
     };
 
+    const handleShowOptions = (x: number, y: number) => {
+      showMenu(props.id, x, y);
+    };
+
     return (
       <div onContextMenu={handleContextMenu} className="compact-node-wrapper">
-        <Component {...props} />
+        <Component {...props as any} onShowOptions={handleShowOptions} />
       </div>
     );
   };
@@ -331,6 +336,7 @@ function Canvas() {
   } | null>(null);
   const [renamingNode, setRenamingNode] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
+  const [deletingNode, setDeletingNode] = useState<string | null>(null);
 
   const { project } = useReactFlow();
 
@@ -429,10 +435,20 @@ function Canvas() {
 
   const handleDelete = useCallback(() => {
     if (!contextMenu) return;
-    setNodes((nds) => nds.filter((n) => n.id !== contextMenu.nodeId));
-    setEdges((eds) => eds.filter((e) => e.source !== contextMenu.nodeId && e.target !== contextMenu.nodeId));
+    setDeletingNode(contextMenu.nodeId);
     setContextMenu(null);
-  }, [contextMenu, setNodes, setEdges]);
+  }, [contextMenu]);
+
+  const confirmDelete = useCallback(() => {
+    if (!deletingNode) return;
+    setNodes((nds) => nds.filter((n) => n.id !== deletingNode));
+    setEdges((eds) => eds.filter((e) => e.source !== deletingNode && e.target !== deletingNode));
+    setDeletingNode(null);
+  }, [deletingNode, setNodes, setEdges]);
+
+  const cancelDelete = useCallback(() => {
+    setDeletingNode(null);
+  }, []);
 
   const handleRenameSubmit = useCallback(() => {
     if (renamingNode) {
@@ -643,6 +659,15 @@ function Canvas() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {deletingNode && (
+        <DeleteConfirmDialog
+          nodeName={String(nodes.find((n) => n.id === deletingNode)?.data?.label || deletingNode)}
+          onConfirm={confirmDelete}
+          onCancel={cancelDelete}
+        />
       )}
     </div>
   );

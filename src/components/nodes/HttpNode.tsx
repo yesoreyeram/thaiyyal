@@ -1,12 +1,14 @@
 import { NodeProps, Handle, Position, useReactFlow } from "reactflow";
 import React from "react";
+import { NodeWrapper } from "./NodeWrapper";
+import { getNodeInfo } from "./nodeInfo";
 
 type HttpNodeData = {
   url?: string;
   label?: string;
 };
 
-export function HttpNode({ id, data }: NodeProps<HttpNodeData>) {
+export function HttpNode({ id, data, ...props }: NodeProps<HttpNodeData>) {
   const { setNodes } = useReactFlow();
   
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -18,10 +20,17 @@ export function HttpNode({ id, data }: NodeProps<HttpNodeData>) {
     );
   };
 
+  const nodeInfo = getNodeInfo("httpNode");
+  const onShowOptions = (props as any).onShowOptions;
+
   return (
-    <div className="px-3 py-2 bg-gradient-to-br from-purple-700 to-purple-800 text-white shadow-lg rounded-lg border border-purple-600 hover:border-purple-500 transition-all">
+    <NodeWrapper
+      title={String(data?.label || "HTTP Request")}
+      nodeInfo={nodeInfo}
+      onShowOptions={onShowOptions}
+      className="bg-gradient-to-br from-purple-700 to-purple-800 text-white shadow-lg rounded-lg border border-purple-600 hover:border-purple-500 transition-all"
+    >
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "HTTP Request")}</div>
       <input
         value={String(data?.url ?? "")}
         type="text"
@@ -31,6 +40,6 @@ export function HttpNode({ id, data }: NodeProps<HttpNodeData>) {
         aria-label="HTTP URL"
       />
       <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
-    </div>
+    </NodeWrapper>
   );
 }

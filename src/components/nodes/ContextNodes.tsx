@@ -1,5 +1,7 @@
 import { NodeProps, useReactFlow } from "reactflow";
 import React from "react";
+import { NodeWrapper } from "./NodeWrapper";
+import { getNodeInfo } from "./nodeInfo";
 
 type ContextNodeData = {
   context_name?: string;
@@ -52,8 +54,9 @@ const configs: Record<"variable" | "constant", ContextNodeConfig> = {
 
 export function BaseContextNode({ 
   id, 
-  data, 
-  config 
+  data,
+  config,
+  ...props
 }: NodeProps<ContextNodeData> & { config: ContextNodeConfig }) {
   const { setNodes } = useReactFlow();
   
@@ -81,14 +84,16 @@ export function BaseContextNode({
   const templatePrefix = config.type === "variable" ? "variable" : "const";
   const contextName = data?.context_name || "...";
 
+  const nodeInfo = getNodeInfo(config.type === "variable" ? "contextVariableNode" : "contextConstantNode");
+  const onShowOptions = (props as any).onShowOptions;
+
   return (
-    <div className={`px-3 py-2 bg-gradient-to-br ${config.color.gradient} text-white shadow-lg rounded-lg border-2 ${config.color.border} ${config.color.borderHover} transition-all`}>
-      <div className="flex items-center gap-1 mb-1">
-        <span className="text-sm">{config.icon}</span>
-        <div className={`text-xs font-semibold ${config.color.text}`}>
-          {label}
-        </div>
-      </div>
+    <NodeWrapper
+      title={label}
+      nodeInfo={nodeInfo}
+      onShowOptions={onShowOptions}
+      className={`bg-gradient-to-br ${config.color.gradient} text-white shadow-lg rounded-lg border-2 ${config.color.border} ${config.color.borderHover} transition-all`}
+    >
       <div className="space-y-1">
         <input
           value={String(data?.context_name ?? "")}
@@ -110,7 +115,7 @@ export function BaseContextNode({
       <div className={`mt-1 text-xs ${config.color.templateText} font-mono`}>
         {`{{ ${templatePrefix}.${contextName} }}`}
       </div>
-    </div>
+    </NodeWrapper>
   );
 }
 

@@ -1,5 +1,7 @@
 import { NodeProps, Handle, Position, useReactFlow } from "reactflow";
 import React from "react";
+import { NodeWrapper } from "./NodeWrapper";
+import { getNodeInfo } from "./nodeInfo";
 
 type TextOperationNodeData = {
   text_op?: string;
@@ -8,7 +10,7 @@ type TextOperationNodeData = {
   label?: string;
 };
 
-export function TextOperationNode({ id, data }: NodeProps<TextOperationNodeData>) {
+export function TextOperationNode({ id, data, ...props }: NodeProps<TextOperationNodeData>) {
   const { setNodes } = useReactFlow();
   
   const onOpChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -32,10 +34,17 @@ export function TextOperationNode({ id, data }: NodeProps<TextOperationNodeData>
     );
   };
 
+  const nodeInfo = getNodeInfo("textOpNode");
+  const onShowOptions = (props as any).onShowOptions;
+
   return (
-    <div className="px-3 py-2 bg-gradient-to-br from-emerald-600 to-emerald-700 text-white shadow-lg rounded-lg border border-emerald-500 hover:border-emerald-400 transition-all">
+    <NodeWrapper
+      title={String(data?.label || "Text Operation")}
+      nodeInfo={nodeInfo}
+      onShowOptions={onShowOptions}
+      className="bg-gradient-to-br from-emerald-600 to-emerald-700 text-white shadow-lg rounded-lg border border-emerald-500 hover:border-emerald-400 transition-all"
+    >
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Text Operation")}</div>
       <select
         value={String(data?.text_op ?? "uppercase")}
         onChange={onOpChange}
@@ -71,6 +80,6 @@ export function TextOperationNode({ id, data }: NodeProps<TextOperationNodeData>
         />
       )}
       <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
-    </div>
+    </NodeWrapper>
   );
 }

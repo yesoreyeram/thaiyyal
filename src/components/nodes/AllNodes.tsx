@@ -1,6 +1,8 @@
 // This file contains all the remaining node implementations
 import { NodeProps, Handle, Position, useReactFlow } from "reactflow";
 import React from "react";
+import { NodeWrapper } from "./NodeWrapper";
+import { getNodeInfo } from "./nodeInfo";
 
 // ===== CONTROL FLOW NODES =====
 
@@ -9,7 +11,7 @@ type ForEachNodeData = {
   label?: string;
 };
 
-export function ForEachNode({ id, data }: NodeProps<ForEachNodeData>) {
+export function ForEachNode({ id, data, ...props }: NodeProps<ForEachNodeData>) {
   const { setNodes } = useReactFlow();
   
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -21,10 +23,17 @@ export function ForEachNode({ id, data }: NodeProps<ForEachNodeData>) {
     );
   };
 
+  const nodeInfo = getNodeInfo("forEachNode");
+  const onShowOptions = (props as any).onShowOptions;
+
   return (
-    <div className="px-3 py-2 bg-gradient-to-br from-amber-700 to-amber-800 text-white shadow-lg rounded-lg border border-amber-600 hover:border-amber-500 transition-all">
+    <NodeWrapper
+      title={String(data?.label || "For Each")}
+      nodeInfo={nodeInfo}
+      onShowOptions={onShowOptions}
+      className="bg-gradient-to-br from-amber-700 to-amber-800 text-white shadow-lg rounded-lg border border-amber-600 hover:border-amber-500 transition-all"
+    >
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "For Each")}</div>
       <input
         value={Number(data?.max_iterations ?? 1000)}
         type="number"
@@ -34,7 +43,7 @@ export function ForEachNode({ id, data }: NodeProps<ForEachNodeData>) {
         aria-label="Max iterations"
       />
       <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
-    </div>
+    </NodeWrapper>
   );
 }
 

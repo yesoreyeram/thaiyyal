@@ -1,12 +1,14 @@
 import { NodeProps, Handle, Position, useReactFlow } from "reactflow";
 import React from "react";
+import { NodeWrapper } from "./NodeWrapper";
+import { getNodeInfo } from "./nodeInfo";
 
 type TextInputNodeData = {
   text?: string;
   label?: string;
 };
 
-export function TextInputNode({ id, data }: NodeProps<TextInputNodeData>) {
+export function TextInputNode({ id, data, ...props }: NodeProps<TextInputNodeData>) {
   const { setNodes } = useReactFlow();
   
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -18,10 +20,17 @@ export function TextInputNode({ id, data }: NodeProps<TextInputNodeData>) {
     );
   };
 
+  const nodeInfo = getNodeInfo("textInputNode");
+  const onShowOptions = (props as any).onShowOptions;
+
   return (
-    <div className="px-3 py-2 bg-gradient-to-br from-emerald-700 to-emerald-800 text-white shadow-lg rounded-lg border border-emerald-600 hover:border-emerald-500 transition-all">
+    <NodeWrapper
+      title={String(data?.label || "Text Input")}
+      nodeInfo={nodeInfo}
+      onShowOptions={onShowOptions}
+      className="bg-gradient-to-br from-emerald-700 to-emerald-800 text-white shadow-lg rounded-lg border border-emerald-600 hover:border-emerald-500 transition-all"
+    >
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Text Input")}</div>
       <input
         value={String(data?.text ?? "")}
         type="text"
@@ -31,6 +40,6 @@ export function TextInputNode({ id, data }: NodeProps<TextInputNodeData>) {
         aria-label="Text input value"
       />
       <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
-    </div>
+    </NodeWrapper>
   );
 }
