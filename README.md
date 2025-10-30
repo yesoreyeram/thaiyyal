@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Thaiyyal Logo](screenshots/01-main-page-initial.png)
+![Thaiyyal Home Page](https://github.com/user-attachments/assets/99764f55-33b4-4419-b901-5e0a5410b409)
 
 **A Modern Visual Workflow Builder**
 
@@ -201,27 +201,38 @@ For more examples, visit the **Tests Page** at [http://localhost:3000/tests](htt
 
 ## Screenshots
 
-### Main Application
+### Home Page
 
-![Main Application Interface](screenshots/01-main-page-initial.png)
+![Home Page](https://github.com/user-attachments/assets/99764f55-33b4-4419-b901-5e0a5410b409)
 
-The main interface features:
-- **Left Panel**: Node palette organized by category
-- **Center Canvas**: Visual workflow builder with drag-and-drop
-- **Right Panel**: JSON payload viewer (toggle with "Show Payload")
+The modern home page features:
+- **Hero Section**: Welcome message with gradient text and animations
+- **Feature Highlights**: Visual cards showcasing key capabilities
+- **Quick Actions**: Create new workflow or open existing ones
+- **Professional Design**: Dark theme with glassmorphism effects
+
+### Workflow Example with JSON Viewer
+
+![Simple Addition Workflow](https://github.com/user-attachments/assets/4971c01a-4d6a-47d5-b7b2-a1dddb2be474)
+
+Example workflow showing:
+- **Visual Nodes**: Number and Operation nodes with connections
+- **Interactive Canvas**: Drag-and-drop workflow building
+- **JSON Payload**: Generated workflow definition (click "View JSON Payload")
 
 ### Comprehensive Test Scenarios
 
-![All Test Scenarios](screenshots/02-tests-page-full.png)
+![All Test Scenarios](https://github.com/user-attachments/assets/7302a2db-1d1a-4b62-a103-d69b421d573d)
 
 View all 16 test scenarios demonstrating:
-- ✅ Basic arithmetic operations
-- ✅ Text processing workflows
+- ✅ Basic arithmetic operations (add, subtract, multiply, divide)
+- ✅ Text processing workflows (uppercase, lowercase, concatenate, etc.)
 - ✅ HTTP data fetching
-- ✅ Conditional branching
-- ✅ State management
-- ✅ Advanced control flow
-- ✅ Error handling patterns
+- ✅ Conditional branching (greater than, less than, equals)
+- ✅ State management (variables, counters, accumulators)
+- ✅ Advanced control flow (join, split, parallel, switch)
+- ✅ Error handling patterns (retry, try-catch, timeout)
+- ✅ Caching and delays
 
 ## Documentation
 
