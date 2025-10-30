@@ -24,8 +24,8 @@ export function NodeTopBar({ title, onInfo, onOptions, compact = true }: NodeTop
   };
 
   return (
-    <div className="flex items-center justify-between gap-1 mb-1">
-      <div className="text-xs font-semibold text-gray-200 truncate flex-1 min-w-0">
+    <div className="flex items-center justify-between gap-1 mb-2 pb-2 border-b border-white/10 bg-black/20 -mx-3 -mt-2 px-3 pt-2 rounded-t-lg">
+      <div className="text-xs font-semibold text-gray-100 truncate flex-1 min-w-0">
         {title}
       </div>
       <div className="flex items-center gap-0.5 flex-shrink-0">

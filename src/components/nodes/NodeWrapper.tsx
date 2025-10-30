@@ -1,4 +1,4 @@
-import React, { ReactNode, useState, useCallback } from "react";
+import React, { ReactNode, useState, useCallback, useRef } from "react";
 import { NodeTopBar } from "./NodeTopBar";
 import { NodeInfoPopup } from "./NodeInfoPopup";
 import { NodeResizeHandle } from "./NodeResizeHandle";
@@ -26,6 +26,7 @@ export function NodeWrapper({
 }: NodeWrapperProps) {
   const [showInfo, setShowInfo] = useState(false);
   const [infoPosition, setInfoPosition] = useState({ x: 0, y: 0 });
+  const nodeRef = useRef<HTMLDivElement>(null);
 
   const handleShowInfo = useCallback((e?: React.MouseEvent) => {
     if (e) {
@@ -39,13 +40,24 @@ export function NodeWrapper({
     setShowInfo(false);
   }, []);
 
+  const handleShowOptions = useCallback((x: number, y: number) => {
+    if (nodeRef.current && onShowOptions) {
+      // Get node position to calculate relative coordinates
+      const nodeRect = nodeRef.current.getBoundingClientRect();
+      // Position menu relative to node's bottom-right area
+      const relativeX = nodeRect.left + nodeRect.width;
+      const relativeY = y;
+      onShowOptions(relativeX, relativeY);
+    }
+  }, [onShowOptions]);
+
   return (
-    <div className={`relative ${className}`}>
+    <div ref={nodeRef} className={`relative ${className}`}>
       <div className="px-3 py-2">
         <NodeTopBar
           title={title}
           onInfo={nodeInfo ? () => handleShowInfo() : undefined}
-          onOptions={onShowOptions}
+          onOptions={handleShowOptions}
         />
         {children}
       </div>
