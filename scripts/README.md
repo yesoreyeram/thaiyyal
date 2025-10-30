@@ -41,6 +41,9 @@ This directory contains scripts to make the agent specifications in `.github/age
 | `performance` | Performance Optimization | `.github/agents/performance.md` |
 | `documentation` | Documentation | `.github/agents/documentation.md` |
 | `devops` | DevOps & CI/CD | `.github/agents/devops-cicd.md` |
+| `ui-ux` | UI/UX Architect | `.github/agents/ui-ux-architect.md` |
+| `product-manager` | Product Manager | `.github/agents/product-manager.md` |
+| `marketing` | Marketing | `.github/agents/marketing.md` |
 
 ## Options
 

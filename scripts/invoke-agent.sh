@@ -42,9 +42,12 @@ case $AGENT_NAME in
   performance|perf) SPEC_FILE=".github/agents/performance.md"; AGENT_DISPLAY="Performance" ;;
   documentation|docs) SPEC_FILE=".github/agents/documentation.md"; AGENT_DISPLAY="Documentation" ;;
   devops|cicd) SPEC_FILE=".github/agents/devops-cicd.md"; AGENT_DISPLAY="DevOps & CI/CD" ;;
+  ui-ux|ux) SPEC_FILE=".github/agents/ui-ux-architect.md"; AGENT_DISPLAY="UI/UX Architect" ;;
+  product-manager|pm) SPEC_FILE=".github/agents/product-manager.md"; AGENT_DISPLAY="Product Manager" ;;
+  marketing|market) SPEC_FILE=".github/agents/marketing.md"; AGENT_DISPLAY="Marketing" ;;
   *)
     echo -e "${RED}Unknown agent: $AGENT_NAME${NC}"
-    echo "Available: security-review, architecture, observability, multi-tenancy, testing, performance, documentation, devops"
+    echo "Available: security-review, architecture, observability, multi-tenancy, testing, performance, documentation, devops, ui-ux, product-manager, marketing"
     exit 1
     ;;
 esac

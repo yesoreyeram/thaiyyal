@@ -94,7 +94,10 @@ All specialized agent specifications are located in `.github/agents/`:
 ├── performance.md                 # Performance optimization
 ├── documentation.md               # Technical documentation
 ├── devops-cicd.md                 # DevOps and CI/CD pipelines
-└── AGENTS_CALLABLE_SYSTEM.md      # ✨ Callable agent invocation system
+├── ui-ux-architect.md             # ✨ UI/UX design and user experience
+├── product-manager.md             # ✨ Project tracking and planning
+├── marketing.md                   # ✨ README maintenance and product messaging
+└── AGENTS_CALLABLE_SYSTEM.md      # Callable agent invocation system
 ```
 
 **Callable Agent Scripts:**
@@ -114,15 +117,19 @@ scripts/
 # Architecture assessment
 ./scripts/invoke-agent.sh architecture --files "backend/workflow.go"
 
-# Performance analysis
-./scripts/invoke-agent.sh performance --files "backend/executor.go"
+# UI/UX review
+./scripts/invoke-agent.sh ui-ux --files "src/components/*.tsx"
+
+# Product planning
+./scripts/invoke-agent.sh product-manager --context "Sprint planning"
+
+# README update check
+./scripts/invoke-agent.sh marketing --files "README.md"
 
 # Full review (multiple agents)
-for agent in security-review architecture performance testing; do
+for agent in security-review architecture performance testing ui-ux; do
   ./scripts/invoke-agent.sh $agent --files "$(git diff --name-only main)" --output "review-$agent.md"
 done
-```
-└── devops-cicd.md                 # DevOps and CI/CD pipelines
 ```
 
 ## Quick Reference Guide
@@ -147,6 +154,12 @@ done
 | API documentation | Documentation Agent | [documentation.md](.github/agents/documentation.md) |
 | CI/CD pipeline setup | DevOps Agent | [devops-cicd.md](.github/agents/devops-cicd.md) |
 | Deployment automation | DevOps Agent | [devops-cicd.md](.github/agents/devops-cicd.md) |
+| UI/UX design review | UI/UX Architect Agent | [ui-ux-architect.md](.github/agents/ui-ux-architect.md) |
+| Accessibility compliance | UI/UX Architect Agent | [ui-ux-architect.md](.github/agents/ui-ux-architect.md) |
+| Product roadmap planning | Product Manager Agent | [product-manager.md](.github/agents/product-manager.md) |
+| Sprint planning & tracking | Product Manager Agent | [product-manager.md](.github/agents/product-manager.md) |
+| README.md maintenance | Marketing Agent | [marketing.md](.github/agents/marketing.md) |
+| Product messaging & content | Marketing Agent | [marketing.md](.github/agents/marketing.md) |
 
 ## Agent Specializations
 
@@ -275,6 +288,54 @@ done
 - DevOps best practices
 
 **[Full Specification →](.github/agents/devops-cicd.md)**
+
+---
+
+### 9. UI/UX Architect Agent
+**Focus**: User interface design, user experience optimization, accessibility
+
+**Key Responsibilities**:
+- Visual workflow builder interface design
+- User experience optimization
+- Accessibility compliance (WCAG 2.1 AA)
+- Design system creation and maintenance
+- Responsive design
+- Usability testing
+- Interactive prototypes
+
+**[Full Specification →](.github/agents/ui-ux-architect.md)**
+
+---
+
+### 10. Product Manager Agent
+**Focus**: Project tracking, planning, roadmap management
+
+**Key Responsibilities**:
+- Product strategy and vision
+- Roadmap management
+- Backlog prioritization
+- Sprint planning and execution
+- Stakeholder communication
+- Metrics and analytics
+- User feedback management
+
+**[Full Specification →](.github/agents/product-manager.md)**
+
+---
+
+### 11. Marketing Agent
+**Focus**: README maintenance, product messaging, content strategy
+
+**Key Responsibilities**:
+- README.md maintenance and accuracy
+- Product messaging and positioning
+- Content strategy and creation
+- Documentation synchronization
+- Community engagement
+- Release announcements
+- Feature highlights
+
+**[Full Specification →](.github/agents/marketing.md)**
 
 ---
 

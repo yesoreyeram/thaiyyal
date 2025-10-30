@@ -1,3 +1,9 @@
+---
+name: Observability Agent
+description: Monitoring, logging, tracing, metrics, and alerting for enterprise-grade observability
+version: 1.0
+---
+
 # Observability Agent
 
 ## Agent Identity
