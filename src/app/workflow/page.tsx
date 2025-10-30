@@ -57,7 +57,7 @@ function NumberNode({ id, data }: NodeProps<NodeData>) {
       <Handle type="target" position={Position.Left} />
       <div className="text-xs font-medium">Number</div>
       <input
-        value={typeof data?.value === 'number' ? data.value : 0}
+        value={typeof data?.value === "number" ? data.value : 0}
         type="number"
         onChange={onChange}
         className="mt-1 w-32 border px-2 py-1 rounded bg-gray-800 text-white border-gray-600"
@@ -80,7 +80,7 @@ function OperationNode({ id, data }: NodeProps<NodeData>) {
       <Handle type="target" position={Position.Left} />
       <div className="text-xs font-medium">Operation</div>
       <select
-        value={typeof data?.op === 'string' ? data.op : "add"}
+        value={typeof data?.op === "string" ? data.op : "add"}
         onChange={onChange}
         className="mt-1 w-32 border px-2 py-1 rounded bg-gray-800 text-white border-gray-600"
       >
@@ -107,7 +107,7 @@ function VizNode({ id, data }: NodeProps<NodeData>) {
       <Handle type="target" position={Position.Left} />
       <div className="text-xs font-medium">Visualization</div>
       <select
-        value={typeof data?.mode === 'string' ? data.mode : "text"}
+        value={typeof data?.mode === "string" ? data.mode : "text"}
         onChange={onChange}
         className="mt-1 w-32 border px-2 py-1 rounded bg-gray-800 text-white border-gray-600"
       >
@@ -157,59 +157,178 @@ const nodeCategories = [
   {
     name: "Input/Output",
     nodes: [
-      { type: "numberNode", label: "Number", color: "bg-blue-600", defaultData: { value: 0 } },
-      { type: "textInputNode", label: "Text Input", color: "bg-green-600", defaultData: { text: "" } },
-      { type: "httpNode", label: "HTTP", color: "bg-purple-600", defaultData: { url: "" } },
-      { type: "vizNode", label: "Visualization", color: "bg-indigo-600", defaultData: { mode: "text" } },
+      {
+        type: "numberNode",
+        label: "Number",
+        color: "bg-blue-600",
+        defaultData: { value: 0 },
+      },
+      {
+        type: "textInputNode",
+        label: "Text Input",
+        color: "bg-green-600",
+        defaultData: { text: "" },
+      },
+      {
+        type: "httpNode",
+        label: "HTTP",
+        color: "bg-purple-600",
+        defaultData: { url: "" },
+      },
+      {
+        type: "vizNode",
+        label: "Visualization",
+        color: "bg-indigo-600",
+        defaultData: { mode: "text" },
+      },
     ],
   },
   {
     name: "Operations",
     nodes: [
-      { type: "opNode", label: "Math Op", color: "bg-yellow-600", defaultData: { op: "add" } },
-      { type: "textOpNode", label: "Text Op", color: "bg-green-600", defaultData: { text_op: "uppercase" } },
-      { type: "transformNode", label: "Transform", color: "bg-cyan-600", defaultData: { transform_type: "to_array" } },
-      { type: "extractNode", label: "Extract", color: "bg-teal-600", defaultData: { field: "" } },
+      {
+        type: "opNode",
+        label: "Math Op",
+        color: "bg-yellow-600",
+        defaultData: { op: "add" },
+      },
+      {
+        type: "textOpNode",
+        label: "Text Op",
+        color: "bg-green-600",
+        defaultData: { text_op: "uppercase" },
+      },
+      {
+        type: "transformNode",
+        label: "Transform",
+        color: "bg-cyan-600",
+        defaultData: { transform_type: "to_array" },
+      },
+      {
+        type: "extractNode",
+        label: "Extract",
+        color: "bg-teal-600",
+        defaultData: { field: "" },
+      },
     ],
   },
   {
     name: "Control Flow",
     nodes: [
-      { type: "conditionNode", label: "Condition", color: "bg-amber-600", defaultData: { condition: ">0" } },
-      { type: "forEachNode", label: "For Each", color: "bg-orange-600", defaultData: { max_iterations: 1000 } },
-      { type: "whileLoopNode", label: "While Loop", color: "bg-red-600", defaultData: { condition: ">0", max_iterations: 100 } },
-      { type: "switchNode", label: "Switch", color: "bg-pink-600", defaultData: { cases: [], default_path: "default" } },
+      {
+        type: "conditionNode",
+        label: "Condition",
+        color: "bg-amber-600",
+        defaultData: { condition: ">0" },
+      },
+      {
+        type: "forEachNode",
+        label: "For Each",
+        color: "bg-orange-600",
+        defaultData: { max_iterations: 1000 },
+      },
+      {
+        type: "whileLoopNode",
+        label: "While Loop",
+        color: "bg-red-600",
+        defaultData: { condition: ">0", max_iterations: 100 },
+      },
+      {
+        type: "switchNode",
+        label: "Switch",
+        color: "bg-pink-600",
+        defaultData: { cases: [], default_path: "default" },
+      },
     ],
   },
   {
     name: "Parallel & Join",
     nodes: [
-      { type: "parallelNode", label: "Parallel", color: "bg-violet-600", defaultData: { max_concurrency: 10 } },
-      { type: "joinNode", label: "Join", color: "bg-fuchsia-600", defaultData: { join_strategy: "all" } },
-      { type: "splitNode", label: "Split", color: "bg-rose-600", defaultData: { paths: ["path1", "path2"] } },
+      {
+        type: "parallelNode",
+        label: "Parallel",
+        color: "bg-violet-600",
+        defaultData: { max_concurrency: 10 },
+      },
+      {
+        type: "joinNode",
+        label: "Join",
+        color: "bg-fuchsia-600",
+        defaultData: { join_strategy: "all" },
+      },
+      {
+        type: "splitNode",
+        label: "Split",
+        color: "bg-rose-600",
+        defaultData: { paths: ["path1", "path2"] },
+      },
     ],
   },
   {
     name: "State & Memory",
     nodes: [
-      { type: "variableNode", label: "Variable", color: "bg-sky-600", defaultData: { var_name: "", var_op: "get" } },
-      { type: "accumulatorNode", label: "Accumulator", color: "bg-blue-500", defaultData: { accum_op: "sum" } },
-      { type: "counterNode", label: "Counter", color: "bg-indigo-500", defaultData: { counter_op: "increment", delta: 1 } },
-      { type: "cacheNode", label: "Cache", color: "bg-purple-500", defaultData: { cache_op: "get", cache_key: "" } },
+      {
+        type: "variableNode",
+        label: "Variable",
+        color: "bg-sky-600",
+        defaultData: { var_name: "", var_op: "get" },
+      },
+      {
+        type: "accumulatorNode",
+        label: "Accumulator",
+        color: "bg-blue-500",
+        defaultData: { accum_op: "sum" },
+      },
+      {
+        type: "counterNode",
+        label: "Counter",
+        color: "bg-indigo-500",
+        defaultData: { counter_op: "increment", delta: 1 },
+      },
+      {
+        type: "cacheNode",
+        label: "Cache",
+        color: "bg-purple-500",
+        defaultData: { cache_op: "get", cache_key: "" },
+      },
     ],
   },
   {
     name: "Error Handling",
     nodes: [
-      { type: "retryNode", label: "Retry", color: "bg-red-500", defaultData: { max_attempts: 3, backoff_strategy: "exponential", initial_delay: "1s" } },
-      { type: "tryCatchNode", label: "Try-Catch", color: "bg-orange-500", defaultData: { continue_on_error: true } },
-      { type: "timeoutNode", label: "Timeout", color: "bg-amber-500", defaultData: { timeout: "30s", timeout_action: "error" } },
+      {
+        type: "retryNode",
+        label: "Retry",
+        color: "bg-red-500",
+        defaultData: {
+          max_attempts: 3,
+          backoff_strategy: "exponential",
+          initial_delay: "1s",
+        },
+      },
+      {
+        type: "tryCatchNode",
+        label: "Try-Catch",
+        color: "bg-orange-500",
+        defaultData: { continue_on_error: true },
+      },
+      {
+        type: "timeoutNode",
+        label: "Timeout",
+        color: "bg-amber-500",
+        defaultData: { timeout: "30s", timeout_action: "error" },
+      },
     ],
   },
   {
     name: "Utilities",
     nodes: [
-      { type: "delayNode", label: "Delay", color: "bg-gray-500", defaultData: { duration: "1s" } },
+      {
+        type: "delayNode",
+        label: "Delay",
+        color: "bg-gray-500",
+        defaultData: { duration: "1s" },
+      },
     ],
   },
 ];
@@ -268,14 +387,14 @@ function Canvas() {
   );
 
   const [nextId, setNextId] = useState(5);
-  
+
   const addNode = (type: string, defaultData: Record<string, unknown>) => {
     const id = String(nextId);
     setNextId((s) => s + 1);
     const position: XYPosition = project
       ? project({ x: 100, y: 100 })
       : { x: 400 + nextId * 10, y: 120 + (nextId % 3) * 40 };
-    
+
     const baseData: NodeData = { ...defaultData, label: `${type} ${id}` };
     const newNode: RFNode<NodeData> = { id, position, data: baseData, type };
     setNodes((nds) => nds.concat(newNode));
@@ -295,9 +414,12 @@ function Canvas() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowPayload((s) => !s)}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm transition-colors"
+            className="bg-gray-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm transition-colors"
           >
             {showPayload ? "Hide" : "View"} JSON Payload
+          </button>
+          <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded text-sm transition-colors">
+            ▶︎
           </button>
         </div>
       </div>
@@ -354,9 +476,12 @@ function Canvas() {
                 </svg>
               </button>
             </div>
-            
+
             {nodeCategories.map((category) => (
-              <div key={category.name} className="p-3 border-b border-gray-800 last:border-b-0">
+              <div
+                key={category.name}
+                className="p-3 border-b border-gray-800 last:border-b-0"
+              >
                 <div className="text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wide">
                   {category.name}
                 </div>
@@ -417,7 +542,9 @@ function Canvas() {
               </button>
             </div>
             <div className="flex-1 overflow-auto p-4">
-              <pre className="text-gray-300 text-xs">{JSON.stringify(payload, null, 2)}</pre>
+              <pre className="text-gray-300 text-xs">
+                {JSON.stringify(payload, null, 2)}
+              </pre>
             </div>
           </div>
         )}
