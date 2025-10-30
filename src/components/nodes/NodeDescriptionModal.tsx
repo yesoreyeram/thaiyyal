@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 
 interface NodeDescriptionModalProps {
   title: string;
@@ -36,7 +37,7 @@ export function NodeDescriptionModal({
     };
   }, [onClose]);
 
-  return (
+  const modalContent = (
     <div className="fixed inset-0 bg-black/30 backdrop-blur-[1px] flex items-center justify-center z-50">
       <div
         ref={modalRef}
@@ -100,4 +101,9 @@ export function NodeDescriptionModal({
       </div>
     </div>
   );
+
+  // Render modal at document body level using portal
+  return typeof document !== 'undefined' 
+    ? createPortal(modalContent, document.body)
+    : null;
 }
