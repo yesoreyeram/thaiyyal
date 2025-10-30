@@ -11,13 +11,7 @@ interface OpenWorkflowModalProps {
 export function OpenWorkflowModal({ isOpen, onClose, onSelect }: OpenWorkflowModalProps) {
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
 
-  useEffect(() => {
-    if (isOpen) {
-      loadWorkflows();
-    }
-  }, [isOpen]);
-
-  const loadWorkflows = () => {
+  const loadWorkflows = React.useCallback(() => {
     const saved = localStorage.getItem("thaiyyal_workflows");
     if (saved) {
       try {
@@ -30,7 +24,14 @@ export function OpenWorkflowModal({ isOpen, onClose, onSelect }: OpenWorkflowMod
     } else {
       setWorkflows([]);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      loadWorkflows();
+    }
+  }, [isOpen, loadWorkflows]);
 
   const handleDelete = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();

@@ -377,11 +377,17 @@ function WorkflowEditor() {
         if (workflow) {
           setNodes(workflow.data.nodes as RFNode<NodeData>[]);
           setEdges(workflow.data.edges as RFEdge[]);
-          setWorkflowTitle(workflow.title);
-          setHasUnsavedChanges(false);
+          // Use a separate effect or initial state
+          if (workflowTitle === "Untitled Workflow") {
+            setWorkflowTitle(workflow.title);
+          }
+          if (hasUnsavedChanges) {
+            setHasUnsavedChanges(false);
+          }
         }
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [workflowId, setNodes, setEdges]);
 
   const onConnect = useCallback(
@@ -554,7 +560,7 @@ function WorkflowEditor() {
     };
 
     const saved = localStorage.getItem("thaiyyal_workflows");
-    let workflows: Workflow[] = saved ? JSON.parse(saved) : [];
+    const workflows: Workflow[] = saved ? JSON.parse(saved) : [];
     
     const existingIndex = workflows.findIndex((w) => w.id === workflowId);
     if (existingIndex >= 0) {

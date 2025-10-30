@@ -2,8 +2,8 @@ export interface Workflow {
   id: string;
   title: string;
   data: {
-    nodes: any[];
-    edges: any[];
+    nodes: unknown[];
+    edges: unknown[];
   };
   createdAt: string;
   updatedAt: string;
