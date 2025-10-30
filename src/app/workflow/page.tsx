@@ -37,6 +37,8 @@ import {
   RetryNode,
   TryCatchNode,
   TimeoutNode,
+  NodeContextMenu,
+  DeleteConfirmDialog,
 } from "../../components/nodes";
 import { AppNavBar } from "../../components/AppNavBar";
 import { WorkflowNavBar } from "../../components/WorkflowNavBar";
@@ -47,8 +49,23 @@ import { useRouter } from "next/navigation";
 
 type NodeData = Record<string, unknown>;
 
+// Extended props to include onShowOptions
+type NodePropsWithOptions = NodeProps<NodeData> & {
+  onShowOptions?: (x: number, y: number) => void;
+};
+
+// Higher-order component to add context menu to nodes
+const withContextMenu = (Component: React.ComponentType<NodePropsWithOptions>, handleContextMenu: (nodeId: string, x: number, y: number) => void) => {
+  return (props: NodeProps<NodeData>) => {
+    const onShowOptions = (x: number, y: number) => {
+      handleContextMenu(props.id, x, y);
+    };
+    return <Component {...(props as NodePropsWithOptions)} onShowOptions={onShowOptions} />;
+  };
+};
+
 // Original three node components - Updated to use NodeWrapper
-function NumberNode({ id, data, ...props }: NodeProps<NodeData>) {
+function NumberNode({ id, data, onShowOptions, ...props }: NodePropsWithOptions) {
   const { setNodes } = useReactFlow();
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = Number(e.target.value);
@@ -70,7 +87,6 @@ function NumberNode({ id, data, ...props }: NodeProps<NodeData>) {
   // Import NodeWrapper at top
   const { NodeWrapper, getNodeInfo } = require("../../components/nodes");
   const nodeInfo = getNodeInfo("numberNode");
-  const onShowOptions = (props as any).onShowOptions;
 
   return (
     <NodeWrapper
@@ -92,7 +108,7 @@ function NumberNode({ id, data, ...props }: NodeProps<NodeData>) {
   );
 }
 
-function OperationNode({ id, data, ...props }: NodeProps<NodeData>) {
+function OperationNode({ id, data, onShowOptions, ...props }: NodePropsWithOptions) {
   const { setNodes } = useReactFlow();
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const op = e.target.value;
@@ -111,7 +127,6 @@ function OperationNode({ id, data, ...props }: NodeProps<NodeData>) {
 
   const { NodeWrapper, getNodeInfo } = require("../../components/nodes");
   const nodeInfo = getNodeInfo("opNode");
-  const onShowOptions = (props as any).onShowOptions;
 
   return (
     <NodeWrapper
@@ -137,7 +152,7 @@ function OperationNode({ id, data, ...props }: NodeProps<NodeData>) {
   );
 }
 
-function VizNode({ id, data, ...props }: NodeProps<NodeData>) {
+function VizNode({ id, data, onShowOptions, ...props }: NodePropsWithOptions) {
   const { setNodes } = useReactFlow();
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const mode = e.target.value;
@@ -156,7 +171,6 @@ function VizNode({ id, data, ...props }: NodeProps<NodeData>) {
 
   const { NodeWrapper, getNodeInfo } = require("../../components/nodes");
   const nodeInfo = getNodeInfo("vizNode");
-  const onShowOptions = (props as any).onShowOptions;
 
   return (
     <NodeWrapper
@@ -401,12 +415,18 @@ function Canvas() {
   const [showPayload, setShowPayload] = useState(false);
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [workflowTitle, setWorkflowTitle] = useState("Untitled Workflow");
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; nodeId: string } | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{ nodeId: string; nodeName: string } | null>(null);
   const { project, getNodes } = useReactFlow();
 
   const onConnect = useCallback(
     (params: Connection) => setEdges((eds: RFEdge[]) => addEdge(params, eds)),
     [setEdges]
   );
+
+  const handleNodeContextMenu = useCallback((nodeId: string, x: number, y: number) => {
+    setContextMenu({ x, y, nodeId });
+  }, []);
 
   const payload = useMemo(
     () => ({
@@ -422,31 +442,31 @@ function Canvas() {
 
   const nodeTypes = useMemo(
     () => ({
-      numberNode: NumberNode,
-      opNode: OperationNode,
-      vizNode: VizNode,
-      textInputNode: TextInputNode,
-      textOpNode: TextOperationNode,
-      httpNode: HttpNode,
-      conditionNode: ConditionNode,
-      forEachNode: ForEachNode,
-      whileLoopNode: WhileLoopNode,
-      variableNode: VariableNode,
-      extractNode: ExtractNode,
-      transformNode: TransformNode,
-      accumulatorNode: AccumulatorNode,
-      counterNode: CounterNode,
-      switchNode: SwitchNode,
-      parallelNode: ParallelNode,
-      joinNode: JoinNode,
-      splitNode: SplitNode,
-      delayNode: DelayNode,
-      cacheNode: CacheNode,
-      retryNode: RetryNode,
-      tryCatchNode: TryCatchNode,
-      timeoutNode: TimeoutNode,
+      numberNode: withContextMenu(NumberNode, handleNodeContextMenu),
+      opNode: withContextMenu(OperationNode, handleNodeContextMenu),
+      vizNode: withContextMenu(VizNode, handleNodeContextMenu),
+      textInputNode: withContextMenu(TextInputNode, handleNodeContextMenu),
+      textOpNode: withContextMenu(TextOperationNode, handleNodeContextMenu),
+      httpNode: withContextMenu(HttpNode, handleNodeContextMenu),
+      conditionNode: withContextMenu(ConditionNode, handleNodeContextMenu),
+      forEachNode: withContextMenu(ForEachNode, handleNodeContextMenu),
+      whileLoopNode: withContextMenu(WhileLoopNode, handleNodeContextMenu),
+      variableNode: withContextMenu(VariableNode, handleNodeContextMenu),
+      extractNode: withContextMenu(ExtractNode, handleNodeContextMenu),
+      transformNode: withContextMenu(TransformNode, handleNodeContextMenu),
+      accumulatorNode: withContextMenu(AccumulatorNode, handleNodeContextMenu),
+      counterNode: withContextMenu(CounterNode, handleNodeContextMenu),
+      switchNode: withContextMenu(SwitchNode, handleNodeContextMenu),
+      parallelNode: withContextMenu(ParallelNode, handleNodeContextMenu),
+      joinNode: withContextMenu(JoinNode, handleNodeContextMenu),
+      splitNode: withContextMenu(SplitNode, handleNodeContextMenu),
+      delayNode: withContextMenu(DelayNode, handleNodeContextMenu),
+      cacheNode: withContextMenu(CacheNode, handleNodeContextMenu),
+      retryNode: withContextMenu(RetryNode, handleNodeContextMenu),
+      tryCatchNode: withContextMenu(TryCatchNode, handleNodeContextMenu),
+      timeoutNode: withContextMenu(TimeoutNode, handleNodeContextMenu),
     }),
-    []
+    [handleNodeContextMenu]
   );
 
   const [nextId, setNextId] = useState(5);
@@ -488,10 +508,15 @@ function Canvas() {
     const id = String(nextId);
     setNextId((s) => s + 1);
     
-    // Get base position at center of viewport
+    // Get viewport dimensions (accounting for nav bars: 14px app + 12px workflow + 7px status = 33px total)
+    const navHeight = 112; // Total height of both navs + status bar
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight - navHeight;
+    
+    // Get base position at center of visible viewport
     const basePosition: XYPosition = project
-      ? project({ x: window.innerWidth / 2 - 75, y: window.innerHeight / 2 - 40 })
-      : { x: 400, y: 120 };
+      ? project({ x: viewportWidth / 2 - 75, y: viewportHeight / 2 })
+      : { x: 400, y: 200 };
     
     // Find non-overlapping position
     const position = findNonOverlappingPosition(basePosition);
@@ -521,6 +546,22 @@ function Canvas() {
   const handleRun = () => {
     // TODO: Run workflow
     console.log('Run workflow', payload);
+  };
+
+  const handleDeleteNode = (nodeId: string) => {
+    const node = nodes.find((n) => n.id === nodeId);
+    if (node) {
+      setDeleteConfirm({ nodeId, nodeName: String(node.data?.label || `Node ${nodeId}`) });
+    }
+    setContextMenu(null);
+  };
+
+  const confirmDelete = () => {
+    if (deleteConfirm) {
+      setNodes((nds) => nds.filter((n) => n.id !== deleteConfirm.nodeId));
+      setEdges((eds) => eds.filter((e) => e.source !== deleteConfirm.nodeId && e.target !== deleteConfirm.nodeId));
+    }
+    setDeleteConfirm(null);
   };
 
   return (
@@ -584,6 +625,25 @@ function Canvas() {
           payload={payload}
         />
       </div>
+
+      {/* Context Menu */}
+      {contextMenu && (
+        <NodeContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          onClose={() => setContextMenu(null)}
+          onDelete={() => handleDeleteNode(contextMenu.nodeId)}
+        />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {deleteConfirm && (
+        <DeleteConfirmDialog
+          nodeName={deleteConfirm.nodeName}
+          onConfirm={confirmDelete}
+          onCancel={() => setDeleteConfirm(null)}
+        />
+      )}
 
       {/* Bottom Status Bar */}
       <WorkflowStatusBar

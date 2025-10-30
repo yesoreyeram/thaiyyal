@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { useRouter } from "next/navigation";
 
 interface AppNavBarProps {
   onNewWorkflow: () => void;
@@ -7,24 +8,34 @@ interface AppNavBarProps {
 }
 
 export function AppNavBar({ onNewWorkflow, onOpenWorkflow }: AppNavBarProps) {
+  const router = useRouter();
+
+  const handleTitleClick = () => {
+    router.push('/');
+  };
+
   return (
-    <div className="h-14 bg-gray-900 border-b border-gray-800 flex items-center justify-between px-6">
+    <div className="h-14 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-6">
       <div className="flex items-center gap-3">
-        <h1 className="text-xl font-bold text-white flex items-center gap-2">
+        <button 
+          onClick={handleTitleClick}
+          className="text-xl font-bold text-white flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer"
+          title="Go to Home"
+        >
           <span className="text-2xl">⚡</span>
           <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
             Thaiyyal
           </span>
-        </h1>
-        <span className="text-xs text-gray-500 font-medium px-2 py-1 bg-gray-800 rounded-md">
+        </button>
+        <span className="text-xs text-gray-500 font-medium px-2 py-1 bg-gray-700 rounded-md">
           Workflow Builder
         </span>
       </div>
       
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         <button
           onClick={onOpenWorkflow}
-          className="p-2 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded-lg transition-all"
+          className="p-2 bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white rounded-lg transition-all"
           title="Open Workflow"
           aria-label="Open Workflow"
         >

@@ -1,6 +1,6 @@
 import React, { ReactNode, useState, useCallback, useRef } from "react";
 import { NodeTopBar } from "./NodeTopBar";
-import { NodeInfoPopup } from "./NodeInfoPopup";
+import { NodeDescriptionModal } from "./NodeDescriptionModal";
 import { NodeResizeHandle } from "./NodeResizeHandle";
 
 export interface NodeWrapperProps {
@@ -27,14 +27,9 @@ export function NodeWrapper({
   enableResize = true,
 }: NodeWrapperProps) {
   const [showInfo, setShowInfo] = useState(false);
-  const [infoPosition, setInfoPosition] = useState({ x: 0, y: 0 });
   const nodeRef = useRef<HTMLDivElement>(null);
 
-  const handleShowInfo = useCallback((e?: React.MouseEvent) => {
-    if (e) {
-      const rect = (e.target as HTMLElement).getBoundingClientRect();
-      setInfoPosition({ x: rect.right + 8, y: rect.top });
-    }
+  const handleShowInfo = useCallback(() => {
     setShowInfo(true);
   }, []);
 
@@ -58,7 +53,7 @@ export function NodeWrapper({
       <div className="px-2.5 py-1.5">
         <NodeTopBar
           title={title}
-          onInfo={nodeInfo ? () => handleShowInfo() : undefined}
+          onInfo={nodeInfo ? handleShowInfo : undefined}
           onOptions={handleShowOptions}
           onTitleChange={onTitleChange}
         />
@@ -66,19 +61,13 @@ export function NodeWrapper({
       </div>
       {enableResize && <NodeResizeHandle />}
       {showInfo && nodeInfo && (
-        <>
-          {/* Backdrop blur effect */}
-          <div className="fixed inset-0 bg-black/20 backdrop-blur-[1px] z-40" onClick={handleCloseInfo} />
-          <NodeInfoPopup
-            title={title}
-            description={nodeInfo.description}
-            inputs={nodeInfo.inputs}
-            outputs={nodeInfo.outputs}
-            onClose={handleCloseInfo}
-            x={infoPosition.x}
-            y={infoPosition.y}
-          />
-        </>
+        <NodeDescriptionModal
+          title={title}
+          description={nodeInfo.description}
+          inputs={nodeInfo.inputs}
+          outputs={nodeInfo.outputs}
+          onClose={handleCloseInfo}
+        />
       )}
     </div>
   );
