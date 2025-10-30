@@ -216,14 +216,14 @@ export function ExtractNode({ id, data }: NodeProps<ExtractNodeData>) {
   };
 
   return (
-    <div className="px-3 py-2 bg-gradient-to-br from-sky-700 to-sky-800 text-white shadow-lg rounded-lg border border-sky-600 hover:border-sky-500 transition-all">
+    <div className="px-3 py-2 bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Extract")}</div>
       <input
         value={String(data?.field ?? "")}
         type="text"
         onChange={onChange}
-        className="w-28 text-xs border border-sky-600 px-2 py-1 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-2 focus:ring-sky-400 focus:outline-none"
+        className="w-28 text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-400 focus:outline-none"
         placeholder="Field name"
       />
       <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
@@ -249,13 +249,13 @@ export function TransformNode({ id, data }: NodeProps<TransformNodeData>) {
   };
 
   return (
-    <div className="px-3 py-2 bg-gradient-to-br from-sky-800 to-sky-900 text-white shadow-lg rounded-lg border border-sky-700 hover:border-sky-600 transition-all">
+    <div className="px-3 py-2 bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Transform")}</div>
       <select
         value={String(data?.transform_type ?? "to_array")}
         onChange={onChange}
-        className="w-28 text-xs border border-sky-700 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-sky-400 focus:outline-none"
+        className="w-28 text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 focus:outline-none"
       >
         <option value="to_array">To Array</option>
         <option value="to_object">To Object</option>
@@ -287,13 +287,13 @@ export function AccumulatorNode({ id, data }: NodeProps<AccumulatorNodeData>) {
   };
 
   return (
-    <div className="px-3 py-2 bg-gradient-to-br from-indigo-600 to-indigo-700 text-white shadow-lg rounded-lg border border-indigo-500 hover:border-indigo-400 transition-all">
+    <div className="px-3 py-2 bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Accumulator")}</div>
       <select
         value={String(data?.accum_op ?? "sum")}
         onChange={onChange}
-        className="w-24 text-xs border border-indigo-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-indigo-400 focus:outline-none"
+        className="w-24 text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 focus:outline-none"
       >
         <option value="sum">Sum</option>
         <option value="product">Product</option>
@@ -335,13 +335,13 @@ export function CounterNode({ id, data }: NodeProps<CounterNodeData>) {
   };
 
   return (
-    <div className="px-3 py-2 bg-gradient-to-br from-indigo-700 to-indigo-800 text-white shadow-lg rounded-lg border border-indigo-600 hover:border-indigo-500 transition-all">
+    <div className="px-3 py-2 bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Counter")}</div>
       <select
         value={String(data?.counter_op ?? "increment")}
         onChange={onOpChange}
-        className="w-24 text-xs border border-indigo-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+        className="w-24 text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 focus:outline-none"
       >
         <option value="increment">Increment</option>
         <option value="decrement">Decrement</option>
@@ -353,7 +353,7 @@ export function CounterNode({ id, data }: NodeProps<CounterNodeData>) {
           value={Number(data?.delta ?? 1)}
           type="number"
           onChange={onDeltaChange}
-          className="w-24 text-xs border border-indigo-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+          className="w-24 text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 focus:outline-none"
           placeholder="Delta"
         />
       )}
@@ -383,14 +383,14 @@ export function SwitchNode({ id, data }: NodeProps<SwitchNodeData>) {
   };
 
   return (
-    <div className="px-3 py-2 bg-gradient-to-br from-orange-600 to-orange-700 text-white shadow-lg rounded-lg border border-orange-500 hover:border-orange-400 transition-all">
+    <div className="px-3 py-2 bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Switch")}</div>
       <input
         value={String(data?.default_path ?? "default")}
         type="text"
         onChange={onDefaultPathChange}
-        className="w-24 text-xs border border-orange-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-orange-400 focus:outline-none"
+        className="w-24 text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 focus:outline-none"
         placeholder="Default path"
       />
       <div className="text-xs mt-1">Cases: {data?.cases?.length ?? 0}</div>
@@ -417,14 +417,14 @@ export function ParallelNode({ id, data }: NodeProps<ParallelNodeData>) {
   };
 
   return (
-    <div className="px-3 py-2 bg-gradient-to-br from-orange-700 to-orange-800 text-white shadow-lg rounded-lg border border-orange-600 hover:border-orange-500 transition-all">
+    <div className="px-3 py-2 bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Parallel")}</div>
       <input
         value={Number(data?.max_concurrency ?? 10)}
         type="number"
         onChange={onChange}
-        className="w-24 text-xs border border-orange-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-orange-500 focus:outline-none"
+        className="w-24 text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 focus:outline-none"
         placeholder="Max concurrency"
       />
       <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
@@ -451,13 +451,13 @@ export function JoinNode({ id, data }: NodeProps<JoinNodeData>) {
   };
 
   return (
-    <div className="px-3 py-2 bg-gradient-to-br from-orange-800 to-orange-900 text-white shadow-lg rounded-lg border border-orange-700 hover:border-orange-600 transition-all">
+    <div className="px-3 py-2 bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Join")}</div>
       <select
         value={String(data?.join_strategy ?? "all")}
         onChange={onChange}
-        className="w-24 text-xs border border-orange-700 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-orange-600 focus:outline-none"
+        className="w-24 text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 focus:outline-none"
       >
         <option value="all">All</option>
         <option value="any">Any</option>
@@ -475,7 +475,7 @@ type SplitNodeData = {
 
 export function SplitNode({ data }: NodeProps<SplitNodeData>) {
   return (
-    <div className="px-3 py-2 bg-gradient-to-br from-pink-600 to-pink-700 text-white shadow-lg rounded-lg border border-pink-500 hover:border-pink-400 transition-all">
+    <div className="px-3 py-2 bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Split")}</div>
       <div className="text-xs mt-1">Paths: {data?.paths?.length ?? 2}</div>
@@ -502,14 +502,14 @@ export function DelayNode({ id, data }: NodeProps<DelayNodeData>) {
   };
 
   return (
-    <div className="px-3 py-2 bg-gradient-to-br from-pink-700 to-pink-800 text-white shadow-lg rounded-lg border border-pink-600 hover:border-pink-500 transition-all">
+    <div className="px-3 py-2 bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Delay")}</div>
       <input
         value={String(data?.duration ?? "1s")}
         type="text"
         onChange={onChange}
-        className="w-24 text-xs border border-pink-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-pink-500 focus:outline-none"
+        className="w-24 text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 focus:outline-none"
         placeholder="1s, 100ms..."
       />
       <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
@@ -555,13 +555,13 @@ export function CacheNode({ id, data }: NodeProps<CacheNodeData>) {
   };
 
   return (
-    <div className="px-3 py-2 bg-gradient-to-br from-pink-800 to-pink-900 text-white shadow-lg rounded-lg border border-pink-700 hover:border-pink-600 transition-all">
+    <div className="px-3 py-2 bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Cache")}</div>
       <select
         value={String(data?.cache_op ?? "get")}
         onChange={onOpChange}
-        className="w-24 text-xs border border-pink-700 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-pink-600 focus:outline-none"
+        className="w-24 text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 focus:outline-none"
       >
         <option value="get">Get</option>
         <option value="set">Set</option>
@@ -571,7 +571,7 @@ export function CacheNode({ id, data }: NodeProps<CacheNodeData>) {
         value={String(data?.cache_key ?? "")}
         type="text"
         onChange={onKeyChange}
-        className="w-24 text-xs border border-pink-700 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-pink-600 focus:outline-none"
+        className="w-24 text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 focus:outline-none"
         placeholder="Cache key"
       />
       {data?.cache_op === "set" && (
@@ -579,7 +579,7 @@ export function CacheNode({ id, data }: NodeProps<CacheNodeData>) {
           value={String(data?.ttl ?? "5m")}
           type="text"
           onChange={onTTLChange}
-          className="w-24 text-xs border border-pink-700 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-pink-600 focus:outline-none"
+          className="w-24 text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 focus:outline-none"
           placeholder="TTL (5m, 1h)"
         />
       )}
@@ -630,20 +630,20 @@ export function RetryNode({ id, data }: NodeProps<RetryNodeData>) {
   };
 
   return (
-    <div className="px-3 py-2 bg-gradient-to-br from-red-600 to-red-700 text-white shadow-lg rounded-lg border border-red-500 hover:border-red-400 transition-all">
+    <div className="px-3 py-2 bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Retry")}</div>
       <input
         value={Number(data?.max_attempts ?? 3)}
         type="number"
         onChange={onAttemptsChange}
-        className="w-24 text-xs border border-red-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-red-400 focus:outline-none"
+        className="w-24 text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 focus:outline-none"
         placeholder="Max attempts"
       />
       <select
         value={String(data?.backoff_strategy ?? "exponential")}
         onChange={onStrategyChange}
-        className="w-24 text-xs border border-red-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-red-400 focus:outline-none"
+        className="w-24 text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 focus:outline-none"
       >
         <option value="exponential">Exponential</option>
         <option value="linear">Linear</option>
@@ -653,7 +653,7 @@ export function RetryNode({ id, data }: NodeProps<RetryNodeData>) {
         value={String(data?.initial_delay ?? "1s")}
         type="text"
         onChange={onInitialDelayChange}
-        className="w-24 text-xs border border-red-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-red-400 focus:outline-none"
+        className="w-24 text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 focus:outline-none"
         placeholder="Initial delay"
       />
       <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
@@ -681,7 +681,7 @@ export function TryCatchNode({ id, data }: NodeProps<TryCatchNodeData>) {
   };
 
   return (
-    <div className="px-3 py-2 bg-gradient-to-br from-red-700 to-red-800 text-white shadow-lg rounded-lg border border-red-600 hover:border-red-500 transition-all">
+    <div className="px-3 py-2 bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Try-Catch")}</div>
       <label className="flex items-center gap-1 mt-1">
@@ -726,20 +726,20 @@ export function TimeoutNode({ id, data }: NodeProps<TimeoutNodeData>) {
   };
 
   return (
-    <div className="px-3 py-2 bg-gradient-to-br from-red-800 to-red-900 text-white shadow-lg rounded-lg border border-red-700 hover:border-red-600 transition-all">
+    <div className="px-3 py-2 bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Timeout")}</div>
       <input
         value={String(data?.timeout ?? "30s")}
         type="text"
         onChange={onTimeoutChange}
-        className="w-24 text-xs border border-red-700 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-red-600 focus:outline-none"
+        className="w-24 text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 focus:outline-none"
         placeholder="30s, 5m..."
       />
       <select
         value={String(data?.timeout_action ?? "error")}
         onChange={onActionChange}
-        className="w-24 text-xs border border-red-700 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-red-600 focus:outline-none"
+        className="w-24 text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 focus:outline-none"
       >
         <option value="error">Error</option>
         <option value="continue_with_partial">Continue with partial</option>
