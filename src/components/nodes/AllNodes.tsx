@@ -40,15 +40,14 @@ export function ForEachNode({ id, data, ...props }: NodeProps<ForEachNodeData>) 
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
       onTitleChange={handleTitleChange}
-      className="bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all"
     >
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <input
         value={Number(data?.max_iterations ?? 1000)}
         type="number"
         onChange={onChange}
-        className="w-24 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
-        placeholder="Max iterations"
+        className="w-20 text-[10px] leading-tight border border-gray-600 px-1 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
+        placeholder="Max iter"
         aria-label="Max iterations"
       />
       <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
@@ -100,15 +99,14 @@ export function WhileLoopNode({ id, data, ...props }: NodeProps<WhileLoopNodeDat
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
       onTitleChange={handleTitleChange}
-      className="bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all"
     >
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-0.5">
         <input
           value={String(data?.condition ?? ">0")}
           type="text"
           onChange={onConditionChange}
-          className="w-24 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-1 focus:ring-blue-400 focus:outline-none"
+          className="w-20 text-[10px] leading-tight border border-gray-600 px-1 py-0.5 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-1 focus:ring-blue-400 focus:outline-none"
           placeholder="Condition"
           aria-label="Loop condition"
         />
@@ -116,8 +114,8 @@ export function WhileLoopNode({ id, data, ...props }: NodeProps<WhileLoopNodeDat
           value={Number(data?.max_iterations ?? 100)}
           type="number"
           onChange={onMaxIterChange}
-          className="w-24 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
-          placeholder="Max iterations"
+          className="w-20 text-[10px] leading-tight border border-gray-600 px-1 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
+          placeholder="Max iter"
           aria-label="Max iterations"
         />
       </div>
@@ -172,21 +170,20 @@ export function VariableNode({ id, data, ...props }: NodeProps<VariableNodeData>
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
       onTitleChange={handleTitleChange}
-      className="bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all"
     >
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-0.5">
         <input
           value={String(data?.var_name ?? "")}
           type="text"
           onChange={onNameChange}
-          className="w-20 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-1 focus:ring-blue-400 focus:outline-none"
+          className="w-16 text-[10px] leading-tight border border-gray-600 px-1 py-0.5 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-1 focus:ring-blue-400 focus:outline-none"
           placeholder="Name"
         />
         <select
           value={String(data?.var_op ?? "get")}
           onChange={onOpChange}
-          className="w-16 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-1 focus:ring-blue-400 focus:outline-none"
+          className="w-12 text-[10px] leading-tight border border-gray-600 px-1 py-0.5 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-1 focus:ring-blue-400 focus:outline-none"
         >
           <option value="get">Get</option>
           <option value="set">Set</option>
@@ -216,7 +213,7 @@ export function ExtractNode({ id, data }: NodeProps<ExtractNodeData>) {
   };
 
   return (
-    <div className="px-3 py-2 bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all">
+    <div className="px-2 py-1 bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Extract")}</div>
       <input
@@ -249,7 +246,7 @@ export function TransformNode({ id, data }: NodeProps<TransformNodeData>) {
   };
 
   return (
-    <div className="px-3 py-2 bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all">
+    <div className="px-2 py-1 bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Transform")}</div>
       <select
@@ -287,7 +284,7 @@ export function AccumulatorNode({ id, data }: NodeProps<AccumulatorNodeData>) {
   };
 
   return (
-    <div className="px-3 py-2 bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all">
+    <div className="px-2 py-1 bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Accumulator")}</div>
       <select
@@ -335,7 +332,7 @@ export function CounterNode({ id, data }: NodeProps<CounterNodeData>) {
   };
 
   return (
-    <div className="px-3 py-2 bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all">
+    <div className="px-2 py-1 bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Counter")}</div>
       <select
@@ -383,7 +380,7 @@ export function SwitchNode({ id, data }: NodeProps<SwitchNodeData>) {
   };
 
   return (
-    <div className="px-3 py-2 bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all">
+    <div className="px-2 py-1 bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Switch")}</div>
       <input
@@ -417,7 +414,7 @@ export function ParallelNode({ id, data }: NodeProps<ParallelNodeData>) {
   };
 
   return (
-    <div className="px-3 py-2 bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all">
+    <div className="px-2 py-1 bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Parallel")}</div>
       <input
@@ -451,7 +448,7 @@ export function JoinNode({ id, data }: NodeProps<JoinNodeData>) {
   };
 
   return (
-    <div className="px-3 py-2 bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all">
+    <div className="px-2 py-1 bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Join")}</div>
       <select
@@ -475,7 +472,7 @@ type SplitNodeData = {
 
 export function SplitNode({ data }: NodeProps<SplitNodeData>) {
   return (
-    <div className="px-3 py-2 bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all">
+    <div className="px-2 py-1 bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Split")}</div>
       <div className="text-xs mt-1">Paths: {data?.paths?.length ?? 2}</div>
@@ -502,7 +499,7 @@ export function DelayNode({ id, data }: NodeProps<DelayNodeData>) {
   };
 
   return (
-    <div className="px-3 py-2 bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all">
+    <div className="px-2 py-1 bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Delay")}</div>
       <input
@@ -555,7 +552,7 @@ export function CacheNode({ id, data }: NodeProps<CacheNodeData>) {
   };
 
   return (
-    <div className="px-3 py-2 bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all">
+    <div className="px-2 py-1 bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Cache")}</div>
       <select
@@ -630,7 +627,7 @@ export function RetryNode({ id, data }: NodeProps<RetryNodeData>) {
   };
 
   return (
-    <div className="px-3 py-2 bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all">
+    <div className="px-2 py-1 bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Retry")}</div>
       <input
@@ -681,7 +678,7 @@ export function TryCatchNode({ id, data }: NodeProps<TryCatchNodeData>) {
   };
 
   return (
-    <div className="px-3 py-2 bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all">
+    <div className="px-2 py-1 bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Try-Catch")}</div>
       <label className="flex items-center gap-1 mt-1">
@@ -726,7 +723,7 @@ export function TimeoutNode({ id, data }: NodeProps<TimeoutNodeData>) {
   };
 
   return (
-    <div className="px-3 py-2 bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all">
+    <div className="px-2 py-1 bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all">
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Timeout")}</div>
       <input

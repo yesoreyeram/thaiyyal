@@ -103,7 +103,7 @@ function NumberNode({ id, data, onShowOptions, onOpenInfo, ...props }: NodeProps
       onShowOptions={onShowOptions}
       onTitleChange={handleTitleChange}
       onOpenInfo={onOpenInfo}
-      className="bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all"
+      
     >
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <input
@@ -143,7 +143,7 @@ function OperationNode({ id, data, onShowOptions, ...props }: NodePropsWithOptio
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
       onTitleChange={handleTitleChange}
-      className="bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all"
+      
     >
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <select
@@ -187,7 +187,7 @@ function VizNode({ id, data, onShowOptions, ...props }: NodePropsWithOptions) {
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
       onTitleChange={handleTitleChange}
-      className="bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all"
+      
     >
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <select

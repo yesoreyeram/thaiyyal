@@ -54,8 +54,8 @@ export function NodeWrapper({
   }, [onShowOptions]);
 
   return (
-    <div ref={nodeRef} className={`relative ${className}`}>
-      <div className="px-2.5 py-1">
+    <div ref={nodeRef} className={`relative bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all ${className}`}>
+      <div className="px-2 py-1">
         <NodeTopBar
           title={title}
           onInfo={nodeInfo ? handleShowInfo : undefined}
