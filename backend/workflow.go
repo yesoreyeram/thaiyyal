@@ -97,6 +97,9 @@ NodeTypeCache    NodeType = "cache"    // Cache get/set operations
 NodeTypeRetry    NodeType = "retry"     // Retry with backoff
 NodeTypeTryCatch NodeType = "try_catch" // Error handling with fallback
 NodeTypeTimeout  NodeType = "timeout"   // Enforce time limits
+// Context nodes (orphan nodes that define workflow-level values)
+NodeTypeContextVariable NodeType = "context_variable" // Define a mutable variable
+NodeTypeContextConstant NodeType = "context_constant" // Define an immutable constant
 )
 
 // Payload represents the JSON payload from the frontend
@@ -160,6 +163,9 @@ FallbackValue    interface{} `json:"fallback_value,omitempty"`    // for try-cat
 ContinueOnError  *bool       `json:"continue_on_error,omitempty"` // for try-catch node
 ErrorOutputPath  *string     `json:"error_output_path,omitempty"` // for try-catch node
 TimeoutAction    *string     `json:"timeout_action,omitempty"`    // for timeout node (error/continue_with_partial)
+// Context node fields
+ContextName  *string     `json:"context_name,omitempty"`  // for context nodes (name of the variable/constant)
+ContextValue interface{} `json:"context_value,omitempty"` // for context nodes (value of the variable/constant)
 }
 
 // SwitchCase represents a case in a switch node
@@ -211,6 +217,9 @@ counter    float64                // stores counter value
 // Cache management
 cache      map[string]*CacheEntry // stores cached values with TTL
 cacheMutex sync.RWMutex           // protects cache access
+// Context for template interpolation (populated by context nodes)
+contextVariables map[string]interface{} // workflow-level variables from context_variable nodes
+contextConstants map[string]interface{} // workflow-level constants from context_constant nodes
 }
 
 // ============================================================================
@@ -233,13 +242,15 @@ return nil, fmt.Errorf("failed to parse payload: %w", err)
 }
 
 return &Engine{
-nodes:       payload.Nodes,
-edges:       payload.Edges,
-nodeResults: make(map[string]interface{}),
-variables:   make(map[string]interface{}),
-accumulator: nil,
-counter:     0,
-cache:       make(map[string]*CacheEntry),
+nodes:            payload.Nodes,
+edges:            payload.Edges,
+nodeResults:      make(map[string]interface{}),
+variables:        make(map[string]interface{}),
+accumulator:      nil,
+counter:          0,
+cache:            make(map[string]*CacheEntry),
+contextVariables: make(map[string]interface{}),
+contextConstants: make(map[string]interface{}),
 }, nil
 }
 
