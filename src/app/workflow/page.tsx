@@ -49,23 +49,31 @@ import { useRouter } from "next/navigation";
 
 type NodeData = Record<string, unknown>;
 
-// Extended props to include onShowOptions
+// Extended props to include onShowOptions and onOpenInfo
 type NodePropsWithOptions = NodeProps<NodeData> & {
   onShowOptions?: (x: number, y: number) => void;
+  onOpenInfo?: () => void;
 };
 
-// Higher-order component to add context menu to nodes
-const withContextMenu = (Component: React.ComponentType<NodePropsWithOptions>, handleContextMenu: (nodeId: string, x: number, y: number) => void) => {
+// Higher-order component to add context menu and palette close to nodes
+const withContextMenu = (
+  Component: React.ComponentType<NodePropsWithOptions>, 
+  handleContextMenu: (nodeId: string, x: number, y: number) => void,
+  closePalette: () => void
+) => {
   return (props: NodeProps<NodeData>) => {
     const onShowOptions = (x: number, y: number) => {
       handleContextMenu(props.id, x, y);
     };
-    return <Component {...(props as NodePropsWithOptions)} onShowOptions={onShowOptions} />;
+    const onOpenInfo = () => {
+      closePalette();
+    };
+    return <Component {...(props as NodePropsWithOptions)} onShowOptions={onShowOptions} onOpenInfo={onOpenInfo} />;
   };
 };
 
 // Original three node components - Updated to use NodeWrapper
-function NumberNode({ id, data, onShowOptions, ...props }: NodePropsWithOptions) {
+function NumberNode({ id, data, onShowOptions, onOpenInfo, ...props }: NodePropsWithOptions) {
   const { setNodes } = useReactFlow();
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = Number(e.target.value);
@@ -94,7 +102,8 @@ function NumberNode({ id, data, onShowOptions, ...props }: NodePropsWithOptions)
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
       onTitleChange={handleTitleChange}
-      className="bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all"
+      onOpenInfo={onOpenInfo}
+      
     >
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <input
@@ -134,7 +143,7 @@ function OperationNode({ id, data, onShowOptions, ...props }: NodePropsWithOptio
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
       onTitleChange={handleTitleChange}
-      className="bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all"
+      
     >
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <select
@@ -178,7 +187,7 @@ function VizNode({ id, data, onShowOptions, ...props }: NodePropsWithOptions) {
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
       onTitleChange={handleTitleChange}
-      className="bg-gray-800 text-white shadow-lg rounded-lg border border-gray-700 hover:border-gray-600 transition-all"
+      
     >
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
       <select
@@ -442,29 +451,29 @@ function Canvas() {
 
   const nodeTypes = useMemo(
     () => ({
-      numberNode: withContextMenu(NumberNode, handleNodeContextMenu),
-      opNode: withContextMenu(OperationNode, handleNodeContextMenu),
-      vizNode: withContextMenu(VizNode, handleNodeContextMenu),
-      textInputNode: withContextMenu(TextInputNode, handleNodeContextMenu),
-      textOpNode: withContextMenu(TextOperationNode, handleNodeContextMenu),
-      httpNode: withContextMenu(HttpNode, handleNodeContextMenu),
-      conditionNode: withContextMenu(ConditionNode, handleNodeContextMenu),
-      forEachNode: withContextMenu(ForEachNode, handleNodeContextMenu),
-      whileLoopNode: withContextMenu(WhileLoopNode, handleNodeContextMenu),
-      variableNode: withContextMenu(VariableNode, handleNodeContextMenu),
-      extractNode: withContextMenu(ExtractNode, handleNodeContextMenu),
-      transformNode: withContextMenu(TransformNode, handleNodeContextMenu),
-      accumulatorNode: withContextMenu(AccumulatorNode, handleNodeContextMenu),
-      counterNode: withContextMenu(CounterNode, handleNodeContextMenu),
-      switchNode: withContextMenu(SwitchNode, handleNodeContextMenu),
-      parallelNode: withContextMenu(ParallelNode, handleNodeContextMenu),
-      joinNode: withContextMenu(JoinNode, handleNodeContextMenu),
-      splitNode: withContextMenu(SplitNode, handleNodeContextMenu),
-      delayNode: withContextMenu(DelayNode, handleNodeContextMenu),
-      cacheNode: withContextMenu(CacheNode, handleNodeContextMenu),
-      retryNode: withContextMenu(RetryNode, handleNodeContextMenu),
-      tryCatchNode: withContextMenu(TryCatchNode, handleNodeContextMenu),
-      timeoutNode: withContextMenu(TimeoutNode, handleNodeContextMenu),
+      numberNode: withContextMenu(NumberNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
+      opNode: withContextMenu(OperationNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
+      vizNode: withContextMenu(VizNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
+      textInputNode: withContextMenu(TextInputNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
+      textOpNode: withContextMenu(TextOperationNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
+      httpNode: withContextMenu(HttpNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
+      conditionNode: withContextMenu(ConditionNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
+      forEachNode: withContextMenu(ForEachNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
+      whileLoopNode: withContextMenu(WhileLoopNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
+      variableNode: withContextMenu(VariableNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
+      extractNode: withContextMenu(ExtractNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
+      transformNode: withContextMenu(TransformNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
+      accumulatorNode: withContextMenu(AccumulatorNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
+      counterNode: withContextMenu(CounterNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
+      switchNode: withContextMenu(SwitchNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
+      parallelNode: withContextMenu(ParallelNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
+      joinNode: withContextMenu(JoinNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
+      splitNode: withContextMenu(SplitNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
+      delayNode: withContextMenu(DelayNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
+      cacheNode: withContextMenu(CacheNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
+      retryNode: withContextMenu(RetryNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
+      tryCatchNode: withContextMenu(TryCatchNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
+      timeoutNode: withContextMenu(TimeoutNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
     }),
     [handleNodeContextMenu]
   );

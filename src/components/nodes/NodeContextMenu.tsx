@@ -71,7 +71,7 @@ export function NodeContextMenu({
           <span>Copy</span>
         </button>
       )}
-      <div className="border-t border-gray-700 my-1"></div>
+      {(onDuplicate || onCopy) && <div className="border-t border-gray-700 my-1"></div>}
       <button
         onClick={() => {
           onDelete();

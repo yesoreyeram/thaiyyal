@@ -65,7 +65,7 @@ export function NodeTopBar({ title, onInfo, onOptions, onTitleChange, compact = 
   };
 
   return (
-    <div className="flex items-center justify-between gap-1 mb-1.5 pb-1.5 border-b border-white/10 bg-black/20 -mx-3 -mt-2 px-2 pt-1.5 rounded-t-lg">
+    <div className="flex items-center justify-between gap-1 mb-0.5 pb-0.5 border-b border-white/10 bg-black/20 -mx-2 -mt-1 px-1.5 pt-0.5 rounded-t">
       {isEditing ? (
         <input
           ref={inputRef}
@@ -74,12 +74,12 @@ export function NodeTopBar({ title, onInfo, onOptions, onTitleChange, compact = 
           onChange={(e) => setEditValue(e.target.value)}
           onBlur={handleTitleSubmit}
           onKeyDown={handleKeyDown}
-          className="text-xs font-semibold text-gray-100 flex-1 min-w-0 bg-gray-900 border border-gray-600 rounded px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="text-[10px] leading-tight font-medium text-gray-100 flex-1 min-w-0 bg-gray-900 border border-gray-600 rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
           onClick={(e) => e.stopPropagation()}
         />
       ) : (
         <div 
-          className={`text-xs font-semibold text-gray-100 truncate flex-1 min-w-0 ${onTitleChange ? 'cursor-text hover:text-white' : ''}`}
+          className={`text-[10px] leading-tight font-medium text-gray-100 truncate flex-1 min-w-0 ${onTitleChange ? 'cursor-text hover:text-white' : ''}`}
           onClick={handleTitleClick}
           title={onTitleChange ? "Click to edit title" : title}
         >
@@ -90,7 +90,7 @@ export function NodeTopBar({ title, onInfo, onOptions, onTitleChange, compact = 
         {onInfo && (
           <button
             onClick={handleInfoClick}
-            className="w-4 h-4 flex items-center justify-center rounded hover:bg-white/10 transition-colors text-gray-300 hover:text-white"
+            className="w-3.5 h-3.5 flex items-center justify-center rounded hover:bg-white/10 transition-colors text-gray-300 hover:text-white"
             aria-label="Show node information"
             title="Show information"
           >
@@ -98,7 +98,7 @@ export function NodeTopBar({ title, onInfo, onOptions, onTitleChange, compact = 
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 16 16"
               fill="currentColor"
-              className="w-3 h-3"
+              className="w-2.5 h-2.5"
             >
               <path
                 fillRule="evenodd"
@@ -112,7 +112,7 @@ export function NodeTopBar({ title, onInfo, onOptions, onTitleChange, compact = 
           <button
             ref={optionsRef}
             onClick={handleOptionsClick}
-            className="w-4 h-4 flex items-center justify-center rounded hover:bg-white/10 transition-colors text-gray-300 hover:text-white"
+            className="w-3.5 h-3.5 flex items-center justify-center rounded hover:bg-white/10 transition-colors text-gray-300 hover:text-white"
             aria-label="Show node options"
             title="Show options"
           >
@@ -120,7 +120,7 @@ export function NodeTopBar({ title, onInfo, onOptions, onTitleChange, compact = 
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 16 16"
               fill="currentColor"
-              className="w-3 h-3"
+              className="w-2.5 h-2.5"
             >
               <path d="M2 8a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM6.5 8a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM12.5 6.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z" />
             </svg>
