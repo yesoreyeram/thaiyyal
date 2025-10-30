@@ -210,6 +210,7 @@ type Engine struct {
 nodes       []Node
 edges       []Edge
 nodeResults map[string]interface{}
+config      Config // configuration for execution limits and security
 // State management
 variables  map[string]interface{} // stores variables across nodes
 accumulator interface{}            // stores accumulated value
@@ -245,6 +246,7 @@ return &Engine{
 nodes:            payload.Nodes,
 edges:            payload.Edges,
 nodeResults:      make(map[string]interface{}),
+config:           DefaultConfig(),
 variables:        make(map[string]interface{}),
 accumulator:      nil,
 counter:          0,
@@ -253,6 +255,29 @@ contextVariables: make(map[string]interface{}),
 contextConstants: make(map[string]interface{}),
 }, nil
 }
+
+// NewEngineWithConfig creates a new workflow engine with custom configuration.
+// This is useful for testing or when you need non-default security settings.
+func NewEngineWithConfig(payloadJSON []byte, config Config) (*Engine, error) {
+var payload Payload
+if err := json.Unmarshal(payloadJSON, &payload); err != nil {
+return nil, fmt.Errorf("failed to parse payload: %w", err)
+}
+
+return &Engine{
+nodes:            payload.Nodes,
+edges:            payload.Edges,
+nodeResults:      make(map[string]interface{}),
+config:           config,
+variables:        make(map[string]interface{}),
+accumulator:      nil,
+counter:          0,
+cache:            make(map[string]*CacheEntry),
+contextVariables: make(map[string]interface{}),
+contextConstants: make(map[string]interface{}),
+}, nil
+}
+
 
 // Execute runs the workflow and returns the result.
 //

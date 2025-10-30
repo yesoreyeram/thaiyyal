@@ -7,6 +7,13 @@ import (
 	"testing"
 )
 
+// testConfig returns a config suitable for testing that allows internal IPs
+func testConfig() Config {
+	cfg := DefaultConfig()
+	cfg.BlockInternalIPs = false // Allow localhost/internal IPs for tests
+	return cfg
+}
+
 // Test creating engine with valid and invalid payloads
 func TestNewEngine(t *testing.T) {
 	validPayload := `{"nodes":[{"id":"1","data":{"value":10}}],"edges":[]}`
@@ -78,7 +85,7 @@ func TestAllOperations(t *testing.T) {
 			}
 			jsonData, _ := json.Marshal(payload)
 
-			engine, _ := NewEngine(jsonData)
+			engine, _ := NewEngineWithConfig(jsonData, testConfig())
 			result, err := engine.Execute()
 
 			if tt.hasError && err == nil {
@@ -301,7 +308,7 @@ func TestVisualizationModes(t *testing.T) {
 			}
 			jsonData, _ := json.Marshal(payload)
 
-			engine, _ := NewEngine(jsonData)
+			engine, _ := NewEngineWithConfig(jsonData, testConfig())
 			result, err := engine.Execute()
 			if err != nil {
 				t.Fatalf("Execute failed: %v", err)
@@ -586,7 +593,7 @@ func TestHTTPNodeSuccess(t *testing.T) {
 	}
 	jsonData, _ := json.Marshal(payload)
 
-	engine, _ := NewEngine(jsonData)
+	engine, _ := NewEngineWithConfig(jsonData, testConfig())
 	result, err := engine.Execute()
 	if err != nil {
 		t.Fatalf("Execute failed: %v", err)
@@ -614,7 +621,7 @@ func TestHTTPNodeErrorStatus(t *testing.T) {
 	}
 	jsonData, _ := json.Marshal(payload)
 
-	engine, _ := NewEngine(jsonData)
+	engine, _ := NewEngineWithConfig(jsonData, testConfig())
 	_, err := engine.Execute()
 	if err == nil {
 		t.Error("Expected error for 404 status code")
@@ -660,7 +667,7 @@ func TestHTTPNodeToTextOperation(t *testing.T) {
 	}
 	jsonData, _ := json.Marshal(payload)
 
-	engine, _ := NewEngine(jsonData)
+	engine, _ := NewEngineWithConfig(jsonData, testConfig())
 	result, err := engine.Execute()
 	if err != nil {
 		t.Fatalf("Execute failed: %v", err)
@@ -697,7 +704,7 @@ func TestHTTPNodeErrorToTextOperation(t *testing.T) {
 	}
 	jsonData, _ := json.Marshal(payload)
 
-	engine, _ := NewEngine(jsonData)
+	engine, _ := NewEngineWithConfig(jsonData, testConfig())
 	_, err := engine.Execute()
 	if err == nil {
 		t.Error("Expected error when HTTP node fails")
@@ -726,7 +733,7 @@ func TestHTTPNodeToChainedTextOperations(t *testing.T) {
 	}
 	jsonData, _ := json.Marshal(payload)
 
-	engine, _ := NewEngine(jsonData)
+	engine, _ := NewEngineWithConfig(jsonData, testConfig())
 	result, err := engine.Execute()
 	if err != nil {
 		t.Fatalf("Execute failed: %v", err)
@@ -763,7 +770,7 @@ func TestExplicitHTTPNodeType(t *testing.T) {
 	}
 	jsonData, _ := json.Marshal(payload)
 
-	engine, _ := NewEngine(jsonData)
+	engine, _ := NewEngineWithConfig(jsonData, testConfig())
 	result, err := engine.Execute()
 	if err != nil {
 		t.Fatalf("Execute failed: %v", err)
@@ -805,7 +812,7 @@ func TestHTTPNodeStatusCodes(t *testing.T) {
 			}
 			jsonData, _ := json.Marshal(payload)
 
-			engine, _ := NewEngine(jsonData)
+			engine, _ := NewEngineWithConfig(jsonData, testConfig())
 			_, err := engine.Execute()
 
 			if tt.shouldFail && err == nil {
@@ -858,7 +865,7 @@ func TestTextOperationConcatWithSeparator(t *testing.T) {
 	}
 	jsonData, _ := json.Marshal(payload)
 
-	engine, _ := NewEngine(jsonData)
+	engine, _ := NewEngineWithConfig(jsonData, testConfig())
 	result, err := engine.Execute()
 	if err != nil {
 		t.Fatalf("Execute failed: %v", err)
@@ -886,7 +893,7 @@ func TestTextOperationConcatMultiple(t *testing.T) {
 	}
 	jsonData, _ := json.Marshal(payload)
 
-	engine, _ := NewEngine(jsonData)
+	engine, _ := NewEngineWithConfig(jsonData, testConfig())
 	result, err := engine.Execute()
 	if err != nil {
 		t.Fatalf("Execute failed: %v", err)
@@ -932,7 +939,7 @@ func TestTextOperationRepeat(t *testing.T) {
 	}
 	jsonData, _ := json.Marshal(payload)
 
-	engine, _ := NewEngine(jsonData)
+	engine, _ := NewEngineWithConfig(jsonData, testConfig())
 	result, err := engine.Execute()
 	if err != nil {
 		t.Fatalf("Execute failed: %v", err)
@@ -957,7 +964,7 @@ func TestTextOperationRepeatZero(t *testing.T) {
 	}
 	jsonData, _ := json.Marshal(payload)
 
-	engine, _ := NewEngine(jsonData)
+	engine, _ := NewEngineWithConfig(jsonData, testConfig())
 	result, err := engine.Execute()
 	if err != nil {
 		t.Fatalf("Execute failed: %v", err)
@@ -1001,7 +1008,7 @@ func TestTextOperationRepeatNegative(t *testing.T) {
 	}
 	jsonData, _ := json.Marshal(payload)
 
-	engine, _ := NewEngine(jsonData)
+	engine, _ := NewEngineWithConfig(jsonData, testConfig())
 	_, err := engine.Execute()
 	if err == nil {
 		t.Error("Expected error for negative repeat_n")
@@ -1026,7 +1033,7 @@ func TestConcatAndRepeatChained(t *testing.T) {
 	}
 	jsonData, _ := json.Marshal(payload)
 
-	engine, _ := NewEngine(jsonData)
+	engine, _ := NewEngineWithConfig(jsonData, testConfig())
 	result, err := engine.Execute()
 	if err != nil {
 		t.Fatalf("Execute failed: %v", err)
@@ -1065,7 +1072,7 @@ func TestHTTPToConcat(t *testing.T) {
 	}
 	jsonData, _ := json.Marshal(payload)
 
-	engine, _ := NewEngine(jsonData)
+	engine, _ := NewEngineWithConfig(jsonData, testConfig())
 	result, err := engine.Execute()
 	if err != nil {
 		t.Fatalf("Execute failed: %v", err)
@@ -1103,7 +1110,7 @@ func TestComplexTextWorkflow(t *testing.T) {
 	}
 	jsonData, _ := json.Marshal(payload)
 
-	engine, _ := NewEngine(jsonData)
+	engine, _ := NewEngineWithConfig(jsonData, testConfig())
 	result, err := engine.Execute()
 	if err != nil {
 		t.Fatalf("Execute failed: %v", err)
