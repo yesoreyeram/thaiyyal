@@ -14,7 +14,7 @@ This directory contains the main pages for the Thaiyyal workflow builder applica
 ### Workflow Builder
 - **`workflow/page.tsx`**: Interactive workflow builder
   - Collapsible, floating node palette (hidden by default)
-  - 7 categorized node groups with 23+ node types
+  - 7 categorized node groups with 23 node types
   - Dark theme interface
   - Real-time JSON payload generation
   - Drag-and-drop workflow building
