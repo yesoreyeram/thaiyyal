@@ -1,39 +1,41 @@
-# Frontend Test Screenshots
+# Thaiyyal Screenshots
 
-This directory contains screenshots of the frontend implementation demonstrating all node types.
+This directory contains screenshots of the Thaiyyal workflow builder application.
 
-## Screenshot URLs
+## Available Screenshots
 
-The screenshots are hosted on GitHub and can be viewed at:
+### 1. Home Page (Dark Theme)
+- **File**: `00-home-page-dark.png`
+- **Shows**: Modern dark-themed home page with hero section, feature highlights, and call-to-action buttons
 
-1. **Main Application Page**
-   - URL: https://github.com/user-attachments/assets/7f06a032-8440-4b10-b614-0836f77df9eb
-   - Shows: All 23 node types available in the toolbar, interactive canvas with default workflow
+### 2. Workflow Builder - Palette Closed
+- **File**: `workflow-builder-complex.png`
+- **Shows**: Workflow builder with a complex workflow (8 nodes) showing the collapsible palette in closed state with just the + button visible
 
-2. **Comprehensive Test Page**
-   - URL: https://github.com/user-attachments/assets/af85f814-a7f4-4b56-8472-db6b15e48af9
-   - Shows: All 16 test scenarios with visual workflow demonstrations
+### 3. Workflow Builder - Palette Open
+- **File**: `workflow-builder-palette-open.png`
+- **Shows**: Workflow builder with the floating node palette open, displaying all 7 node categories with organized node types
 
-## Local Screenshots
+## Features Demonstrated
 
-If running locally, you can generate screenshots by:
+The screenshots demonstrate:
+- ✅ Modern dark theme throughout the application
+- ✅ Collapsible, floating node palette (hidden by default)
+- ✅ Categorized node organization (7 categories)
+- ✅ Professional workflow builder interface
+- ✅ Multiple node types in use (HTTP, Condition, For Each, Transform, etc.)
+- ✅ Clean navigation from home page to workflow builder
 
-1. Starting the development server:
+## Taking New Screenshots
+
+To generate new screenshots:
+
+1. Start the development server:
    ```bash
    npm run dev
    ```
 
-2. Visit the test page at: http://localhost:3000/tests
-
-3. Take screenshots of the page showing all test scenarios
-
-## Test Coverage
-
-The screenshots demonstrate:
-- ✅ 23 node types fully implemented
-- ✅ 16 comprehensive test scenarios
-- ✅ All node categories (Basic, Text, HTTP, Control Flow, State & Memory, Advanced, Error Handling)
-- ✅ Visual representation of workflows
-- ✅ JSON payload generation
-
-See [FRONTEND_TESTS.md](../FRONTEND_TESTS.md) for detailed documentation.
+2. Navigate to the home page: http://localhost:3000
+3. Click "Create New Workflow" to access the workflow builder
+4. Click the + button to open/close the node palette
+5. Take screenshots as needed

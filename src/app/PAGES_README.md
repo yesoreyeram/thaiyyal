@@ -1,30 +1,40 @@
-# Frontend Page Variants
+# Frontend Pages
 
-This directory contains multiple page variants for historical/comparison purposes:
+This directory contains the main pages for the Thaiyyal workflow builder application.
 
-## Active Page
-- **`page.tsx`**: The main, canonical workflow builder page (23,622 LOC)
-  - Full-featured implementation with all 23 node types
-  - Context menu support for node operations
-  - Right-click functionality
-  - Comprehensive node palette organized by category
+## Active Pages
 
-## Legacy/Experimental Pages (For Reference)
-- **`page-original.tsx`**: Original simplified version (7,352 LOC)
-  - Basic workflow builder with limited node types
-  - Kept for comparison and rollback if needed
-  
-- **`page-enhanced.tsx`**: Enhanced experimental version (10,711 LOC)
-  - Intermediate feature set
-  - Testing ground for new features before merging to main
+### Home Page
+- **`page.tsx`**: Main landing page
+  - Dark theme with modern design
+  - Hero section with feature highlights
+  - Navigation to workflow builder
+  - Workflow management features
 
-## Recommendation
-Once the current implementation (page.tsx) is stable and verified, consider:
-1. Archiving page-original.tsx and page-enhanced.tsx to a `legacy/` directory
-2. Or removing them entirely if no longer needed
-3. Use git history for reference to previous versions
+### Workflow Builder
+- **`workflow/page.tsx`**: Interactive workflow builder
+  - Collapsible, floating node palette (hidden by default)
+  - 7 categorized node groups with 23+ node types
+  - Dark theme interface
+  - Real-time JSON payload generation
+  - Drag-and-drop workflow building
 
-## Migration Notes
-- Current active: `page.tsx`
-- All new features should be added to `page.tsx`
-- Test page at: `/tests` (src/app/tests/page.tsx)
+## Removed Pages
+
+The following pages were removed as part of cleanup:
+- `page-enhanced.tsx` - Legacy experimental version
+- `page-original.tsx` - Original simplified version
+- `tests/page.tsx` - Test scenarios page
+- `pagination-tests/page.tsx` - Pagination test page
+
+Legacy versions can be accessed via git history if needed.
+
+## Page Structure
+
+```
+src/app/
+├── page.tsx                    # Home page
+├── workflow/
+│   └── page.tsx               # Workflow builder
+└── layout.tsx                 # Root layout
+```
