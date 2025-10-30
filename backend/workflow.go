@@ -8,6 +8,7 @@
 //
 // The workflow engine consists of:
 //   - Type system: 23 node types organized by category (I/O, operations, control flow, state, resilience)
+//   - Validation: Comprehensive validation of workflow structure and node data before execution
 //   - Execution engine: Parses JSON, infers types, sorts nodes, executes in order
 //   - State management: Variables, accumulators, counters, and cache scoped to workflow execution
 //
@@ -22,36 +23,47 @@
 //
 // # Example Usage
 //
-//payload := `{
-//  "nodes": [
-//    {"id": "1", "data": {"value": 10}},
-//    {"id": "2", "data": {"value": 5}},
-//    {"id": "3", "data": {"op": "add"}}
-//  ],
-//  "edges": [
-//    {"source": "1", "target": "3"},
-//    {"source": "2", "target": "3"}
-//  ]
-//}`
+//	payload := `{
+//	  "nodes": [
+//	    {"id": "1", "data": {"value": 10}},
+//	    {"id": "2", "data": {"value": 5}},
+//	    {"id": "3", "data": {"op": "add"}}
+//	  ],
+//	  "edges": [
+//	    {"source": "1", "target": "3"},
+//	    {"source": "2", "target": "3"}
+//	  ]
+//	}`
 //
-//engine, err := workflow.NewEngine([]byte(payload))
-//if err != nil {
-//    log.Fatal(err)
-//}
+//	// Validate workflow before execution (recommended)
+//	validationResult, err := workflow.ValidatePayload([]byte(payload))
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//	if !validationResult.Valid {
+//	    log.Fatalf("Workflow validation failed: %v", validationResult.Errors)
+//	}
 //
-//result, err := engine.Execute()
-//if err != nil {
-//    log.Fatal(err)
-//}
+//	// Execute workflow
+//	engine, err := workflow.NewEngine([]byte(payload))
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
 //
-//fmt.Printf("Result: %v\n", result.FinalOutput) // Output: 15
+//	result, err := engine.Execute()
+//	if err != nil {
+//	    log.Fatal(err)
+//	}
+//
+//	fmt.Printf("Result: %v\n", result.FinalOutput) // Output: 15
 //
 // # Design Principles
 //
 //   - Simplicity: Single package, no external dependencies
-//   - Testability: Comprehensive test coverage (142+ tests)
+//   - Testability: Comprehensive test coverage (165+ tests)
 //   - Type Safety: Strong typing with type inference support
 //   - Error Handling: Descriptive errors with context
+//   - Validation: Early error detection through comprehensive validation
 //
 // See ARCHITECTURE.md for detailed architecture documentation.
 package workflow
