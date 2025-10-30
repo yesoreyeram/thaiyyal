@@ -61,7 +61,7 @@ func TestPaginationPageBased(t *testing.T) {
 		]
 	}`, server.URL)
 
-	engine, err := NewEngine([]byte(payload))
+	engine, err := NewEngineWithConfig([]byte(payload), testConfig())
 	if err != nil {
 		t.Fatalf("Failed to create engine: %v", err)
 	}
@@ -149,7 +149,7 @@ func TestPaginationOffsetBased(t *testing.T) {
 		]
 	}`, server.URL)
 
-	engine, err := NewEngine([]byte(payload))
+	engine, err := NewEngineWithConfig([]byte(payload), testConfig())
 	if err != nil {
 		t.Fatalf("Failed to create engine: %v", err)
 	}
@@ -213,7 +213,7 @@ func TestPaginationCursorBased(t *testing.T) {
 		]
 	}`, server.URL)
 
-	engine, err := NewEngine([]byte(payload))
+	engine, err := NewEngineWithConfig([]byte(payload), testConfig())
 	if err != nil {
 		t.Fatalf("Failed to create engine: %v", err)
 	}
@@ -280,7 +280,7 @@ func TestPaginationUntilEmpty(t *testing.T) {
 		]
 	}`, server.URL)
 
-	engine, err := NewEngine([]byte(payload))
+	engine, err := NewEngineWithConfig([]byte(payload), testConfig())
 	if err != nil {
 		t.Fatalf("Failed to create engine: %v", err)
 	}
@@ -340,7 +340,7 @@ func TestPaginationWithAccumulator(t *testing.T) {
 		]
 	}`, server.URL)
 
-	engine, err := NewEngine([]byte(payload))
+	engine, err := NewEngineWithConfig([]byte(payload), testConfig())
 	if err != nil {
 		t.Fatalf("Failed to create engine: %v", err)
 	}
@@ -394,7 +394,7 @@ func TestPaginationErrorHandling(t *testing.T) {
 		]
 	}`, server.URL)
 
-	engine, err := NewEngine([]byte(payload))
+	engine, err := NewEngineWithConfig([]byte(payload), testConfig())
 	if err != nil {
 		t.Fatalf("Failed to create engine: %v", err)
 	}
@@ -441,7 +441,7 @@ func TestPaginationWithRateLimit(t *testing.T) {
 		]
 	}`, server.URL)
 
-	engine, err := NewEngine([]byte(payload))
+	engine, err := NewEngineWithConfig([]byte(payload), testConfig())
 	if err != nil {
 		t.Fatalf("Failed to create engine: %v", err)
 	}
@@ -510,7 +510,7 @@ func TestPaginationCompleteScenario(t *testing.T) {
 		]
 	}`, server.URL)
 
-	engine, err := NewEngine([]byte(payload))
+	engine, err := NewEngineWithConfig([]byte(payload), testConfig())
 	if err != nil {
 		t.Fatalf("Failed to create engine: %v", err)
 	}

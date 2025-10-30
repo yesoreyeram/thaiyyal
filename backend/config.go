@@ -12,6 +12,9 @@ type Config struct {
 	// HTTP node configuration
 	HTTPTimeout         time.Duration // Timeout for HTTP requests
 	MaxHTTPRedirects    int           // Maximum number of HTTP redirects to follow
+	MaxResponseSize     int64         // Maximum size of HTTP response body (bytes)
+	AllowedURLPatterns  []string      // Whitelist of allowed URL patterns (if empty, all external URLs allowed)
+	BlockInternalIPs    bool          // Block requests to internal/private IP addresses
 	
 	// Cache configuration
 	DefaultCacheTTL     time.Duration // Default TTL for cache entries if not specified
@@ -39,6 +42,9 @@ func DefaultConfig() Config {
 		// HTTP configuration
 		HTTPTimeout:          30 * time.Second,
 		MaxHTTPRedirects:     10,
+		MaxResponseSize:      10 * 1024 * 1024, // 10MB
+		AllowedURLPatterns:   []string{},       // Empty = allow all external URLs
+		BlockInternalIPs:     true,             // Block internal IPs by default
 		
 		// Cache configuration
 		DefaultCacheTTL:      1 * time.Hour,
