@@ -11,14 +11,14 @@ export default function HomePage() {
   const [showOpenModal, setShowOpenModal] = React.useState(false);
 
   const handleNewWorkflow = () => {
-    // For static export, navigate to page-enhanced instead
-    router.push('/page-enhanced');
+    // Navigate to workflow builder
+    router.push('/workflow');
   };
 
   const handleOpenWorkflow = (workflow: Workflow) => {
     // Save the workflow ID to localStorage and navigate
     localStorage.setItem('current_workflow_id', workflow.id);
-    router.push('/page-enhanced');
+    router.push('/workflow');
   };
 
   return (
