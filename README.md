@@ -167,11 +167,19 @@ This creates a static export in the `out/` directory, ready for deployment to an
 
 ### Creating Your First Workflow
 
-1. **Add Nodes**: Click on any node type in the left sidebar to add it to the canvas
-2. **Connect Nodes**: Drag from the output handle (right) of one node to the input handle (left) of another
-3. **Configure Nodes**: Click on a node to edit its properties (values, operations, etc.)
-4. **View JSON**: Click "Show Payload" to see the generated workflow JSON
-5. **Save Workflow**: Use Ctrl/Cmd+S or click the Save button to persist your workflow
+1. **Open Workflow Builder**: Click "Create New Workflow" from the home page
+2. **Add Nodes**: Click the + button to open the node palette and select any node type
+3. **Connect Nodes**: Drag from the output handle (right) of one node to the input handle (left) of another
+4. **Configure Nodes**: Click on a node to edit its properties (values, operations, etc.)
+5. **View JSON**: Click "View JSON Payload" to see the generated workflow JSON
+6. **Close Palette**: The palette automatically closes after adding a node, or click the X to close manually
+
+### Node Palette Features
+
+- **Collapsible & Floating**: The node palette floats over the canvas and can be toggled on/off
+- **Categorized Nodes**: Nodes are organized into 7 categories for easy discovery
+- **Hidden by Default**: Starts hidden to maximize canvas space
+- **Quick Access**: Click the + button to instantly add nodes
 
 ### Example Workflows
 
@@ -197,13 +205,13 @@ This creates a static export in the `out/` directory, ready for deployment to an
 [Number: 100] ──┘                      └─false─► [Visualization: "Low"]
 ```
 
-For more examples, visit the **Tests Page** at [http://localhost:3000/tests](http://localhost:3000/tests) to see 16 comprehensive workflow scenarios.
-
 ## Screenshots
+
+<div align="center">
 
 ### Home Page
 
-![Home Page](screenshots/00-home-page.png)
+![Home Page](screenshots/00-home-page-dark.png)
 
 The modern home page features:
 - **Hero Section**: Welcome message with gradient text and animations
@@ -211,28 +219,18 @@ The modern home page features:
 - **Quick Actions**: Create new workflow or open existing ones
 - **Professional Design**: Dark theme with glassmorphism effects
 
-### Workflow Example with JSON Viewer
+### Workflow Builder
 
-![Simple Addition Workflow](screenshots/simple-addition-with-json.png)
+![Workflow Builder](screenshots/workflow-builder-complex.png)
 
-Example workflow showing:
-- **Visual Nodes**: Number and Operation nodes with connections
-- **Interactive Canvas**: Drag-and-drop workflow building
-- **JSON Payload**: Generated workflow definition (click "View JSON Payload")
+Advanced workflow builder showing:
+- **Collapsible Node Palette**: Floating palette with categorized nodes (hidden by default)
+- **Multiple Node Types**: HTTP, Condition, For Each, Transform, and more
+- **Dark Theme**: Professional dark interface for comfortable editing
+- **Interactive Canvas**: Drag-and-drop workflow building with real-time connections
+- **Add Node Button**: Click the + button to open the node palette
 
-### Comprehensive Test Scenarios
-
-![All Test Scenarios](screenshots/tests-page-full.png)
-
-View all 16 test scenarios demonstrating:
-- ✅ Basic arithmetic operations (add, subtract, multiply, divide)
-- ✅ Text processing workflows (uppercase, lowercase, concatenate, etc.)
-- ✅ HTTP data fetching
-- ✅ Conditional branching (greater than, less than, equals)
-- ✅ State management (variables, counters, accumulators)
-- ✅ Advanced control flow (join, split, parallel, switch)
-- ✅ Error handling patterns (retry, try-catch, timeout)
-- ✅ Caching and delays
+</div>
 
 ## Documentation
 
