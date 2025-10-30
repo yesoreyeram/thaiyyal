@@ -24,3 +24,12 @@ export {
   TryCatchNode,
   TimeoutNode,
 } from './AllNodes';
+
+// Export new UI components
+export { NodeTopBar } from './NodeTopBar';
+export { NodeInfoPopup } from './NodeInfoPopup';
+export { NodeResizeHandle } from './NodeResizeHandle';
+export { DeleteConfirmDialog } from './DeleteConfirmDialog';
+export { NodeWrapper } from './NodeWrapper';
+export { getNodeInfo, nodeInfoMap } from './nodeInfo';
+export type { NodeInfo } from './nodeInfo';

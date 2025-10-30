@@ -40,9 +40,20 @@ import {
   TimeoutNode,
   ContextVariableNode,
   ContextConstantNode,
+  DeleteConfirmDialog,
+  NodeWrapper,
+  getNodeInfo,
 } from "../components/nodes";
 
 type NodeData = Record<string, unknown>;
+
+// Extended node props type to include onShowOptions
+type ExtendedNodeProps = NodeProps<NodeData> & {
+  onShowOptions?: (x: number, y: number) => void;
+};
+
+// Reusable class names
+const BASE_NODE_CLASSES = "bg-gradient-to-br from-gray-700 to-gray-800 text-white shadow-lg rounded-lg border border-gray-600 hover:border-gray-500 transition-all";
 
 // Context Menu Component
 function NodeContextMenu({
@@ -68,8 +79,19 @@ function NodeContextMenu({
         onClose();
       }
     };
+    
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
   }, [onClose]);
 
   return (
@@ -108,7 +130,7 @@ function NodeContextMenu({
 
 // Compact node wrapper with context menu
 function createCompactNode(
-  Component: React.ComponentType<NodeProps<NodeData>>,
+  Component: React.ComponentType<ExtendedNodeProps>,
   showMenu: (id: string, x: number, y: number) => void
 ) {
   return function CompactNodeWrapper(props: NodeProps<NodeData>) {
@@ -117,16 +139,25 @@ function createCompactNode(
       showMenu(props.id, e.clientX, e.clientY);
     };
 
+    const handleShowOptions = (x: number, y: number) => {
+      showMenu(props.id, x, y);
+    };
+
+    const extendedProps: ExtendedNodeProps = {
+      ...props,
+      onShowOptions: handleShowOptions
+    };
+
     return (
       <div onContextMenu={handleContextMenu} className="compact-node-wrapper">
-        <Component {...props} />
+        <Component {...extendedProps} />
       </div>
     );
   };
 }
 
 // Original three node components with dark theme
-function NumberNode({ id, data }: NodeProps<NodeData>) {
+function NumberNode({ id, data, ...props }: ExtendedNodeProps) {
   const { setNodes } = useReactFlow();
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = Number(e.target.value);
@@ -136,10 +167,18 @@ function NumberNode({ id, data }: NodeProps<NodeData>) {
       )
     );
   };
+
+  const nodeInfo = getNodeInfo("numberNode");
+  const onShowOptions = props.onShowOptions;
+
   return (
-    <div className="px-3 py-2 bg-gradient-to-br from-gray-700 to-gray-800 text-white shadow-lg rounded-lg border border-gray-600 hover:border-gray-500 transition-all">
+    <NodeWrapper
+      title={String(data?.label || "Number")}
+      nodeInfo={nodeInfo}
+      onShowOptions={onShowOptions}
+      className={BASE_NODE_CLASSES}
+    >
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-300">{String(data?.label || "Number")}</div>
       <input
         value={Number(data?.value ?? 0)}
         type="number"
@@ -148,11 +187,11 @@ function NumberNode({ id, data }: NodeProps<NodeData>) {
         aria-label="Number value"
       />
       <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
-    </div>
+    </NodeWrapper>
   );
 }
 
-function OperationNode({ id, data }: NodeProps<NodeData>) {
+function OperationNode({ id, data, ...props }: ExtendedNodeProps) {
   const { setNodes } = useReactFlow();
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const op = e.target.value;
@@ -160,10 +199,18 @@ function OperationNode({ id, data }: NodeProps<NodeData>) {
       nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, op } } : n))
     );
   };
+
+  const nodeInfo = getNodeInfo("opNode");
+  const onShowOptions = props.onShowOptions;
+
   return (
-    <div className="px-3 py-2 bg-gradient-to-br from-gray-700 to-gray-800 text-white shadow-lg rounded-lg border border-gray-600 hover:border-gray-500 transition-all">
+    <NodeWrapper
+      title={String(data?.label || "Operation")}
+      nodeInfo={nodeInfo}
+      onShowOptions={onShowOptions}
+      className={BASE_NODE_CLASSES}
+    >
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-300">{String(data?.label || "Operation")}</div>
       <select
         value={String(data?.op ?? "add")}
         onChange={onChange}
@@ -176,11 +223,11 @@ function OperationNode({ id, data }: NodeProps<NodeData>) {
         <option value="divide">Divide</option>
       </select>
       <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
-    </div>
+    </NodeWrapper>
   );
 }
 
-function VizNode({ id, data }: NodeProps<NodeData>) {
+function VizNode({ id, data, ...props }: ExtendedNodeProps) {
   const { setNodes } = useReactFlow();
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const mode = e.target.value;
@@ -188,10 +235,18 @@ function VizNode({ id, data }: NodeProps<NodeData>) {
       nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, mode } } : n))
     );
   };
+
+  const nodeInfo = getNodeInfo("vizNode");
+  const onShowOptions = props.onShowOptions;
+
   return (
-    <div className="px-3 py-2 bg-gradient-to-br from-gray-700 to-gray-800 text-white shadow-lg rounded-lg border border-gray-600 hover:border-gray-500 transition-all">
+    <NodeWrapper
+      title={String(data?.label || "Visualization")}
+      nodeInfo={nodeInfo}
+      onShowOptions={onShowOptions}
+      className={BASE_NODE_CLASSES}
+    >
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-300">{String(data?.label || "Visualization")}</div>
       <select
         value={String(data?.mode ?? "text")}
         onChange={onChange}
@@ -202,7 +257,7 @@ function VizNode({ id, data }: NodeProps<NodeData>) {
         <option value="table">Table</option>
       </select>
       <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
-    </div>
+    </NodeWrapper>
   );
 }
 
@@ -331,6 +386,7 @@ function Canvas() {
   } | null>(null);
   const [renamingNode, setRenamingNode] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
+  const [deletingNode, setDeletingNode] = useState<string | null>(null);
 
   const { project } = useReactFlow();
 
@@ -429,10 +485,20 @@ function Canvas() {
 
   const handleDelete = useCallback(() => {
     if (!contextMenu) return;
-    setNodes((nds) => nds.filter((n) => n.id !== contextMenu.nodeId));
-    setEdges((eds) => eds.filter((e) => e.source !== contextMenu.nodeId && e.target !== contextMenu.nodeId));
+    setDeletingNode(contextMenu.nodeId);
     setContextMenu(null);
-  }, [contextMenu, setNodes, setEdges]);
+  }, [contextMenu]);
+
+  const confirmDelete = useCallback(() => {
+    if (!deletingNode) return;
+    setNodes((nds) => nds.filter((n) => n.id !== deletingNode));
+    setEdges((eds) => eds.filter((e) => e.source !== deletingNode && e.target !== deletingNode));
+    setDeletingNode(null);
+  }, [deletingNode, setNodes, setEdges]);
+
+  const cancelDelete = useCallback(() => {
+    setDeletingNode(null);
+  }, []);
 
   const handleRenameSubmit = useCallback(() => {
     if (renamingNode) {
@@ -643,6 +709,15 @@ function Canvas() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      {deletingNode && (
+        <DeleteConfirmDialog
+          nodeName={String(nodes.find((n) => n.id === deletingNode)?.data?.label || deletingNode)}
+          onConfirm={confirmDelete}
+          onCancel={cancelDelete}
+        />
       )}
     </div>
   );
