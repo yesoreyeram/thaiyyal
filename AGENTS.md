@@ -4,6 +4,36 @@
 
 This document provides comprehensive specifications for AI agents that can assist with various aspects of the Thaiyyal project. Each agent is specialized for specific tasks within our visual workflow builder platform, ensuring **enterprise-grade quality** with **local-first architecture** and **seamless agent collaboration**.
 
+> **📝 Note on Agent Types**
+>
+> The agents described in this document are **specification documents** that serve as guidelines for:
+> - Human reviewers conducting code reviews
+> - AI assistants performing architectural assessments
+> - Development teams implementing enterprise features
+>
+> **✨ NEW: Callable Agent System**
+>
+> We've created a **callable agent invocation system** that allows you to programmatically apply these specifications:
+>
+> ```bash
+> # Invoke an agent from command line
+> ./scripts/invoke-agent.sh security-review \
+>   --files "backend/nodes_http.go" \
+>   --context "Review for OWASP compliance" \
+>   --output security-review.md
+> ```
+>
+> **Documentation:**
+> - **Quick Start**: [scripts/README.md](scripts/README.md)
+> - **Complete Guide**: [.github/agents/AGENTS_CALLABLE_SYSTEM.md](.github/agents/AGENTS_CALLABLE_SYSTEM.md)
+> - **Invocation Script**: [scripts/invoke-agent.sh](scripts/invoke-agent.sh)
+>
+> **How to Use These Specifications:**
+> 1. **Manual**: Review the specification and apply guidelines manually
+> 2. **Scripted**: Use `./scripts/invoke-agent.sh` to invoke agents programmatically
+> 3. **CI/CD**: Integrate agent calls into your pipeline (see documentation)
+> 4. **Pre-commit**: Add agent checks to git hooks
+
 ### Enterprise Quality Standards
 
 All agents are designed to deliver:
@@ -25,14 +55,21 @@ Thaiyyal is designed to run **locally without any cloud dependencies**:
 - **Docker Support**: Easy containerized local deployment
 - **Fast Setup**: Running locally in under 5 minutes
 
-### Agent Collaboration Framework
+### Using Agent Specifications in Reviews
 
-Agents are designed to **work together efficiently**:
-- **Shared Context**: Common understanding of Thaiyyal architecture
-- **Coordinated Reviews**: Multi-agent code reviews for comprehensive coverage
-- **Sequential Workflows**: Agents can hand-off tasks in logical order
-- **Parallel Analysis**: Multiple agents can analyze different aspects simultaneously
-- **Cross-Domain Expertise**: Agents consult each other for specialized knowledge
+These specification documents are designed to **guide comprehensive reviews**:
+- **Shared Context**: All specifications share common understanding of Thaiyyal architecture
+- **Coordinated Reviews**: Use multiple agent specs for comprehensive coverage (e.g., security + architecture)
+- **Sequential Workflows**: Follow specs in logical order (e.g., architecture → security → performance)
+- **Parallel Analysis**: Different team members can review different aspects simultaneously
+- **Cross-Domain Expertise**: Specs reference each other for holistic guidance
+
+**Example Review Workflow:**
+1. Start with **System Architecture** spec to assess overall design
+2. Apply **Security Code Review** spec to identify vulnerabilities
+3. Use **Performance** spec to find optimization opportunities
+4. Reference **Testing & QA** spec to ensure adequate test coverage
+5. Apply **Observability** spec to verify monitoring capabilities
 
 ### Thaiyyal Technology Stack
 
@@ -56,7 +93,43 @@ All specialized agent specifications are located in `.github/agents/`:
 ├── testing-qa.md                  # Testing strategies and quality assurance
 ├── performance.md                 # Performance optimization
 ├── documentation.md               # Technical documentation
-└── devops-cicd.md                 # DevOps and CI/CD pipelines
+├── devops-cicd.md                 # DevOps and CI/CD pipelines
+├── ui-ux-architect.md             # ✨ UI/UX design and user experience
+├── product-manager.md             # ✨ Project tracking and planning
+├── marketing.md                   # ✨ README maintenance and product messaging
+└── AGENTS_CALLABLE_SYSTEM.md      # Callable agent invocation system
+```
+
+**Callable Agent Scripts:**
+
+```
+scripts/
+├── invoke-agent.sh                # Main agent invocation script
+└── README.md                      # Usage examples and integration guide
+```
+
+**Quick Invocation Examples:**
+
+```bash
+# Security review
+./scripts/invoke-agent.sh security-review --files "backend/*.go"
+
+# Architecture assessment
+./scripts/invoke-agent.sh architecture --files "backend/workflow.go"
+
+# UI/UX review
+./scripts/invoke-agent.sh ui-ux --files "src/components/*.tsx"
+
+# Product planning
+./scripts/invoke-agent.sh product-manager --context "Sprint planning"
+
+# README update check
+./scripts/invoke-agent.sh marketing --files "README.md"
+
+# Full review (multiple agents)
+for agent in security-review architecture performance testing ui-ux; do
+  ./scripts/invoke-agent.sh $agent --files "$(git diff --name-only main)" --output "review-$agent.md"
+done
 ```
 
 ## Quick Reference Guide
@@ -81,6 +154,12 @@ All specialized agent specifications are located in `.github/agents/`:
 | API documentation | Documentation Agent | [documentation.md](.github/agents/documentation.md) |
 | CI/CD pipeline setup | DevOps Agent | [devops-cicd.md](.github/agents/devops-cicd.md) |
 | Deployment automation | DevOps Agent | [devops-cicd.md](.github/agents/devops-cicd.md) |
+| UI/UX design review | UI/UX Architect Agent | [ui-ux-architect.md](.github/agents/ui-ux-architect.md) |
+| Accessibility compliance | UI/UX Architect Agent | [ui-ux-architect.md](.github/agents/ui-ux-architect.md) |
+| Product roadmap planning | Product Manager Agent | [product-manager.md](.github/agents/product-manager.md) |
+| Sprint planning & tracking | Product Manager Agent | [product-manager.md](.github/agents/product-manager.md) |
+| README.md maintenance | Marketing Agent | [marketing.md](.github/agents/marketing.md) |
+| Product messaging & content | Marketing Agent | [marketing.md](.github/agents/marketing.md) |
 
 ## Agent Specializations
 
@@ -212,69 +291,122 @@ All specialized agent specifications are located in `.github/agents/`:
 
 ---
 
+### 9. UI/UX Architect Agent
+**Focus**: User interface design, user experience optimization, accessibility
+
+**Key Responsibilities**:
+- Visual workflow builder interface design
+- User experience optimization
+- Accessibility compliance (WCAG 2.1 AA)
+- Design system creation and maintenance
+- Responsive design
+- Usability testing
+- Interactive prototypes
+
+**[Full Specification →](.github/agents/ui-ux-architect.md)**
+
+---
+
+### 10. Product Manager Agent
+**Focus**: Project tracking, planning, roadmap management
+
+**Key Responsibilities**:
+- Product strategy and vision
+- Roadmap management
+- Backlog prioritization
+- Sprint planning and execution
+- Stakeholder communication
+- Metrics and analytics
+- User feedback management
+
+**[Full Specification →](.github/agents/product-manager.md)**
+
+---
+
+### 11. Marketing Agent
+**Focus**: README maintenance, product messaging, content strategy
+
+**Key Responsibilities**:
+- README.md maintenance and accuracy
+- Product messaging and positioning
+- Content strategy and creation
+- Documentation synchronization
+- Community engagement
+- Release announcements
+- Feature highlights
+
+**[Full Specification →](.github/agents/marketing.md)**
+
+---
+
 ## Usage Guidelines
 
-### How to Work with Agents
+### How to Use Agent Specifications
 
-1. **Identify the Task**: Determine which agent specialization best matches your task
-2. **Review Agent Specification**: Read the detailed specification in the agent's dedicated file
-3. **Provide Context**: Give the agent relevant context about Thaiyyal's architecture
-4. **Set Clear Objectives**: Define specific, measurable goals for the agent
-5. **Review Agent Output**: Carefully review and validate agent recommendations
-6. **Iterate as Needed**: Work iteratively with the agent to refine solutions
+These specifications serve as **comprehensive guides** for reviewing and improving Thaiyyal:
 
-### Best Practices
+1. **Identify the Domain**: Determine which specification matches your work area (security, architecture, etc.)
+2. **Review the Specification**: Read the detailed guidelines in the agent's dedicated file
+3. **Apply the Standards**: Use the spec's checklists, patterns, and best practices
+4. **Document Findings**: Record issues and recommendations based on the specification
+5. **Validate Changes**: Ensure implementations follow the spec's guidelines
+6. **Cross-Reference**: When work spans domains, consult multiple specifications
 
-- **Single Responsibility**: Use one agent per task for focused expertise
-- **Context First**: Always provide project context before requesting agent assistance
-- **Validate Recommendations**: Review agent suggestions against project requirements
-- **Incremental Changes**: Implement changes incrementally, testing at each step
-- **Documentation**: Document agent recommendations and implementation decisions
-- **Cross-Agent Coordination**: When tasks span multiple domains, consult relevant agents sequentially
+### Best Practices for Using Specifications
 
-### Agent Interaction Patterns
+- **Domain Focus**: Apply one specification at a time for thorough coverage
+- **Context Awareness**: Consider Thaiyyal's architecture when applying guidelines
+- **Standards Validation**: Verify that implementations meet the specification's requirements
+- **Incremental Application**: Apply recommendations incrementally, testing at each step
+- **Documentation**: Record which specifications were applied and findings discovered
+- **Multi-Domain Coordination**: For complex work, apply multiple specifications sequentially
 
-### Pattern 1: Sequential Consultation (Enterprise Feature Development)
+### Specification Application Patterns
+
+### Pattern 1: Sequential Application (Enterprise Feature Development)
+When building a new enterprise feature, apply specifications in this order:
 ```
-System Architecture Agent
-    ↓ (Architectural design)
-Multi-Tenancy Specialist
-    ↓ (Tenant isolation design)
-Security Code Review Agent
-    ↓ (Security review)
-Performance Optimization Agent
-    ↓ (Performance optimization)
-Testing & QA Agent
-    ↓ (Test strategy and implementation)
-Documentation Agent
-    ↓ (Documentation)
-DevOps & CI/CD Agent
-    ↓ (Deployment automation)
-Final Implementation
-```
-
-### Pattern 2: Parallel Consultation (Code Review)
-```
-Security Code Review Agent ──┐
-                             │
-Performance Agent        ────┤──→ Comprehensive Review
-                             │      ↓
-Testing & QA Agent       ────┤   Synthesis
-                             │      ↓
-Documentation Agent      ────┘   Implementation
+1. System Architecture Spec
+   ↓ (Review architectural design)
+2. Multi-Tenancy Spec
+   ↓ (Verify tenant isolation)
+3. Security Code Review Spec
+   ↓ (Check for vulnerabilities)
+4. Performance Spec
+   ↓ (Optimize implementation)
+5. Testing & QA Spec
+   ↓ (Ensure test coverage)
+6. Documentation Spec
+   ↓ (Document the feature)
+7. DevOps & CI/CD Spec
+   ↓ (Automate deployment)
+Final Implementation Review
 ```
 
-### Pattern 3: Iterative Refinement (Quality Enhancement)
+### Pattern 2: Parallel Application (Code Review)
+For comprehensive code reviews, multiple reviewers can apply different specs simultaneously:
 ```
-Initial Implementation
+Reviewer 1: Security Spec ──┐
+                            │
+Reviewer 2: Performance Spec├──→ Consolidated Findings
+                            │      ↓
+Reviewer 3: Testing Spec ───┤   Action Items
+                            │      ↓
+Reviewer 4: Docs Spec ──────┘   Implementation
+```
+
+### Pattern 3: Iterative Application (Quality Enhancement)
+For improving existing code, apply specifications iteratively:
+```
+Current Implementation
     ↓
-Testing Agent (finds issues)
+Apply Testing Spec (identify test gaps)
     ↓
-Performance Agent (optimizes)
+Apply Performance Spec (optimize bottlenecks)
     ↓
-Security Agent (hardens)
+Apply Security Spec (harden security)
     ↓
-Observability Agent (instruments)
+Apply Observability Spec (add monitoring)
     ↓
 Final Production-Ready Code
 ```

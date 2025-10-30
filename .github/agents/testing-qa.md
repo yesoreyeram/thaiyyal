@@ -1,3 +1,9 @@
+---
+name: Testing & Quality Assurance Agent
+description: Test strategy, test automation, quality metrics, and comprehensive test coverage
+version: 1.0
+---
+
 # Testing & Quality Assurance Agent
 
 ## Agent Identity

@@ -1,3 +1,9 @@
+---
+name: System Design & Architecture Agent
+description: System architecture, design patterns, scalability planning, and technical strategy
+version: 1.0
+---
+
 # System Design & Architecture Agent
 
 ## Agent Identity

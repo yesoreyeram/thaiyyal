@@ -1,3 +1,9 @@
+---
+name: DevOps & CI/CD Agent
+description: Deployment automation, CI/CD pipelines, infrastructure, and release management
+version: 1.0
+---
+
 # DevOps & CI/CD Agent
 
 ## Agent Identity

@@ -1,3 +1,9 @@
+---
+name: Security Code Review Agent
+description: Security vulnerability analysis, secure coding practices, and threat modeling specialist
+version: 1.0
+---
+
 # Security Code Review Agent
 
 ## Agent Identity

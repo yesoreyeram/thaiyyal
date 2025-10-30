@@ -1,3 +1,9 @@
+---
+name: Performance Optimization Agent
+description: Performance analysis, optimization, benchmarking, and profiling for high-performance systems
+version: 1.0
+---
+
 # Performance Optimization Agent
 
 ## Agent Identity
