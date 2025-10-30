@@ -11,27 +11,24 @@ export function AppNavBar({ onNewWorkflow, onOpenWorkflow }: AppNavBarProps) {
   const router = useRouter();
 
   const handleTitleClick = () => {
-    router.push('/');
+    router.push("/");
   };
 
   return (
-    <div className="h-14 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-6">
+    <div className="h-10 bg-black border-b border-gray-700 flex items-center justify-between px-4">
       <div className="flex items-center gap-3">
-        <button 
+        <button
           onClick={handleTitleClick}
-          className="text-xl font-bold text-white flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer"
+          className="text-l font-bold text-white flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer"
           title="Go to Home"
         >
-          <span className="text-2xl">⚡</span>
+          <span className="text-l">⚡</span>
           <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
             Thaiyyal
           </span>
         </button>
-        <span className="text-xs text-gray-500 font-medium px-2 py-1 bg-gray-700 rounded-md">
-          Workflow Builder
-        </span>
       </div>
-      
+
       <div className="flex items-center gap-3">
         <button
           onClick={onOpenWorkflow}
@@ -41,15 +38,14 @@ export function AppNavBar({ onNewWorkflow, onOpenWorkflow }: AppNavBarProps) {
         >
           <span>📂</span>
         </button>
-        
         <button
           onClick={onNewWorkflow}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-all flex items-center gap-2 hover:shadow-lg hover:shadow-blue-500/20"
+          className="px-2 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-all flex items-center gap-2 hover:shadow-lg hover:shadow-blue-500/20"
           title="Create New Workflow"
           aria-label="Create New Workflow"
         >
-          <span>📄</span>
-          <span>New Workflow</span>
+          <span>⚡</span>
+          <span>New</span>
         </button>
       </div>
     </div>
