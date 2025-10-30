@@ -2,7 +2,7 @@
 
 <div align="center">
 
-![Thaiyyal Home Page](https://github.com/user-attachments/assets/99764f55-33b4-4419-b901-5e0a5410b409)
+![Thaiyyal Home Page](screenshots/00-home-page.png)
 
 **A Modern Visual Workflow Builder**
 
@@ -203,7 +203,7 @@ For more examples, visit the **Tests Page** at [http://localhost:3000/tests](htt
 
 ### Home Page
 
-![Home Page](https://github.com/user-attachments/assets/99764f55-33b4-4419-b901-5e0a5410b409)
+![Home Page](screenshots/00-home-page.png)
 
 The modern home page features:
 - **Hero Section**: Welcome message with gradient text and animations
@@ -213,7 +213,7 @@ The modern home page features:
 
 ### Workflow Example with JSON Viewer
 
-![Simple Addition Workflow](https://github.com/user-attachments/assets/4971c01a-4d6a-47d5-b7b2-a1dddb2be474)
+![Simple Addition Workflow](screenshots/simple-addition-with-json.png)
 
 Example workflow showing:
 - **Visual Nodes**: Number and Operation nodes with connections
@@ -222,7 +222,7 @@ Example workflow showing:
 
 ### Comprehensive Test Scenarios
 
-![All Test Scenarios](https://github.com/user-attachments/assets/7302a2db-1d1a-4b62-a103-d69b421d573d)
+![All Test Scenarios](screenshots/tests-page-full.png)
 
 View all 16 test scenarios demonstrating:
 - ✅ Basic arithmetic operations (add, subtract, multiply, divide)
