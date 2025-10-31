@@ -297,6 +297,7 @@ type Engine struct {
 	nodes       []Node
 	edges       []Edge
 	nodeResults map[string]interface{}
+	resultsMutex sync.RWMutex // protects nodeResults for parallel execution
 	config      Config // configuration for execution limits and security
 	
 	// Execution metadata

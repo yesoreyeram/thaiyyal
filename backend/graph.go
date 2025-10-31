@@ -107,10 +107,15 @@ func (e *Engine) getNode(nodeID string) Node {
 // It looks at all edges where the target is the specified node and returns
 // the results of those source nodes.
 //
+// This function is thread-safe for use in parallel execution.
+//
 // Returns:
 //   - []interface{}: Slice of input values from predecessor nodes, in edge order
 func (e *Engine) getNodeInputs(nodeID string) []interface{} {
 	inputs := []interface{}{}
+	e.resultsMutex.RLock()
+	defer e.resultsMutex.RUnlock()
+	
 	for _, edge := range e.edges {
 		if edge.Target == nodeID {
 			if result, ok := e.nodeResults[edge.Source]; ok {
@@ -129,6 +134,8 @@ func (e *Engine) getNodeInputs(nodeID string) []interface{} {
 // If multiple terminal nodes exist, returns the first non-context one found.
 // If no terminal nodes exist (all nodes have outgoing edges), returns nil.
 //
+// This function is thread-safe for use in parallel execution.
+//
 // Returns:
 //   - interface{}: The result value from a terminal node, or nil if none found
 func (e *Engine) getFinalOutput() interface{} {
@@ -145,6 +152,9 @@ func (e *Engine) getFinalOutput() interface{} {
 		terminalNodes[edge.Source] = false
 	}
 
+	e.resultsMutex.RLock()
+	defer e.resultsMutex.RUnlock()
+	
 	// First pass: Try to find a non-context terminal node
 	for nodeID, isTerminal := range terminalNodes {
 		if isTerminal {
