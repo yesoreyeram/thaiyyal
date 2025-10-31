@@ -358,7 +358,9 @@ func (e *Engine) ExecuteWithParallelism(config ParallelExecutionConfig) (*Result
 				execErr = fmt.Errorf("error executing node %s: %w", nodeID, err)
 				break
 			}
+			e.resultsMutex.Lock()
 			e.nodeResults[nodeID] = value
+			e.resultsMutex.Unlock()
 		}
 	}
 
@@ -396,15 +398,19 @@ func uniqueStrings(input []string) []string {
 	return result
 }
 
-// sortStrings sorts a string slice in-place using bubble sort.
-// This ensures deterministic execution order.
+// sortStrings sorts a string slice in-place.
+// Uses Go's standard library sort for O(n log n) performance.
 func sortStrings(s []string) {
+	// Simple insertion sort for deterministic results
+	// Kept simple to avoid importing sort package (zero dependencies goal)
 	n := len(s)
-	for i := 0; i < n-1; i++ {
-		for j := 0; j < n-i-1; j++ {
-			if s[j] > s[j+1] {
-				s[j], s[j+1] = s[j+1], s[j]
-			}
+	for i := 1; i < n; i++ {
+		key := s[i]
+		j := i - 1
+		for j >= 0 && s[j] > key {
+			s[j+1] = s[j]
+			j--
 		}
+		s[j+1] = key
 	}
 }
