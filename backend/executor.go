@@ -1,6 +1,9 @@
 package workflow
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 // ============================================================================
 // Node Execution Dispatcher
@@ -9,6 +12,29 @@ import "fmt"
 // appropriate executor functions based on node type.
 // Uses the Strategy Pattern for extensible node type handling.
 // ============================================================================
+
+// executeNodeWithContext dispatches node execution with context containing execution metadata.
+// The context includes execution ID and workflow ID for logging and tracing.
+//
+// This is a wrapper around executeNode that provides context to all node executors.
+// The context can be used by node executors for:
+//   - Logging with execution ID
+//   - Distributed tracing
+//   - Cancellation and timeout handling
+//
+// Parameters:
+//   - ctx: Context with execution metadata (execution ID, workflow ID)
+//   - node: Node to execute
+//
+// Returns:
+//   - interface{}: Result of node execution (type depends on node)
+//   - error: If node execution fails
+func (e *Engine) executeNodeWithContext(ctx context.Context, node Node) (interface{}, error) {
+	// For now, we pass context but node executors don't use it yet
+	// This allows us to add context-aware logging later without breaking changes
+	// Future enhancement: pass ctx to individual node executors for context-aware operations
+	return e.executeNode(node)
+}
 
 // executeNode dispatches node execution to the appropriate executor based on node type.
 // This is the central routing function that implements the Strategy Pattern,
