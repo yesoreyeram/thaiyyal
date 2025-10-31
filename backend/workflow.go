@@ -240,22 +240,31 @@ ContinueOnError  *bool       `json:"continue_on_error,omitempty"` // for try-cat
 ErrorOutputPath  *string     `json:"error_output_path,omitempty"` // for try-catch node
 TimeoutAction    *string     `json:"timeout_action,omitempty"`    // for timeout node (error/continue_with_partial)
 // Context node fields
-ContextName  *string     `json:"context_name,omitempty"`  // for context nodes (name of the variable/constant)
-ContextValue interface{} `json:"context_value,omitempty"` // for context nodes (value of the variable/constant)
+ContextName  *string     `json:"context_name,omitempty"`  // DEPRECATED: Use ContextValues for multiple values
+ContextValue interface{} `json:"context_value,omitempty"` // DEPRECATED: Use ContextValues for multiple values
+ContextValues []ContextVariableValue `json:"context_values,omitempty"` // for context nodes (multiple typed values)
 }
 
 // SwitchCase represents a case in a switch node
 type SwitchCase struct {
-When       string      `json:"when"`                  // condition or value to match
-Value      interface{} `json:"value,omitempty"`       // value to match (for value matching)
-OutputPath *string     `json:"output_path,omitempty"` // output port name
+	When       string      `json:"when"`                  // condition or value to match
+	Value      interface{} `json:"value,omitempty"`       // value to match (for value matching)
+	OutputPath *string     `json:"output_path,omitempty"` // output port name
+}
+
+// ContextVariableValue represents a typed value in a context variable/constant node.
+// Supports multiple values with explicit type information for proper type conversion.
+type ContextVariableValue struct {
+	Name  string      `json:"name"`            // Variable name
+	Value interface{} `json:"value"`           // The actual value
+	Type  string      `json:"type"`            // Type: "string", "number", "boolean", "time_string", "epoch_second", "epoch_ms", "null"
 }
 
 // Edge represents a connection between nodes
 type Edge struct {
-ID     string `json:"id"`
-Source string `json:"source"`
-Target string `json:"target"`
+	ID     string `json:"id"`
+	Source string `json:"source"`
+	Target string `json:"target"`
 }
 
 // Result represents the execution result of the workflow
