@@ -8,8 +8,9 @@ A simple, easy-to-understand Go workflow execution engine that parses and execut
 - **Easy to Understand**: Straightforward code flow without complex patterns
 - **JSON Payload Parsing**: Accepts workflow definitions as JSON
 - **DAG Execution**: Uses topological sorting to execute nodes in correct order
+- **⚡ Parallel Execution**: NEW - Execute independent nodes concurrently for 2-10x speedup
 - **Type Inference**: Automatically determines node types from data
-- **Node Types** (20 types):
+- **Node Types** (23 types):
   - **Number Nodes**: Provide numeric input values
   - **Operation Nodes**: Perform arithmetic (add, subtract, multiply, divide)
   - **Visualization Nodes**: Format output for display (text, table)
@@ -24,23 +25,29 @@ A simple, easy-to-understand Go workflow execution engine that parses and execut
   - **Transform Nodes**: Transform data structures (to_array, to_object, flatten, keys, values)
   - **Accumulator Nodes**: Accumulate values over time (sum, product, concat, array, count)
   - **Counter Nodes**: Simple counter with increment/decrement/reset
-  - **Switch Nodes**: Multi-way branching based on value or condition (NEW ✨)
-  - **Parallel Nodes**: Execute multiple branches concurrently with concurrency control (NEW ✨)
-  - **Join Nodes**: Combine outputs from multiple nodes with strategies (all/any/first) (NEW ✨)
-  - **Split Nodes**: Split single input to multiple output paths (NEW ✨)
-  - **Delay Nodes**: Pause execution for specified duration (NEW ✨)
-  - **Cache Nodes**: Get/set cached values with TTL and LRU eviction (NEW ✨)
+  - **Switch Nodes**: Multi-way branching based on value or condition
+  - **Parallel Nodes**: Execute multiple branches concurrently with concurrency control
+  - **Join Nodes**: Combine outputs from multiple nodes with strategies (all/any/first)
+  - **Split Nodes**: Split single input to multiple output paths
+  - **Delay Nodes**: Pause execution for specified duration
+  - **Cache Nodes**: Get/set cached values with TTL and LRU eviction
+  - **Retry Nodes**: Retry with exponential/linear/constant backoff
+  - **Try-Catch Nodes**: Error handling with fallback logic
+  - **Timeout Nodes**: Enforce time limits on operations
 - **State Management**: Variables, accumulators, counters, and cache for stateful workflows
 - **Cycle Detection**: Prevents execution of workflows with circular dependencies
-- **Comprehensive Tests**: 142+ test cases (including sub-tests) covering all functionality
+- **Thread Safety**: Full mutex protection for concurrent execution
+- **Comprehensive Tests**: 176+ test cases (including parallel execution tests)
   - 40 standard tests
   - 39 control flow tests
   - 17 state/memory tests
-  - 46+ advanced control flow tests (table-driven with multiple scenarios)
+  - 46+ advanced control flow tests
+  - 11 parallel execution tests
+  - 13 context and validation tests
 
 ## Quick Start
 
-### As a Library
+### Sequential Execution (Standard)
 
 ```go
 package main
@@ -70,6 +77,7 @@ func main() {
         log.Fatal(err)
     }
     
+    // Sequential execution
     result, err := engine.Execute()
     if err != nil {
         log.Fatal(err)
@@ -78,6 +86,28 @@ func main() {
     fmt.Printf("Result: %v\n", result.FinalOutput)
 }
 ```
+
+### Parallel Execution (NEW ⚡)
+
+```go
+// Enable parallel execution for 2-10x speedup on branching workflows
+config := workflow.DefaultParallelConfig()
+result, err := engine.ExecuteWithParallelism(config)
+if err != nil {
+    log.Fatal(err)
+}
+
+fmt.Printf("Result: %v\n", result.FinalOutput)
+
+// Custom configuration with concurrency limit
+config := workflow.ParallelExecutionConfig{
+    MaxConcurrency: 4,    // Limit to 4 concurrent nodes
+    EnableParallel: true,
+}
+result, err := engine.ExecuteWithParallelism(config)
+```
+
+**Learn More**: See [PARALLEL_EXECUTION.md](PARALLEL_EXECUTION.md) for detailed documentation.
 
 ### Running Examples
 
