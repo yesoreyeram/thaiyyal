@@ -1,30 +1,49 @@
 package executor
 
 import (
-"github.com/yesoreyeram/thaiyyal/backend/pkg/types"
+	"fmt"
+
+	"github.com/yesoreyeram/thaiyyal/backend/pkg/types"
 )
 
 // SplitExecutor executes Split nodes
-type SplitExecutor struct {
-// Delegate to engine method
-ExecuteFunc func(ctx ExecutionContext, node types.Node) (interface{}, error)
-}
+type SplitExecutor struct{}
 
 // Execute runs the Split node
+// Handles splitting single input to multiple paths
 func (e *SplitExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-if e.ExecuteFunc != nil {
-return e.ExecuteFunc(ctx, node)
-}
-return nil, nil
+	inputs := ctx.GetNodeInputs(node.ID)
+	if len(inputs) == 0 {
+		return nil, fmt.Errorf("split node requires at least one input")
+	}
+
+	inputValue := inputs[0]
+	paths := node.Data.Paths
+	if len(paths) == 0 {
+		// Default to splitting to 2 paths
+		paths = []string{"path1", "path2"}
+	}
+
+	// Create a copy of the input for each path
+	outputs := make(map[string]interface{})
+	for _, path := range paths {
+		outputs[path] = inputValue
+	}
+
+	return map[string]interface{}{
+		"value":   inputValue,
+		"paths":   paths,
+		"outputs": outputs,
+	}, nil
 }
 
 // NodeType returns the node type this executor handles
 func (e *SplitExecutor) NodeType() types.NodeType {
-return types.NodeTypeSplit
+	return types.NodeTypeSplit
 }
 
 // Validate checks if node configuration is valid
 func (e *SplitExecutor) Validate(node types.Node) error {
-// Basic validation - specific validation in Execute
-return nil
+	// No required fields for split
+	return nil
 }

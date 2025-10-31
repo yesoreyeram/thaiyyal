@@ -3,7 +3,7 @@ package executor
 import (
 	"fmt"
 	"strings"
-	"unicode"
+
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/types"
 )
 
@@ -113,37 +113,3 @@ func (e *TextOperationExecutor) executeTextRepeat(input interface{}, repeatN *in
 	return strings.Repeat(inputText, repeatCount), nil
 }
 
-// toTitleCase converts text to Title Case
-func toTitleCase(s string) string {
-	return strings.Title(strings.ToLower(s))
-}
-
-// toCamelCase converts text to camelCase
-func toCamelCase(s string) string {
-	words := strings.Fields(s)
-	if len(words) == 0 {
-		return s
-	}
-
-	result := strings.ToLower(words[0])
-	for i := 1; i < len(words); i++ {
-		word := words[i]
-		if len(word) > 0 {
-			result += strings.ToUpper(string(word[0])) + strings.ToLower(word[1:])
-		}
-	}
-	return result
-}
-
-// toInverseCase inverts the case of each character
-func toInverseCase(s string) string {
-	runes := []rune(s)
-	for i, r := range runes {
-		if unicode.IsUpper(r) {
-			runes[i] = unicode.ToLower(r)
-		} else if unicode.IsLower(r) {
-			runes[i] = unicode.ToUpper(r)
-		}
-	}
-	return string(runes)
-}

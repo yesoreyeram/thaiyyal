@@ -1,30 +1,74 @@
 package executor
 
 import (
-"github.com/yesoreyeram/thaiyyal/backend/pkg/types"
+	"fmt"
+
+	"github.com/yesoreyeram/thaiyyal/backend/pkg/types"
 )
 
 // SwitchExecutor executes Switch nodes
-type SwitchExecutor struct {
-// Delegate to engine method
-ExecuteFunc func(ctx ExecutionContext, node types.Node) (interface{}, error)
-}
+type SwitchExecutor struct{}
 
 // Execute runs the Switch node
+// Handles switch/case node execution
 func (e *SwitchExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-if e.ExecuteFunc != nil {
-return e.ExecuteFunc(ctx, node)
-}
-return nil, nil
+	inputs := ctx.GetNodeInputs(node.ID)
+	if len(inputs) == 0 {
+		return nil, fmt.Errorf("switch node requires at least one input")
+	}
+
+	// Get the input value to switch on
+	inputValue := inputs[0]
+
+	// Check each case
+	for _, switchCase := range node.Data.Cases {
+		matched := false
+
+		// If switchCase.Value is set, do value matching
+		if switchCase.Value != nil {
+			matched = compareValues(inputValue, switchCase.Value)
+		} else {
+			// Otherwise, evaluate as a condition
+			matched = evaluateCondition(switchCase.When, inputValue)
+		}
+
+		if matched {
+			outputPath := "matched"
+			if switchCase.OutputPath != nil {
+				outputPath = *switchCase.OutputPath
+			}
+			return map[string]interface{}{
+				"value":       inputValue,
+				"matched":     true,
+				"case":        switchCase.When,
+				"output_path": outputPath,
+			}, nil
+		}
+	}
+
+	// No case matched, use default
+	defaultPath := "default"
+	if node.Data.DefaultPath != nil {
+		defaultPath = *node.Data.DefaultPath
+	}
+
+	return map[string]interface{}{
+		"value":       inputValue,
+		"matched":     false,
+		"output_path": defaultPath,
+	}, nil
 }
 
 // NodeType returns the node type this executor handles
 func (e *SwitchExecutor) NodeType() types.NodeType {
-return types.NodeTypeSwitch
+	return types.NodeTypeSwitch
 }
 
 // Validate checks if node configuration is valid
 func (e *SwitchExecutor) Validate(node types.Node) error {
-// Basic validation - specific validation in Execute
-return nil
+	// Switch node should have at least one case
+	if len(node.Data.Cases) == 0 {
+		return fmt.Errorf("switch node requires at least one case")
+	}
+	return nil
 }
