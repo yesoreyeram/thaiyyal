@@ -52,3 +52,5 @@ next-env.d.ts
 *.out
 go.work
 go.work.sum
+examples/parallel_demo
+backend/examples
