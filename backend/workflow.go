@@ -70,6 +70,8 @@ package workflow
 
 import (
 "context"
+"crypto/rand"
+"encoding/hex"
 "encoding/json"
 "fmt"
 "sync"
@@ -79,6 +81,17 @@ import (
 // ============================================================================
 // Core Types and Constants
 // ============================================================================
+
+// Context keys for passing execution metadata through the execution chain
+type contextKey string
+
+const (
+	// ContextKeyExecutionID is the context key for the unique execution ID
+	ContextKeyExecutionID contextKey = "execution_id"
+	
+	// ContextKeyWorkflowID is the context key for the workflow ID
+	ContextKeyWorkflowID contextKey = "workflow_id"
+)
 
 // NodeType represents the type of a workflow node
 type NodeType string
@@ -115,10 +128,60 @@ NodeTypeContextVariable NodeType = "context_variable" // Define a mutable variab
 NodeTypeContextConstant NodeType = "context_constant" // Define an immutable constant
 )
 
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+// generateExecutionID creates a unique execution identifier.
+// Uses crypto/rand for cryptographically secure random IDs.
+// Format: 16 hex characters (8 bytes) for balance between uniqueness and readability.
+// Example: "a1b2c3d4e5f6g7h8"
+func generateExecutionID() string {
+	bytes := make([]byte, 8)
+	if _, err := rand.Read(bytes); err != nil {
+		// Fallback to timestamp-based ID if random generation fails
+		return fmt.Sprintf("exec_%d", time.Now().UnixNano())
+	}
+	return hex.EncodeToString(bytes)
+}
+
+// GetExecutionID extracts the execution ID from context.
+// Returns empty string if not found in context.
+//
+// This can be used by node executors for logging:
+//
+//	executionID := workflow.GetExecutionID(ctx)
+//	log.Printf("[%s] Processing node", executionID)
+func GetExecutionID(ctx context.Context) string {
+	if id, ok := ctx.Value(ContextKeyExecutionID).(string); ok {
+		return id
+	}
+	return ""
+}
+
+// GetWorkflowID extracts the workflow ID from context.
+// Returns empty string if not found in context.
+//
+// This can be used by node executors for logging:
+//
+//	workflowID := workflow.GetWorkflowID(ctx)
+//	log.Printf("[workflow:%s] Processing", workflowID)
+func GetWorkflowID(ctx context.Context) string {
+	if id, ok := ctx.Value(ContextKeyWorkflowID).(string); ok {
+		return id
+	}
+	return ""
+}
+
+// ============================================================================
+// Payload and Node Types
+// ============================================================================
+
 // Payload represents the JSON payload from the frontend
 type Payload struct {
-Nodes []Node `json:"nodes"`
-Edges []Edge `json:"edges"`
+	WorkflowID string `json:"workflow_id,omitempty"` // Optional workflow identifier
+	Nodes      []Node `json:"nodes"`
+	Edges      []Edge `json:"edges"`
 }
 
 // Node represents a workflow node
@@ -197,9 +260,11 @@ Target string `json:"target"`
 
 // Result represents the execution result of the workflow
 type Result struct {
-NodeResults map[string]interface{} `json:"node_results"`
-FinalOutput interface{}            `json:"final_output"`
-Errors      []string               `json:"errors,omitempty"`
+	ExecutionID string                 `json:"execution_id"`         // Unique execution identifier
+	WorkflowID  string                 `json:"workflow_id,omitempty"` // Optional workflow identifier
+	NodeResults map[string]interface{} `json:"node_results"`
+	FinalOutput interface{}            `json:"final_output"`
+	Errors      []string               `json:"errors,omitempty"`
 }
 
 // CacheEntry represents a cached value with expiration
@@ -220,20 +285,27 @@ Expiration time.Time
 //   - State Pattern: Manages workflow state (variables, accumulator, counter, cache)
 //   - Template Method: Execute() defines the workflow execution algorithm
 type Engine struct {
-nodes       []Node
-edges       []Edge
-nodeResults map[string]interface{}
-config      Config // configuration for execution limits and security
-// State management
-variables  map[string]interface{} // stores variables across nodes
-accumulator interface{}            // stores accumulated value
-counter    float64                // stores counter value
-// Cache management
-cache      map[string]*CacheEntry // stores cached values with TTL
-cacheMutex sync.RWMutex           // protects cache access
-// Context for template interpolation (populated by context nodes)
-contextVariables map[string]interface{} // workflow-level variables from context_variable nodes
-contextConstants map[string]interface{} // workflow-level constants from context_constant nodes
+	nodes       []Node
+	edges       []Edge
+	nodeResults map[string]interface{}
+	config      Config // configuration for execution limits and security
+	
+	// Execution metadata
+	executionID string // unique identifier for this execution
+	workflowID  string // optional identifier for the workflow definition
+	
+	// State management
+	variables   map[string]interface{} // stores variables across nodes
+	accumulator interface{}            // stores accumulated value
+	counter     float64                // stores counter value
+	
+	// Cache management
+	cache      map[string]*CacheEntry // stores cached values with TTL
+	cacheMutex sync.RWMutex           // protects cache access
+	
+	// Context for template interpolation (populated by context nodes)
+	contextVariables map[string]interface{} // workflow-level variables from context_variable nodes
+	contextConstants map[string]interface{} // workflow-level constants from context_constant nodes
 }
 
 // ============================================================================
@@ -243,75 +315,78 @@ contextConstants map[string]interface{} // workflow-level constants from context
 // NewEngine creates a new workflow engine from JSON payload.
 //
 // The payload should contain:
+//   - workflow_id (optional): Identifier for the workflow definition
 //   - nodes: Array of node definitions with id, type (optional), and data
 //   - edges: Array of edge definitions connecting nodes
+//
+// An execution ID is automatically generated for this execution.
 //
 // Returns:
 //   - *Engine: Initialized engine ready for execution
 //   - error: If JSON parsing fails
 func NewEngine(payloadJSON []byte) (*Engine, error) {
-var payload Payload
-if err := json.Unmarshal(payloadJSON, &payload); err != nil {
-return nil, fmt.Errorf("failed to parse payload: %w", err)
-}
+	var payload Payload
+	if err := json.Unmarshal(payloadJSON, &payload); err != nil {
+		return nil, fmt.Errorf("failed to parse payload: %w", err)
+	}
 
-return &Engine{
-nodes:            payload.Nodes,
-edges:            payload.Edges,
-nodeResults:      make(map[string]interface{}),
-config:           DefaultConfig(),
-variables:        make(map[string]interface{}),
-accumulator:      nil,
-counter:          0,
-cache:            make(map[string]*CacheEntry),
-contextVariables: make(map[string]interface{}),
-contextConstants: make(map[string]interface{}),
-}, nil
+	return &Engine{
+		nodes:            payload.Nodes,
+		edges:            payload.Edges,
+		nodeResults:      make(map[string]interface{}),
+		config:           DefaultConfig(),
+		executionID:      generateExecutionID(),
+		workflowID:       payload.WorkflowID,
+		variables:        make(map[string]interface{}),
+		accumulator:      nil,
+		counter:          0,
+		cache:            make(map[string]*CacheEntry),
+		contextVariables: make(map[string]interface{}),
+		contextConstants: make(map[string]interface{}),
+	}, nil
 }
 
 // NewEngineWithConfig creates a new workflow engine with custom configuration.
 // This is useful for testing or when you need non-default security settings.
+//
+// An execution ID is automatically generated for this execution.
 func NewEngineWithConfig(payloadJSON []byte, config Config) (*Engine, error) {
-var payload Payload
-if err := json.Unmarshal(payloadJSON, &payload); err != nil {
-return nil, fmt.Errorf("failed to parse payload: %w", err)
+	var payload Payload
+	if err := json.Unmarshal(payloadJSON, &payload); err != nil {
+		return nil, fmt.Errorf("failed to parse payload: %w", err)
+	}
+
+	return &Engine{
+		nodes:            payload.Nodes,
+		edges:            payload.Edges,
+		nodeResults:      make(map[string]interface{}),
+		config:           config,
+		executionID:      generateExecutionID(),
+		workflowID:       payload.WorkflowID,
+		variables:        make(map[string]interface{}),
+		accumulator:      nil,
+		counter:          0,
+		cache:            make(map[string]*CacheEntry),
+		contextVariables: make(map[string]interface{}),
+		contextConstants: make(map[string]interface{}),
+	}, nil
 }
 
-return &Engine{
-nodes:            payload.Nodes,
-edges:            payload.Edges,
-nodeResults:      make(map[string]interface{}),
-config:           config,
-variables:        make(map[string]interface{}),
-accumulator:      nil,
-counter:          0,
-cache:            make(map[string]*CacheEntry),
-contextVariables: make(map[string]interface{}),
-contextConstants: make(map[string]interface{}),
-}, nil
-}
 
-
-// Execute runs the workflow and returns the result.
-//
-// The execution follows these steps:
-//  1. Infer node types if not explicitly set
-//  2. Perform topological sort to determine execution order
-//  3. Execute each node in order, storing results
-//  4. Determine final output from terminal nodes
-//
-// Returns:
-//   - *Result: Contains node results, final output, and any errors
-//   - error: If execution fails at any step
 // Execute runs the workflow and returns the result.
 // The workflow execution is protected by a timeout configured in MaxExecutionTime.
 // If the workflow takes longer than the timeout, execution is cancelled and an error is returned.
 //
+// Each workflow execution is assigned a unique execution ID that is passed through the
+// execution context and included in the result. This ID can be used for logging and tracing.
+//
 // Returns:
-//   - *Result: Workflow execution results including node outputs and final output
+//   - *Result: Workflow execution results including execution ID, node outputs and final output
 //   - error: If execution fails, times out, or encounters an error
 func (e *Engine) Execute() (*Result, error) {
 	result := &Result{
+		ExecutionID: e.executionID,
+		WorkflowID:  e.workflowID,
 		NodeResults: make(map[string]interface{}),
 		Errors:      []string{},
 	}
@@ -325,9 +400,13 @@ func (e *Engine) Execute() (*Result, error) {
 		return result, err
 	}
 
-	// Step 3: Create context with timeout for workflow execution
+	// Step 3: Create context with timeout and execution metadata for workflow execution
 	ctx, cancel := context.WithTimeout(context.Background(), e.config.MaxExecutionTime)
 	defer cancel()
+	
+	// Add execution ID and workflow ID to context for logging and tracing
+	ctx = context.WithValue(ctx, ContextKeyExecutionID, e.executionID)
+	ctx = context.WithValue(ctx, ContextKeyWorkflowID, e.workflowID)
 
 	// Use a channel to communicate execution completion
 	done := make(chan error, 1)
@@ -345,7 +424,7 @@ func (e *Engine) Execute() (*Result, error) {
 			}
 
 			node := e.getNode(nodeID)
-			value, err := e.executeNode(node)
+			value, err := e.executeNodeWithContext(ctx, node)
 			if err != nil {
 				errMsg := fmt.Sprintf("error executing node %s: %v", nodeID, err)
 				result.Errors = append(result.Errors, errMsg)
