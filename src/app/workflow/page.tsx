@@ -439,7 +439,7 @@ function Canvas() {
 
   const payload = useMemo(
     () => ({
-      nodes: nodes.map((n) => ({ id: n.id, type: n.type, data: n.data })),
+      nodes: nodes.map((n) => ({ id: n.id, type: n.type, data: n.data, position: n.position })),
       edges: edges.map((e) => ({
         id: e.id,
         source: e.source,
@@ -557,6 +557,46 @@ function Canvas() {
     console.log('Run workflow', payload);
   };
 
+  const handleExport = () => {
+    const jsonString = JSON.stringify(payload, null, 2);
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    
+    // Use workflow title for filename, sanitize it
+    const sanitizedTitle = workflowTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    link.download = `${sanitizedTitle}_workflow.json`;
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleImport = (data: { nodes: unknown[]; edges: unknown[] }) => {
+    // Type cast and validate the imported data
+    const importedNodes = data.nodes as RFNode<NodeData>[];
+    const importedEdges = data.edges as RFEdge[];
+    
+    // Ensure all nodes have position data, add default position if missing
+    const nodesWithPositions = importedNodes.map((node, index) => ({
+      ...node,
+      position: node.position || { x: 50 + index * 200, y: 50 + index * 100 }
+    }));
+    
+    // Set the imported nodes and edges
+    setNodes(nodesWithPositions);
+    setEdges(importedEdges);
+    
+    // Update the next ID to be higher than any existing node ID
+    const maxId = importedNodes.reduce((max, node) => {
+      const nodeId = parseInt(node.id, 10);
+      return isNaN(nodeId) ? max : Math.max(max, nodeId);
+    }, 0);
+    setNextId(maxId + 1);
+  };
+
   const handleDeleteNode = (nodeId: string) => {
     const node = nodes.find((n) => n.id === nodeId);
     if (node) {
@@ -589,6 +629,8 @@ function Canvas() {
         onShowJSON={() => setShowPayload(true)}
         onDelete={handleDelete}
         onRun={handleRun}
+        onExport={handleExport}
+        onImport={handleImport}
       />
 
       {/* Main Content */}
@@ -632,6 +674,7 @@ function Canvas() {
           isOpen={showPayload}
           onClose={() => setShowPayload(false)}
           payload={payload}
+          workflowTitle={workflowTitle}
         />
       </div>
 
