@@ -14,6 +14,7 @@ import (
 
 "github.com/yesoreyeram/thaiyyal/backend/pkg/executor"
 "github.com/yesoreyeram/thaiyyal/backend/pkg/graph"
+"github.com/yesoreyeram/thaiyyal/backend/pkg/observer"
 "github.com/yesoreyeram/thaiyyal/backend/pkg/state"
 "github.com/yesoreyeram/thaiyyal/backend/pkg/types"
 )
@@ -29,6 +30,7 @@ import (
 //   - Strategy Pattern: Different execution strategies for different node types (via Registry)
 //   - State Pattern: Manages workflow state (variables, accumulator, counter, cache)
 //   - Template Method: Execute() defines the workflow execution algorithm
+//   - Observer Pattern: Notifies observers of execution events (optional)
 type Engine struct {
 	graph      *graph.Graph
 	state      *state.Manager
@@ -47,6 +49,10 @@ type Engine struct {
 	// Node storage for lookups
 	nodes []types.Node
 	edges []types.Edge
+
+	// Observer support
+	observerMgr *observer.Manager
+	logger      observer.Logger
 }
 
 // ============================================================================
@@ -120,6 +126,8 @@ func NewWithRegistry(payloadJSON []byte, config types.Config, registry *executor
 		workflowID:  payload.WorkflowID,
 		nodes:       payload.Nodes,
 		edges:       payload.Edges,
+		observerMgr: observer.NewManager(),
+		logger:      &observer.NoOpLogger{},
 	}
 
 	// Create graph for topological sorting
@@ -206,6 +214,35 @@ return hex.EncodeToString(bytes)
 }
 
 // ============================================================================
+// Observer and Logger Configuration
+// ============================================================================
+
+// RegisterObserver adds an observer to receive execution events.
+// Multiple observers can be registered and will all receive events.
+// Returns the engine for method chaining.
+func (e *Engine) RegisterObserver(obs observer.Observer) *Engine {
+	if obs != nil {
+		e.observerMgr.Register(obs)
+	}
+	return e
+}
+
+// SetLogger sets the logger for the engine.
+// If no logger is set, a NoOpLogger is used by default.
+// Returns the engine for method chaining.
+func (e *Engine) SetLogger(logger observer.Logger) *Engine {
+	if logger != nil {
+		e.logger = logger
+	}
+	return e
+}
+
+// GetObserverCount returns the number of registered observers
+func (e *Engine) GetObserverCount() int {
+	return e.observerMgr.Count()
+}
+
+// ============================================================================
 // Public API - Execute
 // ============================================================================
 
@@ -216,77 +253,92 @@ return hex.EncodeToString(bytes)
 // Each workflow execution is assigned a unique execution ID that is passed through the
 // execution context and included in the result. This ID can be used for logging and tracing.
 //
+// Observers will be notified of workflow and node execution events if registered.
+//
 // Returns:
 //   - *types.Result: Workflow execution results including execution ID, node outputs and final output
 //   - error: If execution fails, times out, or encounters an error
 func (e *Engine) Execute() (*types.Result, error) {
-result := &types.Result{
-ExecutionID: e.executionID,
-WorkflowID:  e.workflowID,
-NodeResults: make(map[string]interface{}),
-Errors:      []string{},
-}
+	workflowStartTime := time.Now()
+	
+	result := &types.Result{
+		ExecutionID: e.executionID,
+		WorkflowID:  e.workflowID,
+		NodeResults: make(map[string]interface{}),
+		Errors:      []string{},
+	}
 
-// Step 1: Infer node types if not set
-e.inferNodeTypes()
+	// Step 1: Infer node types if not set
+	e.inferNodeTypes()
 
-// Step 2: Get execution order using topological sort
-executionOrder, err := e.graph.TopologicalSort()
-if err != nil {
-return result, err
-}
+	// Step 2: Get execution order using topological sort
+	executionOrder, err := e.graph.TopologicalSort()
+	if err != nil {
+		return result, err
+	}
 
-// Step 3: Create context with timeout and execution metadata for workflow execution
-ctx, cancel := context.WithTimeout(context.Background(), e.config.MaxExecutionTime)
-defer cancel()
+	// Step 3: Create context with timeout and execution metadata for workflow execution
+	ctx, cancel := context.WithTimeout(context.Background(), e.config.MaxExecutionTime)
+	defer cancel()
 
-// Add execution ID and workflow ID to context for logging and tracing
-ctx = context.WithValue(ctx, types.ContextKeyExecutionID, e.executionID)
-ctx = context.WithValue(ctx, types.ContextKeyWorkflowID, e.workflowID)
+	// Add execution ID and workflow ID to context for logging and tracing
+	ctx = context.WithValue(ctx, types.ContextKeyExecutionID, e.executionID)
+	ctx = context.WithValue(ctx, types.ContextKeyWorkflowID, e.workflowID)
 
-// Use a channel to communicate execution completion
-done := make(chan error, 1)
+	// Notify observers: Workflow start
+	e.notifyWorkflowStart(ctx, workflowStartTime)
 
-// Execute workflow in a goroutine
-go func() {
-// Execute each node in order
-for _, nodeID := range executionOrder {
-// Check if context was cancelled (timeout or parent cancellation)
-select {
-case <-ctx.Done():
-done <- ctx.Err()
-return
-default:
-}
+	// Use a channel to communicate execution completion
+	done := make(chan error, 1)
 
-node := e.getNode(nodeID)
-value, err := e.executeNode(ctx, node)
-if err != nil {
-errMsg := fmt.Sprintf("error executing node %s: %v", nodeID, err)
-result.Errors = append(result.Errors, errMsg)
-done <- fmt.Errorf("%s", errMsg)
-return
-}
-e.SetNodeResult(nodeID, value)
-}
-done <- nil
-}()
+	// Execute workflow in a goroutine
+	go func() {
+		// Execute each node in order
+		for _, nodeID := range executionOrder {
+			// Check if context was cancelled (timeout or parent cancellation)
+			select {
+			case <-ctx.Done():
+				done <- ctx.Err()
+				return
+			default:
+			}
 
-// Wait for execution to complete or timeout
-select {
-case err := <-done:
-if err != nil {
-return result, err
-}
-case <-ctx.Done():
-return result, fmt.Errorf("workflow execution timeout: exceeded %v", e.config.MaxExecutionTime)
-}
+			node := e.getNode(nodeID)
+			value, err := e.executeNode(ctx, node)
+			if err != nil {
+				errMsg := fmt.Sprintf("error executing node %s: %v", nodeID, err)
+				result.Errors = append(result.Errors, errMsg)
+				done <- fmt.Errorf("%s", errMsg)
+				return
+			}
+			e.SetNodeResult(nodeID, value)
+		}
+		done <- nil
+	}()
 
-// Step 4: Copy results and set final output
-result.NodeResults = e.results
-result.FinalOutput = e.getFinalOutput()
+	// Wait for execution to complete or timeout
+	select {
+	case err := <-done:
+		if err != nil {
+			// Notify observers: Workflow end with error
+			e.notifyWorkflowEnd(ctx, workflowStartTime, nil, err)
+			return result, err
+		}
+	case <-ctx.Done():
+		timeoutErr := fmt.Errorf("workflow execution timeout: exceeded %v", e.config.MaxExecutionTime)
+		// Notify observers: Workflow end with timeout
+		e.notifyWorkflowEnd(ctx, workflowStartTime, nil, timeoutErr)
+		return result, timeoutErr
+	}
 
-return result, nil
+	// Step 4: Copy results and set final output
+	result.NodeResults = e.results
+	result.FinalOutput = e.getFinalOutput()
+
+	// Notify observers: Workflow end (success)
+	e.notifyWorkflowEnd(ctx, workflowStartTime, result.FinalOutput, nil)
+
+	return result, nil
 }
 
 // ============================================================================
@@ -295,6 +347,7 @@ return result, nil
 
 // executeNode dispatches node execution to the appropriate executor via the registry.
 // Handles template interpolation before execution (except for context nodes).
+// Notifies observers of node execution events.
 //
 // Parameters:
 //   - ctx: Context with execution metadata (execution ID, workflow ID)
@@ -304,8 +357,15 @@ return result, nil
 //   - interface{}: Result of node execution (type depends on node)
 //   - error: If node execution fails
 func (e *Engine) executeNode(ctx context.Context, node types.Node) (interface{}, error) {
+	nodeStartTime := time.Now()
+	
+	// Notify observers: Node start
+	e.notifyNodeStart(ctx, node, nodeStartTime)
+
 	// Check and increment node execution counter
 	if err := e.IncrementNodeExecution(); err != nil {
+		// Notify observers: Node failure
+		e.notifyNodeFailure(ctx, node, nodeStartTime, nil, err)
 		return nil, err
 	}
 
@@ -315,7 +375,18 @@ func (e *Engine) executeNode(ctx context.Context, node types.Node) (interface{},
 	}
 
 	// Dispatch to appropriate executor via registry
-	return e.registry.Execute(e, node)
+	result, err := e.registry.Execute(e, node)
+	
+	if err != nil {
+		// Notify observers: Node failure
+		e.notifyNodeFailure(ctx, node, nodeStartTime, result, err)
+		return nil, err
+	}
+	
+	// Notify observers: Node success
+	e.notifyNodeSuccess(ctx, node, nodeStartTime, result)
+	
+	return result, nil
 }
 
 // ============================================================================
@@ -857,4 +928,117 @@ return result
 
 // No terminal node found
 return nil
+}
+
+// ============================================================================
+// Observer Notification Helpers
+// ============================================================================
+
+// notifyWorkflowStart notifies observers that workflow execution has started
+func (e *Engine) notifyWorkflowStart(ctx context.Context, startTime time.Time) {
+	if !e.observerMgr.HasObservers() {
+		return
+	}
+
+	event := observer.Event{
+		Type:        observer.EventWorkflowStart,
+		Status:      observer.StatusStarted,
+		Timestamp:   startTime,
+		ExecutionID: e.executionID,
+		WorkflowID:  e.workflowID,
+		StartTime:   startTime,
+	}
+
+	e.observerMgr.Notify(ctx, event)
+}
+
+// notifyWorkflowEnd notifies observers that workflow execution has ended
+func (e *Engine) notifyWorkflowEnd(ctx context.Context, startTime time.Time, result interface{}, err error) {
+	if !e.observerMgr.HasObservers() {
+		return
+	}
+
+	status := observer.StatusSuccess
+	if err != nil {
+		status = observer.StatusFailure
+	}
+
+	event := observer.Event{
+		Type:        observer.EventWorkflowEnd,
+		Status:      status,
+		Timestamp:   time.Now(),
+		ExecutionID: e.executionID,
+		WorkflowID:  e.workflowID,
+		StartTime:   startTime,
+		ElapsedTime: time.Since(startTime),
+		Result:      result,
+		Error:       err,
+	}
+
+	e.observerMgr.Notify(ctx, event)
+}
+
+// notifyNodeStart notifies observers that a node execution has started
+func (e *Engine) notifyNodeStart(ctx context.Context, node types.Node, startTime time.Time) {
+	if !e.observerMgr.HasObservers() {
+		return
+	}
+
+	event := observer.Event{
+		Type:        observer.EventNodeStart,
+		Status:      observer.StatusStarted,
+		Timestamp:   startTime,
+		ExecutionID: e.executionID,
+		WorkflowID:  e.workflowID,
+		NodeID:      node.ID,
+		NodeType:    node.Type,
+		StartTime:   startTime,
+	}
+
+	e.observerMgr.Notify(ctx, event)
+}
+
+// notifyNodeSuccess notifies observers that a node execution succeeded
+func (e *Engine) notifyNodeSuccess(ctx context.Context, node types.Node, startTime time.Time, result interface{}) {
+	if !e.observerMgr.HasObservers() {
+		return
+	}
+
+	event := observer.Event{
+		Type:        observer.EventNodeSuccess,
+		Status:      observer.StatusSuccess,
+		Timestamp:   time.Now(),
+		ExecutionID: e.executionID,
+		WorkflowID:  e.workflowID,
+		NodeID:      node.ID,
+		NodeType:    node.Type,
+		StartTime:   startTime,
+		ElapsedTime: time.Since(startTime),
+		Result:      result,
+	}
+
+	e.observerMgr.Notify(ctx, event)
+}
+
+// notifyNodeFailure notifies observers that a node execution failed
+func (e *Engine) notifyNodeFailure(ctx context.Context, node types.Node, startTime time.Time, result interface{}, err error) {
+	if !e.observerMgr.HasObservers() {
+		return
+	}
+
+	event := observer.Event{
+		Type:        observer.EventNodeFailure,
+		Status:      observer.StatusFailure,
+		Timestamp:   time.Now(),
+		ExecutionID: e.executionID,
+		WorkflowID:  e.workflowID,
+		NodeID:      node.ID,
+		NodeType:    node.Type,
+		StartTime:   startTime,
+		ElapsedTime: time.Since(startTime),
+		Result:      result,
+		Error:       err,
+	}
+
+	e.observerMgr.Notify(ctx, event)
 }
