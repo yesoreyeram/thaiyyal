@@ -74,30 +74,79 @@ return NewWithConfig(payloadJSON, types.DefaultConfig())
 //
 // An execution ID is automatically generated for this execution.
 func NewWithConfig(payloadJSON []byte, config types.Config) (*Engine, error) {
-var payload types.Payload
-if err := json.Unmarshal(payloadJSON, &payload); err != nil {
-return nil, fmt.Errorf("failed to parse payload: %w", err)
+	return NewWithRegistry(payloadJSON, config, DefaultRegistry())
 }
 
-engine := &Engine{
-state:       state.New(),
-registry:    defaultRegistry(),
-config:      config,
-results:     make(map[string]interface{}),
-executionID: generateExecutionID(),
-workflowID:  payload.WorkflowID,
-nodes:       payload.Nodes,
-edges:       payload.Edges,
+// NewWithRegistry creates a new workflow engine with a custom executor registry.
+// This allows users to register custom node executors while maintaining all
+// security protections and workflow execution capabilities.
+//
+// Example usage:
+//
+//	// Start with default registry and add custom nodes
+//	registry := engine.DefaultRegistry()
+//	registry.MustRegister(&MyCustomExecutor{})
+//	engine, err := engine.NewWithRegistry(payload, config, registry)
+//
+//	// Or create a completely custom registry
+//	registry := executor.NewRegistry()
+//	registry.MustRegister(&MyExecutor{})
+//	engine, err := engine.NewWithRegistry(payload, config, registry)
+//
+// Security Considerations:
+//   - Custom executors must implement NodeExecutor interface properly
+//   - All protection limits (MaxNodeExecutions, MaxHTTPCallsPerExec, etc.) apply to custom nodes
+//   - Custom executors should call ctx.IncrementNodeExecution() if they perform iterations
+//   - Custom executors making HTTP calls should call ctx.IncrementHTTPCall()
+//   - Custom executors should validate all inputs and handle errors appropriately
+//
+// An execution ID is automatically generated for this execution.
+func NewWithRegistry(payloadJSON []byte, config types.Config, registry *executor.Registry) (*Engine, error) {
+	if registry == nil {
+		return nil, fmt.Errorf("registry cannot be nil")
+	}
+
+	var payload types.Payload
+	if err := json.Unmarshal(payloadJSON, &payload); err != nil {
+		return nil, fmt.Errorf("failed to parse payload: %w", err)
+	}
+
+	engine := &Engine{
+		state:       state.New(),
+		registry:    registry,
+		config:      config,
+		results:     make(map[string]interface{}),
+		executionID: generateExecutionID(),
+		workflowID:  payload.WorkflowID,
+		nodes:       payload.Nodes,
+		edges:       payload.Edges,
+	}
+
+	// Create graph for topological sorting
+	engine.graph = graph.New(payload.Nodes, payload.Edges)
+
+	return engine, nil
 }
 
-// Create graph for topological sorting
-engine.graph = graph.New(payload.Nodes, payload.Edges)
-
-return engine, nil
-}
-
-// defaultRegistry creates and populates the default executor registry with all node executors
-func defaultRegistry() *executor.Registry {
+// DefaultRegistry creates and populates the default executor registry with all built-in node executors.
+// This function is exported to allow users to start with the default set and add custom executors.
+//
+// Example usage:
+//
+//	// Get default registry and add custom nodes
+//	registry := engine.DefaultRegistry()
+//	registry.MustRegister(&MyCustomExecutor{})
+//	engine, err := engine.NewWithRegistry(payload, config, registry)
+//
+// Returns a registry with all 25 built-in node types registered:
+//   - Basic I/O: Number, TextInput, Visualization
+//   - Operations: Operation, TextOperation, HTTP
+//   - Control Flow: Condition, ForEach, WhileLoop
+//   - State & Memory: Variable, Extract, Transform, Accumulator, Counter
+//   - Advanced Control: Switch, Parallel, Join, Split, Delay, Cache
+//   - Error Handling: Retry, TryCatch, Timeout
+//   - Context: ContextVariable, ContextConstant
+func DefaultRegistry() *executor.Registry {
 	reg := executor.NewRegistry()
 
 	// Register all 25 node type executors

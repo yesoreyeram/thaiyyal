@@ -67,6 +67,7 @@ package workflow
 
 import (
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/engine"
+	"github.com/yesoreyeram/thaiyyal/backend/pkg/executor"
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/types"
 )
 
@@ -90,6 +91,18 @@ type (
 
 // Engine re-exported from pkg/engine
 type Engine = engine.Engine
+
+// Executor types re-exported from pkg/executor
+type (
+	// NodeExecutor is the interface that custom node executors must implement
+	NodeExecutor = executor.NodeExecutor
+
+	// ExecutionContext provides access to workflow state and operations for executors
+	ExecutionContext = executor.ExecutionContext
+
+	// Registry manages node executor registration and lookup
+	Registry = executor.Registry
+)
 
 // ============================================================================
 // Constant Re-exports
@@ -165,6 +178,19 @@ var (
 
 	// NewEngineWithConfig creates a new workflow engine with custom configuration
 	NewEngineWithConfig = engine.NewWithConfig
+
+	// NewEngineWithRegistry creates a new workflow engine with a custom executor registry.
+	// This allows users to register custom node executors.
+	NewEngineWithRegistry = engine.NewWithRegistry
+)
+
+// Registry functions
+var (
+	// NewRegistry creates a new empty executor registry
+	NewRegistry = executor.NewRegistry
+
+	// DefaultRegistry creates a registry with all built-in node executors registered
+	DefaultRegistry = engine.DefaultRegistry
 )
 
 // Context helper functions

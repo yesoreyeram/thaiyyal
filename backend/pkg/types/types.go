@@ -148,6 +148,10 @@ type NodeData struct {
 	ContextName   *string                `json:"context_name,omitempty"`   // DEPRECATED: Use ContextValues for multiple values
 	ContextValue  interface{}            `json:"context_value,omitempty"`  // DEPRECATED: Use ContextValues for multiple values
 	ContextValues []ContextVariableValue `json:"context_values,omitempty"` // for context nodes (multiple typed values)
+
+	// Custom executor fields - extensible data for user-defined node types
+	Factor *float64 `json:"factor,omitempty"` // for multiply_by_n custom executor (example)
+	Prefix *string  `json:"prefix,omitempty"` // for concat_prefix custom executor (example)
 }
 
 // SwitchCase represents a case in a switch node
