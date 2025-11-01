@@ -274,3 +274,45 @@ func (m *Manager) GetAllContext() map[string]interface{} {
 	
 	return result
 }
+
+// GetAllCache returns all cache entries
+// Used for snapshot/restore functionality
+func (m *Manager) GetAllCache() map[string]*types.CacheEntry {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	// Create a copy to avoid race conditions
+	result := make(map[string]*types.CacheEntry, len(m.cache))
+	for k, v := range m.cache {
+		// Deep copy the cache entry
+		result[k] = &types.CacheEntry{
+			Value:      v.Value,
+			Expiration: v.Expiration,
+		}
+	}
+	return result
+}
+
+// GetContextVariables returns all context variables (without constants)
+func (m *Manager) GetContextVariables() map[string]interface{} {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	result := make(map[string]interface{}, len(m.contextVariables))
+	for k, v := range m.contextVariables {
+		result[k] = v
+	}
+	return result
+}
+
+// GetContextConstants returns all context constants
+func (m *Manager) GetContextConstants() map[string]interface{} {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	result := make(map[string]interface{}, len(m.contextConstants))
+	for k, v := range m.contextConstants {
+		result[k] = v
+	}
+	return result
+}
