@@ -57,6 +57,7 @@ const (
 	NodeTypeCondition     NodeType = "condition"
 	NodeTypeForEach       NodeType = "for_each"
 	NodeTypeWhileLoop     NodeType = "while_loop"
+	NodeTypeFilter        NodeType = "filter" // Filter array elements with expression
 	// State & Memory nodes
 	NodeTypeVariable    NodeType = "variable"    // Store/retrieve variables
 	NodeTypeExtract     NodeType = "extract"     // Extract fields from objects

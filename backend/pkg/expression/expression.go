@@ -239,13 +239,41 @@ if strings.HasPrefix(ref, "node.") {
 return resolveNodeReference(ref, ctx)
 }
 
-// Check for variable reference: variables.name
+// Check for variable reference: variables.name or variables.name.field
 if strings.HasPrefix(ref, "variables.") {
-varName := ref[10:] // Remove "variables." prefix
-if val, ok := ctx.Variables[varName]; ok {
-return val, nil
-}
-return nil, fmt.Errorf("variable not found: %s", varName)
+	// Parse: variables.name.field or just variables.name
+	parts := strings.Split(ref, ".")
+	if len(parts) < 2 {
+		return nil, fmt.Errorf("invalid variable reference: %s", ref)
+	}
+	
+	varName := parts[1]
+	val, ok := ctx.Variables[varName]
+	if !ok {
+		return nil, fmt.Errorf("variable not found: %s", varName)
+	}
+	
+	// If just variables.name, return the whole value
+	if len(parts) == 2 {
+		return val, nil
+	}
+	
+	// Navigate to nested field (like node references)
+	current := val
+	for i := 2; i < len(parts); i++ {
+		field := parts[i]
+		if m, ok := current.(map[string]interface{}); ok {
+			if fieldVal, exists := m[field]; exists {
+				current = fieldVal
+			} else {
+				return nil, fmt.Errorf("field not found: %s in variables.%s", field, varName)
+			}
+		} else {
+			return nil, fmt.Errorf("cannot access field %s on non-object", field)
+		}
+	}
+	
+	return current, nil
 }
 
 // Check for context reference: context.name
