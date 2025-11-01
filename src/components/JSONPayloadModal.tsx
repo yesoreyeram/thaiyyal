@@ -45,6 +45,18 @@ export function JSONPayloadModal({ isOpen, onClose, payload }: JSONPayloadModalP
     // Could add a toast notification here
   };
 
+  const exportToFile = () => {
+    const blob = new Blob([jsonString], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'workflow.json';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div
@@ -59,6 +71,16 @@ export function JSONPayloadModal({ isOpen, onClose, payload }: JSONPayloadModalP
           </div>
           
           <div className="flex items-center gap-2">
+            <button
+              onClick={exportToFile}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+              title="Export to JSON file"
+              aria-label="Export to JSON file"
+            >
+              <span>💾</span>
+              <span>Export</span>
+            </button>
+            
             <button
               onClick={copyToClipboard}
               className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
