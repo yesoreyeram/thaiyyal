@@ -374,7 +374,3 @@ func TestConditionExecutor_NodeType(t *testing.T) {
 	}
 }
 
-// Helper function for string pointers
-func strPtr(s string) *string {
-	return &s
-}

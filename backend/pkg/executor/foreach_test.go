@@ -6,12 +6,12 @@ import (
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/types"
 )
 
-// TestForEachExecutor_Basic tests basic ForEach functionality
-func TestForEachExecutor_Basic(t *testing.T) {
+// TestForEachExecutor_MapMode tests MAP mode (transform each element)
+func TestForEachExecutor_MapMode(t *testing.T) {
 	tests := []struct {
 		name          string
 		input         interface{}
-		maxIterations *int
+		mode          string
 		expectedCount int
 		expectError   bool
 		description   string
@@ -19,13 +19,15 @@ func TestForEachExecutor_Basic(t *testing.T) {
 		{
 			name:          "Small array",
 			input:         []interface{}{1, 2, 3},
+			mode:          "map",
 			expectedCount: 3,
 			expectError:   false,
-			description:   "Should iterate over 3 elements",
+			description:   "Should map over 3 elements",
 		},
 		{
 			name:          "Empty array",
 			input:         []interface{}{},
+			mode:          "map",
 			expectedCount: 0,
 			expectError:   false,
 			description:   "Should handle empty array",
@@ -33,16 +35,10 @@ func TestForEachExecutor_Basic(t *testing.T) {
 		{
 			name:          "Array of objects",
 			input:         []interface{}{map[string]interface{}{"id": 1}, map[string]interface{}{"id": 2}},
+			mode:          "map",
 			expectedCount: 2,
 			expectError:   false,
-			description:   "Should iterate over objects",
-		},
-		{
-			name:          "Large array within limit",
-			input:         make([]interface{}, 500),
-			expectedCount: 500,
-			expectError:   false,
-			description:   "Should handle 500 elements",
+			description:   "Should map over objects",
 		},
 	}
 
@@ -59,7 +55,7 @@ func TestForEachExecutor_Basic(t *testing.T) {
 				ID:   "test-node",
 				Type: types.NodeTypeForEach,
 				Data: types.NodeData{
-					MaxIterations: tt.maxIterations,
+					Mode: &tt.mode,
 				},
 			}
 
@@ -81,24 +77,19 @@ func TestForEachExecutor_Basic(t *testing.T) {
 				t.Fatalf("Expected result to be map, got %T", result)
 			}
 
-			count, ok := resultMap["count"].(int)
+			// Verify mode
+			if resultMap["mode"].(string) != "map" {
+				t.Errorf("Expected mode=map, got %s", resultMap["mode"])
+			}
+
+			// Verify results array
+			results, ok := resultMap["results"].([]interface{})
 			if !ok {
-				t.Fatalf("Expected count to be int, got %T", resultMap["count"])
+				t.Fatalf("Expected results to be array, got %T", resultMap["results"])
 			}
 
-			if count != tt.expectedCount {
-				t.Errorf("Expected count=%d, got %d. Description: %s",
-					tt.expectedCount, count, tt.description)
-			}
-
-			// Verify items are preserved
-			items, ok := resultMap["items"].([]interface{})
-			if !ok {
-				t.Fatalf("Expected items to be array, got %T", resultMap["items"])
-			}
-
-			if len(items) != tt.expectedCount {
-				t.Errorf("Expected %d items, got %d", tt.expectedCount, len(items))
+			if len(results) != tt.expectedCount {
+				t.Errorf("Expected %d results, got %d", tt.expectedCount, len(results))
 			}
 		})
 	}
