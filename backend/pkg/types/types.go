@@ -211,6 +211,10 @@ type Config struct {
 	MaxNodes          int // Maximum number of nodes in workflow
 	MaxEdges          int // Maximum number of edges in workflow
 	MaxNodeExecutions int // Maximum total node executions (including loop iterations, 0 = unlimited)
+	MaxStringLength   int // Maximum length of string values (0 = unlimited)
+	MaxArrayLength    int // Maximum length of array values (0 = unlimited)
+	MaxVariables      int // Maximum number of variables in workflow state (0 = unlimited)
+	MaxContextDepth   int // Maximum depth of nested objects/arrays (0 = unlimited)
 
 	// Retry configuration
 	DefaultMaxAttempts int           // Default max retry attempts
