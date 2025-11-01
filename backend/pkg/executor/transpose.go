@@ -1,0 +1,100 @@
+package executor
+
+import (
+	"context"
+	"fmt"
+
+	"github.com/yesoreyeram/thaiyyal/backend/pkg/types"
+)
+
+// TransposeExecutor transposes a 2D array (matrix)
+type TransposeExecutor struct{}
+
+// Execute transposes a 2D array
+func (e *TransposeExecutor) Execute(ctx context.Context, node types.Node, inputs map[string]interface{}, nodeResults map[string]interface{}, variables map[string]interface{}) (interface{}, error) {
+	// Get input array
+	input, ok := inputs["in"]
+	if !ok {
+		return nil, fmt.Errorf("transpose node missing required input 'in'")
+	}
+
+	// Check if input is an array
+	arr, ok := input.([]interface{})
+	if !ok {
+		return map[string]interface{}{
+			"error": "input is not an array",
+			"input": input,
+		}, nil
+	}
+
+	if len(arr) == 0 {
+		return map[string]interface{}{
+			"transposed": []interface{}{},
+			"rows":       0,
+			"cols":       0,
+		}, nil
+	}
+
+	// Check if first element is an array (2D structure)
+	firstRow, ok := arr[0].([]interface{})
+	if !ok {
+		return map[string]interface{}{
+			"error":          "input is not a 2D array (array of arrays)",
+			"first_element":  arr[0],
+			"expected":       "array of arrays",
+		}, nil
+	}
+
+	rows := len(arr)
+	cols := len(firstRow)
+
+	// Validate all rows have same length
+	for i, row := range arr {
+		rowArr, ok := row.([]interface{})
+		if !ok {
+			return map[string]interface{}{
+				"error":      fmt.Sprintf("row %d is not an array", i),
+				"row_index":  i,
+				"row_value":  row,
+			}, nil
+		}
+		if len(rowArr) != cols {
+			return map[string]interface{}{
+				"error":         "all rows must have the same length",
+				"expected_cols": cols,
+				"row_index":     i,
+				"actual_cols":   len(rowArr),
+			}, nil
+		}
+	}
+
+	// Transpose the matrix
+	transposed := make([]interface{}, cols)
+	for i := 0; i < cols; i++ {
+		column := make([]interface{}, rows)
+		for j := 0; j < rows; j++ {
+			rowArr := arr[j].([]interface{})
+			column[j] = rowArr[i]
+		}
+		transposed[i] = column
+	}
+
+	return map[string]interface{}{
+		"transposed": transposed,
+		"rows":       rows,
+		"cols":       cols,
+		"transposed_rows": cols,
+		"transposed_cols": rows,
+	}, nil
+}
+
+// NodeType returns the node type this executor handles
+func (e *TransposeExecutor) NodeType() types.NodeType {
+	return types.NodeTypeTranspose
+}
+
+// Validate checks if the node configuration is valid
+func (e *TransposeExecutor) Validate(node types.Node) error {
+	// No configuration needed
+	return nil
+}

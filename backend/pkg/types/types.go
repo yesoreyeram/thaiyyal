@@ -60,6 +60,21 @@ const (
 	NodeTypeFilter        NodeType = "filter" // Filter array elements with expression
 	NodeTypeMap           NodeType = "map"    // Transform array elements
 	NodeTypeReduce        NodeType = "reduce" // Reduce array to single value
+	// Array Processing nodes
+	NodeTypeSlice     NodeType = "slice"      // Extract portion of array (pagination)
+	NodeTypeSort      NodeType = "sort"       // Sort array by field
+	NodeTypeFind      NodeType = "find"       // Find first matching element
+	NodeTypeFlatMap   NodeType = "flat_map"   // Transform and flatten arrays
+	NodeTypeGroupBy   NodeType = "group_by"   // Group and aggregate array elements
+	NodeTypeUnique    NodeType = "unique"     // Remove duplicate elements
+	NodeTypeChunk     NodeType = "chunk"      // Split array into chunks
+	NodeTypeReverse   NodeType = "reverse"    // Reverse array order
+	NodeTypePartition NodeType = "partition"  // Split array into two groups by condition
+	NodeTypeZip       NodeType = "zip"        // Combine arrays element-wise
+	NodeTypeSample    NodeType = "sample"     // Get random sample from array
+	NodeTypeRange     NodeType = "range"      // Generate array of numbers
+	NodeTypeCompact   NodeType = "compact"    // Remove null/empty values
+	NodeTypeTranspose NodeType = "transpose"  // Transpose 2D array (matrix)
 	// State & Memory nodes
 	NodeTypeVariable    NodeType = "variable"    // Store/retrieve variables
 	NodeTypeExtract     NodeType = "extract"     // Extract fields from objects
@@ -111,11 +126,26 @@ type NodeData struct {
 	URL           *string  `json:"url,omitempty"`            // for HTTP nodes
 	Separator     *string  `json:"separator,omitempty"`      // for concat text operation
 	RepeatN       *int     `json:"repeat_n,omitempty"`       // for repeat text operation
-	Condition     *string  `json:"condition,omitempty"`      // for condition, filter, reduce nodes
-	Expression    *string  `json:"expression,omitempty"`     // for map, reduce nodes (transformation expression)
-	TruePath      *string  `json:"true_path,omitempty"`      // for condition nodes (output port name)
-	FalsePath     *string  `json:"false_path,omitempty"`     // for condition nodes (output port name)
-	MaxIterations *int     `json:"max_iterations,omitempty"` // for for_each and while_loop nodes
+	Condition     *string `json:"condition,omitempty"`      // for condition, filter, partition, find nodes
+	Expression    *string `json:"expression,omitempty"`     // for map, reduce nodes (transformation expression)
+	TruePath      *string     `json:"true_path,omitempty"`      // for condition nodes (output port name)
+	FalsePath     *string     `json:"false_path,omitempty"`     // for condition nodes (output port name)
+	MaxIterations *int        `json:"max_iterations,omitempty"` // for for_each and while_loop nodes
+	// Array Processing fields
+	Start        interface{}   `json:"start,omitempty"`         // for slice, range nodes (start index/value)
+	End          interface{}   `json:"end,omitempty"`           // for slice, range nodes (end index/value)
+	Length       interface{}   `json:"length,omitempty"`        // for slice node (length instead of end)
+	Step         interface{}   `json:"step,omitempty"`          // for range node (step value)
+	Order        *string       `json:"order,omitempty"`         // for sort node (asc/desc)
+	ReturnIndex  *bool         `json:"return_index,omitempty"`  // for find node
+	Size         interface{}   `json:"size,omitempty"`          // for chunk node
+	Count        interface{}   `json:"count,omitempty"`         // for sample node
+	Method       *string       `json:"method,omitempty"`        // for sample node (random/first/last)
+	Aggregate    *string       `json:"aggregate,omitempty"`     // for group_by node (count/sum/avg/min/max/values)
+	ValueField   *string       `json:"value_field,omitempty"`   // for group_by node (field to aggregate)
+	Arrays       interface{}   `json:"arrays,omitempty"`        // for zip node (array references)
+	FillMissing  interface{}   `json:"fill_missing,omitempty"`  // for zip node (value for shorter arrays)
+	RemoveEmpty  *bool         `json:"remove_empty,omitempty"`  // for compact node
 	// State & Memory fields
 	VarName       *string     `json:"var_name,omitempty"`       // for variable nodes (variable name)
 	VarOp         *string     `json:"var_op,omitempty"`         // for variable nodes (get/set)

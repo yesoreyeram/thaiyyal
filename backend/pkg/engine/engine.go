@@ -159,10 +159,11 @@ func NewWithRegistry(payloadJSON []byte, config types.Config, registry *executor
 //	registry.MustRegister(&MyCustomExecutor{})
 //	engine, err := engine.NewWithRegistry(payload, config, registry)
 //
-// Returns a registry with all 26 built-in node types registered:
+// Returns a registry with all 40 built-in node types registered:
 //   - Basic I/O: Number, TextInput, Visualization
 //   - Operations: Operation, TextOperation, HTTP
-//   - Control Flow: Condition, ForEach, WhileLoop, Filter
+//   - Control Flow: Condition, ForEach, WhileLoop, Filter, Map, Reduce
+//   - Array Processing: Slice, Sort, Find, FlatMap, GroupBy, Unique, Chunk, Reverse, Partition, Zip, Sample, Range, Compact, Transpose
 //   - State & Memory: Variable, Extract, Transform, Accumulator, Counter
 //   - Advanced Control: Switch, Parallel, Join, Split, Delay, Cache
 //   - Error Handling: Retry, TryCatch, Timeout
@@ -170,7 +171,7 @@ func NewWithRegistry(payloadJSON []byte, config types.Config, registry *executor
 func DefaultRegistry() *executor.Registry {
 	reg := executor.NewRegistry()
 
-	// Register all 26 node type executors
+	// Register all 40 node type executors
 	// Basic I/O nodes
 	reg.MustRegister(&executor.NumberExecutor{})
 	reg.MustRegister(&executor.TextInputExecutor{})
@@ -188,6 +189,22 @@ func DefaultRegistry() *executor.Registry {
 	reg.MustRegister(&executor.FilterExecutor{})
 	reg.MustRegister(&executor.MapExecutor{})
 	reg.MustRegister(&executor.ReduceExecutor{})
+
+	// Array processing nodes (14 new nodes)
+	reg.MustRegister(&executor.SliceExecutor{})      // Pagination, windowing
+	reg.MustRegister(&executor.SortExecutor{})       // Sort by field
+	reg.MustRegister(&executor.FindExecutor{})       // Find first match
+	reg.MustRegister(&executor.FlatMapExecutor{})    // Transform and flatten
+	reg.MustRegister(&executor.GroupByExecutor{})    // Group and aggregate
+	reg.MustRegister(&executor.UniqueExecutor{})     // Remove duplicates
+	reg.MustRegister(&executor.ChunkExecutor{})      // Split into chunks
+	reg.MustRegister(&executor.ReverseExecutor{})    // Reverse array
+	reg.MustRegister(&executor.PartitionExecutor{})  // Split by condition
+	reg.MustRegister(&executor.ZipExecutor{})        // Combine arrays
+	reg.MustRegister(&executor.SampleExecutor{})     // Random sampling
+	reg.MustRegister(&executor.RangeExecutor{})      // Generate sequences
+	reg.MustRegister(&executor.CompactExecutor{})    // Remove null/empty
+	reg.MustRegister(&executor.TransposeExecutor{})  // Transpose matrix
 
 	// State & memory nodes
 	reg.MustRegister(&executor.VariableExecutor{})

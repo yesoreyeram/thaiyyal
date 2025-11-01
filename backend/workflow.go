@@ -157,6 +157,24 @@ const (
 	NodeTypeReduce    = types.NodeTypeReduce
 )
 
+// Node type constants - Array Processing
+const (
+	NodeTypeSlice     = types.NodeTypeSlice
+	NodeTypeSort      = types.NodeTypeSort
+	NodeTypeFind      = types.NodeTypeFind
+	NodeTypeFlatMap   = types.NodeTypeFlatMap
+	NodeTypeGroupBy   = types.NodeTypeGroupBy
+	NodeTypeUnique    = types.NodeTypeUnique
+	NodeTypeChunk     = types.NodeTypeChunk
+	NodeTypeReverse   = types.NodeTypeReverse
+	NodeTypePartition = types.NodeTypePartition
+	NodeTypeZip       = types.NodeTypeZip
+	NodeTypeSample    = types.NodeTypeSample
+	NodeTypeRange     = types.NodeTypeRange
+	NodeTypeCompact   = types.NodeTypeCompact
+	NodeTypeTranspose = types.NodeTypeTranspose
+)
+
 // Node type constants - State & Memory
 const (
 	NodeTypeVariable    = types.NodeTypeVariable
