@@ -4,16 +4,26 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/types"
 )
 
-// HTTPExecutor executes HTTP nodes
-type HTTPExecutor struct{}
+// HTTPExecutor executes HTTP nodes with connection pooling
+type HTTPExecutor struct {
+	client *http.Client
+	mu     sync.RWMutex
+}
+
+// NewHTTPExecutor creates a new HTTP executor with a shared connection pool
+func NewHTTPExecutor() *HTTPExecutor {
+	return &HTTPExecutor{}
+}
 
 // Execute runs the HTTP node
 // Performs an HTTP GET request and returns the response body.
+// Uses a shared connection pool for better performance.
 //
 // Security features:
 //   - URL validation (blocks internal IPs by default)
@@ -32,27 +42,8 @@ func (e *HTTPExecutor) Execute(ctx ExecutionContext, node types.Node) (interface
 		return nil, fmt.Errorf("URL validation failed: %w", err)
 	}
 
-	// Create HTTP client with timeout and security settings
-	client := &http.Client{
-		Timeout: config.HTTPTimeout,
-		Transport: &http.Transport{
-			MaxIdleConns:        10,
-			IdleConnTimeout:     30 * time.Second,
-			TLSHandshakeTimeout: 10 * time.Second,
-			DisableKeepAlives:   false,
-		},
-		// Limit redirects
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			if len(via) >= config.MaxHTTPRedirects {
-				return fmt.Errorf("too many redirects (max %d)", config.MaxHTTPRedirects)
-			}
-			// Validate redirect URL as well (prevent redirect-based SSRF)
-			if err := isAllowedURL(req.URL.String(), config); err != nil {
-				return fmt.Errorf("redirect URL validation failed: %w", err)
-			}
-			return nil
-		},
-	}
+	// Get or create shared HTTP client with connection pooling
+	client := e.getOrCreateClient(config)
 
 	// Make HTTP GET request
 	resp, err := client.Get(*node.Data.URL)
@@ -83,6 +74,58 @@ func (e *HTTPExecutor) Execute(ctx ExecutionContext, node types.Node) (interface
 	}
 
 	return string(body), nil
+}
+
+// getOrCreateClient returns the shared HTTP client, creating it if necessary
+// This enables connection pooling and reuse across multiple requests
+func (e *HTTPExecutor) getOrCreateClient(config types.Config) *http.Client {
+	e.mu.RLock()
+	if e.client != nil {
+		e.mu.RUnlock()
+		return e.client
+	}
+	e.mu.RUnlock()
+
+	e.mu.Lock()
+	defer e.mu.Unlock()
+
+	// Double-check after acquiring write lock
+	if e.client != nil {
+		return e.client
+	}
+
+	// Create HTTP client with connection pooling and security settings
+	e.client = &http.Client{
+		Timeout: config.HTTPTimeout,
+		Transport: &http.Transport{
+			// Connection pooling settings
+			MaxIdleConns:        100,              // Max idle connections across all hosts
+			MaxIdleConnsPerHost: 10,               // Max idle connections per host
+			MaxConnsPerHost:     100,              // Max connections per host
+			IdleConnTimeout:     90 * time.Second, // How long idle connections are kept
+			
+			// Performance settings
+			TLSHandshakeTimeout:   10 * time.Second,
+			ResponseHeaderTimeout: 30 * time.Second,
+			ExpectContinueTimeout: 1 * time.Second,
+			
+			// Keep connections alive for reuse
+			DisableKeepAlives: false,
+		},
+		// Limit redirects
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			if len(via) >= config.MaxHTTPRedirects {
+				return fmt.Errorf("too many redirects (max %d)", config.MaxHTTPRedirects)
+			}
+			// Validate redirect URL as well (prevent redirect-based SSRF)
+			if err := isAllowedURL(req.URL.String(), config); err != nil {
+				return fmt.Errorf("redirect URL validation failed: %w", err)
+			}
+			return nil
+		},
+	}
+
+	return e.client
 }
 
 // NodeType returns the node type this executor handles
