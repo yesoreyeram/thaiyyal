@@ -81,6 +81,11 @@ func (m *Manager) ListVariables() map[string]interface{} {
 	return result
 }
 
+// GetAllVariables is an alias for ListVariables
+func (m *Manager) GetAllVariables() map[string]interface{} {
+	return m.ListVariables()
+}
+
 // ============================================================================
 // Accumulator Operations
 // ============================================================================

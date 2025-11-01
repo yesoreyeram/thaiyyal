@@ -39,6 +39,9 @@ type ExecutionContext interface {
 	// Result management
 	GetNodeResult(nodeID string) (interface{}, bool)
 	SetNodeResult(nodeID string, result interface{})
+	GetAllNodeResults() map[string]interface{}
+	GetVariables() map[string]interface{}
+	GetContextVariables() map[string]interface{}
 	
 	// Configuration
 	GetConfig() types.Config

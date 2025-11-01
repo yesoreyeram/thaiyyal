@@ -490,6 +490,29 @@ defer e.resultsMu.Unlock()
 e.results[nodeID] = result
 }
 
+// GetAllNodeResults returns all node execution results
+func (e *Engine) GetAllNodeResults() map[string]interface{} {
+e.resultsMu.RLock()
+defer e.resultsMu.RUnlock()
+
+// Return a copy to avoid concurrent modification
+resultsCopy := make(map[string]interface{}, len(e.results))
+for k, v := range e.results {
+resultsCopy[k] = v
+}
+return resultsCopy
+}
+
+// GetVariables returns all workflow variables
+func (e *Engine) GetVariables() map[string]interface{} {
+return e.state.GetAllVariables()
+}
+
+// GetContextVariables returns all context variables and constants
+func (e *Engine) GetContextVariables() map[string]interface{} {
+return e.state.GetAllContext()
+}
+
 // GetConfig returns the engine configuration
 func (e *Engine) GetConfig() types.Config {
 return e.config
