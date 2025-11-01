@@ -38,10 +38,27 @@ export function ConditionNode({ id, data, ...props }: NodeProps<ConditionNodeDat
         type="text"
         onChange={onConditionChange}
         className="w-28 text-xs border border-amber-600 px-2 py-1 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-2 focus:ring-amber-400 focus:outline-none"
-        placeholder=">100, <50..."
+        placeholder="node.id.value > 100"
         aria-label="Condition expression"
       />
-      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+      {/* True path handle (top right) */}
+      <Handle 
+        type="source" 
+        position={Position.Right} 
+        id="true"
+        style={{ top: '30%' }}
+        className="w-2 h-2 bg-green-500"
+        title="True path"
+      />
+      {/* False path handle (bottom right) */}
+      <Handle 
+        type="source" 
+        position={Position.Right} 
+        id="false"
+        style={{ top: '70%' }}
+        className="w-2 h-2 bg-red-500"
+        title="False path"
+      />
     </NodeWrapper>
   );
 }
