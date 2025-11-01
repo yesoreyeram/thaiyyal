@@ -257,7 +257,8 @@ func DeserializeSnapshot(data []byte) (*Snapshot, error) {
 // ExecuteFromSnapshot is a convenience method that loads a snapshot and executes the workflow.
 // This combines LoadSnapshot and Execute in a single call.
 //
-// The workflow will resume from where the snapshot was taken, skipping already-completed nodes.
+// Note: The current implementation will re-execute all nodes in the workflow.
+// Future versions may support incremental execution to skip already-completed nodes.
 //
 // Parameters:
 //   - snapshot: Previously saved snapshot

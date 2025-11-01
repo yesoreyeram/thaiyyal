@@ -281,10 +281,13 @@ func (m *Manager) GetAllCache() map[string]*types.CacheEntry {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
-	// Create a copy to avoid race conditions
+	// Create a shallow copy of cache entries to avoid race conditions
+	// Note: This is a shallow copy. If Value contains complex types with pointers,
+	// they will share references with the original. For true deep copy, use
+	// serialization/deserialization or a deep copy library.
 	result := make(map[string]*types.CacheEntry, len(m.cache))
 	for k, v := range m.cache {
-		// Deep copy the cache entry
+		// Shallow copy the cache entry
 		result[k] = &types.CacheEntry{
 			Value:      v.Value,
 			Expiration: v.Expiration,
