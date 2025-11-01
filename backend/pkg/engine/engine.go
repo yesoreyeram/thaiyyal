@@ -14,6 +14,7 @@ import (
 
 "github.com/yesoreyeram/thaiyyal/backend/pkg/executor"
 "github.com/yesoreyeram/thaiyyal/backend/pkg/graph"
+"github.com/yesoreyeram/thaiyyal/backend/pkg/logging"
 "github.com/yesoreyeram/thaiyyal/backend/pkg/observer"
 "github.com/yesoreyeram/thaiyyal/backend/pkg/state"
 "github.com/yesoreyeram/thaiyyal/backend/pkg/types"
@@ -53,6 +54,9 @@ type Engine struct {
 	// Observer support
 	observerMgr *observer.Manager
 	logger      observer.Logger
+	
+	// Structured logging
+	structuredLogger *logging.Logger
 }
 
 // ============================================================================
@@ -117,17 +121,26 @@ func NewWithRegistry(payloadJSON []byte, config types.Config, registry *executor
 		return nil, fmt.Errorf("failed to parse payload: %w", err)
 	}
 
+	// Generate execution ID
+	executionID := generateExecutionID()
+
+	// Create structured logger with workflow and execution context
+	structuredLogger := logging.New(logging.DefaultConfig()).
+		WithWorkflowID(payload.WorkflowID).
+		WithExecutionID(executionID)
+
 	engine := &Engine{
-		state:       state.New(),
-		registry:    registry,
-		config:      config,
-		results:     make(map[string]interface{}),
-		executionID: generateExecutionID(),
-		workflowID:  payload.WorkflowID,
-		nodes:       payload.Nodes,
-		edges:       payload.Edges,
-		observerMgr: observer.NewManager(),
-		logger:      &observer.NoOpLogger{},
+		state:            state.New(),
+		registry:         registry,
+		config:           config,
+		results:          make(map[string]interface{}),
+		executionID:      executionID,
+		workflowID:       payload.WorkflowID,
+		nodes:            payload.Nodes,
+		edges:            payload.Edges,
+		observerMgr:      observer.NewManager(),
+		logger:           &observer.NoOpLogger{},
+		structuredLogger: structuredLogger,
 	}
 
 	// Create graph for topological sorting
@@ -261,6 +274,9 @@ func (e *Engine) GetObserverCount() int {
 func (e *Engine) Execute() (*types.Result, error) {
 	workflowStartTime := time.Now()
 	
+	// Log workflow execution start
+	e.structuredLogger.Info("workflow execution started")
+	
 	result := &types.Result{
 		ExecutionID: e.executionID,
 		WorkflowID:  e.workflowID,
@@ -274,8 +290,14 @@ func (e *Engine) Execute() (*types.Result, error) {
 	// Step 2: Get execution order using topological sort
 	executionOrder, err := e.graph.TopologicalSort()
 	if err != nil {
+		e.structuredLogger.WithError(err).Error("topological sort failed")
 		return result, err
 	}
+	
+	e.structuredLogger.
+		WithField("execution_order", executionOrder).
+		WithField("node_count", len(executionOrder)).
+		Debug("execution order determined")
 
 	// Step 3: Create context with timeout and execution metadata for workflow execution
 	ctx, cancel := context.WithTimeout(context.Background(), e.config.MaxExecutionTime)
@@ -308,6 +330,7 @@ func (e *Engine) Execute() (*types.Result, error) {
 			if err != nil {
 				errMsg := fmt.Sprintf("error executing node %s: %v", nodeID, err)
 				result.Errors = append(result.Errors, errMsg)
+				e.structuredLogger.WithNodeID(nodeID).WithError(err).Error("node execution failed")
 				done <- fmt.Errorf("%s", errMsg)
 				return
 			}
@@ -320,12 +343,14 @@ func (e *Engine) Execute() (*types.Result, error) {
 	select {
 	case err := <-done:
 		if err != nil {
+			e.structuredLogger.WithError(err).Error("workflow execution failed")
 			// Notify observers: Workflow end with error
 			e.notifyWorkflowEnd(ctx, workflowStartTime, nil, err)
 			return result, err
 		}
 	case <-ctx.Done():
 		timeoutErr := fmt.Errorf("workflow execution timeout: exceeded %v", e.config.MaxExecutionTime)
+		e.structuredLogger.WithField("timeout", e.config.MaxExecutionTime).Error("workflow execution timeout")
 		// Notify observers: Workflow end with timeout
 		e.notifyWorkflowEnd(ctx, workflowStartTime, nil, timeoutErr)
 		return result, timeoutErr
@@ -334,6 +359,11 @@ func (e *Engine) Execute() (*types.Result, error) {
 	// Step 4: Copy results and set final output
 	result.NodeResults = e.results
 	result.FinalOutput = e.getFinalOutput()
+	
+	e.structuredLogger.
+		WithField("duration_ms", time.Since(workflowStartTime).Milliseconds()).
+		WithField("nodes_executed", len(executionOrder)).
+		Info("workflow execution completed successfully")
 
 	// Notify observers: Workflow end (success)
 	e.notifyWorkflowEnd(ctx, workflowStartTime, result.FinalOutput, nil)
@@ -359,11 +389,19 @@ func (e *Engine) Execute() (*types.Result, error) {
 func (e *Engine) executeNode(ctx context.Context, node types.Node) (interface{}, error) {
 	nodeStartTime := time.Now()
 	
+	// Create node-specific logger
+	nodeLogger := e.structuredLogger.
+		WithNodeID(node.ID).
+		WithNodeType(node.Type)
+	
+	nodeLogger.Debug("node execution started")
+	
 	// Notify observers: Node start
 	e.notifyNodeStart(ctx, node, nodeStartTime)
 
 	// Check and increment node execution counter
 	if err := e.IncrementNodeExecution(); err != nil {
+		nodeLogger.WithError(err).Error("node execution counter limit exceeded")
 		// This is a protection limit error, not a node execution failure
 		// Still notify as failure since execution couldn't proceed
 		e.notifyNodeFailure(ctx, node, nodeStartTime, nil, err)
@@ -379,10 +417,15 @@ func (e *Engine) executeNode(ctx context.Context, node types.Node) (interface{},
 	result, err := e.registry.Execute(e, node)
 	
 	if err != nil {
+		nodeLogger.WithError(err).Error("node execution failed")
 		// Notify observers: Node execution failure
 		e.notifyNodeFailure(ctx, node, nodeStartTime, result, err)
 		return nil, err
 	}
+	
+	nodeLogger.
+		WithField("duration_ms", time.Since(nodeStartTime).Milliseconds()).
+		Info("node execution completed successfully")
 	
 	// Notify observers: Node success
 	e.notifyNodeSuccess(ctx, node, nodeStartTime, result)
@@ -602,15 +645,18 @@ func (e *Engine) GetContextVariable(name string) (interface{}, bool) {
 }
 
 // SetContextVariable sets a context variable
-// Note: Validation failures are silently ignored to maintain backward compatibility.
+// Note: Validation failures are logged and ignored to maintain backward compatibility.
 // Context variables are typically set during workflow initialization.
 func (e *Engine) SetContextVariable(name string, value interface{}) {
 	// Validate value against resource limits (best effort)
 	if err := types.ValidateValue(value, e.config); err != nil {
-		// TODO: Add structured logging here in production
-		// For now, validation errors are silently ignored to avoid breaking
+		// Log validation error but continue to maintain backward compatibility
+		e.structuredLogger.
+			WithField("variable_name", name).
+			WithError(err).
+			Warn("context variable validation failed, storing anyway")
+		// For now, validation errors are logged but ignored to avoid breaking
 		// workflow initialization with large context values
-		return
 	}
 	e.state.SetContextVariable(name, value)
 }
@@ -621,15 +667,18 @@ func (e *Engine) GetContextConstant(name string) (interface{}, bool) {
 }
 
 // SetContextConstant sets a context constant
-// Note: Validation failures are silently ignored to maintain backward compatibility.
+// Note: Validation failures are logged and ignored to maintain backward compatibility.
 // Context constants are typically set during workflow initialization.
 func (e *Engine) SetContextConstant(name string, value interface{}) {
 	// Validate value against resource limits (best effort)
 	if err := types.ValidateValue(value, e.config); err != nil {
-		// TODO: Add structured logging here in production
-		// For now, validation errors are silently ignored to avoid breaking
+		// Log validation error but continue to maintain backward compatibility
+		e.structuredLogger.
+			WithField("constant_name", name).
+			WithError(err).
+			Warn("context constant validation failed, storing anyway")
+		// For now, validation errors are logged but ignored to avoid breaking
 		// workflow initialization with large context values
-		return
 	}
 	e.state.SetContextConstant(name, value)
 }
@@ -655,9 +704,13 @@ func (e *Engine) SetNodeResult(nodeID string, result interface{}) {
 	// Validate result against resource limits (best effort)
 	// We don't fail here to avoid breaking workflows that produce large intermediate results
 	if err := types.ValidateValue(result, e.config); err != nil {
-		// TODO: Add structured logging here in production
-		// For now, the validation error is silently ignored to maintain backward compatibility
-		// and avoid breaking workflows that may produce large intermediate results
+		// Log validation warning but store the result to maintain workflow execution
+		e.structuredLogger.
+			WithNodeID(nodeID).
+			WithError(err).
+			Warn("node result validation failed, storing anyway")
+		// For now, the validation error is logged but the result is still stored
+		// to maintain backward compatibility and avoid breaking workflows
 	}
 
 	e.resultsMu.Lock()
