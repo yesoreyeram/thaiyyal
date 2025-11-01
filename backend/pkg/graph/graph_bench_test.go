@@ -327,13 +327,10 @@ func generatePipelineEdges(stages, parallelPerStage int) []types.Edge {
 		// Connect each node in current stage to all nodes in next stage
 		for j := 0; j < parallelPerStage; j++ {
 			for k := 0; k < parallelPerStage; k++ {
-				sourceIdx := i*parallelPerStage + j
-				targetIdx := (i+1)*parallelPerStage + k
 				edges = append(edges, types.Edge{
 					Source: fmt.Sprintf("stage-%d-node-%d", i, j),
 					Target: fmt.Sprintf("stage-%d-node-%d", i+1, k),
 				})
-				_, _ = sourceIdx, targetIdx // avoid unused variable
 			}
 		}
 	}

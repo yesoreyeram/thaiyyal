@@ -2,6 +2,7 @@ package graph
 
 import (
 	"sort"
+	"strings"
 	"testing"
 
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/types"
@@ -176,9 +177,9 @@ func TestTopologicalSort_Large(t *testing.T) {
 			var edges []types.Edge
 			
 			// Generate different graph types based on test name
-			if contains(tt.name, "linear") {
+			if strings.Contains(tt.name, "linear") {
 				nodes, edges = generateLinearChain(tt.numNodes)
-			} else if contains(tt.name, "wide") {
+			} else if strings.Contains(tt.name, "wide") {
 				nodes, edges = generateWideGraph(tt.numNodes)
 			}
 			
@@ -199,21 +200,6 @@ func TestTopologicalSort_Large(t *testing.T) {
 			}
 		})
 	}
-}
-
-// Helper to check if string contains substring
-func contains(s, substr string) bool {
-	return len(s) >= len(substr) && s[len(s)-len(substr):] == substr || 
-	       len(s) > len(substr) && findSubstring(s, substr)
-}
-
-func findSubstring(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
-		}
-	}
-	return false
 }
 
 // TestDetectCycles tests the cycle detection method
