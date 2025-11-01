@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/yesoreyeram/thaiyyal/backend/pkg/security"
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/types"
 )
 
@@ -147,20 +148,22 @@ func (e *HTTPExecutor) Validate(node types.Node) error {
 	return nil
 }
 
-// isAllowedURL validates URLs to prevent SSRF attacks
-// This is a placeholder - actual implementation should be in config or security package
+// isAllowedURL validates URLs to prevent SSRF attacks using the security package
 func isAllowedURL(url string, config types.Config) error {
-	// Basic validation - in production this should check:
-	// - Block private IP ranges (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16)
-	// - Block localhost (127.0.0.0/8, ::1)
-	// - Block link-local (169.254.0.0/16, fe80::/10)
-	// - Block cloud metadata endpoints (169.254.169.254)
-	// - Allow only whitelisted schemes (http, https)
-	// - Optional: whitelist/blacklist specific domains
-	
-	// For now, just ensure URL is not empty
-	if url == "" {
-		return fmt.Errorf("URL cannot be empty")
+	// For now, we'll use a permissive config that allows localhost for testing
+	// In production, config should control this behavior
+	ssrfConfig := security.SSRFConfig{
+		AllowedSchemes:     []string{"http", "https"},
+		BlockPrivateIPs:    false, // Allow for now - should be true in production
+		BlockLocalhost:     false, // Allow for now - should be true in production
+		BlockLinkLocal:     true,
+		BlockCloudMetadata: true,
+		AllowedDomains:     []string{},
+		BlockedDomains:     []string{},
 	}
-	return nil
+	
+	protection := security.NewSSRFProtectionWithConfig(ssrfConfig)
+	
+	// Validate URL
+	return protection.ValidateURL(url)
 }
