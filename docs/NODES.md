@@ -23,6 +23,7 @@ This document provides a comprehensive reference of all node types in the Thaiyy
 | **Condition** | Conditional branching/validation | 1 `any` | `object` with value and condition_met | `{"type": "condition", "data": {"condition": ">100"}}` | ✅ |
 | **For Each** | Iterate over array elements | 1 `array` | `object` with iteration metadata | `{"type": "for_each", "data": {"max_iterations": 1000}}` | ✅ |
 | **While Loop** | Loop while condition is true | 1 `any` | `object` with final value and iterations | `{"type": "while_loop", "data": {"condition": "<10", "max_iterations": 100}}` | ✅ |
+| **Filter** | Filter JSON array elements by condition | 1 `array` or `any` | `object` with filtered array and metadata | `{"type": "filter", "data": {"condition": "variables.item.age > 18"}}` | ✅ |
 | **Variable** | Store/retrieve values across workflow | 1 `any` (for set) / None (for get) | `object` with var_name, operation, value | `{"data": {"var_name": "x", "var_op": "set"}}` | ✅ |
 | **Extract** | Extract fields from objects | 1 `object` | `object` with extracted fields | `{"type": "extract", "data": {"field": "name"}}` | ✅ |
 | **Transform** | Transform data structures | 1 `any` | Varies by transform type | `{"type": "transform", "data": {"transform_type": "to_array"}}` | ✅ |
@@ -67,6 +68,81 @@ This document provides a comprehensive reference of all node types in the Thaiyy
 - **Output**: Returns `{"final_value": any, "iterations": int, "condition": string}`
 - **Use Cases**: Retry logic, iterative processing, threshold monitoring
 - **Note**: Current implementation tracks iterations but doesn't modify values in loop
+
+#### Filter Node
+- **Purpose**: Filter JSON array elements based on expression conditions
+- **Configuration**: Required `condition` (expression string)
+- **Input Behavior**:
+  - **Array input**: Filters elements where expression evaluates to true
+  - **Non-array input**: Passes through unchanged with warning log
+- **Expression Context**: Each array element is available as `variables.item`, index as `variables.index`
+- **Expression Syntax**: Uses same expression language as Condition node with full support for:
+  - Comparisons: `>`, `<`, `>=`, `<=`, `==`, `!=`
+  - Boolean operators: `&&`, `||`, `!`
+  - Field access: `variables.item.fieldName`, `variables.item.nested.field`
+  - Node references: `node.id.value`
+  - Context variables: `context.variableName`
+  - Functions: Math, date/time, string functions
+- **Output**: Returns object with:
+  - `filtered`: Filtered array (or original input if not array)
+  - `input_count`: Number of input elements
+  - `output_count`: Number of filtered elements
+  - `skipped_count`: Number of elements that didn't match
+  - `error_count`: Number of evaluation errors
+  - `condition`: The filter expression used
+  - `is_array`: Boolean indicating if input was an array
+  - `warning`: Present if input was not an array
+- **Use Cases**: 
+  - Filter API response arrays by field values
+  - Remove invalid/incomplete data from arrays
+  - Select items matching business rules
+  - Data quality filtering
+- **Example Expressions**:
+  ```json
+  // Filter numbers greater than 10
+  {"condition": "variables.item > 10"}
+  
+  // Filter objects by field value
+  {"condition": "variables.item.age >= 18"}
+  
+  // Filter by string field
+  {"condition": "variables.item.status == \"active\""}
+  
+  // Complex condition with AND
+  {"condition": "variables.item.price < 50 && variables.item.category == \"books\""}
+  
+  // Filter using context variable
+  {"condition": "variables.item.score > context.threshold"}
+  
+  // Filter with nested field access
+  {"condition": "variables.item.profile.verified == true"}
+  ```
+- **Complete Example**:
+  ```json
+  {
+    "nodes": [
+      {
+        "id": "1",
+        "type": "http",
+        "data": {"url": "https://api.example.com/users"}
+      },
+      {
+        "id": "2", 
+        "type": "filter",
+        "data": {"condition": "variables.item.age >= 18 && variables.item.active == true"}
+      },
+      {
+        "id": "3",
+        "type": "visualization",
+        "data": {"mode": "json"}
+      }
+    ],
+    "edges": [
+      {"source": "1", "target": "2"},
+      {"source": "2", "target": "3"}
+    ]
+  }
+  ```
 
 ### State & Memory Node Details
 

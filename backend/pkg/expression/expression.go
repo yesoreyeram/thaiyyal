@@ -290,7 +290,47 @@ if ref == "input" {
 return input, nil
 }
 
+// Check for item reference: item.field or just item
+// This is the preferred syntax for filter expressions (e.g., "item.age >= 18")
+if strings.HasPrefix(ref, "item.") || ref == "item" {
+	if ref == "item" {
+		return input, nil
+	}
+	// Navigate to nested field starting from input
+	fieldPath := ref[5:] // Remove "item." prefix
+	return resolveFieldPath(fieldPath, input)
+}
+
+// Check for direct field access on input object (e.g., "age", "name", "profile.verified")
+// This also works but "item.age" is more explicit and recommended
+if input != nil {
+	// Try to resolve as a field path on the input object
+	if val, err := resolveFieldPath(ref, input); err == nil {
+		return val, nil
+	}
+}
+
 return nil, fmt.Errorf("unknown reference: %s", ref)
+}
+
+// resolveFieldPath resolves a field path (e.g., "age" or "profile.verified") from an object
+func resolveFieldPath(path string, obj interface{}) (interface{}, error) {
+	parts := strings.Split(path, ".")
+	current := obj
+	
+	for _, field := range parts {
+		if m, ok := current.(map[string]interface{}); ok {
+			if val, exists := m[field]; exists {
+				current = val
+			} else {
+				return nil, fmt.Errorf("field not found: %s", field)
+			}
+		} else {
+			return nil, fmt.Errorf("cannot access field %s on non-object", field)
+		}
+	}
+	
+	return current, nil
 }
 
 // containsArithmetic checks if an expression contains arithmetic operators or functions

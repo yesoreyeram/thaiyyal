@@ -724,3 +724,313 @@ func TestFilterExecutor_WithNodeReferences(t *testing.T) {
 func strPtr(s string) *string {
 	return &s
 }
+
+// TestFilterExecutor_DirectFieldAccess tests the new direct field access syntax
+func TestFilterExecutor_DirectFieldAccess(t *testing.T) {
+tests := []struct {
+name          string
+condition     string
+inputArray    []interface{}
+expectedCount int
+description   string
+}{
+{
+name:      "Direct field access - simple",
+condition: "age > 18",
+inputArray: []interface{}{
+map[string]interface{}{"name": "Alice", "age": float64(25)},
+map[string]interface{}{"name": "Bob", "age": float64(17)},
+map[string]interface{}{"name": "Charlie", "age": float64(30)},
+},
+expectedCount: 2, // Alice and Charlie
+description:   "Should filter using direct field access: age > 18",
+},
+{
+name:      "Direct field access with variable comparison",
+condition: "age >= variables.minAge",
+inputArray: []interface{}{
+map[string]interface{}{"name": "Alice", "age": float64(25)},
+map[string]interface{}{"name": "Bob", "age": float64(19)},
+map[string]interface{}{"name": "Charlie", "age": float64(22)},
+},
+expectedCount: 2, // Alice and Charlie (if minAge=21)
+description:   "Should filter using direct field and variable: age >= variables.minAge",
+},
+{
+name:      "Direct nested field access",
+condition: "profile.verified == true",
+inputArray: []interface{}{
+map[string]interface{}{
+"name": "Alice",
+"profile": map[string]interface{}{
+"verified": true,
+},
+},
+map[string]interface{}{
+"name": "Bob",
+"profile": map[string]interface{}{
+"verified": false,
+},
+},
+map[string]interface{}{
+"name": "Charlie",
+"profile": map[string]interface{}{
+"verified": true,
+},
+},
+},
+expectedCount: 2, // Alice and Charlie
+description:   "Should filter using nested field access: profile.verified == true",
+},
+{
+name:      "Direct field with AND operator",
+condition: "age >= 18 && status == \"active\"",
+inputArray: []interface{}{
+map[string]interface{}{"name": "Alice", "age": float64(25), "status": "active"},
+map[string]interface{}{"name": "Bob", "age": float64(19), "status": "inactive"},
+map[string]interface{}{"name": "Charlie", "age": float64(22), "status": "active"},
+map[string]interface{}{"name": "Dave", "age": float64(17), "status": "active"},
+},
+expectedCount: 2, // Alice and Charlie
+description:   "Should filter using direct fields with AND: age >= 18 && status == active",
+},
+{
+name:      "Direct field with context variable",
+condition: "score > context.threshold",
+inputArray: []interface{}{
+map[string]interface{}{"name": "Alice", "score": float64(85)},
+map[string]interface{}{"name": "Bob", "score": float64(65)},
+map[string]interface{}{"name": "Charlie", "score": float64(95)},
+},
+expectedCount: 2, // Alice and Charlie (if threshold=70)
+description:   "Should filter using direct field and context: score > context.threshold",
+},
+}
+
+for _, tt := range tests {
+t.Run(tt.name, func(t *testing.T) {
+exec := &FilterExecutor{}
+ctx := &MockExecutionContext{
+inputs: map[string][]interface{}{
+"test-node": {tt.inputArray},
+},
+variables: map[string]interface{}{
+"minAge": float64(21),
+},
+contextVars: map[string]interface{}{
+"threshold": float64(70),
+},
+}
+
+node := types.Node{
+ID:   "test-node",
+Type: types.NodeTypeFilter,
+Data: types.NodeData{
+Condition: &tt.condition,
+},
+}
+
+result, err := exec.Execute(ctx, node)
+if err != nil {
+t.Fatalf("Unexpected error: %v", err)
+}
+
+resultMap := result.(map[string]interface{})
+filtered := resultMap["filtered"].([]interface{})
+
+if len(filtered) != tt.expectedCount {
+t.Errorf("Expected %d filtered items, got %d. Description: %s",
+tt.expectedCount, len(filtered), tt.description)
+}
+})
+}
+}
+
+// TestFilterExecutor_BackwardCompatibility ensures old syntax still works
+func TestFilterExecutor_BackwardCompatibility(t *testing.T) {
+tests := []struct {
+name          string
+condition     string
+inputArray    []interface{}
+expectedCount int
+}{
+{
+name:      "Old syntax: variables.item.age",
+condition: "variables.item.age > 18",
+inputArray: []interface{}{
+map[string]interface{}{"name": "Alice", "age": float64(25)},
+map[string]interface{}{"name": "Bob", "age": float64(17)},
+},
+expectedCount: 1, // Alice
+},
+{
+name:      "Mixed: new and old syntax",
+condition: "age > 18 && variables.item.status == \"active\"",
+inputArray: []interface{}{
+map[string]interface{}{"name": "Alice", "age": float64(25), "status": "active"},
+map[string]interface{}{"name": "Bob", "age": float64(19), "status": "inactive"},
+},
+expectedCount: 1, // Alice
+},
+}
+
+for _, tt := range tests {
+t.Run(tt.name, func(t *testing.T) {
+exec := &FilterExecutor{}
+ctx := &MockExecutionContext{
+inputs: map[string][]interface{}{
+"test-node": {tt.inputArray},
+},
+variables: make(map[string]interface{}),
+}
+
+node := types.Node{
+ID:   "test-node",
+Type: types.NodeTypeFilter,
+Data: types.NodeData{
+Condition: &tt.condition,
+},
+}
+
+result, err := exec.Execute(ctx, node)
+if err != nil {
+t.Fatalf("Unexpected error: %v", err)
+}
+
+resultMap := result.(map[string]interface{})
+filtered := resultMap["filtered"].([]interface{})
+
+if len(filtered) != tt.expectedCount {
+t.Errorf("Expected %d filtered items, got %d",
+tt.expectedCount, len(filtered))
+}
+})
+}
+}
+
+// TestFilterExecutor_ItemSyntax tests the recommended item.field syntax
+func TestFilterExecutor_ItemSyntax(t *testing.T) {
+tests := []struct {
+name          string
+condition     string
+inputArray    []interface{}
+expectedCount int
+description   string
+}{
+{
+name:      "item.field syntax - simple",
+condition: "item.age > 18",
+inputArray: []interface{}{
+map[string]interface{}{"name": "Alice", "age": float64(25)},
+map[string]interface{}{"name": "Bob", "age": float64(17)},
+map[string]interface{}{"name": "Charlie", "age": float64(30)},
+},
+expectedCount: 2, // Alice and Charlie
+description:   "Should filter using item.age > 18 (RECOMMENDED SYNTAX)",
+},
+{
+name:      "item.field with variable comparison",
+condition: "item.age >= variables.minAge",
+inputArray: []interface{}{
+map[string]interface{}{"name": "Alice", "age": float64(25)},
+map[string]interface{}{"name": "Bob", "age": float64(19)},
+map[string]interface{}{"name": "Charlie", "age": float64(22)},
+},
+expectedCount: 2, // Alice and Charlie (>= 21)
+description:   "Should filter using item.age >= variables.minAge",
+},
+{
+name:      "item.nested.field syntax",
+condition: "item.profile.verified == true",
+inputArray: []interface{}{
+map[string]interface{}{
+"name": "Alice",
+"profile": map[string]interface{}{"verified": true},
+},
+map[string]interface{}{
+"name": "Bob",
+"profile": map[string]interface{}{"verified": false},
+},
+map[string]interface{}{
+"name": "Charlie",
+"profile": map[string]interface{}{"verified": true},
+},
+},
+expectedCount: 2, // Alice and Charlie
+description:   "Should filter using nested item.profile.verified",
+},
+{
+name:      "item syntax with complex AND condition",
+condition: "item.age >= 18 && item.status == \"active\"",
+inputArray: []interface{}{
+map[string]interface{}{"name": "Alice", "age": float64(25), "status": "active"},
+map[string]interface{}{"name": "Bob", "age": float64(19), "status": "inactive"},
+map[string]interface{}{"name": "Charlie", "age": float64(22), "status": "active"},
+map[string]interface{}{"name": "Dave", "age": float64(17), "status": "active"},
+},
+expectedCount: 2, // Alice and Charlie
+description:   "Should filter with item.age >= 18 AND item.status == active",
+},
+{
+name:      "item syntax with context variable",
+condition: "item.score > context.passingScore",
+inputArray: []interface{}{
+map[string]interface{}{"name": "Alice", "score": float64(85)},
+map[string]interface{}{"name": "Bob", "score": float64(65)},
+map[string]interface{}{"name": "Charlie", "score": float64(95)},
+},
+expectedCount: 2, // Alice and Charlie (> 70)
+description:   "Should filter using item.score > context.passingScore",
+},
+{
+name:      "item reference for primitive in array",
+condition: "item > 10",
+inputArray: []interface{}{
+float64(5),
+float64(15),
+float64(8),
+float64(20),
+},
+expectedCount: 2, // 15 and 20
+description:   "Should filter primitive values using item > 10",
+},
+}
+
+for _, tt := range tests {
+t.Run(tt.name, func(t *testing.T) {
+exec := &FilterExecutor{}
+ctx := &MockExecutionContext{
+inputs: map[string][]interface{}{
+"test-node": {tt.inputArray},
+},
+variables: map[string]interface{}{
+"minAge": float64(21),
+},
+contextVars: map[string]interface{}{
+"passingScore": float64(70),
+},
+}
+
+node := types.Node{
+ID:   "test-node",
+Type: types.NodeTypeFilter,
+Data: types.NodeData{
+Condition: &tt.condition,
+},
+}
+
+result, err := exec.Execute(ctx, node)
+if err != nil {
+t.Fatalf("Unexpected error: %v", err)
+}
+
+resultMap := result.(map[string]interface{})
+filtered := resultMap["filtered"].([]interface{})
+
+if len(filtered) != tt.expectedCount {
+t.Errorf("Expected %d filtered items, got %d. Description: %s",
+tt.expectedCount, len(filtered), tt.description)
+}
+})
+}
+}

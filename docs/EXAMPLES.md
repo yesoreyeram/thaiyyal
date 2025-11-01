@@ -380,9 +380,131 @@ Pseudo-spec (short)
 }
 ```
 
+## Example F — Filter API Data by Criteria
+
+**Description**: Fetch a list of items from an API, filter them based on business rules, and process only the valid items.
+
+**Flow**:
+- HTTP Node: GET `https://api.example.com/products`
+- Filter Node: Keep only products that meet criteria (e.g., in stock, price in range, active status)
+- Transform Node: Extract relevant fields for processing
+- Visualization: Display filtered results
+
+**Use Cases**:
+- Filter active users from user API
+- Select products within price range
+- Remove incomplete/invalid records
+- Apply business rules to data sets
+
+**Pseudo-spec**:
+
+```json
+{
+  "workflow": {
+    "id": "wf-filter-products-001",
+    "nodes": [
+      {
+        "id": "fetch-1",
+        "type": "http",
+        "data": {
+          "url": "https://api.example.com/products"
+        }
+      },
+      {
+        "id": "filter-1",
+        "type": "filter",
+        "data": {
+          "condition": "variables.item.in_stock == true && variables.item.price >= 10 && variables.item.price <= 100"
+        }
+      },
+      {
+        "id": "extract-1",
+        "type": "extract",
+        "data": {
+          "fields": ["id", "name", "price", "category"]
+        }
+      },
+      {
+        "id": "viz-1",
+        "type": "visualization",
+        "data": {
+          "mode": "json"
+        }
+      }
+    ],
+    "edges": [
+      {"source": "fetch-1", "target": "filter-1"},
+      {"source": "filter-1", "target": "extract-1"},
+      {"source": "extract-1", "target": "viz-1"}
+    ]
+  }
+}
+```
+
+**More Filter Examples**:
+
+```json
+// Filter users by age
+{
+  "type": "filter",
+  "data": {
+    "condition": "variables.item.age >= 18"
+  }
+}
+
+// Filter by multiple conditions with AND
+{
+  "type": "filter",
+  "data": {
+    "condition": "variables.item.status == \"active\" && variables.item.verified == true"
+  }
+}
+
+// Filter by multiple conditions with OR
+{
+  "type": "filter",
+  "data": {
+    "condition": "variables.item.priority == \"high\" || variables.item.urgent == true"
+  }
+}
+
+// Filter using nested field access
+{
+  "type": "filter",
+  "data": {
+    "condition": "variables.item.profile.subscription.tier == \"premium\""
+  }
+}
+
+// Filter using context variable threshold
+{
+  "type": "filter",
+  "data": {
+    "condition": "variables.item.score > context.threshold"
+  }
+}
+
+// Filter by date range (using date functions)
+{
+  "type": "filter",
+  "data": {
+    "condition": "year(variables.item.created_at) == 2024"
+  }
+}
+
+// Filter with complex business logic
+{
+  "type": "filter",
+  "data": {
+    "condition": "variables.item.quantity > 0 && (variables.item.discount > 0 || variables.item.featured == true)"
+  }
+}
+```
+
 Execution & testing tips
 
 - Provide representative sample payloads for each trigger to allow quick dry-run of subgraphs.
 - For join operations, include small sample datasets (2–5 rows) for each input to verify join keys and behavior (left/inner/outer).
 - For resampling/interpolation, include edge cases with missing data and verify your chosen fill strategy (null, zero, forward-fill).
 - For transforms that accept user code, recommend adding a linter and runtime guard (time limit, memory limit) and show example unit tests.
+- For filter operations, test with edge cases: empty arrays, non-array inputs, missing fields, null values, and complex nested structures.
