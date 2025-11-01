@@ -9,7 +9,8 @@ import (
 )
 
 func main() {
-	fmt.Println("=== Structured Logging Example ===\n")
+	fmt.Println("=== Structured Logging Example ===")
+	fmt.Println()
 
 	// Create a simple workflow with multiple nodes
 	workflow := map[string]interface{}{
@@ -65,6 +66,7 @@ func main() {
 	}
 
 	fmt.Println("============================================================")
-	fmt.Printf("\nWorkflow execution completed successfully!\n")
+	fmt.Println()
+	fmt.Println("Workflow execution completed successfully!")
 	fmt.Printf("Final result: %v\n", result.FinalOutput)
 }

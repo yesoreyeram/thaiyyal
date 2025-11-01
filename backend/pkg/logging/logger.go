@@ -1,14 +1,14 @@
 // Package logging provides structured logging with context propagation for the workflow engine.
-// It uses zerolog for high-performance, zero-allocation structured logging.
+// It uses Go's built-in slog package for high-performance structured logging.
 package logging
 
 import (
 	"context"
+	"fmt"
 	"io"
+	"log/slog"
 	"os"
-	"time"
 
-	"github.com/rs/zerolog"
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/types"
 )
 
@@ -20,9 +20,9 @@ const (
 	ContextKeyLogger contextKey = "logger"
 )
 
-// Logger wraps zerolog.Logger with workflow-specific functionality
+// Logger wraps slog.Logger with workflow-specific functionality
 type Logger struct {
-	logger zerolog.Logger
+	logger *slog.Logger
 }
 
 // Config holds logging configuration
@@ -31,30 +31,26 @@ type Config struct {
 	Level string
 	// Output is where logs are written (default: os.Stdout)
 	Output io.Writer
-	// Pretty enables human-readable console output (default: false for JSON)
+	// Pretty enables human-readable text output (default: false for JSON)
 	Pretty bool
-	// IncludeTimestamp includes timestamps in logs (default: true)
-	IncludeTimestamp bool
-	// IncludeCaller includes file:line in logs (default: false, expensive)
+	// IncludeCaller includes source location in logs (default: false)
 	IncludeCaller bool
 }
 
 // DefaultConfig returns default logging configuration
 func DefaultConfig() Config {
 	return Config{
-		Level:            "info",
-		Output:           os.Stdout,
-		Pretty:           false,
-		IncludeTimestamp: true,
-		IncludeCaller:    false,
+		Level:         "info",
+		Output:        os.Stdout,
+		Pretty:        false,
+		IncludeCaller: false,
 	}
 }
 
 // New creates a new logger with the given configuration
 func New(cfg Config) *Logger {
-	// Set global log level
+	// Parse log level
 	level := parseLevel(cfg.Level)
-	zerolog.SetGlobalLevel(level)
 
 	// Configure output
 	output := cfg.Output
@@ -62,52 +58,38 @@ func New(cfg Config) *Logger {
 		output = os.Stdout
 	}
 
-	// Use console writer for pretty output, JSON otherwise
-	var writer io.Writer
+	// Create handler options
+	opts := &slog.HandlerOptions{
+		Level:     level,
+		AddSource: cfg.IncludeCaller,
+	}
+
+	// Create appropriate handler
+	var handler slog.Handler
 	if cfg.Pretty {
-		writer = zerolog.ConsoleWriter{
-			Out:        output,
-			TimeFormat: time.RFC3339,
-		}
+		handler = slog.NewTextHandler(output, opts)
 	} else {
-		writer = output
-	}
-
-	// Create logger context
-	loggerCtx := zerolog.New(writer)
-
-	// Add timestamp if configured
-	if cfg.IncludeTimestamp {
-		loggerCtx = loggerCtx.With().Timestamp().Logger()
-	}
-
-	// Add caller info if configured (expensive, only for debugging)
-	if cfg.IncludeCaller {
-		loggerCtx = loggerCtx.With().Caller().Logger()
+		handler = slog.NewJSONHandler(output, opts)
 	}
 
 	return &Logger{
-		logger: loggerCtx,
+		logger: slog.New(handler),
 	}
 }
 
-// parseLevel converts string level to zerolog.Level
-func parseLevel(level string) zerolog.Level {
+// parseLevel converts string level to slog.Level
+func parseLevel(level string) slog.Level {
 	switch level {
 	case "debug":
-		return zerolog.DebugLevel
+		return slog.LevelDebug
 	case "info":
-		return zerolog.InfoLevel
+		return slog.LevelInfo
 	case "warn", "warning":
-		return zerolog.WarnLevel
+		return slog.LevelWarn
 	case "error":
-		return zerolog.ErrorLevel
-	case "fatal":
-		return zerolog.FatalLevel
-	case "panic":
-		return zerolog.PanicLevel
+		return slog.LevelError
 	default:
-		return zerolog.InfoLevel
+		return slog.LevelInfo
 	}
 }
 
@@ -128,108 +110,109 @@ func FromContext(ctx context.Context) *Logger {
 // WithWorkflowID adds workflow_id to the logger context
 func (l *Logger) WithWorkflowID(workflowID string) *Logger {
 	return &Logger{
-		logger: l.logger.With().Str("workflow_id", workflowID).Logger(),
+		logger: l.logger.With(slog.String("workflow_id", workflowID)),
 	}
 }
 
 // WithExecutionID adds execution_id to the logger context
 func (l *Logger) WithExecutionID(executionID string) *Logger {
 	return &Logger{
-		logger: l.logger.With().Str("execution_id", executionID).Logger(),
+		logger: l.logger.With(slog.String("execution_id", executionID)),
 	}
 }
 
 // WithNodeID adds node_id to the logger context
 func (l *Logger) WithNodeID(nodeID string) *Logger {
 	return &Logger{
-		logger: l.logger.With().Str("node_id", nodeID).Logger(),
+		logger: l.logger.With(slog.String("node_id", nodeID)),
 	}
 }
 
 // WithNodeType adds node_type to the logger context
 func (l *Logger) WithNodeType(nodeType types.NodeType) *Logger {
 	return &Logger{
-		logger: l.logger.With().Str("node_type", string(nodeType)).Logger(),
+		logger: l.logger.With(slog.String("node_type", string(nodeType))),
 	}
 }
 
 // WithField adds a custom field to the logger context
 func (l *Logger) WithField(key string, value interface{}) *Logger {
 	return &Logger{
-		logger: l.logger.With().Interface(key, value).Logger(),
+		logger: l.logger.With(slog.Any(key, value)),
 	}
 }
 
 // WithFields adds multiple custom fields to the logger context
 func (l *Logger) WithFields(fields map[string]interface{}) *Logger {
+	args := make([]any, 0, len(fields)*2)
+	for k, v := range fields {
+		args = append(args, slog.Any(k, v))
+	}
 	return &Logger{
-		logger: l.logger.With().Fields(fields).Logger(),
+		logger: l.logger.With(args...),
 	}
 }
 
 // WithError adds error to the logger context
 func (l *Logger) WithError(err error) *Logger {
 	return &Logger{
-		logger: l.logger.With().Err(err).Logger(),
+		logger: l.logger.With(slog.Any("error", err)),
 	}
 }
 
 // Debug logs a debug message
 func (l *Logger) Debug(msg string) {
-	l.logger.Debug().Msg(msg)
+	l.logger.Debug(msg)
 }
 
 // Debugf logs a formatted debug message
 func (l *Logger) Debugf(format string, args ...interface{}) {
-	l.logger.Debug().Msgf(format, args...)
+	l.logger.Debug(fmt.Sprintf(format, args...))
 }
 
 // Info logs an info message
 func (l *Logger) Info(msg string) {
-	l.logger.Info().Msg(msg)
+	l.logger.Info(msg)
 }
 
 // Infof logs a formatted info message
 func (l *Logger) Infof(format string, args ...interface{}) {
-	l.logger.Info().Msgf(format, args...)
+	l.logger.Info(fmt.Sprintf(format, args...))
 }
 
 // Warn logs a warning message
 func (l *Logger) Warn(msg string) {
-	l.logger.Warn().Msg(msg)
+	l.logger.Warn(msg)
 }
 
 // Warnf logs a formatted warning message
 func (l *Logger) Warnf(format string, args ...interface{}) {
-	l.logger.Warn().Msgf(format, args...)
+	l.logger.Warn(fmt.Sprintf(format, args...))
 }
 
 // Error logs an error message
 func (l *Logger) Error(msg string) {
-	l.logger.Error().Msg(msg)
+	l.logger.Error(msg)
 }
 
 // Errorf logs a formatted error message
 func (l *Logger) Errorf(format string, args ...interface{}) {
-	l.logger.Error().Msgf(format, args...)
+	l.logger.Error(fmt.Sprintf(format, args...))
 }
 
 // Fatal logs a fatal message and exits
 func (l *Logger) Fatal(msg string) {
-	l.logger.Fatal().Msg(msg)
+	l.logger.Error(msg)
+	os.Exit(1)
 }
 
 // Fatalf logs a formatted fatal message and exits
 func (l *Logger) Fatalf(format string, args ...interface{}) {
-	l.logger.Fatal().Msgf(format, args...)
+	l.logger.Error(fmt.Sprintf(format, args...))
+	os.Exit(1)
 }
 
-// Event returns a zerolog.Event for advanced logging
-func (l *Logger) Event(level zerolog.Level) *zerolog.Event {
-	return l.logger.WithLevel(level)
-}
-
-// GetZerologLogger returns the underlying zerolog.Logger for advanced use cases
-func (l *Logger) GetZerologLogger() zerolog.Logger {
+// GetSlogLogger returns the underlying slog.Logger for advanced use cases
+func (l *Logger) GetSlogLogger() *slog.Logger {
 	return l.logger
 }

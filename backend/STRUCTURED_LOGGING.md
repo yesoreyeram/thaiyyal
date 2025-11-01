@@ -7,7 +7,7 @@
 
 ## Overview
 
-Enterprise-grade structured logging has been implemented for the Thaiyyal workflow engine using [zerolog](https://github.com/rs/zerolog), a high-performance, zero-allocation JSON logger.
+Enterprise-grade structured logging has been implemented for the Thaiyyal workflow engine using Go's built-in `slog` package (introduced in Go 1.21), providing high-performance structured logging with zero external dependencies.
 
 ## Features
 
@@ -16,16 +16,16 @@ Enterprise-grade structured logging has been implemented for the Thaiyyal workfl
 - **Structured JSON Logging**: All logs are emitted in JSON format for easy parsing and analysis
 - **Context Propagation**: Workflow and execution context automatically flows through all log messages
 - **Correlation IDs**: Each workflow execution gets a unique execution ID for end-to-end tracing
-- **Zero Allocation**: Uses zerolog for high-performance, memory-efficient logging
-- **Configurable Log Levels**: Support for debug, info, warn, error, fatal, and panic levels
+- **Built-in Package**: Uses Go's standard library `slog` for high-performance, memory-efficient logging
+- **Configurable Log Levels**: Support for debug, info, warn, error levels
 - **Contextual Fields**: Automatic inclusion of workflow_id, execution_id, node_id, and node_type
 
 ### 🔑 Key Fields
 
 Every log message includes:
-- `level`: Log level (debug, info, warn, error)
+- `level`: Log level (DEBUG, INFO, WARN, ERROR)
 - `time`: ISO 8601 timestamp
-- `message`: Human-readable message
+- `msg`: Human-readable message
 - `workflow_id`: Workflow identifier (if available)
 - `execution_id`: Unique execution identifier
 - `node_id`: Node being executed (for node-level logs)
@@ -150,11 +150,11 @@ Output:
 ### Successful Workflow Execution
 
 ```json
-{"level":"info","workflow_id":"demo-workflow","execution_id":"3e683d668c2d8f64","time":"2025-11-01T14:54:29Z","message":"workflow execution started"}
-{"level":"info","workflow_id":"demo-workflow","execution_id":"3e683d668c2d8f64","node_id":"1","node_type":"number","duration_ms":0,"time":"2025-11-01T14:54:29Z","message":"node execution completed successfully"}
-{"level":"info","workflow_id":"demo-workflow","execution_id":"3e683d668c2d8f64","node_id":"2","node_type":"number","duration_ms":0,"time":"2025-11-01T14:54:29Z","message":"node execution completed successfully"}
-{"level":"info","workflow_id":"demo-workflow","execution_id":"3e683d668c2d8f64","node_id":"3","node_type":"operation","duration_ms":0,"time":"2025-11-01T14:54:29Z","message":"node execution completed successfully"}
-{"level":"info","workflow_id":"demo-workflow","execution_id":"3e683d668c2d8f64","duration_ms":0,"nodes_executed":4,"time":"2025-11-01T14:54:29Z","message":"workflow execution completed successfully"}
+{"time":"2025-11-01T15:50:44.325269983Z","level":"INFO","msg":"workflow execution started","workflow_id":"demo-workflow","execution_id":"ba6efab7886d6f1f"}
+{"time":"2025-11-01T15:50:44.325359291Z","level":"INFO","msg":"node execution completed successfully","workflow_id":"demo-workflow","execution_id":"ba6efab7886d6f1f","node_id":"1","node_type":"number","duration_ms":0}
+{"time":"2025-11-01T15:50:44.325373548Z","level":"INFO","msg":"node execution completed successfully","workflow_id":"demo-workflow","execution_id":"ba6efab7886d6f1f","node_id":"2","node_type":"number","duration_ms":0}
+{"time":"2025-11-01T15:50:44.325385801Z","level":"INFO","msg":"node execution completed successfully","workflow_id":"demo-workflow","execution_id":"ba6efab7886d6f1f","node_id":"3","node_type":"operation","duration_ms":0}
+{"time":"2025-11-01T15:50:44.325414124Z","level":"INFO","msg":"workflow execution completed successfully","workflow_id":"demo-workflow","execution_id":"ba6efab7886d6f1f","duration_ms":0,"nodes_executed":4}
 ```
 
 ### Failed Workflow Execution
@@ -168,18 +168,11 @@ Output:
 
 ## Performance
 
-Zerolog is specifically designed for high performance:
-- **Zero Allocation**: No heap allocations for most operations
-- **Fast**: Benchmarked as one of the fastest Go logging libraries
+Go's `slog` package is designed for high performance:
+- **Efficient**: Optimized for production use with minimal allocations
+- **Fast**: Built into the Go standard library and well-optimized
 - **Small Memory Footprint**: Minimal impact on application memory
-
-Benchmark comparison (from zerolog documentation):
-```
-BenchmarkLogEmpty           100000000    10.0 ns/op     0 B/op    0 allocs/op
-BenchmarkDisabled           2000000000    0.50 ns/op    0 B/op    0 allocs/op
-BenchmarkInfo               30000000     42.0 ns/op     0 B/op    0 allocs/op
-BenchmarkContextFields      20000000     62.0 ns/op     0 B/op    0 allocs/op
-```
+- **No External Dependencies**: No need to manage third-party library versions
 
 ## Integration with Observability Stack
 
@@ -312,8 +305,7 @@ logging.DefaultConfig() // Returns:
 
 ## Dependencies
 
-- **github.com/rs/zerolog v1.34.0**: Zero-allocation JSON logger
-- **golang.org/x/sys v0.12.0**: System-level dependencies (indirect)
+**None** - Uses only Go's standard library `log/slog` package (Go 1.21+)
 
 ## Related Documentation
 

@@ -22,29 +22,26 @@ func TestNew(t *testing.T) {
 		{
 			name: "debug level",
 			config: Config{
-				Level:            "debug",
-				Output:           &bytes.Buffer{},
-				Pretty:           false,
-				IncludeTimestamp: true,
+				Level:  "debug",
+				Output: &bytes.Buffer{},
+				Pretty: false,
 			},
 		},
 		{
 			name: "pretty output",
 			config: Config{
-				Level:            "info",
-				Output:           &bytes.Buffer{},
-				Pretty:           true,
-				IncludeTimestamp: true,
+				Level:  "info",
+				Output: &bytes.Buffer{},
+				Pretty: true,
 			},
 		},
 		{
 			name: "with caller",
 			config: Config{
-				Level:            "info",
-				Output:           &bytes.Buffer{},
-				Pretty:           false,
-				IncludeTimestamp: true,
-				IncludeCaller:    true,
+				Level:         "info",
+				Output:        &bytes.Buffer{},
+				Pretty:        false,
+				IncludeCaller: true,
 			},
 		},
 	}
@@ -62,10 +59,9 @@ func TestNew(t *testing.T) {
 func TestLogger_Info(t *testing.T) {
 	buf := &bytes.Buffer{}
 	logger := New(Config{
-		Level:            "info",
-		Output:           buf,
-		Pretty:           false,
-		IncludeTimestamp: false,
+		Level:  "info",
+		Output: buf,
+		Pretty: false,
 	})
 
 	logger.Info("test message")
@@ -74,18 +70,17 @@ func TestLogger_Info(t *testing.T) {
 	if !strings.Contains(output, "test message") {
 		t.Errorf("Expected log to contain 'test message', got: %s", output)
 	}
-	if !strings.Contains(output, `"level":"info"`) {
-		t.Errorf("Expected log to contain level info, got: %s", output)
+	if !strings.Contains(output, `"level":"INFO"`) {
+		t.Errorf("Expected log to contain level INFO, got: %s", output)
 	}
 }
 
 func TestLogger_Debug(t *testing.T) {
 	buf := &bytes.Buffer{}
 	logger := New(Config{
-		Level:            "debug",
-		Output:           buf,
-		Pretty:           false,
-		IncludeTimestamp: false,
+		Level:  "debug",
+		Output: buf,
+		Pretty: false,
 	})
 
 	logger.Debug("debug message")
@@ -94,18 +89,17 @@ func TestLogger_Debug(t *testing.T) {
 	if !strings.Contains(output, "debug message") {
 		t.Errorf("Expected log to contain 'debug message', got: %s", output)
 	}
-	if !strings.Contains(output, `"level":"debug"`) {
-		t.Errorf("Expected log to contain level debug, got: %s", output)
+	if !strings.Contains(output, `"level":"DEBUG"`) {
+		t.Errorf("Expected log to contain level DEBUG, got: %s", output)
 	}
 }
 
 func TestLogger_DebugNotLogged(t *testing.T) {
 	buf := &bytes.Buffer{}
 	logger := New(Config{
-		Level:            "info", // Debug should not be logged
-		Output:           buf,
-		Pretty:           false,
-		IncludeTimestamp: false,
+		Level:  "info", // Debug should not be logged
+		Output: buf,
+		Pretty: false,
 	})
 
 	logger.Debug("debug message")
@@ -119,10 +113,9 @@ func TestLogger_DebugNotLogged(t *testing.T) {
 func TestLogger_Warn(t *testing.T) {
 	buf := &bytes.Buffer{}
 	logger := New(Config{
-		Level:            "warn",
-		Output:           buf,
-		Pretty:           false,
-		IncludeTimestamp: false,
+		Level:  "warn",
+		Output: buf,
+		Pretty: false,
 	})
 
 	logger.Warn("warning message")
@@ -131,18 +124,17 @@ func TestLogger_Warn(t *testing.T) {
 	if !strings.Contains(output, "warning message") {
 		t.Errorf("Expected log to contain 'warning message', got: %s", output)
 	}
-	if !strings.Contains(output, `"level":"warn"`) {
-		t.Errorf("Expected log to contain level warn, got: %s", output)
+	if !strings.Contains(output, `"level":"WARN"`) {
+		t.Errorf("Expected log to contain level WARN, got: %s", output)
 	}
 }
 
 func TestLogger_Error(t *testing.T) {
 	buf := &bytes.Buffer{}
 	logger := New(Config{
-		Level:            "error",
-		Output:           buf,
-		Pretty:           false,
-		IncludeTimestamp: false,
+		Level:  "error",
+		Output: buf,
+		Pretty: false,
 	})
 
 	logger.Error("error message")
@@ -151,18 +143,17 @@ func TestLogger_Error(t *testing.T) {
 	if !strings.Contains(output, "error message") {
 		t.Errorf("Expected log to contain 'error message', got: %s", output)
 	}
-	if !strings.Contains(output, `"level":"error"`) {
-		t.Errorf("Expected log to contain level error, got: %s", output)
+	if !strings.Contains(output, `"level":"ERROR"`) {
+		t.Errorf("Expected log to contain level ERROR, got: %s", output)
 	}
 }
 
 func TestLogger_WithWorkflowID(t *testing.T) {
 	buf := &bytes.Buffer{}
 	logger := New(Config{
-		Level:            "info",
-		Output:           buf,
-		Pretty:           false,
-		IncludeTimestamp: false,
+		Level:  "info",
+		Output: buf,
+		Pretty: false,
 	})
 
 	logger = logger.WithWorkflowID("workflow-123")
@@ -177,10 +168,9 @@ func TestLogger_WithWorkflowID(t *testing.T) {
 func TestLogger_WithExecutionID(t *testing.T) {
 	buf := &bytes.Buffer{}
 	logger := New(Config{
-		Level:            "info",
-		Output:           buf,
-		Pretty:           false,
-		IncludeTimestamp: false,
+		Level:  "info",
+		Output: buf,
+		Pretty: false,
 	})
 
 	logger = logger.WithExecutionID("exec-456")
@@ -195,10 +185,9 @@ func TestLogger_WithExecutionID(t *testing.T) {
 func TestLogger_WithNodeID(t *testing.T) {
 	buf := &bytes.Buffer{}
 	logger := New(Config{
-		Level:            "info",
-		Output:           buf,
-		Pretty:           false,
-		IncludeTimestamp: false,
+		Level:  "info",
+		Output: buf,
+		Pretty: false,
 	})
 
 	logger = logger.WithNodeID("node-789")
@@ -213,10 +202,9 @@ func TestLogger_WithNodeID(t *testing.T) {
 func TestLogger_WithNodeType(t *testing.T) {
 	buf := &bytes.Buffer{}
 	logger := New(Config{
-		Level:            "info",
-		Output:           buf,
-		Pretty:           false,
-		IncludeTimestamp: false,
+		Level:  "info",
+		Output: buf,
+		Pretty: false,
 	})
 
 	logger = logger.WithNodeType(types.NodeTypeHTTP)
@@ -231,10 +219,9 @@ func TestLogger_WithNodeType(t *testing.T) {
 func TestLogger_WithField(t *testing.T) {
 	buf := &bytes.Buffer{}
 	logger := New(Config{
-		Level:            "info",
-		Output:           buf,
-		Pretty:           false,
-		IncludeTimestamp: false,
+		Level:  "info",
+		Output: buf,
+		Pretty: false,
 	})
 
 	logger = logger.WithField("custom_field", "custom_value")
@@ -249,10 +236,9 @@ func TestLogger_WithField(t *testing.T) {
 func TestLogger_WithFields(t *testing.T) {
 	buf := &bytes.Buffer{}
 	logger := New(Config{
-		Level:            "info",
-		Output:           buf,
-		Pretty:           false,
-		IncludeTimestamp: false,
+		Level:  "info",
+		Output: buf,
+		Pretty: false,
 	})
 
 	logger = logger.WithFields(map[string]interface{}{
@@ -273,10 +259,9 @@ func TestLogger_WithFields(t *testing.T) {
 func TestLogger_WithError(t *testing.T) {
 	buf := &bytes.Buffer{}
 	logger := New(Config{
-		Level:            "error",
-		Output:           buf,
-		Pretty:           false,
-		IncludeTimestamp: false,
+		Level:  "error",
+		Output: buf,
+		Pretty: false,
 	})
 
 	err := &testError{"test error"}
@@ -300,10 +285,9 @@ func (e *testError) Error() string {
 func TestLogger_ChainedContext(t *testing.T) {
 	buf := &bytes.Buffer{}
 	logger := New(Config{
-		Level:            "info",
-		Output:           buf,
-		Pretty:           false,
-		IncludeTimestamp: false,
+		Level:  "info",
+		Output: buf,
+		Pretty: false,
 	})
 
 	logger = logger.
@@ -327,8 +311,8 @@ func TestLogger_ChainedContext(t *testing.T) {
 		"execution_id": "exec-456",
 		"node_id":      "node-789",
 		"node_type":    "http",
-		"level":        "info",
-		"message":      "test",
+		"level":        "INFO",
+		"msg":          "test",
 	}
 
 	for key, expectedValue := range expectedFields {
@@ -367,10 +351,9 @@ func TestLogger_FromContextDefault(t *testing.T) {
 func TestLogger_Infof(t *testing.T) {
 	buf := &bytes.Buffer{}
 	logger := New(Config{
-		Level:            "info",
-		Output:           buf,
-		Pretty:           false,
-		IncludeTimestamp: false,
+		Level:  "info",
+		Output: buf,
+		Pretty: false,
 	})
 
 	logger.Infof("formatted message: %s %d", "test", 42)
@@ -384,10 +367,9 @@ func TestLogger_Infof(t *testing.T) {
 func TestLogger_Debugf(t *testing.T) {
 	buf := &bytes.Buffer{}
 	logger := New(Config{
-		Level:            "debug",
-		Output:           buf,
-		Pretty:           false,
-		IncludeTimestamp: false,
+		Level:  "debug",
+		Output: buf,
+		Pretty: false,
 	})
 
 	logger.Debugf("debug: %d", 123)
@@ -401,10 +383,9 @@ func TestLogger_Debugf(t *testing.T) {
 func TestLogger_Warnf(t *testing.T) {
 	buf := &bytes.Buffer{}
 	logger := New(Config{
-		Level:            "warn",
-		Output:           buf,
-		Pretty:           false,
-		IncludeTimestamp: false,
+		Level:  "warn",
+		Output: buf,
+		Pretty: false,
 	})
 
 	logger.Warnf("warning: %s", "test")
@@ -418,10 +399,9 @@ func TestLogger_Warnf(t *testing.T) {
 func TestLogger_Errorf(t *testing.T) {
 	buf := &bytes.Buffer{}
 	logger := New(Config{
-		Level:            "error",
-		Output:           buf,
-		Pretty:           false,
-		IncludeTimestamp: false,
+		Level:  "error",
+		Output: buf,
+		Pretty: false,
 	})
 
 	logger.Errorf("error: %d", 500)
@@ -437,13 +417,13 @@ func TestParseLevel(t *testing.T) {
 		input    string
 		expected string
 	}{
-		{"debug", "debug"},
-		{"info", "info"},
-		{"warn", "warn"},
-		{"warning", "warn"},
-		{"error", "error"},
-		{"invalid", "info"}, // Should default to info
-		{"", "info"},        // Should default to info
+		{"debug", "DEBUG"},
+		{"info", "INFO"},
+		{"warn", "WARN"},
+		{"warning", "WARN"},
+		{"error", "ERROR"},
+		{"invalid", "INFO"}, // Should default to info
+		{"", "INFO"},        // Should default to info
 	}
 
 	for _, tt := range tests {
@@ -459,10 +439,9 @@ func TestParseLevel(t *testing.T) {
 func TestLogger_JSONOutput(t *testing.T) {
 	buf := &bytes.Buffer{}
 	logger := New(Config{
-		Level:            "info",
-		Output:           buf,
-		Pretty:           false,
-		IncludeTimestamp: false,
+		Level:  "info",
+		Output: buf,
+		Pretty: false,
 	})
 
 	logger.Info("test message")
