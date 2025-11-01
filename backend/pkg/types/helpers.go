@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"reflect"
 	"time"
 )
 
@@ -28,21 +29,27 @@ func DefaultConfig() Config {
 		MaxIterations:        1000,
 
 		// HTTP configuration
-		HTTPTimeout:        30 * time.Second,
-		MaxHTTPRedirects:   10,
-		MaxResponseSize:    10 * 1024 * 1024, // 10MB
-		AllowedURLPatterns: []string{},       // Empty = allow all external URLs
-		BlockInternalIPs:   true,             // Block internal IPs by default
+		HTTPTimeout:         30 * time.Second,
+		MaxHTTPRedirects:    10,
+		MaxResponseSize:     10 * 1024 * 1024, // 10MB
+		MaxHTTPCallsPerExec: 100,              // Limit to 100 HTTP calls per execution
+		AllowedURLPatterns:  []string{},       // Empty = allow all external URLs
+		BlockInternalIPs:    true,             // Block internal IPs by default
 
 		// Cache configuration
 		DefaultCacheTTL: 1 * time.Hour,
 		MaxCacheSize:    1000,
 
 		// Resource limits
-		MaxInputSize:   10 * 1024 * 1024, // 10MB
-		MaxPayloadSize: 1 * 1024 * 1024,  // 1MB
-		MaxNodes:       1000,
-		MaxEdges:       10000,
+		MaxInputSize:      10 * 1024 * 1024, // 10MB
+		MaxPayloadSize:    1 * 1024 * 1024,  // 1MB
+		MaxNodes:          1000,
+		MaxEdges:          10000,
+		MaxNodeExecutions: 10000,            // Limit total node executions including loop iterations
+		MaxStringLength:   1024 * 1024,      // 1MB max string length
+		MaxArrayLength:    10000,            // 10k elements max in arrays
+		MaxVariables:      1000,             // Max 1000 variables in workflow state
+		MaxContextDepth:   32,               // Max 32 levels of nesting
 
 		// Retry configuration
 		DefaultMaxAttempts: 3,
@@ -58,6 +65,12 @@ func ValidationLimits() Config {
 	c.MaxIterations = 100
 	c.MaxNodes = 100
 	c.MaxEdges = 1000
+	c.MaxHTTPCallsPerExec = 10
+	c.MaxNodeExecutions = 1000
+	c.MaxStringLength = 100 * 1024  // 100KB
+	c.MaxArrayLength = 1000
+	c.MaxVariables = 100
+	c.MaxContextDepth = 16
 	return c
 }
 
@@ -69,5 +82,90 @@ func DevelopmentConfig() Config {
 	c.MaxIterations = 10000
 	c.MaxNodes = 10000
 	c.MaxEdges = 100000
+	c.MaxHTTPCallsPerExec = 1000
+	c.MaxNodeExecutions = 100000
+	c.MaxStringLength = 10 * 1024 * 1024 // 10MB
+	c.MaxArrayLength = 100000
+	c.MaxVariables = 10000
+	c.MaxContextDepth = 64
 	return c
+}
+
+// ValidateValue validates a value against resource limits in the config.
+// Returns an error if the value violates any limits.
+func ValidateValue(value interface{}, config Config) error {
+	if value == nil {
+		return nil
+	}
+
+	// Check string length
+	if config.MaxStringLength > 0 {
+		if str, ok := value.(string); ok {
+			if len(str) > config.MaxStringLength {
+				return fmt.Errorf("string too long: %d bytes (limit: %d)", len(str), config.MaxStringLength)
+			}
+		}
+	}
+
+	// Check array length
+	if config.MaxArrayLength > 0 {
+		if arr, ok := value.([]interface{}); ok {
+			if len(arr) > config.MaxArrayLength {
+				return fmt.Errorf("array too large: %d elements (limit: %d)", len(arr), config.MaxArrayLength)
+			}
+			// Recursively validate array elements
+			for i, elem := range arr {
+				if err := ValidateValue(elem, config); err != nil {
+					return fmt.Errorf("array element %d: %w", i, err)
+				}
+			}
+		}
+	}
+
+	// Check nesting depth
+	if config.MaxContextDepth > 0 {
+		depth := getValueDepth(value)
+		if depth > config.MaxContextDepth {
+			return fmt.Errorf("value too deeply nested: %d levels (limit: %d)", depth, config.MaxContextDepth)
+		}
+	}
+
+	return nil
+}
+
+// getValueDepth calculates the nesting depth of a value
+// with protection against stack overflow
+func getValueDepth(value interface{}) int {
+	return getValueDepthRecursive(value, 0, 1000) // max 1000 depth for safety
+}
+
+func getValueDepthRecursive(value interface{}, currentDepth, maxDepth int) int {
+	if value == nil || currentDepth >= maxDepth {
+		return currentDepth
+	}
+
+	v := reflect.ValueOf(value)
+	switch v.Kind() {
+	case reflect.Map:
+		maxChildDepth := currentDepth
+		iter := v.MapRange()
+		for iter.Next() {
+			depth := getValueDepthRecursive(iter.Value().Interface(), currentDepth+1, maxDepth)
+			if depth > maxChildDepth {
+				maxChildDepth = depth
+			}
+		}
+		return maxChildDepth
+	case reflect.Slice, reflect.Array:
+		maxChildDepth := currentDepth
+		for i := 0; i < v.Len(); i++ {
+			depth := getValueDepthRecursive(v.Index(i).Interface(), currentDepth+1, maxDepth)
+			if depth > maxChildDepth {
+				maxChildDepth = depth
+			}
+		}
+		return maxChildDepth
+	default:
+		return currentDepth + 1
+	}
 }

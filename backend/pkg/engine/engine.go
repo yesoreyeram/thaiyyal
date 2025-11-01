@@ -30,18 +30,23 @@ import (
 //   - State Pattern: Manages workflow state (variables, accumulator, counter, cache)
 //   - Template Method: Execute() defines the workflow execution algorithm
 type Engine struct {
-graph      *graph.Graph
-state      *state.Manager
-registry   *executor.Registry
-config     types.Config
-results    map[string]interface{}
-resultsMu  sync.RWMutex
-executionID string
-workflowID  string
+	graph      *graph.Graph
+	state      *state.Manager
+	registry   *executor.Registry
+	config     types.Config
+	results    map[string]interface{}
+	resultsMu  sync.RWMutex
+	executionID string
+	workflowID  string
 
-// Node storage for lookups
-nodes []types.Node
-edges []types.Edge
+	// Runtime protection counters
+	nodeExecutionCount int
+	httpCallCount      int
+	countersMu         sync.RWMutex
+
+	// Node storage for lookups
+	nodes []types.Node
+	edges []types.Edge
 }
 
 // ============================================================================
@@ -250,13 +255,18 @@ return result, nil
 //   - interface{}: Result of node execution (type depends on node)
 //   - error: If node execution fails
 func (e *Engine) executeNode(ctx context.Context, node types.Node) (interface{}, error) {
-// Interpolate templates in node data before execution (except for context nodes)
-if node.Type != types.NodeTypeContextVariable && node.Type != types.NodeTypeContextConstant {
-e.interpolateNodeData(&node.Data)
-}
+	// Check and increment node execution counter
+	if err := e.IncrementNodeExecution(); err != nil {
+		return nil, err
+	}
 
-// Dispatch to appropriate executor via registry
-return e.registry.Execute(e, node)
+	// Interpolate templates in node data before execution (except for context nodes)
+	if node.Type != types.NodeTypeContextVariable && node.Type != types.NodeTypeContextConstant {
+		e.interpolateNodeData(&node.Data)
+	}
+
+	// Dispatch to appropriate executor via registry
+	return e.registry.Execute(e, node)
 }
 
 // ============================================================================
@@ -404,12 +414,29 @@ return nil
 
 // GetVariable retrieves a variable value
 func (e *Engine) GetVariable(name string) (interface{}, error) {
-return e.state.GetVariable(name)
+	return e.state.GetVariable(name)
 }
 
-// SetVariable sets a variable value
+// SetVariable sets a variable value with validation
 func (e *Engine) SetVariable(name string, value interface{}) error {
-return e.state.SetVariable(name, value)
+	// Validate value against resource limits
+	if err := types.ValidateValue(value, e.config); err != nil {
+		return fmt.Errorf("variable validation failed: %w", err)
+	}
+
+	// Check variable count limit (only for new variables)
+	if e.config.MaxVariables > 0 {
+		_, err := e.state.GetVariable(name)
+		if err != nil {
+			// Variable doesn't exist, check count limit
+			vars := e.state.GetAllVariables()
+			if len(vars) >= e.config.MaxVariables {
+				return fmt.Errorf("maximum variables exceeded: %d (limit: %d)", len(vars), e.config.MaxVariables)
+			}
+		}
+	}
+
+	return e.state.SetVariable(name, value)
 }
 
 // GetAccumulator returns the current accumulator value
@@ -450,22 +477,40 @@ return e.state.GetAllContext()
 
 // GetContextVariable retrieves a context variable
 func (e *Engine) GetContextVariable(name string) (interface{}, bool) {
-return e.state.GetContextVariable(name)
+	return e.state.GetContextVariable(name)
 }
 
 // SetContextVariable sets a context variable
+// Note: Validation failures are silently ignored to maintain backward compatibility.
+// Context variables are typically set during workflow initialization.
 func (e *Engine) SetContextVariable(name string, value interface{}) {
-e.state.SetContextVariable(name, value)
+	// Validate value against resource limits (best effort)
+	if err := types.ValidateValue(value, e.config); err != nil {
+		// TODO: Add structured logging here in production
+		// For now, validation errors are silently ignored to avoid breaking
+		// workflow initialization with large context values
+		return
+	}
+	e.state.SetContextVariable(name, value)
 }
 
 // GetContextConstant retrieves a context constant
 func (e *Engine) GetContextConstant(name string) (interface{}, bool) {
-return e.state.GetContextConstant(name)
+	return e.state.GetContextConstant(name)
 }
 
 // SetContextConstant sets a context constant
+// Note: Validation failures are silently ignored to maintain backward compatibility.
+// Context constants are typically set during workflow initialization.
 func (e *Engine) SetContextConstant(name string, value interface{}) {
-e.state.SetContextConstant(name, value)
+	// Validate value against resource limits (best effort)
+	if err := types.ValidateValue(value, e.config); err != nil {
+		// TODO: Add structured logging here in production
+		// For now, validation errors are silently ignored to avoid breaking
+		// workflow initialization with large context values
+		return
+	}
+	e.state.SetContextConstant(name, value)
 }
 
 // InterpolateTemplate replaces template placeholders in a string with actual values from context
@@ -483,11 +528,21 @@ return result, ok
 }
 
 // SetNodeResult stores a node's execution result
+// Note: Validation is best-effort to avoid breaking valid executions.
+// Results that exceed limits may still be stored but could cause issues downstream.
 func (e *Engine) SetNodeResult(nodeID string, result interface{}) {
-e.resultsMu.Lock()
-defer e.resultsMu.Unlock()
+	// Validate result against resource limits (best effort)
+	// We don't fail here to avoid breaking workflows that produce large intermediate results
+	if err := types.ValidateValue(result, e.config); err != nil {
+		// TODO: Add structured logging here in production
+		// For now, the validation error is silently ignored to maintain backward compatibility
+		// and avoid breaking workflows that may produce large intermediate results
+	}
 
-e.results[nodeID] = result
+	e.resultsMu.Lock()
+	defer e.resultsMu.Unlock()
+
+	e.results[nodeID] = result
 }
 
 // GetAllNodeResults returns all node execution results
@@ -515,7 +570,53 @@ return e.state.GetAllContext()
 
 // GetConfig returns the engine configuration
 func (e *Engine) GetConfig() types.Config {
-return e.config
+	return e.config
+}
+
+// IncrementNodeExecution increments the node execution counter and checks limits.
+// Returns an error if the limit is exceeded.
+func (e *Engine) IncrementNodeExecution() error {
+	e.countersMu.Lock()
+	defer e.countersMu.Unlock()
+	
+	e.nodeExecutionCount++
+	
+	// Check if limit is configured and enforced (0 means unlimited)
+	if e.config.MaxNodeExecutions > 0 && e.nodeExecutionCount > e.config.MaxNodeExecutions {
+		return fmt.Errorf("maximum node executions exceeded: %d (limit: %d)", e.nodeExecutionCount, e.config.MaxNodeExecutions)
+	}
+	
+	return nil
+}
+
+// IncrementHTTPCall increments the HTTP call counter and checks limits.
+// Returns an error if the limit is exceeded.
+func (e *Engine) IncrementHTTPCall() error {
+	e.countersMu.Lock()
+	defer e.countersMu.Unlock()
+	
+	e.httpCallCount++
+	
+	// Check if limit is configured and enforced (0 means unlimited)
+	if e.config.MaxHTTPCallsPerExec > 0 && e.httpCallCount > e.config.MaxHTTPCallsPerExec {
+		return fmt.Errorf("maximum HTTP calls per execution exceeded: %d (limit: %d)", e.httpCallCount, e.config.MaxHTTPCallsPerExec)
+	}
+	
+	return nil
+}
+
+// GetNodeExecutionCount returns the current node execution count
+func (e *Engine) GetNodeExecutionCount() int {
+	e.countersMu.RLock()
+	defer e.countersMu.RUnlock()
+	return e.nodeExecutionCount
+}
+
+// GetHTTPCallCount returns the current HTTP call count
+func (e *Engine) GetHTTPCallCount() int {
+	e.countersMu.RLock()
+	defer e.countersMu.RUnlock()
+	return e.httpCallCount
 }
 
 // ============================================================================

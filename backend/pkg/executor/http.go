@@ -30,9 +30,15 @@ func NewHTTPExecutor() *HTTPExecutor {
 //   - Request timeout (30s default, configurable)
 //   - Response size limit (10MB default, configurable)
 //   - SSRF protection against cloud metadata endpoints
+//   - HTTP call count limit per execution
 func (e *HTTPExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
 	if node.Data.URL == nil {
 		return nil, fmt.Errorf("HTTP node missing url")
+	}
+
+	// Check and increment HTTP call counter before making the request
+	if err := ctx.IncrementHTTPCall(); err != nil {
+		return nil, err
 	}
 
 	config := ctx.GetConfig()

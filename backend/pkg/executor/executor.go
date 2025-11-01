@@ -45,6 +45,12 @@ type ExecutionContext interface {
 	
 	// Configuration
 	GetConfig() types.Config
+	
+	// Protection counters
+	IncrementNodeExecution() error
+	IncrementHTTPCall() error
+	GetNodeExecutionCount() int
+	GetHTTPCallCount() int
 }
 
 // NodeExecutor defines the interface for node execution strategies.
