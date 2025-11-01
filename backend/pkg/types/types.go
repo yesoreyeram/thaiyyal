@@ -58,6 +58,8 @@ const (
 	NodeTypeForEach       NodeType = "for_each"
 	NodeTypeWhileLoop     NodeType = "while_loop"
 	NodeTypeFilter        NodeType = "filter" // Filter array elements with expression
+	NodeTypeMap           NodeType = "map"    // Transform array elements
+	NodeTypeReduce        NodeType = "reduce" // Reduce array to single value
 	// State & Memory nodes
 	NodeTypeVariable    NodeType = "variable"    // Store/retrieve variables
 	NodeTypeExtract     NodeType = "extract"     // Extract fields from objects
@@ -109,7 +111,8 @@ type NodeData struct {
 	URL           *string  `json:"url,omitempty"`            // for HTTP nodes
 	Separator     *string  `json:"separator,omitempty"`      // for concat text operation
 	RepeatN       *int     `json:"repeat_n,omitempty"`       // for repeat text operation
-	Condition     *string  `json:"condition,omitempty"`      // for condition nodes
+	Condition     *string  `json:"condition,omitempty"`      // for condition, filter, reduce nodes
+	Expression    *string  `json:"expression,omitempty"`     // for map, reduce nodes (transformation expression)
 	TruePath      *string  `json:"true_path,omitempty"`      // for condition nodes (output port name)
 	FalsePath     *string  `json:"false_path,omitempty"`     // for condition nodes (output port name)
 	MaxIterations *int     `json:"max_iterations,omitempty"` // for for_each and while_loop nodes

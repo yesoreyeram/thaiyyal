@@ -153,6 +153,8 @@ const (
 	NodeTypeForEach   = types.NodeTypeForEach
 	NodeTypeWhileLoop = types.NodeTypeWhileLoop
 	NodeTypeFilter    = types.NodeTypeFilter
+	NodeTypeMap       = types.NodeTypeMap
+	NodeTypeReduce    = types.NodeTypeReduce
 )
 
 // Node type constants - State & Memory

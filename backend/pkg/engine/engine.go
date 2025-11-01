@@ -186,6 +186,8 @@ func DefaultRegistry() *executor.Registry {
 	reg.MustRegister(&executor.ForEachExecutor{})
 	reg.MustRegister(&executor.WhileLoopExecutor{})
 	reg.MustRegister(&executor.FilterExecutor{})
+	reg.MustRegister(&executor.MapExecutor{})
+	reg.MustRegister(&executor.ReduceExecutor{})
 
 	// State & memory nodes
 	reg.MustRegister(&executor.VariableExecutor{})
