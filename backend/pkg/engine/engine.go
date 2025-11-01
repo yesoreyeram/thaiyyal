@@ -104,7 +104,7 @@ func defaultRegistry() *executor.Registry {
 	// Operation nodes
 	reg.MustRegister(&executor.OperationExecutor{})
 	reg.MustRegister(&executor.TextOperationExecutor{})
-	reg.MustRegister(&executor.HTTPExecutor{})
+	reg.MustRegister(executor.NewHTTPExecutor())
 
 	// Control flow nodes
 	reg.MustRegister(&executor.ConditionExecutor{})
