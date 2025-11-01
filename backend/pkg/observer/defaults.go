@@ -180,7 +180,8 @@ func (m *Manager) Register(observer Observer) {
 // If an observer panics, it will be recovered and not affect other observers or the main execution.
 func (m *Manager) Notify(ctx context.Context, event Event) {
 	for _, observer := range m.observers {
-		// Create a local copy to avoid closure issues
+		// Call observer in a goroutine for async execution
+		// Note: Explicit copy not strictly needed in Go 1.22+ but kept for compatibility
 		obs := observer
 		
 		// Execute observer asynchronously in a goroutine

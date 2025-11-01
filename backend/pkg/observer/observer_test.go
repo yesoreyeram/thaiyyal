@@ -16,23 +16,30 @@ import (
 // TestObserver is a test observer that records all events
 // It includes synchronization primitives for testing asynchronous behavior
 type TestObserver struct {
-	events []Event
-	mu     sync.Mutex
-	wg     sync.WaitGroup
+	events   []Event
+	mu       sync.Mutex
+	wg       sync.WaitGroup
+	expected int // Track expected event count
 }
 
 func NewTestObserver() *TestObserver {
 	return &TestObserver{
-		events: []Event{},
+		events:   []Event{},
+		expected: 0,
 	}
 }
 
 func (o *TestObserver) OnEvent(ctx context.Context, event Event) {
 	o.mu.Lock()
 	defer o.mu.Unlock()
-	defer o.wg.Done()
 	
 	o.events = append(o.events, event)
+	
+	// Only call Done if we're expecting events
+	if o.expected > 0 {
+		o.wg.Done()
+		o.expected--
+	}
 }
 
 func (o *TestObserver) GetEvents() []Event {
@@ -68,6 +75,9 @@ func (o *TestObserver) Clear() {
 
 // ExpectEvents prepares the observer to wait for a specific number of events
 func (o *TestObserver) ExpectEvents(count int) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	o.expected += count
 	o.wg.Add(count)
 }
 

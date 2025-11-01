@@ -364,7 +364,8 @@ func (e *Engine) executeNode(ctx context.Context, node types.Node) (interface{},
 
 	// Check and increment node execution counter
 	if err := e.IncrementNodeExecution(); err != nil {
-		// Notify observers: Node failure
+		// This is a protection limit error, not a node execution failure
+		// Still notify as failure since execution couldn't proceed
 		e.notifyNodeFailure(ctx, node, nodeStartTime, nil, err)
 		return nil, err
 	}
@@ -378,7 +379,7 @@ func (e *Engine) executeNode(ctx context.Context, node types.Node) (interface{},
 	result, err := e.registry.Execute(e, node)
 	
 	if err != nil {
-		// Notify observers: Node failure
+		// Notify observers: Node execution failure
 		e.notifyNodeFailure(ctx, node, nodeStartTime, result, err)
 		return nil, err
 	}
