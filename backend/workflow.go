@@ -68,6 +68,7 @@ package workflow
 import (
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/engine"
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/executor"
+	"github.com/yesoreyeram/thaiyyal/backend/pkg/observer"
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/types"
 )
 
@@ -102,6 +103,24 @@ type (
 
 	// Registry manages node executor registration and lookup
 	Registry = executor.Registry
+)
+
+// Observer types re-exported from pkg/observer
+type (
+	// Observer receives notifications about workflow execution events
+	Observer = observer.Observer
+
+	// Logger is the interface for custom logging
+	Logger = observer.Logger
+
+	// Event represents an execution event with metadata
+	Event = observer.Event
+
+	// EventType represents the type of execution event
+	EventType = observer.EventType
+
+	// ExecutionStatus represents the status of execution
+	ExecutionStatus = observer.ExecutionStatus
 )
 
 // ============================================================================
@@ -167,6 +186,24 @@ const (
 	NodeTypeContextConstant = types.NodeTypeContextConstant
 )
 
+// Observer event type constants
+const (
+	EventWorkflowStart = observer.EventWorkflowStart
+	EventWorkflowEnd   = observer.EventWorkflowEnd
+	EventNodeStart     = observer.EventNodeStart
+	EventNodeEnd       = observer.EventNodeEnd
+	EventNodeSuccess   = observer.EventNodeSuccess
+	EventNodeFailure   = observer.EventNodeFailure
+)
+
+// Execution status constants
+const (
+	StatusStarted   = observer.StatusStarted
+	StatusSuccess   = observer.StatusSuccess
+	StatusFailure   = observer.StatusFailure
+	StatusCompleted = observer.StatusCompleted
+)
+
 // ============================================================================
 // Function Re-exports
 // ============================================================================
@@ -191,6 +228,18 @@ var (
 
 	// DefaultRegistry creates a registry with all built-in node executors registered
 	DefaultRegistry = engine.DefaultRegistry
+)
+
+// Observer functions
+var (
+	// NewConsoleObserver creates a console observer with default logger
+	NewConsoleObserver = observer.NewConsoleObserver
+
+	// NewConsoleObserverWithLogger creates a console observer with custom logger
+	NewConsoleObserverWithLogger = observer.NewConsoleObserverWithLogger
+
+	// NewDefaultLogger creates the default logger implementation
+	NewDefaultLogger = observer.NewDefaultLogger
 )
 
 // Context helper functions

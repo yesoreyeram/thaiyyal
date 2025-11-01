@@ -9,7 +9,8 @@ A simple, easy-to-understand Go workflow execution engine that parses and execut
 - **JSON Payload Parsing**: Accepts workflow definitions as JSON
 - **DAG Execution**: Uses topological sorting to execute nodes in correct order
 - **⚡ Parallel Execution**: Execute independent nodes concurrently for 2-10x speedup
-- **🔌 Extensible**: Add custom node types with your own executors (NEW!)
+- **🔌 Extensible**: Add custom node types with your own executors
+- **👀 Observable**: Monitor workflow execution with the Observer pattern (NEW!)
 - **🛡️ Secure by Default**: Comprehensive protection limits prevent resource exhaustion
 - **Type Inference**: Automatically determines node types from data
 - **Node Types** (25+ types):
@@ -187,6 +188,66 @@ func main() {
 - ✅ Comprehensive validation support
 
 **Learn More**: See [CUSTOM_NODES.md](CUSTOM_NODES.md) for the complete guide with examples.
+
+### Observer Pattern (NEW 👀)
+
+Monitor workflow execution with custom observers:
+
+```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "log"
+    
+    "github.com/yesoreyeram/thaiyyal/backend"
+)
+
+func main() {
+    payload := `{...}`
+    
+    engine, err := workflow.NewEngine([]byte(payload))
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    // Register console observer for debugging
+    observer := workflow.NewConsoleObserver()
+    engine.RegisterObserver(observer)
+    
+    // Or create a custom observer
+    customObserver := &MyCustomObserver{}
+    engine.RegisterObserver(customObserver)
+    
+    // Execute workflow (observers receive events asynchronously)
+    result, err := engine.Execute()
+    if err != nil {
+        log.Fatal(err)
+    }
+    
+    fmt.Printf("Result: %v\n", result.FinalOutput)
+}
+
+// Custom observer implementation
+type MyCustomObserver struct{}
+
+func (o *MyCustomObserver) OnEvent(ctx context.Context, event workflow.Event) {
+    // Handle workflow and node events
+    fmt.Printf("[%s] %s - Node: %s, Status: %s\n", 
+        event.Type, event.ExecutionID, event.NodeID, event.Status)
+}
+```
+
+**Features:**
+- ✅ Asynchronous execution (observers never block workflow)
+- ✅ Multiple observers support
+- ✅ Built-in console observer and custom logger
+- ✅ Complete event metadata (timing, status, errors)
+- ✅ Integration with monitoring systems (DataDog, Prometheus, etc.)
+- ✅ Panic recovery (observer failures don't affect workflow)
+
+**Learn More**: See [OBSERVER_PATTERN.md](OBSERVER_PATTERN.md) for the complete guide with examples.
 
 ### Running Examples
 
@@ -678,7 +739,8 @@ All errors include descriptive messages.
 
 ## Learn More
 
-- See [`CUSTOM_NODES.md`](CUSTOM_NODES.md) for custom node executor guide (NEW!)
+- See [`OBSERVER_PATTERN.md`](OBSERVER_PATTERN.md) for workflow monitoring and observability guide (NEW!)
+- See [`CUSTOM_NODES.md`](CUSTOM_NODES.md) for custom node executor guide
 - See [`PROTECTION.md`](PROTECTION.md) for security and protection limits
 - See [`docs/NODES.md`](../docs/NODES.md) for complete node type reference
 - See [`INTEGRATION.md`](INTEGRATION.md) for frontend integration guide
