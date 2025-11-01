@@ -8,9 +8,11 @@ A simple, easy-to-understand Go workflow execution engine that parses and execut
 - **Easy to Understand**: Straightforward code flow without complex patterns
 - **JSON Payload Parsing**: Accepts workflow definitions as JSON
 - **DAG Execution**: Uses topological sorting to execute nodes in correct order
-- **⚡ Parallel Execution**: NEW - Execute independent nodes concurrently for 2-10x speedup
+- **⚡ Parallel Execution**: Execute independent nodes concurrently for 2-10x speedup
+- **🔌 Extensible**: Add custom node types with your own executors (NEW!)
+- **🛡️ Secure by Default**: Comprehensive protection limits prevent resource exhaustion
 - **Type Inference**: Automatically determines node types from data
-- **Node Types** (23 types):
+- **Node Types** (25+ types):
   - **Number Nodes**: Provide numeric input values
   - **Operation Nodes**: Perform arithmetic (add, subtract, multiply, divide)
   - **Visualization Nodes**: Format output for display (text, table)
@@ -34,16 +36,18 @@ A simple, easy-to-understand Go workflow execution engine that parses and execut
   - **Retry Nodes**: Retry with exponential/linear/constant backoff
   - **Try-Catch Nodes**: Error handling with fallback logic
   - **Timeout Nodes**: Enforce time limits on operations
+  - **Custom Nodes**: Add your own node types with custom executors
 - **State Management**: Variables, accumulators, counters, and cache for stateful workflows
 - **Cycle Detection**: Prevents execution of workflows with circular dependencies
 - **Thread Safety**: Full mutex protection for concurrent execution
-- **Comprehensive Tests**: 176+ test cases (including parallel execution tests)
+- **Comprehensive Tests**: 190+ test cases (including custom executor tests)
   - 40 standard tests
   - 39 control flow tests
   - 17 state/memory tests
   - 46+ advanced control flow tests
   - 11 parallel execution tests
   - 13 context and validation tests
+  - 14 custom executor tests (NEW!)
 
 ## Quick Start
 
@@ -109,10 +113,89 @@ result, err := engine.ExecuteWithParallelism(config)
 
 **Learn More**: See [PARALLEL_EXECUTION.md](PARALLEL_EXECUTION.md) for detailed documentation.
 
+### Custom Node Types (NEW 🔌)
+
+Extend the workflow engine with your own custom node executors:
+
+```go
+package main
+
+import (
+    "fmt"
+    "github.com/yesoreyeram/thaiyyal/backend"
+)
+
+// Define a custom executor
+type ReverseStringExecutor struct{}
+
+func (e *ReverseStringExecutor) Execute(ctx workflow.ExecutionContext, node workflow.Node) (interface{}, error) {
+    // Increment execution counter for protection
+    if err := ctx.IncrementNodeExecution(); err != nil {
+        return nil, err
+    }
+    
+    inputs := ctx.GetNodeInputs(node.ID)
+    str := inputs[0].(string)
+    
+    // Reverse the string
+    runes := []rune(str)
+    for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {
+        runes[i], runes[j] = runes[j], runes[i]
+    }
+    
+    return string(runes), nil
+}
+
+func (e *ReverseStringExecutor) NodeType() types.NodeType {
+    return types.NodeType("reverse_string")
+}
+
+func (e *ReverseStringExecutor) Validate(node workflow.Node) error {
+    return nil
+}
+
+func main() {
+    // Register your custom executor
+    registry := workflow.DefaultRegistry()
+    registry.MustRegister(&ReverseStringExecutor{})
+    
+    payload := `{
+        "nodes": [
+            {"id": "1", "data": {"text": "Hello"}},
+            {"id": "2", "type": "reverse_string", "data": {}}
+        ],
+        "edges": [{"source": "1", "target": "2"}]
+    }`
+    
+    // Create engine with custom registry
+    engine, _ := workflow.NewEngineWithRegistry(
+        []byte(payload),
+        workflow.DefaultConfig(),
+        registry,
+    )
+    
+    result, _ := engine.Execute()
+    fmt.Println(result.FinalOutput)  // Output: "olleH"
+}
+```
+
+**Features:**
+- ✅ All protection limits automatically apply to custom nodes
+- ✅ Mix custom and built-in nodes in the same workflow
+- ✅ Full access to workflow state (variables, cache, context)
+- ✅ HTTP call tracking and limits
+- ✅ Comprehensive validation support
+
+**Learn More**: See [CUSTOM_NODES.md](CUSTOM_NODES.md) for the complete guide with examples.
+
 ### Running Examples
 
 ```bash
 cd backend/examples
+go run main.go
+
+# Run custom nodes examples
+cd backend/examples/custom_nodes
 go run main.go
 ```
 
@@ -595,7 +678,11 @@ All errors include descriptive messages.
 
 ## Learn More
 
+- See [`CUSTOM_NODES.md`](CUSTOM_NODES.md) for custom node executor guide (NEW!)
+- See [`PROTECTION.md`](PROTECTION.md) for security and protection limits
 - See [`docs/NODES.md`](../docs/NODES.md) for complete node type reference
 - See [`INTEGRATION.md`](INTEGRATION.md) for frontend integration guide
+- See [`PARALLEL_EXECUTION.md`](PARALLEL_EXECUTION.md) for parallel execution guide
+- See [`examples/custom_nodes/`](examples/custom_nodes/) for custom node examples
 - See [`examples/looping_poc.go`](examples/looping_poc.go) for looping patterns
 
