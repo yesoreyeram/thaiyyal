@@ -75,14 +75,17 @@ This document provides a comprehensive reference of all node types in the Thaiyy
 - **Input Behavior**:
   - **Array input**: Filters elements where expression evaluates to true
   - **Non-array input**: Passes through unchanged with warning log
-- **Expression Context**: Each array element is available as `variables.item`, index as `variables.index`
-- **Expression Syntax**: Uses same expression language as Condition node with full support for:
-  - Comparisons: `>`, `<`, `>=`, `<=`, `==`, `!=`
-  - Boolean operators: `&&`, `||`, `!`
-  - Field access: `variables.item.fieldName`, `variables.item.nested.field`
-  - Node references: `node.id.value`
-  - Context variables: `context.variableName`
-  - Functions: Math, date/time, string functions
+- **Expression Syntax**: ✨ **Use `item.field` to reference array elements**
+  - **`item`** - refers to the current array element being evaluated
+  - **`item.field`** - access a field of the current element
+  - **`item.nested.field`** - access nested fields
+  - Full expression language support:
+    - Comparisons: `>`, `<`, `>=`, `<=`, `==`, `!=`
+    - Boolean operators: `&&`, `||`, `!`
+    - Variable references: `variables.name`
+    - Context references: `context.name`
+    - Node references: `node.id.value`
+    - Functions: Math, date/time, string functions
 - **Output**: Returns object with:
   - `filtered`: Filtered array (or original input if not array)
   - `input_count`: Number of input elements
@@ -97,25 +100,39 @@ This document provides a comprehensive reference of all node types in the Thaiyy
   - Remove invalid/incomplete data from arrays
   - Select items matching business rules
   - Data quality filtering
-- **Example Expressions**:
+- **Example Expressions** (RECOMMENDED SYNTAX):
   ```json
   // Filter numbers greater than 10
-  {"condition": "variables.item > 10"}
+  {"condition": "item > 10"}
   
-  // Filter objects by field value
-  {"condition": "variables.item.age >= 18"}
+  // Filter objects by field value (MOST COMMON)
+  {"condition": "item.age >= 18"}
   
   // Filter by string field
-  {"condition": "variables.item.status == \"active\""}
+  {"condition": "item.status == \"active\""}
   
   // Complex condition with AND
-  {"condition": "variables.item.price < 50 && variables.item.category == \"books\""}
+  {"condition": "item.price < 50 && item.category == \"books\""}
+  
+  // Filter using variable threshold
+  {"condition": "item.age >= variables.minAge"}
   
   // Filter using context variable
-  {"condition": "variables.item.score > context.threshold"}
+  {"condition": "item.score > context.passingScore"}
   
   // Filter with nested field access
-  {"condition": "variables.item.profile.verified == true"}
+  {"condition": "item.profile.verified == true"}
+  
+  // Complex business logic
+  {"condition": "item.age >= 18 && item.active == true && item.verified == true"}
+  ```
+- **Alternative Syntaxes** (also supported):
+  ```json
+  // Explicit variable reference (verbose)
+  {"condition": "variables.item.age >= 18"}
+  
+  // Direct field access (less explicit, but works)
+  {"condition": "age >= 18"}
   ```
 - **Complete Example**:
   ```json
@@ -129,7 +146,7 @@ This document provides a comprehensive reference of all node types in the Thaiyy
       {
         "id": "2", 
         "type": "filter",
-        "data": {"condition": "variables.item.age >= 18 && variables.item.active == true"}
+        "data": {"condition": "item.age >= 18 && item.active == true"}
       },
       {
         "id": "3",

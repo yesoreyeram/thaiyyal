@@ -414,7 +414,7 @@ Pseudo-spec (short)
         "id": "filter-1",
         "type": "filter",
         "data": {
-          "condition": "variables.item.in_stock == true && variables.item.price >= 10 && variables.item.price <= 100"
+          "condition": "item.in_stock == true && item.price >= 10 && item.price <= 100"
         }
       },
       {
@@ -441,14 +441,14 @@ Pseudo-spec (short)
 }
 ```
 
-**More Filter Examples**:
+**More Filter Examples** (using recommended `item.field` syntax):
 
 ```json
-// Filter users by age
+// Filter users by age (RECOMMENDED SYNTAX)
 {
   "type": "filter",
   "data": {
-    "condition": "variables.item.age >= 18"
+    "condition": "item.age >= 18"
   }
 }
 
@@ -456,7 +456,7 @@ Pseudo-spec (short)
 {
   "type": "filter",
   "data": {
-    "condition": "variables.item.status == \"active\" && variables.item.verified == true"
+    "condition": "item.status == \"active\" && item.verified == true"
   }
 }
 
@@ -464,7 +464,7 @@ Pseudo-spec (short)
 {
   "type": "filter",
   "data": {
-    "condition": "variables.item.priority == \"high\" || variables.item.urgent == true"
+    "condition": "item.priority == \"high\" || item.urgent == true"
   }
 }
 
@@ -472,7 +472,7 @@ Pseudo-spec (short)
 {
   "type": "filter",
   "data": {
-    "condition": "variables.item.profile.subscription.tier == \"premium\""
+    "condition": "item.profile.subscription.tier == \"premium\""
   }
 }
 
@@ -480,7 +480,15 @@ Pseudo-spec (short)
 {
   "type": "filter",
   "data": {
-    "condition": "variables.item.score > context.threshold"
+    "condition": "item.score > context.threshold"
+  }
+}
+
+// Filter using workflow variable
+{
+  "type": "filter",
+  "data": {
+    "condition": "item.age >= variables.minAge"
   }
 }
 
@@ -488,7 +496,7 @@ Pseudo-spec (short)
 {
   "type": "filter",
   "data": {
-    "condition": "year(variables.item.created_at) == 2024"
+    "condition": "year(item.created_at) == 2024"
   }
 }
 
@@ -496,9 +504,27 @@ Pseudo-spec (short)
 {
   "type": "filter",
   "data": {
-    "condition": "variables.item.quantity > 0 && (variables.item.discount > 0 || variables.item.featured == true)"
+    "condition": "item.quantity > 0 && (item.discount > 0 || item.featured == true)"
   }
 }
+
+// Filter primitive array (numbers)
+{
+  "type": "filter",
+  "data": {
+    "condition": "item > 100"
+  }
+}
+```
+
+**Key Points About Filter Expressions:**
+- ✨ **Use `item.field` syntax** - Most intuitive and readable
+- `item` refers to the current array element being evaluated  
+- Works for object properties: `item.name`, `item.age`
+- Works for nested properties: `item.profile.verified`
+- Works for primitives: `item > 10` (when filtering arrays of numbers/strings)
+- Combine with variables: `item.age >= variables.minAge`
+- Combine with context: `item.score > context.threshold`
 ```
 
 Execution & testing tips
