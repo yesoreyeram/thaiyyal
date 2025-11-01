@@ -3,6 +3,7 @@ package expression
 import (
 	"math"
 	"testing"
+	"time"
 )
 
 func TestEvaluate_SimpleComparisons(t *testing.T) {
@@ -460,4 +461,182 @@ func BenchmarkEvaluateArithmetic(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		EvaluateArithmetic("(variables.a + variables.b) * 2", ctx)
 	}
+}
+
+// ============================================================================
+// Date/Time and Null Handling Tests
+// ============================================================================
+
+func TestEvaluate_NullHandling(t *testing.T) {
+ctx := &Context{
+NodeResults: map[string]interface{}{
+"nullNode": map[string]interface{}{
+"value": nil,
+},
+"validNode": map[string]interface{}{
+"value": "test",
+},
+},
+Variables: map[string]interface{}{
+"nullVar":  nil,
+"validVar": 100.0,
+},
+ContextVars: make(map[string]interface{}),
+}
+
+tests := []struct {
+name       string
+expression string
+want       bool
+}{
+{"isNull on null value", "isNull(node.nullNode.value)", true},
+{"isNull on non-null value", "isNull(node.validNode.value)", false},
+{"isNull on null variable", "isNull(variables.nullVar)", true},
+{"isNull on valid variable", "isNull(variables.validVar)", false},
+}
+
+for _, tt := range tests {
+t.Run(tt.name, func(t *testing.T) {
+got, err := Evaluate(tt.expression, nil, ctx)
+if err != nil {
+t.Errorf("Evaluate() error = %v", err)
+return
+}
+if got != tt.want {
+t.Errorf("Evaluate() = %v, want %v", got, tt.want)
+}
+})
+}
+}
+
+func TestEvaluate_NullComparisons(t *testing.T) {
+ctx := &Context{
+NodeResults: map[string]interface{}{
+"null1": map[string]interface{}{"value": nil},
+"null2": map[string]interface{}{"value": nil},
+"val1":  map[string]interface{}{"value": 100.0},
+},
+Variables:   make(map[string]interface{}),
+ContextVars: make(map[string]interface{}),
+}
+
+tests := []struct {
+name       string
+expression string
+want       bool
+}{
+{"null equals null", "node.null1.value == node.null2.value", true},
+{"null not equals value", "node.null1.value != node.val1.value", true},
+{"value not equals null", "node.val1.value != node.null1.value", true},
+}
+
+for _, tt := range tests {
+t.Run(tt.name, func(t *testing.T) {
+got, err := Evaluate(tt.expression, nil, ctx)
+if err != nil {
+t.Errorf("Evaluate() error = %v", err)
+return
+}
+if got != tt.want {
+t.Errorf("Evaluate() = %v, want %v", got, tt.want)
+}
+})
+}
+}
+
+func TestParseDateTimeFormats(t *testing.T) {
+tests := []struct {
+name    string
+input   interface{}
+wantErr bool
+}{
+{"RFC3339", "2024-01-15T10:30:00Z", false},
+{"RFC3339Nano", "2024-01-15T10:30:00.123456789Z", false},
+{"simple date", "2024-01-15", false},
+{"datetime with space", "2024-01-15 10:30:00", false},
+{"unix timestamp int", int64(1705315800), false},
+{"unix timestamp float", 1705315800.0, false},
+{"time.Time", time.Now(), false},
+{"invalid string", "not a date", true},
+}
+
+for _, tt := range tests {
+t.Run(tt.name, func(t *testing.T) {
+_, err := parseDateTime(tt.input)
+if (err != nil) != tt.wantErr {
+t.Errorf("parseDateTime() error = %v, wantErr %v", err, tt.wantErr)
+}
+})
+}
+}
+
+func TestDateTimeComparisons(t *testing.T) {
+// Test time.Time comparisons
+time1 := time.Date(2024, 1, 15, 10, 30, 0, 0, time.UTC)
+time2 := time.Date(2024, 1, 20, 10, 30, 0, 0, time.UTC)
+
+ctx := &Context{
+NodeResults: map[string]interface{}{
+"date1": map[string]interface{}{"value": time1},
+"date2": map[string]interface{}{"value": time2},
+},
+Variables:   make(map[string]interface{}),
+ContextVars: make(map[string]interface{}),
+}
+
+tests := []struct {
+name       string
+expression string
+want       bool
+}{
+{"time before", "node.date1.value < node.date2.value", true},
+{"time after", "node.date2.value > node.date1.value", true},
+{"time equal", "node.date1.value == node.date1.value", true},
+{"time not equal", "node.date1.value != node.date2.value", true},
+}
+
+for _, tt := range tests {
+t.Run(tt.name, func(t *testing.T) {
+got, err := Evaluate(tt.expression, nil, ctx)
+if err != nil {
+t.Errorf("Evaluate() error = %v", err)
+return
+}
+if got != tt.want {
+t.Errorf("Evaluate() = %v, want %v", got, tt.want)
+}
+})
+}
+}
+
+func TestCoalesceFunction(t *testing.T) {
+ctx := &Context{
+NodeResults: make(map[string]interface{}),
+Variables:   make(map[string]interface{}),
+ContextVars: make(map[string]interface{}),
+}
+
+tests := []struct {
+name    string
+args    []interface{}
+want    interface{}
+wantErr bool
+}{
+{"first non-null", []interface{}{nil, nil, 100.0, 200.0}, 100.0, false},
+{"all null", []interface{}{nil, nil, nil}, nil, false},
+{"first is non-null", []interface{}{100.0, nil, 200.0}, 100.0, false},
+}
+
+for _, tt := range tests {
+t.Run(tt.name, func(t *testing.T) {
+got, err := callDateTimeFunction("coalesce", tt.args, ctx)
+if (err != nil) != tt.wantErr {
+t.Errorf("coalesce() error = %v, wantErr %v", err, tt.wantErr)
+return
+}
+if !tt.wantErr && got != tt.want {
+t.Errorf("coalesce() = %v, want %v", got, tt.want)
+}
+})
+}
 }

@@ -8,6 +8,7 @@ import (
 "regexp"
 "strconv"
 "strings"
+"time"
 )
 
 // Context provides access to workflow state during expression evaluation
@@ -59,7 +60,16 @@ return false, err
 return !result, nil
 }
 
-// Check for contains() function
+// Check for function calls (date/time, null handling, strings)
+if idx := strings.Index(expression, "("); idx > 0 && strings.HasSuffix(expression, ")") {
+funcName := strings.TrimSpace(expression[:idx])
+// Check if it's a known function
+if isFunctionCall(funcName) {
+return evaluateFunctionCall(expression, input, ctx)
+}
+}
+
+// Check for contains() function (backward compatibility)
 if strings.HasPrefix(expression, "contains(") && strings.HasSuffix(expression, ")") {
 return evaluateContains(expression, input, ctx)
 }
@@ -338,6 +348,13 @@ if left == nil || right == nil {
 return false
 }
 
+// Try time.Time comparison
+leftTime, leftIsTime := left.(time.Time)
+rightTime, rightIsTime := right.(time.Time)
+if leftIsTime && rightIsTime {
+return leftTime.Equal(rightTime)
+}
+
 // Try numeric comparison
 leftNum, leftIsNum := toFloat64(left)
 rightNum, rightIsNum := toFloat64(right)
@@ -364,6 +381,23 @@ return false
 
 // compareNumeric compares two values numerically
 func compareNumeric(left, right interface{}, op string) bool {
+// Handle time.Time comparisons
+leftTime, leftIsTime := left.(time.Time)
+rightTime, rightIsTime := right.(time.Time)
+if leftIsTime && rightIsTime {
+switch op {
+case "<":
+return leftTime.Before(rightTime)
+case "<=":
+return leftTime.Before(rightTime) || leftTime.Equal(rightTime)
+case ">":
+return leftTime.After(rightTime)
+case ">=":
+return leftTime.After(rightTime) || leftTime.Equal(rightTime)
+}
+return false
+}
+
 leftNum, leftOk := toFloat64(left)
 rightNum, rightOk := toFloat64(right)
 
@@ -463,6 +497,55 @@ args = append(args, strings.TrimSpace(current.String()))
 }
 
 return args
+}
+
+// isFunctionCall checks if a name is a known function
+func isFunctionCall(name string) bool {
+dateFuncs := []string{"now", "parseDate", "toEpoch", "toEpochMillis", "fromEpoch", "fromEpochMillis",
+"dateDiff", "dateAdd", "year", "month", "day", "hour", "minute", "isNull", "coalesce"}
+for _, fn := range dateFuncs {
+if name == fn {
+return true
+}
+}
+return false
+}
+
+// evaluateFunctionCall evaluates a function call and returns a boolean result
+func evaluateFunctionCall(expr string, input interface{}, ctx *Context) (bool, error) {
+// Extract function name and arguments
+idx := strings.Index(expr, "(")
+if idx == -1 {
+return false, fmt.Errorf("invalid function call: %s", expr)
+}
+
+funcName := strings.TrimSpace(expr[:idx])
+argsStr := expr[idx+1 : len(expr)-1] // Remove "funcName(" and ")"
+
+// Parse arguments
+argStrs := splitArguments(argsStr)
+var args []interface{}
+for _, argStr := range argStrs {
+val, err := resolveValue(argStr, input, ctx)
+if err != nil {
+return false, fmt.Errorf("error resolving argument '%s': %w", argStr, err)
+}
+args = append(args, val)
+}
+
+// Call the function
+result, err := callDateTimeFunction(funcName, args, ctx)
+if err != nil {
+return false, err
+}
+
+// Convert result to boolean
+if boolResult, ok := result.(bool); ok {
+return boolResult, nil
+}
+
+// Non-boolean results from functions like coalesce might need comparison
+return false, fmt.Errorf("function %s() did not return a boolean value", funcName)
 }
 
 // evaluateSimpleCondition evaluates simple numeric conditions (backward compatible)
@@ -937,4 +1020,221 @@ return ch >= '0' && ch <= '9'
 // isLetter checks if a character is a letter
 func (p *arithmeticParser) isLetter(ch byte) bool {
 return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')
+}
+
+// ============================================================================
+// Date/Time Functions
+// ============================================================================
+
+// Date/time helper functions for the expression evaluator
+
+// parseDateTime parses various date/time formats into time.Time
+func parseDateTime(value interface{}) (time.Time, error) {
+switch v := value.(type) {
+case time.Time:
+return v, nil
+case string:
+// Try common formats
+formats := []string{
+time.RFC3339,
+time.RFC3339Nano,
+time.RFC822,
+time.RFC1123,
+"2006-01-02",
+"2006-01-02 15:04:05",
+"2006-01-02T15:04:05",
+}
+for _, format := range formats {
+if t, err := time.Parse(format, v); err == nil {
+return t, nil
+}
+}
+return time.Time{}, fmt.Errorf("unable to parse date/time: %s", v)
+case float64:
+// Assume Unix timestamp in seconds
+return time.Unix(int64(v), 0), nil
+case int64:
+// Unix timestamp in seconds
+return time.Unix(v, 0), nil
+case int:
+// Unix timestamp in seconds
+return time.Unix(int64(v), 0), nil
+default:
+return time.Time{}, fmt.Errorf("unsupported date/time type: %T", value)
+}
+}
+
+// isNull checks if a value is null/nil
+func isNull(value interface{}) bool {
+return value == nil
+}
+
+// callDateTimeFunction handles date/time specific functions
+func callDateTimeFunction(name string, args []interface{}, ctx *Context) (interface{}, error) {
+switch name {
+case "now":
+// Current timestamp
+if len(args) != 0 {
+return nil, fmt.Errorf("now() takes no arguments, got %d", len(args))
+}
+return time.Now(), nil
+
+case "parseDate":
+// Parse date string
+if len(args) != 1 {
+return nil, fmt.Errorf("parseDate() requires exactly 1 argument, got %d", len(args))
+}
+return parseDateTime(args[0])
+
+case "toEpoch":
+// Convert to Unix timestamp (seconds)
+if len(args) != 1 {
+return nil, fmt.Errorf("toEpoch() requires exactly 1 argument, got %d", len(args))
+}
+t, err := parseDateTime(args[0])
+if err != nil {
+return nil, err
+}
+return float64(t.Unix()), nil
+
+case "toEpochMillis":
+// Convert to Unix timestamp (milliseconds)
+if len(args) != 1 {
+return nil, fmt.Errorf("toEpochMillis() requires exactly 1 argument, got %d", len(args))
+}
+t, err := parseDateTime(args[0])
+if err != nil {
+return nil, err
+}
+return float64(t.UnixMilli()), nil
+
+case "fromEpoch":
+// Create time from Unix timestamp (seconds)
+if len(args) != 1 {
+return nil, fmt.Errorf("fromEpoch() requires exactly 1 argument, got %d", len(args))
+}
+val, ok := toFloat64(args[0])
+if !ok {
+return nil, fmt.Errorf("fromEpoch() requires numeric argument")
+}
+return time.Unix(int64(val), 0), nil
+
+case "fromEpochMillis":
+// Create time from Unix timestamp (milliseconds)
+if len(args) != 1 {
+return nil, fmt.Errorf("fromEpochMillis() requires exactly 1 argument, got %d", len(args))
+}
+val, ok := toFloat64(args[0])
+if !ok {
+return nil, fmt.Errorf("fromEpochMillis() requires numeric argument")
+}
+return time.UnixMilli(int64(val)), nil
+
+case "dateDiff":
+// Difference between two dates in seconds
+if len(args) != 2 {
+return nil, fmt.Errorf("dateDiff() requires exactly 2 arguments, got %d", len(args))
+}
+t1, err := parseDateTime(args[0])
+if err != nil {
+return nil, fmt.Errorf("dateDiff() first argument: %w", err)
+}
+t2, err := parseDateTime(args[1])
+if err != nil {
+return nil, fmt.Errorf("dateDiff() second argument: %w", err)
+}
+return float64(t1.Sub(t2).Seconds()), nil
+
+case "dateAdd":
+// Add seconds to a date
+if len(args) != 2 {
+return nil, fmt.Errorf("dateAdd() requires exactly 2 arguments, got %d", len(args))
+}
+t, err := parseDateTime(args[0])
+if err != nil {
+return nil, fmt.Errorf("dateAdd() first argument: %w", err)
+}
+seconds, ok := toFloat64(args[1])
+if !ok {
+return nil, fmt.Errorf("dateAdd() second argument must be numeric")
+}
+return t.Add(time.Duration(seconds) * time.Second), nil
+
+case "year":
+// Get year from date
+if len(args) != 1 {
+return nil, fmt.Errorf("year() requires exactly 1 argument, got %d", len(args))
+}
+t, err := parseDateTime(args[0])
+if err != nil {
+return nil, err
+}
+return float64(t.Year()), nil
+
+case "month":
+// Get month from date (1-12)
+if len(args) != 1 {
+return nil, fmt.Errorf("month() requires exactly 1 argument, got %d", len(args))
+}
+t, err := parseDateTime(args[0])
+if err != nil {
+return nil, err
+}
+return float64(t.Month()), nil
+
+case "day":
+// Get day from date
+if len(args) != 1 {
+return nil, fmt.Errorf("day() requires exactly 1 argument, got %d", len(args))
+}
+t, err := parseDateTime(args[0])
+if err != nil {
+return nil, err
+}
+return float64(t.Day()), nil
+
+case "hour":
+// Get hour from date
+if len(args) != 1 {
+return nil, fmt.Errorf("hour() requires exactly 1 argument, got %d", len(args))
+}
+t, err := parseDateTime(args[0])
+if err != nil {
+return nil, err
+}
+return float64(t.Hour()), nil
+
+case "minute":
+// Get minute from date
+if len(args) != 1 {
+return nil, fmt.Errorf("minute() requires exactly 1 argument, got %d", len(args))
+}
+t, err := parseDateTime(args[0])
+if err != nil {
+return nil, err
+}
+return float64(t.Minute()), nil
+
+case "isNull":
+// Check if value is null
+if len(args) != 1 {
+return nil, fmt.Errorf("isNull() requires exactly 1 argument, got %d", len(args))
+}
+return isNull(args[0]), nil
+
+case "coalesce":
+// Return first non-null value
+if len(args) < 1 {
+return nil, fmt.Errorf("coalesce() requires at least 1 argument")
+}
+for _, arg := range args {
+if !isNull(arg) {
+return arg, nil
+}
+}
+return nil, nil
+
+default:
+return nil, fmt.Errorf("unknown date/time function: %s", name)
+}
 }
