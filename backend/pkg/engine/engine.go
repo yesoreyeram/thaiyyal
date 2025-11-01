@@ -480,12 +480,15 @@ func (e *Engine) GetContextVariable(name string) (interface{}, bool) {
 	return e.state.GetContextVariable(name)
 }
 
-// SetContextVariable sets a context variable with validation
+// SetContextVariable sets a context variable
+// Note: Validation failures are silently ignored to maintain backward compatibility.
+// Context variables are typically set during workflow initialization.
 func (e *Engine) SetContextVariable(name string, value interface{}) {
-	// Validate value against resource limits
+	// Validate value against resource limits (best effort)
 	if err := types.ValidateValue(value, e.config); err != nil {
-		// Log error but don't fail - context variables are set during initialization
-		// In a production system, this would use proper logging
+		// TODO: Add structured logging here in production
+		// For now, validation errors are silently ignored to avoid breaking
+		// workflow initialization with large context values
 		return
 	}
 	e.state.SetContextVariable(name, value)
@@ -496,12 +499,15 @@ func (e *Engine) GetContextConstant(name string) (interface{}, bool) {
 	return e.state.GetContextConstant(name)
 }
 
-// SetContextConstant sets a context constant with validation
+// SetContextConstant sets a context constant
+// Note: Validation failures are silently ignored to maintain backward compatibility.
+// Context constants are typically set during workflow initialization.
 func (e *Engine) SetContextConstant(name string, value interface{}) {
-	// Validate value against resource limits
+	// Validate value against resource limits (best effort)
 	if err := types.ValidateValue(value, e.config); err != nil {
-		// Log error but don't fail - context constants are set during initialization
-		// In a production system, this would use proper logging
+		// TODO: Add structured logging here in production
+		// For now, validation errors are silently ignored to avoid breaking
+		// workflow initialization with large context values
 		return
 	}
 	e.state.SetContextConstant(name, value)
@@ -521,12 +527,16 @@ result, ok := e.results[nodeID]
 return result, ok
 }
 
-// SetNodeResult stores a node's execution result with validation
+// SetNodeResult stores a node's execution result
+// Note: Validation is best-effort to avoid breaking valid executions.
+// Results that exceed limits may still be stored but could cause issues downstream.
 func (e *Engine) SetNodeResult(nodeID string, result interface{}) {
-	// Validate result against resource limits (best effort, don't fail execution)
+	// Validate result against resource limits (best effort)
+	// We don't fail here to avoid breaking workflows that produce large intermediate results
 	if err := types.ValidateValue(result, e.config); err != nil {
-		// In production, this would be logged
-		// For now, we allow the result to be stored but it might cause issues downstream
+		// TODO: Add structured logging here in production
+		// For now, the validation error is silently ignored to maintain backward compatibility
+		// and avoid breaking workflows that may produce large intermediate results
 	}
 
 	e.resultsMu.Lock()

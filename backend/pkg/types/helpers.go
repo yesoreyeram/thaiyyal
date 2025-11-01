@@ -134,33 +134,38 @@ func ValidateValue(value interface{}, config Config) error {
 }
 
 // getValueDepth calculates the nesting depth of a value
+// with protection against stack overflow
 func getValueDepth(value interface{}) int {
-	if value == nil {
-		return 0
+	return getValueDepthRecursive(value, 0, 1000) // max 1000 depth for safety
+}
+
+func getValueDepthRecursive(value interface{}, currentDepth, maxDepth int) int {
+	if value == nil || currentDepth >= maxDepth {
+		return currentDepth
 	}
 
 	v := reflect.ValueOf(value)
 	switch v.Kind() {
 	case reflect.Map:
-		maxDepth := 0
+		maxChildDepth := currentDepth
 		iter := v.MapRange()
 		for iter.Next() {
-			depth := getValueDepth(iter.Value().Interface())
-			if depth > maxDepth {
-				maxDepth = depth
+			depth := getValueDepthRecursive(iter.Value().Interface(), currentDepth+1, maxDepth)
+			if depth > maxChildDepth {
+				maxChildDepth = depth
 			}
 		}
-		return 1 + maxDepth
+		return maxChildDepth
 	case reflect.Slice, reflect.Array:
-		maxDepth := 0
+		maxChildDepth := currentDepth
 		for i := 0; i < v.Len(); i++ {
-			depth := getValueDepth(v.Index(i).Interface())
-			if depth > maxDepth {
-				maxDepth = depth
+			depth := getValueDepthRecursive(v.Index(i).Interface(), currentDepth+1, maxDepth)
+			if depth > maxChildDepth {
+				maxChildDepth = depth
 			}
 		}
-		return 1 + maxDepth
+		return maxChildDepth
 	default:
-		return 1
+		return currentDepth + 1
 	}
 }
