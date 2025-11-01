@@ -27,7 +27,9 @@ Thaiyyal (Tamil: தையல், meaning "stitch" or "sew") represents the core
 ### Key Highlights
 
 - **🎨 Visual Workflow Builder**: Intuitive drag-and-drop interface powered by React Flow
-- **⚡ 23 Node Types**: Comprehensive set of nodes for data processing, control flow, and error handling
+- **⚡ 25+ Node Types**: Comprehensive set of nodes for data processing, control flow, and error handling
+- **🔌 Extensible Backend**: Add custom node types with your own executors
+- **🛡️ Secure by Default**: Comprehensive protection limits prevent resource exhaustion
 - **🔄 Real-time JSON Generation**: See your workflow structure as you build
 - **🚀 High Performance**: Go-based execution engine for fast workflow processing
 - **💾 Local Storage**: Browser-based workflow persistence
@@ -120,7 +122,9 @@ Thaiyyal (Tamil: தையல், meaning "stitch" or "sew") represents the core
 - **🧠 Type Inference**: Automatically determines node types from data
 - **🔄 Cycle Detection**: Prevents infinite loops
 - **⚡ High Performance**: Written in Go for speed and efficiency
-- **🧪 Comprehensive Testing**: 142+ test cases covering all functionality
+- **🔌 Extensible**: Add custom node types with your own executors
+- **🛡️ Protection Limits**: Prevents resource exhaustion and DoS attacks
+- **🧪 Comprehensive Testing**: 190+ test cases covering all functionality
 
 ## Quick Start
 
@@ -243,7 +247,10 @@ Advanced workflow builder showing:
 ### Backend Documentation
 
 - **[backend/README.md](backend/README.md)** - Backend workflow engine documentation
+- **[backend/CUSTOM_NODES.md](backend/CUSTOM_NODES.md)** - Custom node executor guide (NEW!)
+- **[backend/PROTECTION.md](backend/PROTECTION.md)** - Security and protection limits
 - **[backend/INTEGRATION.md](backend/INTEGRATION.md)** - Frontend-backend integration guide
+- **[backend/PARALLEL_EXECUTION.md](backend/PARALLEL_EXECUTION.md)** - Parallel execution guide
 - **[backend/REFACTORING_SUMMARY.md](backend/REFACTORING_SUMMARY.md)** - Backend refactoring details
 
 ### Frontend Documentation
