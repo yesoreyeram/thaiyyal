@@ -194,21 +194,23 @@ type Config struct {
 	MaxIterations        int           // Default max iterations for loops (if not specified)
 
 	// HTTP node configuration
-	HTTPTimeout        time.Duration // Timeout for HTTP requests
-	MaxHTTPRedirects   int           // Maximum number of HTTP redirects to follow
-	MaxResponseSize    int64         // Maximum size of HTTP response body (bytes)
-	AllowedURLPatterns []string      // Whitelist of allowed URL patterns (if empty, all external URLs allowed)
-	BlockInternalIPs   bool          // Block requests to internal/private IP addresses
+	HTTPTimeout           time.Duration // Timeout for HTTP requests
+	MaxHTTPRedirects      int           // Maximum number of HTTP redirects to follow
+	MaxResponseSize       int64         // Maximum size of HTTP response body (bytes)
+	MaxHTTPCallsPerExec   int           // Maximum HTTP calls allowed per workflow execution (0 = unlimited)
+	AllowedURLPatterns    []string      // Whitelist of allowed URL patterns (if empty, all external URLs allowed)
+	BlockInternalIPs      bool          // Block requests to internal/private IP addresses
 
 	// Cache configuration
 	DefaultCacheTTL time.Duration // Default TTL for cache entries if not specified
 	MaxCacheSize    int           // Maximum number of cache entries (LRU eviction)
 
 	// Resource limits
-	MaxInputSize   int // Maximum size of input data (bytes)
-	MaxPayloadSize int // Maximum size of workflow payload (bytes)
-	MaxNodes       int // Maximum number of nodes in workflow
-	MaxEdges       int // Maximum number of edges in workflow
+	MaxInputSize      int // Maximum size of input data (bytes)
+	MaxPayloadSize    int // Maximum size of workflow payload (bytes)
+	MaxNodes          int // Maximum number of nodes in workflow
+	MaxEdges          int // Maximum number of edges in workflow
+	MaxNodeExecutions int // Maximum total node executions (including loop iterations, 0 = unlimited)
 
 	// Retry configuration
 	DefaultMaxAttempts int           // Default max retry attempts

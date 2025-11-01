@@ -30,18 +30,23 @@ import (
 //   - State Pattern: Manages workflow state (variables, accumulator, counter, cache)
 //   - Template Method: Execute() defines the workflow execution algorithm
 type Engine struct {
-graph      *graph.Graph
-state      *state.Manager
-registry   *executor.Registry
-config     types.Config
-results    map[string]interface{}
-resultsMu  sync.RWMutex
-executionID string
-workflowID  string
+	graph      *graph.Graph
+	state      *state.Manager
+	registry   *executor.Registry
+	config     types.Config
+	results    map[string]interface{}
+	resultsMu  sync.RWMutex
+	executionID string
+	workflowID  string
 
-// Node storage for lookups
-nodes []types.Node
-edges []types.Edge
+	// Runtime protection counters
+	nodeExecutionCount int
+	httpCallCount      int
+	countersMu         sync.RWMutex
+
+	// Node storage for lookups
+	nodes []types.Node
+	edges []types.Edge
 }
 
 // ============================================================================
@@ -250,13 +255,18 @@ return result, nil
 //   - interface{}: Result of node execution (type depends on node)
 //   - error: If node execution fails
 func (e *Engine) executeNode(ctx context.Context, node types.Node) (interface{}, error) {
-// Interpolate templates in node data before execution (except for context nodes)
-if node.Type != types.NodeTypeContextVariable && node.Type != types.NodeTypeContextConstant {
-e.interpolateNodeData(&node.Data)
-}
+	// Check and increment node execution counter
+	if err := e.IncrementNodeExecution(); err != nil {
+		return nil, err
+	}
 
-// Dispatch to appropriate executor via registry
-return e.registry.Execute(e, node)
+	// Interpolate templates in node data before execution (except for context nodes)
+	if node.Type != types.NodeTypeContextVariable && node.Type != types.NodeTypeContextConstant {
+		e.interpolateNodeData(&node.Data)
+	}
+
+	// Dispatch to appropriate executor via registry
+	return e.registry.Execute(e, node)
 }
 
 // ============================================================================
@@ -515,7 +525,53 @@ return e.state.GetAllContext()
 
 // GetConfig returns the engine configuration
 func (e *Engine) GetConfig() types.Config {
-return e.config
+	return e.config
+}
+
+// IncrementNodeExecution increments the node execution counter and checks limits.
+// Returns an error if the limit is exceeded.
+func (e *Engine) IncrementNodeExecution() error {
+	e.countersMu.Lock()
+	defer e.countersMu.Unlock()
+	
+	e.nodeExecutionCount++
+	
+	// Check if limit is configured and enforced (0 means unlimited)
+	if e.config.MaxNodeExecutions > 0 && e.nodeExecutionCount > e.config.MaxNodeExecutions {
+		return fmt.Errorf("maximum node executions exceeded: %d (limit: %d)", e.nodeExecutionCount, e.config.MaxNodeExecutions)
+	}
+	
+	return nil
+}
+
+// IncrementHTTPCall increments the HTTP call counter and checks limits.
+// Returns an error if the limit is exceeded.
+func (e *Engine) IncrementHTTPCall() error {
+	e.countersMu.Lock()
+	defer e.countersMu.Unlock()
+	
+	e.httpCallCount++
+	
+	// Check if limit is configured and enforced (0 means unlimited)
+	if e.config.MaxHTTPCallsPerExec > 0 && e.httpCallCount > e.config.MaxHTTPCallsPerExec {
+		return fmt.Errorf("maximum HTTP calls per execution exceeded: %d (limit: %d)", e.httpCallCount, e.config.MaxHTTPCallsPerExec)
+	}
+	
+	return nil
+}
+
+// GetNodeExecutionCount returns the current node execution count
+func (e *Engine) GetNodeExecutionCount() int {
+	e.countersMu.RLock()
+	defer e.countersMu.RUnlock()
+	return e.nodeExecutionCount
+}
+
+// GetHTTPCallCount returns the current HTTP call count
+func (e *Engine) GetHTTPCallCount() int {
+	e.countersMu.RLock()
+	defer e.countersMu.RUnlock()
+	return e.httpCallCount
 }
 
 // ============================================================================

@@ -316,6 +316,34 @@ func (m *mockExecutionContext) GetNodeResult(nodeID string) (interface{}, bool) 
 func (m *mockExecutionContext) SetNodeResult(nodeID string, result interface{}) {
 }
 
+func (m *mockExecutionContext) GetAllNodeResults() map[string]interface{} {
+	return make(map[string]interface{})
+}
+
+func (m *mockExecutionContext) GetVariables() map[string]interface{} {
+	return make(map[string]interface{})
+}
+
+func (m *mockExecutionContext) GetContextVariables() map[string]interface{} {
+	return make(map[string]interface{})
+}
+
 func (m *mockExecutionContext) GetConfig() types.Config {
 	return m.config
+}
+
+func (m *mockExecutionContext) IncrementNodeExecution() error {
+	return nil
+}
+
+func (m *mockExecutionContext) IncrementHTTPCall() error {
+	return nil
+}
+
+func (m *mockExecutionContext) GetNodeExecutionCount() int {
+	return 0
+}
+
+func (m *mockExecutionContext) GetHTTPCallCount() int {
+	return 0
 }

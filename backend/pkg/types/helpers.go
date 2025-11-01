@@ -28,21 +28,23 @@ func DefaultConfig() Config {
 		MaxIterations:        1000,
 
 		// HTTP configuration
-		HTTPTimeout:        30 * time.Second,
-		MaxHTTPRedirects:   10,
-		MaxResponseSize:    10 * 1024 * 1024, // 10MB
-		AllowedURLPatterns: []string{},       // Empty = allow all external URLs
-		BlockInternalIPs:   true,             // Block internal IPs by default
+		HTTPTimeout:         30 * time.Second,
+		MaxHTTPRedirects:    10,
+		MaxResponseSize:     10 * 1024 * 1024, // 10MB
+		MaxHTTPCallsPerExec: 100,              // Limit to 100 HTTP calls per execution
+		AllowedURLPatterns:  []string{},       // Empty = allow all external URLs
+		BlockInternalIPs:    true,             // Block internal IPs by default
 
 		// Cache configuration
 		DefaultCacheTTL: 1 * time.Hour,
 		MaxCacheSize:    1000,
 
 		// Resource limits
-		MaxInputSize:   10 * 1024 * 1024, // 10MB
-		MaxPayloadSize: 1 * 1024 * 1024,  // 1MB
-		MaxNodes:       1000,
-		MaxEdges:       10000,
+		MaxInputSize:      10 * 1024 * 1024, // 10MB
+		MaxPayloadSize:    1 * 1024 * 1024,  // 1MB
+		MaxNodes:          1000,
+		MaxEdges:          10000,
+		MaxNodeExecutions: 10000, // Limit total node executions including loop iterations
 
 		// Retry configuration
 		DefaultMaxAttempts: 3,
@@ -58,6 +60,8 @@ func ValidationLimits() Config {
 	c.MaxIterations = 100
 	c.MaxNodes = 100
 	c.MaxEdges = 1000
+	c.MaxHTTPCallsPerExec = 10
+	c.MaxNodeExecutions = 1000
 	return c
 }
 
@@ -69,5 +73,7 @@ func DevelopmentConfig() Config {
 	c.MaxIterations = 10000
 	c.MaxNodes = 10000
 	c.MaxEdges = 100000
+	c.MaxHTTPCallsPerExec = 1000
+	c.MaxNodeExecutions = 100000
 	return c
 }
