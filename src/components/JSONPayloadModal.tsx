@@ -5,9 +5,10 @@ interface JSONPayloadModalProps {
   isOpen: boolean;
   onClose: () => void;
   payload: object;
+  workflowTitle?: string;
 }
 
-export function JSONPayloadModal({ isOpen, onClose, payload }: JSONPayloadModalProps) {
+export function JSONPayloadModal({ isOpen, onClose, payload, workflowTitle = "workflow" }: JSONPayloadModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -50,7 +51,11 @@ export function JSONPayloadModal({ isOpen, onClose, payload }: JSONPayloadModalP
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'workflow.json';
+    
+    // Use workflow title for filename, sanitize it
+    const sanitizedTitle = workflowTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    link.download = `${sanitizedTitle}_workflow.json`;
+    
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

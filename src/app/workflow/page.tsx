@@ -674,6 +674,7 @@ function Canvas() {
           isOpen={showPayload}
           onClose={() => setShowPayload(false)}
           payload={payload}
+          workflowTitle={workflowTitle}
         />
       </div>
 
