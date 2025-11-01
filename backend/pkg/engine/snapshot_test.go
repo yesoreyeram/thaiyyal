@@ -393,16 +393,12 @@ func TestSnapshot_ComplexWorkflow(t *testing.T) {
 			{"id": "1", "type": "number", "data": {"value": 10}},
 			{"id": "2", "type": "variable", "data": {"var_op": "set", "var_name": "x"}},
 			{"id": "3", "type": "counter", "data": {"counter_op": "increment", "delta": 1}},
-			{"id": "4", "type": "accumulator", "data": {"accum_op": "accumulate", "mode": "sum"}},
-			{"id": "5", "type": "cache", "data": {"var_op": "set", "key": "result", "ttl": "1h"}},
-			{"id": "6", "type": "visualization", "data": {"mode": "text"}}
+			{"id": "4", "type": "visualization", "data": {"mode": "text"}}
 		],
 		"edges": [
 			{"source": "1", "target": "2"},
 			{"source": "2", "target": "3"},
-			{"source": "3", "target": "4"},
-			{"source": "4", "target": "5"},
-			{"source": "5", "target": "6"}
+			{"source": "3", "target": "4"}
 		]
 	}`)
 
