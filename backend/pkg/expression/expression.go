@@ -4,6 +4,7 @@ package expression
 
 import (
 "fmt"
+"math"
 "regexp"
 "strconv"
 "strings"
@@ -49,8 +50,8 @@ if result, ok := evaluateBooleanExpression(expression, input, ctx); ok {
 return result, nil
 }
 
-// Check for NOT operator
-if strings.HasPrefix(expression, "!") {
+// Check for NOT operator (but not != which is a comparison operator)
+if strings.HasPrefix(expression, "!") && !strings.HasPrefix(expression, "!=") {
 result, err := Evaluate(strings.TrimSpace(expression[1:]), input, ctx)
 if err != nil {
 return false, err
@@ -66,6 +67,14 @@ return evaluateContains(expression, input, ctx)
 // Check for comparison operators with references
 if result, ok := evaluateComparison(expression, input, ctx); ok {
 return result, nil
+}
+
+// Try to resolve as a direct boolean value reference
+if val, err := resolveValue(expression, input, ctx); err == nil {
+// If it's a boolean, return it directly
+if boolVal, ok := val.(bool); ok {
+return boolVal, nil
+}
 }
 
 // Fallback to simple numeric comparison (backward compatible)
@@ -207,6 +216,14 @@ if ref == "false" {
 return false, nil
 }
 
+// Check if it contains arithmetic operators or function calls - try arithmetic evaluation
+if containsArithmetic(ref) {
+if val, err := EvaluateArithmetic(ref, ctx); err == nil {
+return val, nil
+}
+// If arithmetic evaluation fails, continue with reference resolution
+}
+
 // Check for node reference: node.id.output or node.id.value
 if strings.HasPrefix(ref, "node.") {
 return resolveNodeReference(ref, ctx)
@@ -236,6 +253,29 @@ return input, nil
 }
 
 return nil, fmt.Errorf("unknown reference: %s", ref)
+}
+
+// containsArithmetic checks if an expression contains arithmetic operators or functions
+// containsArithmetic checks if an expression contains arithmetic operators or functions
+func containsArithmetic(expr string) bool {
+// Check for math functions first
+mathFuncs := []string{"pow(", "sqrt(", "abs(", "floor(", "ceil(", "round(", "min(", "max("}
+for _, fn := range mathFuncs {
+if strings.Contains(expr, fn) {
+return true
+}
+}
+
+// Don't treat simple variable/node references as arithmetic
+// Only return true if we find actual arithmetic operators used as operators (not comparison)
+hasArithOp := false
+
+// Look for +, *, /, % which are always arithmetic
+if strings.ContainsAny(expr, "*/%+") {
+hasArithOp = true
+}
+
+return hasArithOp
 }
 
 // resolveNodeReference resolves node.id.field references
@@ -499,4 +539,402 @@ return numVal != threshold
 default:
 return false
 }
+}
+
+// ============================================================================
+// Arithmetic Expression Evaluation
+// ============================================================================
+
+// EvaluateArithmetic evaluates an arithmetic expression and returns a numeric result
+// Supports:
+//   - Basic operations: +, -, *, /, %
+//   - Parentheses for grouping: (a + b) * c
+//   - Math functions: pow, sqrt, abs, floor, ceil, round, min, max
+//   - Variable references: variables.name
+//   - Node references: node.id.value
+func EvaluateArithmetic(expression string, ctx *Context) (float64, error) {
+if ctx == nil {
+ctx = &Context{
+NodeResults: make(map[string]interface{}),
+Variables:   make(map[string]interface{}),
+ContextVars: make(map[string]interface{}),
+}
+}
+
+expression = strings.TrimSpace(expression)
+if expression == "" {
+return 0, fmt.Errorf("empty expression")
+}
+
+// Parse and evaluate the expression
+parser := &arithmeticParser{
+expression: expression,
+pos:        0,
+ctx:        ctx,
+}
+
+result, err := parser.parseExpression()
+if err != nil {
+return 0, err
+}
+
+// Make sure we consumed the entire expression
+parser.skipWhitespace()
+if parser.pos < len(parser.expression) {
+return 0, fmt.Errorf("unexpected characters at position %d: %s", parser.pos, parser.expression[parser.pos:])
+}
+
+return result, nil
+}
+
+// arithmeticParser is a recursive descent parser for arithmetic expressions
+type arithmeticParser struct {
+expression string
+pos        int
+ctx        *Context
+}
+
+// parseExpression parses addition and subtraction (lowest precedence)
+func (p *arithmeticParser) parseExpression() (float64, error) {
+left, err := p.parseTerm()
+if err != nil {
+return 0, err
+}
+
+for {
+p.skipWhitespace()
+if p.pos >= len(p.expression) {
+break
+}
+
+op := p.peek()
+if op != '+' && op != '-' {
+break
+}
+
+p.pos++
+right, err := p.parseTerm()
+if err != nil {
+return 0, err
+}
+
+if op == '+' {
+left = left + right
+} else {
+left = left - right
+}
+}
+
+return left, nil
+}
+
+// parseTerm parses multiplication, division, and modulo (higher precedence)
+func (p *arithmeticParser) parseTerm() (float64, error) {
+left, err := p.parseFactor()
+if err != nil {
+return 0, err
+}
+
+for {
+p.skipWhitespace()
+if p.pos >= len(p.expression) {
+break
+}
+
+op := p.peek()
+if op != '*' && op != '/' && op != '%' {
+break
+}
+
+p.pos++
+right, err := p.parseFactor()
+if err != nil {
+return 0, err
+}
+
+switch op {
+case '*':
+left = left * right
+case '/':
+if right == 0 {
+return 0, fmt.Errorf("division by zero")
+}
+left = left / right
+case '%':
+if right == 0 {
+return 0, fmt.Errorf("modulo by zero")
+}
+left = float64(int(left) % int(right))
+}
+}
+
+return left, nil
+}
+
+// parseFactor parses unary operators, numbers, variables, function calls, and parentheses
+func (p *arithmeticParser) parseFactor() (float64, error) {
+p.skipWhitespace()
+
+if p.pos >= len(p.expression) {
+return 0, fmt.Errorf("unexpected end of expression")
+}
+
+// Handle unary operators
+if p.peek() == '+' {
+p.pos++
+return p.parseFactor()
+}
+if p.peek() == '-' {
+p.pos++
+val, err := p.parseFactor()
+if err != nil {
+return 0, err
+}
+return -val, nil
+}
+
+// Handle parentheses
+if p.peek() == '(' {
+p.pos++
+val, err := p.parseExpression()
+if err != nil {
+return 0, err
+}
+p.skipWhitespace()
+if p.pos >= len(p.expression) || p.peek() != ')' {
+return 0, fmt.Errorf("unmatched parentheses at position %d", p.pos)
+}
+p.pos++
+return val, nil
+}
+
+// Handle numbers
+if p.isDigit(p.peek()) {
+return p.parseNumber()
+}
+
+// Handle identifiers (variables, node references, function calls)
+if p.isLetter(p.peek()) {
+return p.parseIdentifier()
+}
+
+return 0, fmt.Errorf("unexpected character '%c' at position %d", p.peek(), p.pos)
+}
+
+// parseNumber parses a numeric literal
+func (p *arithmeticParser) parseNumber() (float64, error) {
+start := p.pos
+hasDecimal := false
+
+for p.pos < len(p.expression) {
+ch := p.expression[p.pos]
+if ch == '.' {
+if hasDecimal {
+break
+}
+hasDecimal = true
+p.pos++
+} else if p.isDigit(ch) {
+p.pos++
+} else {
+break
+}
+}
+
+numStr := p.expression[start:p.pos]
+val, err := strconv.ParseFloat(numStr, 64)
+if err != nil {
+return 0, fmt.Errorf("invalid number '%s' at position %d", numStr, start)
+}
+
+return val, nil
+}
+
+// parseIdentifier parses an identifier (variable, node reference, or function call)
+func (p *arithmeticParser) parseIdentifier() (float64, error) {
+start := p.pos
+
+// Read identifier
+for p.pos < len(p.expression) && (p.isLetter(p.expression[p.pos]) || p.isDigit(p.expression[p.pos]) || p.expression[p.pos] == '_') {
+p.pos++
+}
+
+ident := p.expression[start:p.pos]
+
+// Check if it's a function call
+p.skipWhitespace()
+if p.pos < len(p.expression) && p.peek() == '(' {
+return p.parseFunction(ident)
+}
+
+// Check if it's a dotted path (variables.x or node.id.field)
+if p.pos < len(p.expression) && p.peek() == '.' {
+// Read the full path
+path := ident
+for p.pos < len(p.expression) && p.peek() == '.' {
+p.pos++ // skip '.'
+start := p.pos
+for p.pos < len(p.expression) && (p.isLetter(p.expression[p.pos]) || p.isDigit(p.expression[p.pos]) || p.expression[p.pos] == '_' || p.expression[p.pos] == '-') {
+p.pos++
+}
+if p.pos == start {
+return 0, fmt.Errorf("expected identifier after '.' at position %d", p.pos)
+}
+path += "." + p.expression[start:p.pos]
+}
+
+// Resolve the path
+val, err := resolveValue(path, nil, p.ctx)
+if err != nil {
+return 0, err
+}
+
+// Convert to float64
+num, ok := toFloat64(val)
+if !ok {
+return 0, fmt.Errorf("value '%v' at '%s' cannot be converted to number", val, path)
+}
+
+return num, nil
+}
+
+return 0, fmt.Errorf("unknown identifier '%s' at position %d", ident, start)
+}
+
+// parseFunction parses a function call
+func (p *arithmeticParser) parseFunction(name string) (float64, error) {
+p.pos++ // skip '('
+
+var args []float64
+
+p.skipWhitespace()
+if p.peek() == ')' {
+p.pos++
+return p.callFunction(name, args)
+}
+
+for {
+arg, err := p.parseExpression()
+if err != nil {
+return 0, err
+}
+args = append(args, arg)
+
+p.skipWhitespace()
+if p.pos >= len(p.expression) {
+return 0, fmt.Errorf("unmatched parentheses in function call")
+}
+
+if p.peek() == ')' {
+p.pos++
+break
+}
+
+if p.peek() == ',' {
+p.pos++
+p.skipWhitespace()
+continue
+}
+
+return 0, fmt.Errorf("expected ',' or ')' at position %d", p.pos)
+}
+
+return p.callFunction(name, args)
+}
+
+// callFunction executes a math function
+func (p *arithmeticParser) callFunction(name string, args []float64) (float64, error) {
+
+switch name {
+case "pow":
+if len(args) != 2 {
+return 0, fmt.Errorf("pow() requires exactly 2 arguments, got %d", len(args))
+}
+return math.Pow(args[0], args[1]), nil
+
+case "sqrt":
+if len(args) != 1 {
+return 0, fmt.Errorf("sqrt() requires exactly 1 argument, got %d", len(args))
+}
+if args[0] < 0 {
+return 0, fmt.Errorf("sqrt() of negative number")
+}
+return math.Sqrt(args[0]), nil
+
+case "abs":
+if len(args) != 1 {
+return 0, fmt.Errorf("abs() requires exactly 1 argument, got %d", len(args))
+}
+return math.Abs(args[0]), nil
+
+case "floor":
+if len(args) != 1 {
+return 0, fmt.Errorf("floor() requires exactly 1 argument, got %d", len(args))
+}
+return math.Floor(args[0]), nil
+
+case "ceil":
+if len(args) != 1 {
+return 0, fmt.Errorf("ceil() requires exactly 1 argument, got %d", len(args))
+}
+return math.Ceil(args[0]), nil
+
+case "round":
+if len(args) != 1 {
+return 0, fmt.Errorf("round() requires exactly 1 argument, got %d", len(args))
+}
+return math.Round(args[0]), nil
+
+case "min":
+if len(args) < 2 {
+return 0, fmt.Errorf("min() requires at least 2 arguments, got %d", len(args))
+}
+min := args[0]
+for _, arg := range args[1:] {
+if arg < min {
+min = arg
+}
+}
+return min, nil
+
+case "max":
+if len(args) < 2 {
+return 0, fmt.Errorf("max() requires at least 2 arguments, got %d", len(args))
+}
+max := args[0]
+for _, arg := range args[1:] {
+if arg > max {
+max = arg
+}
+}
+return max, nil
+
+default:
+return 0, fmt.Errorf("unknown function '%s'", name)
+}
+}
+
+// skipWhitespace skips whitespace characters
+func (p *arithmeticParser) skipWhitespace() {
+for p.pos < len(p.expression) && (p.expression[p.pos] == ' ' || p.expression[p.pos] == '\t' || p.expression[p.pos] == '\n' || p.expression[p.pos] == '\r') {
+p.pos++
+}
+}
+
+// peek returns the current character without advancing
+func (p *arithmeticParser) peek() byte {
+if p.pos >= len(p.expression) {
+return 0
+}
+return p.expression[p.pos]
+}
+
+// isDigit checks if a character is a digit
+func (p *arithmeticParser) isDigit(ch byte) bool {
+return ch >= '0' && ch <= '9'
+}
+
+// isLetter checks if a character is a letter
+func (p *arithmeticParser) isLetter(ch byte) bool {
+return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')
 }
