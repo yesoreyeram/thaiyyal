@@ -1,8 +1,8 @@
 package executor
 
 import (
-	"context"
 	"fmt"
+	"log/slog"
 	"math"
 
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/types"
@@ -12,13 +12,15 @@ import (
 type ZipExecutor struct{}
 
 // Execute combines arrays element-wise into tuples
-func (e *ZipExecutor) Execute(ctx context.Context, node types.Node, inputs map[string]interface{}, nodeResults map[string]interface{}, variables map[string]interface{}) (interface{}, error) {
+func (e *ZipExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
 	// Get arrays to zip (can be from inputs or specified as array references)
 	var arrays [][]interface{}
 	
+	inputs := ctx.GetNodeInputs(node.ID)
+	
 	// Check for direct input arrays
-	if in, ok := inputs["in"]; ok {
-		if arr, ok := in.([]interface{}); ok {
+	if len(inputs) > 0 {
+		if arr, ok := inputs[0].([]interface{}); ok {
 			arrays = append(arrays, arr)
 		}
 	}
@@ -86,19 +88,25 @@ func (e *ZipExecutor) Validate(node types.Node) error {
 type CompactExecutor struct{}
 
 // Execute removes null, undefined, and optionally empty values
-func (e *CompactExecutor) Execute(ctx context.Context, node types.Node, inputs map[string]interface{}, nodeResults map[string]interface{}, variables map[string]interface{}) (interface{}, error) {
-	// Get input array
-	input, ok := inputs["in"]
-	if !ok {
-		return nil, fmt.Errorf("compact node missing required input 'in'")
+func (e *CompactExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+	inputs := ctx.GetNodeInputs(node.ID)
+	if len(inputs) == 0 {
+		return nil, fmt.Errorf("compact node needs at least 1 input")
 	}
+
+	input := inputs[0]
 
 	// Check if input is an array
 	arr, ok := input.([]interface{})
 	if !ok {
+		slog.Warn("compact node received non-array input",
+			slog.String("node_id", node.ID),
+			slog.String("input_type", fmt.Sprintf("%T", input)),
+		)
 		return map[string]interface{}{
-			"error": "input is not an array",
-			"input": input,
+			"error":         "input is not an array",
+			"input":         input,
+			"original_type": fmt.Sprintf("%T", input),
 		}, nil
 	}
 

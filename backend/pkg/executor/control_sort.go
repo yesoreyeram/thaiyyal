@@ -1,8 +1,8 @@
 package executor
 
 import (
-	"context"
 	"fmt"
+	"log/slog"
 	"sort"
 	"strings"
 
@@ -13,19 +13,25 @@ import (
 type SortExecutor struct{}
 
 // Execute sorts the input array
-func (e *SortExecutor) Execute(ctx context.Context, node types.Node, inputs map[string]interface{}, nodeResults map[string]interface{}, variables map[string]interface{}) (interface{}, error) {
-	// Get input array
-	input, ok := inputs["in"]
-	if !ok {
-		return nil, fmt.Errorf("sort node missing required input 'in'")
+func (e *SortExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+	inputs := ctx.GetNodeInputs(node.ID)
+	if len(inputs) == 0 {
+		return nil, fmt.Errorf("sort node needs at least 1 input")
 	}
+
+	input := inputs[0]
 
 	// Check if input is an array
 	arr, ok := input.([]interface{})
 	if !ok {
+		slog.Warn("sort node received non-array input",
+			slog.String("node_id", node.ID),
+			slog.String("input_type", fmt.Sprintf("%T", input)),
+		)
 		return map[string]interface{}{
-			"error": "input is not an array",
-			"input": input,
+			"error":         "input is not an array",
+			"input":         input,
+			"original_type": fmt.Sprintf("%T", input),
 		}, nil
 	}
 

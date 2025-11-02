@@ -1,8 +1,8 @@
 package executor
 
 import (
-	"context"
 	"fmt"
+	"log/slog"
 	"math/rand"
 	"time"
 
@@ -13,19 +13,25 @@ import (
 type SampleExecutor struct{}
 
 // Execute gets a sample from the input array
-func (e *SampleExecutor) Execute(ctx context.Context, node types.Node, inputs map[string]interface{}, nodeResults map[string]interface{}, variables map[string]interface{}) (interface{}, error) {
-	// Get input array
-	input, ok := inputs["in"]
-	if !ok {
-		return nil, fmt.Errorf("sample node missing required input 'in'")
+func (e *SampleExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+	inputs := ctx.GetNodeInputs(node.ID)
+	if len(inputs) == 0 {
+		return nil, fmt.Errorf("sample node needs at least 1 input")
 	}
+
+	input := inputs[0]
 
 	// Check if input is an array
 	arr, ok := input.([]interface{})
 	if !ok {
+		slog.Warn("sample node received non-array input",
+			slog.String("node_id", node.ID),
+			slog.String("input_type", fmt.Sprintf("%T", input)),
+		)
 		return map[string]interface{}{
-			"error": "input is not an array",
-			"input": input,
+			"error":         "input is not an array",
+			"input":         input,
+			"original_type": fmt.Sprintf("%T", input),
 		}, nil
 	}
 

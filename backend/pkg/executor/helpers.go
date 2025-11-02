@@ -325,3 +325,8 @@ func stringPtr(s string) *string {
 func float64Ptr(f float64) *float64 {
 	return &f
 }
+
+// boolPtr returns a pointer to a bool value (for tests)
+func boolPtr(b bool) *bool {
+	return &b
+}

@@ -1,8 +1,8 @@
 package executor
 
 import (
-	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/expression"
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/types"
@@ -12,19 +12,25 @@ import (
 type PartitionExecutor struct{}
 
 // Execute splits the input array into passed and failed groups
-func (e *PartitionExecutor) Execute(ctx context.Context, node types.Node, inputs map[string]interface{}, nodeResults map[string]interface{}, variables map[string]interface{}) (interface{}, error) {
-	// Get input array
-	input, ok := inputs["in"]
-	if !ok {
-		return nil, fmt.Errorf("partition node missing required input 'in'")
+func (e *PartitionExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+	inputs := ctx.GetNodeInputs(node.ID)
+	if len(inputs) == 0 {
+		return nil, fmt.Errorf("partition node needs at least 1 input")
 	}
+
+	input := inputs[0]
 
 	// Check if input is an array
 	arr, ok := input.([]interface{})
 	if !ok {
+		slog.Warn("partition node received non-array input",
+			slog.String("node_id", node.ID),
+			slog.String("input_type", fmt.Sprintf("%T", input)),
+		)
 		return map[string]interface{}{
-			"error": "input is not an array",
-			"input": input,
+			"error":         "input is not an array",
+			"input":         input,
+			"original_type": fmt.Sprintf("%T", input),
 		}, nil
 	}
 
@@ -47,11 +53,11 @@ func (e *PartitionExecutor) Execute(ctx context.Context, node types.Node, inputs
 		// Create context with item and index variables
 		itemCtx := &expression.Context{
 			Variables:   make(map[string]interface{}),
-			ContextVars: map[string]interface{}{},
-			NodeResults: nodeResults,
+			ContextVars: ctx.GetContextVariables(),
+			NodeResults: ctx.GetAllNodeResults(),
 		}
 		// Copy existing variables
-		for k, v := range variables {
+		for k, v := range ctx.GetVariables() {
 			itemCtx.Variables[k] = v
 		}
 		itemCtx.Variables["item"] = item

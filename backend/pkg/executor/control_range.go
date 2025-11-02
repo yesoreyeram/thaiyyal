@@ -1,7 +1,6 @@
 package executor
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/types"
@@ -11,7 +10,7 @@ import (
 type RangeExecutor struct{}
 
 // Execute generates a range of numbers
-func (e *RangeExecutor) Execute(ctx context.Context, node types.Node, inputs map[string]interface{}, nodeResults map[string]interface{}, variables map[string]interface{}) (interface{}, error) {
+func (e *RangeExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
 	// Get start
 	start := 0.0
 	if startVal, ok := node.Data.Start.(float64); ok {
