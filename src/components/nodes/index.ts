@@ -26,6 +26,25 @@ export {
   TimeoutNode,
 } from './AllNodes';
 
+// Export from ArrayNodes
+export {
+  MapNode,
+  ReduceNode,
+  SliceNode,
+  SortNode,
+  FindNode,
+  FlatMapNode,
+  GroupByNode,
+  UniqueNode,
+  ChunkNode,
+  ReverseNode,
+  PartitionNode,
+  ZipNode,
+  SampleNode,
+  RangeNode,
+  TransposeNode,
+} from './ArrayNodes';
+
 // Export new UI components
 export { NodeTopBar } from './NodeTopBar';
 export { NodeInfoPopup } from './NodeInfoPopup';
