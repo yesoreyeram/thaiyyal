@@ -22,6 +22,14 @@ export function ConditionNode({ id, data, ...props }: NodeProps<ConditionNodeDat
     );
   };
 
+  const handleTitleChange = (newTitle: string) => {
+    setNodes((nds) =>
+      nds.map((n) =>
+        n.id === id ? { ...n, data: { ...n.data, label: newTitle } } : n
+      )
+    );
+  };
+
   const nodeInfo = getNodeInfo("conditionNode");
   const onShowOptions = (props as any).onShowOptions;
 
@@ -30,6 +38,7 @@ export function ConditionNode({ id, data, ...props }: NodeProps<ConditionNodeDat
       title={String(data?.label || "Condition")}
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
+      onTitleChange={handleTitleChange}
       className="bg-gradient-to-br from-amber-600 to-amber-700 text-white shadow-lg rounded-lg border border-amber-500 hover:border-amber-400 transition-all"
     >
       <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />

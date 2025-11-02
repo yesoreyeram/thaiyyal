@@ -91,6 +91,113 @@ return boolVal, nil
 return evaluateSimpleCondition(expression, input), nil
 }
 
+// EvaluateExpression evaluates an expression and returns its value (not just boolean)
+// This is used for transformations in Map and Reduce nodes.
+// Supports:
+//   - Arithmetic expressions: "item.age * 2", "accumulator + item.value"
+//   - Ternary operator: "condition ? value1 : value2"
+//   - String concatenation: "accumulator + item"
+//   - Field access: "item.field", "item.nested.field"
+//   - All value references (variables, node, context)
+func EvaluateExpression(expression string, input interface{}, ctx *Context) (interface{}, error) {
+	if ctx == nil {
+		ctx = &Context{
+			NodeResults: make(map[string]interface{}),
+			Variables:   make(map[string]interface{}),
+			ContextVars: make(map[string]interface{}),
+		}
+	}
+
+	expression = strings.TrimSpace(expression)
+
+	// Handle ternary operator: condition ? value1 : value2
+	if idx := strings.Index(expression, "?"); idx > 0 {
+		colonIdx := strings.Index(expression[idx:], ":")
+		if colonIdx > 0 {
+			colonIdx += idx
+			condition := strings.TrimSpace(expression[:idx])
+			trueVal := strings.TrimSpace(expression[idx+1 : colonIdx])
+			falseVal := strings.TrimSpace(expression[colonIdx+1:])
+
+			// Evaluate condition
+			condResult, err := Evaluate(condition, input, ctx)
+			if err != nil {
+				return nil, fmt.Errorf("ternary condition evaluation failed: %w", err)
+			}
+
+			// Return appropriate value
+			if condResult {
+				return EvaluateExpression(trueVal, input, ctx)
+			}
+			return EvaluateExpression(falseVal, input, ctx)
+		}
+	}
+
+	// Try arithmetic evaluation first (handles +, -, *, /, %, math functions)
+	if containsArithmeticOp(expression) {
+		result, err := EvaluateArithmetic(expression, ctx)
+		if err == nil {
+			return result, nil
+		}
+		// If arithmetic fails, continue to other evaluation methods
+	}
+
+	// Try to resolve as a value reference (variable, node, context, field access)
+	if val, err := resolveValue(expression, input, ctx); err == nil {
+		return val, nil
+	}
+
+	// Try as literal value
+	if val, ok := parseLiteral(expression); ok {
+		return val, nil
+	}
+
+	return nil, fmt.Errorf("could not evaluate expression: %s", expression)
+}
+
+// containsArithmeticOp checks if expression contains arithmetic operators
+func containsArithmeticOp(expr string) bool {
+	// Check for arithmetic operators
+	arithmeticOps := []string{"+", "-", "*", "/", "%", "(", "pow", "sqrt", "abs", "floor", "ceil", "round", "min", "max"}
+	for _, op := range arithmeticOps {
+		if strings.Contains(expr, op) {
+			return true
+		}
+	}
+	return false
+}
+
+// parseLiteral attempts to parse a string as a literal value
+func parseLiteral(s string) (interface{}, bool) {
+	s = strings.TrimSpace(s)
+
+	// String literal (quoted)
+	if (strings.HasPrefix(s, `"`) && strings.HasSuffix(s, `"`)) ||
+		(strings.HasPrefix(s, `'`) && strings.HasSuffix(s, `'`)) {
+		return s[1 : len(s)-1], true
+	}
+
+	// Boolean
+	if s == "true" {
+		return true, true
+	}
+	if s == "false" {
+		return false, true
+	}
+
+	// Null
+	if s == "null" {
+		return nil, true
+	}
+
+	// Number
+	if num, err := strconv.ParseFloat(s, 64); err == nil {
+		return num, true
+	}
+
+	return nil, false
+}
+
 // ExtractDependencies extracts node IDs referenced in an expression
 // This is used to build the dependency graph for topological sorting
 func ExtractDependencies(expression string) []string {
@@ -239,13 +346,41 @@ if strings.HasPrefix(ref, "node.") {
 return resolveNodeReference(ref, ctx)
 }
 
-// Check for variable reference: variables.name
+// Check for variable reference: variables.name or variables.name.field
 if strings.HasPrefix(ref, "variables.") {
-varName := ref[10:] // Remove "variables." prefix
-if val, ok := ctx.Variables[varName]; ok {
-return val, nil
-}
-return nil, fmt.Errorf("variable not found: %s", varName)
+	// Parse: variables.name.field or just variables.name
+	parts := strings.Split(ref, ".")
+	if len(parts) < 2 {
+		return nil, fmt.Errorf("invalid variable reference: %s", ref)
+	}
+	
+	varName := parts[1]
+	val, ok := ctx.Variables[varName]
+	if !ok {
+		return nil, fmt.Errorf("variable not found: %s", varName)
+	}
+	
+	// If just variables.name, return the whole value
+	if len(parts) == 2 {
+		return val, nil
+	}
+	
+	// Navigate to nested field (like node references)
+	current := val
+	for i := 2; i < len(parts); i++ {
+		field := parts[i]
+		if m, ok := current.(map[string]interface{}); ok {
+			if fieldVal, exists := m[field]; exists {
+				current = fieldVal
+			} else {
+				return nil, fmt.Errorf("field not found: %s in variables.%s", field, varName)
+			}
+		} else {
+			return nil, fmt.Errorf("cannot access field %s on non-object", field)
+		}
+	}
+	
+	return current, nil
 }
 
 // Check for context reference: context.name
@@ -262,7 +397,47 @@ if ref == "input" {
 return input, nil
 }
 
+// Check for item reference: item.field or just item
+// This is the preferred syntax for filter expressions (e.g., "item.age >= 18")
+if strings.HasPrefix(ref, "item.") || ref == "item" {
+	if ref == "item" {
+		return input, nil
+	}
+	// Navigate to nested field starting from input
+	fieldPath := ref[5:] // Remove "item." prefix
+	return resolveFieldPath(fieldPath, input)
+}
+
+// Check for direct field access on input object (e.g., "age", "name", "profile.verified")
+// This also works but "item.age" is more explicit and recommended
+if input != nil {
+	// Try to resolve as a field path on the input object
+	if val, err := resolveFieldPath(ref, input); err == nil {
+		return val, nil
+	}
+}
+
 return nil, fmt.Errorf("unknown reference: %s", ref)
+}
+
+// resolveFieldPath resolves a field path (e.g., "age" or "profile.verified") from an object
+func resolveFieldPath(path string, obj interface{}) (interface{}, error) {
+	parts := strings.Split(path, ".")
+	current := obj
+	
+	for _, field := range parts {
+		if m, ok := current.(map[string]interface{}); ok {
+			if val, exists := m[field]; exists {
+				current = val
+			} else {
+				return nil, fmt.Errorf("field not found: %s", field)
+			}
+		} else {
+			return nil, fmt.Errorf("cannot access field %s on non-object", field)
+		}
+	}
+	
+	return current, nil
 }
 
 // containsArithmetic checks if an expression contains arithmetic operators or functions

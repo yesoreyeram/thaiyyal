@@ -27,7 +27,7 @@ Thaiyyal (Tamil: தையல், meaning "stitch" or "sew") represents the core
 ### Key Highlights
 
 - **🎨 Visual Workflow Builder**: Intuitive drag-and-drop interface powered by React Flow
-- **⚡ 25+ Node Types**: Comprehensive set of nodes for data processing, control flow, and error handling
+- **⚡ 26+ Node Types**: Comprehensive set of nodes for data processing, control flow, and error handling
 - **🔌 Extensible Backend**: Add custom node types with your own executors
 - **🛡️ Secure by Default**: Comprehensive protection limits prevent resource exhaustion
 - **🔄 Real-time JSON Generation**: See your workflow structure as you build
@@ -63,12 +63,13 @@ Thaiyyal (Tamil: தையல், meaning "stitch" or "sew") represents the core
 </details>
 
 <details>
-<summary><b>🔀 Control Flow Nodes (4 types)</b></summary>
+<summary><b>🔀 Control Flow Nodes (5 types)</b></summary>
 
 - **Condition**: Conditional branching (>, <, ==, !=, >=, <=)
 - **For Each**: Iterate over array elements
 - **While Loop**: Loop while condition is true
 - **Switch**: Multi-way branching based on value
+- **Filter**: Filter JSON array elements by expression
 
 </details>
 
@@ -124,7 +125,7 @@ Thaiyyal (Tamil: தையல், meaning "stitch" or "sew") represents the core
 - **⚡ High Performance**: Written in Go for speed and efficiency
 - **🔌 Extensible**: Add custom node types with your own executors
 - **🛡️ Protection Limits**: Prevents resource exhaustion and DoS attacks
-- **🧪 Comprehensive Testing**: 190+ test cases covering all functionality
+- **🧪 Comprehensive Testing**: 416+ test cases covering all functionality
 
 ## Quick Start
 

@@ -306,3 +306,27 @@ func compareValues(a, b interface{}) bool {
 	}
 	return false
 }
+
+// ============================================================================
+// Test Helpers
+// ============================================================================
+
+// intPtr returns a pointer to an int value (for tests)
+func intPtr(i int) *int {
+	return &i
+}
+
+// stringPtr returns a pointer to a string value (for tests)
+func stringPtr(s string) *string {
+	return &s
+}
+
+// float64Ptr returns a pointer to a float64 value (for tests)
+func float64Ptr(f float64) *float64 {
+	return &f
+}
+
+// boolPtr returns a pointer to a bool value (for tests)
+func boolPtr(b bool) *bool {
+	return &b
+}

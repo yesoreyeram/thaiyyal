@@ -21,6 +21,7 @@ import {
   TextOperationNode,
   HttpNode,
   ConditionNode,
+  FilterNode,
   ForEachNode,
   WhileLoopNode,
   VariableNode,
@@ -306,6 +307,12 @@ const nodeCategories = [
         defaultData: { condition: ">0" },
       },
       {
+        type: "filterNode",
+        label: "Filter",
+        color: "bg-purple-600",
+        defaultData: { condition: "item.age > 0" },
+      },
+      {
         type: "forEachNode",
         label: "For Each",
         color: "bg-orange-600",
@@ -458,6 +465,7 @@ function Canvas() {
       textOpNode: withContextMenu(TextOperationNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
       httpNode: withContextMenu(HttpNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
       conditionNode: withContextMenu(ConditionNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
+      filterNode: withContextMenu(FilterNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
       forEachNode: withContextMenu(ForEachNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
       whileLoopNode: withContextMenu(WhileLoopNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
       variableNode: withContextMenu(VariableNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),

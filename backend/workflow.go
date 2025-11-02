@@ -11,7 +11,7 @@
 // # Architecture
 //
 // The workflow engine consists of:
-//   - Type system: 25 node types organized by category (I/O, operations, control flow, state, resilience)
+//   - Type system: 26 node types organized by category (I/O, operations, control flow, state, resilience)
 //   - Validation: Comprehensive validation of workflow structure and node data before execution
 //   - Execution engine: Parses JSON, infers types, sorts nodes, executes in order
 //   - State management: Variables, accumulators, counters, and cache scoped to workflow execution
@@ -20,7 +20,7 @@
 //
 // Basic I/O: Number, TextInput, Visualization
 // Operations: Operation, TextOperation, HTTP
-// Control Flow: Condition, ForEach, WhileLoop
+// Control Flow: Condition, ForEach, WhileLoop, Filter
 // State & Memory: Variable, Extract, Transform, Accumulator, Counter
 // Advanced Control: Switch, Parallel, Join, Split, Delay, Cache
 // Resilience: Retry, TryCatch, Timeout
@@ -152,6 +152,27 @@ const (
 	NodeTypeCondition = types.NodeTypeCondition
 	NodeTypeForEach   = types.NodeTypeForEach
 	NodeTypeWhileLoop = types.NodeTypeWhileLoop
+	NodeTypeFilter    = types.NodeTypeFilter
+	NodeTypeMap       = types.NodeTypeMap
+	NodeTypeReduce    = types.NodeTypeReduce
+)
+
+// Node type constants - Array Processing
+const (
+	NodeTypeSlice     = types.NodeTypeSlice
+	NodeTypeSort      = types.NodeTypeSort
+	NodeTypeFind      = types.NodeTypeFind
+	NodeTypeFlatMap   = types.NodeTypeFlatMap
+	NodeTypeGroupBy   = types.NodeTypeGroupBy
+	NodeTypeUnique    = types.NodeTypeUnique
+	NodeTypeChunk     = types.NodeTypeChunk
+	NodeTypeReverse   = types.NodeTypeReverse
+	NodeTypePartition = types.NodeTypePartition
+	NodeTypeZip       = types.NodeTypeZip
+	NodeTypeSample    = types.NodeTypeSample
+	NodeTypeRange     = types.NodeTypeRange
+	NodeTypeCompact   = types.NodeTypeCompact
+	NodeTypeTranspose = types.NodeTypeTranspose
 )
 
 // Node type constants - State & Memory

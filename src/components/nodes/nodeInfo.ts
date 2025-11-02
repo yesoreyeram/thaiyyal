@@ -42,6 +42,11 @@ export const nodeInfoMap: Record<string, NodeInfo> = {
     inputs: ["Value to compare"],
     outputs: ["True branch", "False branch"],
   },
+  filterNode: {
+    description: "Filter JSON array elements based on expression. Use 'item.field' to access array element properties (e.g., item.age >= 18).",
+    inputs: ["Array to filter"],
+    outputs: ["Filtered array"],
+  },
   forEachNode: {
     description: "Iterate over array elements with a configurable maximum iteration limit.",
     inputs: ["Array or collection"],

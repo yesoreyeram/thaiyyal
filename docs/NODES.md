@@ -23,6 +23,7 @@ This document provides a comprehensive reference of all node types in the Thaiyy
 | **Condition** | Conditional branching/validation | 1 `any` | `object` with value and condition_met | `{"type": "condition", "data": {"condition": ">100"}}` | ✅ |
 | **For Each** | Iterate over array elements | 1 `array` | `object` with iteration metadata | `{"type": "for_each", "data": {"max_iterations": 1000}}` | ✅ |
 | **While Loop** | Loop while condition is true | 1 `any` | `object` with final value and iterations | `{"type": "while_loop", "data": {"condition": "<10", "max_iterations": 100}}` | ✅ |
+| **Filter** | Filter JSON array elements by condition | 1 `array` or `any` | `object` with filtered array and metadata | `{"type": "filter", "data": {"condition": "variables.item.age > 18"}}` | ✅ |
 | **Variable** | Store/retrieve values across workflow | 1 `any` (for set) / None (for get) | `object` with var_name, operation, value | `{"data": {"var_name": "x", "var_op": "set"}}` | ✅ |
 | **Extract** | Extract fields from objects | 1 `object` | `object` with extracted fields | `{"type": "extract", "data": {"field": "name"}}` | ✅ |
 | **Transform** | Transform data structures | 1 `any` | Varies by transform type | `{"type": "transform", "data": {"transform_type": "to_array"}}` | ✅ |
@@ -67,6 +68,98 @@ This document provides a comprehensive reference of all node types in the Thaiyy
 - **Output**: Returns `{"final_value": any, "iterations": int, "condition": string}`
 - **Use Cases**: Retry logic, iterative processing, threshold monitoring
 - **Note**: Current implementation tracks iterations but doesn't modify values in loop
+
+#### Filter Node
+- **Purpose**: Filter JSON array elements based on expression conditions
+- **Configuration**: Required `condition` (expression string)
+- **Input Behavior**:
+  - **Array input**: Filters elements where expression evaluates to true
+  - **Non-array input**: Passes through unchanged with warning log
+- **Expression Syntax**: ✨ **Use `item.field` to reference array elements**
+  - **`item`** - refers to the current array element being evaluated
+  - **`item.field`** - access a field of the current element
+  - **`item.nested.field`** - access nested fields
+  - Full expression language support:
+    - Comparisons: `>`, `<`, `>=`, `<=`, `==`, `!=`
+    - Boolean operators: `&&`, `||`, `!`
+    - Variable references: `variables.name`
+    - Context references: `context.name`
+    - Node references: `node.id.value`
+    - Functions: Math, date/time, string functions
+- **Output**: Returns object with:
+  - `filtered`: Filtered array (or original input if not array)
+  - `input_count`: Number of input elements
+  - `output_count`: Number of filtered elements
+  - `skipped_count`: Number of elements that didn't match
+  - `error_count`: Number of evaluation errors
+  - `condition`: The filter expression used
+  - `is_array`: Boolean indicating if input was an array
+  - `warning`: Present if input was not an array
+- **Use Cases**: 
+  - Filter API response arrays by field values
+  - Remove invalid/incomplete data from arrays
+  - Select items matching business rules
+  - Data quality filtering
+- **Example Expressions** (RECOMMENDED SYNTAX):
+  ```json
+  // Filter numbers greater than 10
+  {"condition": "item > 10"}
+  
+  // Filter objects by field value (MOST COMMON)
+  {"condition": "item.age >= 18"}
+  
+  // Filter by string field
+  {"condition": "item.status == \"active\""}
+  
+  // Complex condition with AND
+  {"condition": "item.price < 50 && item.category == \"books\""}
+  
+  // Filter using variable threshold
+  {"condition": "item.age >= variables.minAge"}
+  
+  // Filter using context variable
+  {"condition": "item.score > context.passingScore"}
+  
+  // Filter with nested field access
+  {"condition": "item.profile.verified == true"}
+  
+  // Complex business logic
+  {"condition": "item.age >= 18 && item.active == true && item.verified == true"}
+  ```
+- **Alternative Syntaxes** (also supported):
+  ```json
+  // Explicit variable reference (verbose)
+  {"condition": "variables.item.age >= 18"}
+  
+  // Direct field access (less explicit, but works)
+  {"condition": "age >= 18"}
+  ```
+- **Complete Example**:
+  ```json
+  {
+    "nodes": [
+      {
+        "id": "1",
+        "type": "http",
+        "data": {"url": "https://api.example.com/users"}
+      },
+      {
+        "id": "2", 
+        "type": "filter",
+        "data": {"condition": "item.age >= 18 && item.active == true"}
+      },
+      {
+        "id": "3",
+        "type": "visualization",
+        "data": {"mode": "json"}
+      }
+    ],
+    "edges": [
+      {"source": "1", "target": "2"},
+      {"source": "2", "target": "3"}
+    ]
+  }
+  ```
 
 ### State & Memory Node Details
 
