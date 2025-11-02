@@ -137,6 +137,81 @@ export const nodeInfoMap: Record<string, NodeInfo> = {
     inputs: [],
     outputs: ["Constant value"],
   },
+  mapNode: {
+    description: "Transform each element in an array using an expression. Similar to JavaScript's map() function.",
+    inputs: ["Array to map"],
+    outputs: ["Transformed array"],
+  },
+  reduceNode: {
+    description: "Reduce array to a single value by applying an expression to accumulate results. Similar to JavaScript's reduce() function.",
+    inputs: ["Array to reduce"],
+    outputs: ["Reduced value"],
+  },
+  sliceNode: {
+    description: "Extract a portion of an array from start to end index. Supports negative indices.",
+    inputs: ["Array to slice"],
+    outputs: ["Sliced array"],
+  },
+  sortNode: {
+    description: "Sort array elements by a field in ascending or descending order.",
+    inputs: ["Array to sort"],
+    outputs: ["Sorted array"],
+  },
+  findNode: {
+    description: "Find the first element in an array that matches the given expression.",
+    inputs: ["Array to search"],
+    outputs: ["Found element or null"],
+  },
+  flatMapNode: {
+    description: "Map each element to an array and flatten the result by one level. Similar to JavaScript's flatMap() function.",
+    inputs: ["Array to flat map"],
+    outputs: ["Flattened array"],
+  },
+  groupByNode: {
+    description: "Group array elements by a specified field, creating an object with grouped arrays.",
+    inputs: ["Array to group"],
+    outputs: ["Grouped object"],
+  },
+  uniqueNode: {
+    description: "Remove duplicate elements from an array. Optionally specify a field for uniqueness comparison.",
+    inputs: ["Array with duplicates"],
+    outputs: ["Array with unique elements"],
+  },
+  chunkNode: {
+    description: "Split an array into smaller arrays of specified size.",
+    inputs: ["Array to chunk"],
+    outputs: ["Array of chunks"],
+  },
+  reverseNode: {
+    description: "Reverse the order of elements in an array.",
+    inputs: ["Array to reverse"],
+    outputs: ["Reversed array"],
+  },
+  partitionNode: {
+    description: "Split an array into two groups based on whether elements match the given expression.",
+    inputs: ["Array to partition"],
+    outputs: ["Matching elements", "Non-matching elements"],
+  },
+  zipNode: {
+    description: "Combine two arrays element-wise into an array of pairs.",
+    inputs: ["First array", "Second array"],
+    outputs: ["Zipped array of pairs"],
+  },
+  sampleNode: {
+    description: "Randomly sample a specified number of elements from an array.",
+    inputs: ["Array to sample from"],
+    outputs: ["Sampled elements"],
+  },
+  rangeNode: {
+    description: "Generate an array of numbers from start to end with an optional step value.",
+    inputs: [],
+    outputs: ["Number range array"],
+  },
+  transposeNode: {
+    description: "Transpose a 2D array (matrix), swapping rows and columns.",
+    inputs: ["2D array to transpose"],
+    outputs: ["Transposed array"],
+  },
 };
 
 export function getNodeInfo(nodeType: string): NodeInfo | undefined {
