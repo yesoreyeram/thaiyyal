@@ -534,7 +534,7 @@ type BarChartOutput = {
 
 | Version | Date | Changes |
 |---------|------|---------|
-| 1.0.0 | 2024-11-02 | Initial release with core features |
+| 1.0.0 | TBD | Initial release with core features |
 
 ## Future Enhancements
 
@@ -571,6 +571,6 @@ For issues or questions:
 
 ---
 
-**Last Updated**: 2024-11-02  
+**Last Updated**: TBD  
 **Maintainer**: Thaiyyal Team  
 **License**: MIT

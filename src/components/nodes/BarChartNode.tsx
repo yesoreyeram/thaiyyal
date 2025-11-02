@@ -69,6 +69,8 @@ export function BarChartNode({ id, data, ...props }: NodeProps<BarChartNodeData>
   };
 
   const nodeInfo = getNodeInfo("barChartNode");
+  // Type assertion is consistent with other nodes in the codebase (see AllNodes.tsx, ArrayNodes.tsx)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onShowOptions = (props as any).onShowOptions;
 
   return (
@@ -117,7 +119,7 @@ export function BarChartNode({ id, data, ...props }: NodeProps<BarChartNodeData>
 
         {/* Max bars input */}
         <input
-          value={Number(data?.max_bars ?? 20)}
+          value={data?.max_bars ?? 20}
           type="number"
           onChange={onMaxBarsChange}
           className="w-28 text-[10px] leading-tight border border-gray-600 px-1 py-0.5 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-1 focus:ring-blue-400 focus:outline-none"
