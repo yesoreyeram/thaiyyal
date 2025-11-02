@@ -37,6 +37,11 @@ export const nodeInfoMap: Record<string, NodeInfo> = {
     inputs: ["Data to visualize"],
     outputs: [],
   },
+  barChartNode: {
+    description: "Create beautiful bar charts from array data. Supports vertical/horizontal orientation, customizable colors, bar widths, and value labels. Input should be an array of objects with 'label' and 'value' fields, or an array of numbers.",
+    inputs: ["Array data for chart"],
+    outputs: ["Chart visualization"],
+  },
   conditionNode: {
     description: "Branch execution based on a condition. Supports comparison operators: >, <, >=, <=, ==, !=.",
     inputs: ["Value to compare"],
