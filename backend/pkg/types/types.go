@@ -126,6 +126,7 @@ type NodeData struct {
 	Text          *string  `json:"text,omitempty"`           // for text input nodes
 	TextOp        *string  `json:"text_op,omitempty"`        // for text operation nodes
 	URL           *string  `json:"url,omitempty"`            // for HTTP nodes
+	HTTPClientUID *string  `json:"http_client_uid,omitempty"` // for HTTP nodes - immutable UID of HTTP client from registry
 	Separator     *string  `json:"separator,omitempty"`      // for concat text operation
 	RepeatN       *int     `json:"repeat_n,omitempty"`       // for repeat text operation
 	Condition     *string `json:"condition,omitempty"`      // for condition, filter, partition, find nodes

@@ -57,6 +57,9 @@ type Engine struct {
 	
 	// Structured logging
 	structuredLogger *logging.Logger
+	
+	// HTTP client registry for named HTTP clients (uses standalone httpclient.Registry)
+	httpClientRegistry interface{}
 }
 
 // ============================================================================
@@ -267,6 +270,14 @@ func (e *Engine) SetLogger(logger observer.Logger) *Engine {
 	if logger != nil {
 		e.logger = logger
 	}
+	return e
+}
+
+// SetHTTPClientRegistry sets the HTTP client registry for named HTTP clients.
+// The registry should be of type *httpclient.Registry from the standalone httpclient package.
+// Returns the engine for method chaining.
+func (e *Engine) SetHTTPClientRegistry(registry interface{}) *Engine {
+	e.httpClientRegistry = registry
 	return e
 }
 
@@ -765,6 +776,13 @@ return e.state.GetAllContext()
 // GetConfig returns the engine configuration
 func (e *Engine) GetConfig() types.Config {
 	return e.config
+}
+
+// GetHTTPClientRegistry returns the HTTP client registry if configured.
+// Returns nil if no registry is set. The caller should type assert to
+// *httpclient.Registry if needed.
+func (e *Engine) GetHTTPClientRegistry() interface{} {
+	return e.httpClientRegistry
 }
 
 // IncrementNodeExecution increments the node execution counter and checks limits.

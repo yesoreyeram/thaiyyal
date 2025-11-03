@@ -26,6 +26,11 @@ func NewHTTPExecutor() *HTTPExecutor {
 // Performs an HTTP GET request and returns the response body.
 // Uses a shared connection pool for better performance.
 //
+// Named HTTP Clients:
+//   - If node.Data.HTTPClientUID is specified, uses the named client from the registry
+//   - Named clients have pre-configured authentication, headers, and settings
+//   - Falls back to default client if HTTPClientUID is not specified
+//
 // Security features:
 //   - Zero trust by default: HTTP must be explicitly enabled via config.AllowHTTP
 //   - URL validation (blocks internal IPs based on config)
@@ -51,13 +56,16 @@ func (e *HTTPExecutor) Execute(ctx ExecutionContext, node types.Node) (interface
 		return nil, err
 	}
 
-	// Validate URL for security (SSRF protection)
-	if err := isAllowedURL(*node.Data.URL, config); err != nil {
-		return nil, fmt.Errorf("URL validation failed: %w", err)
-	}
+	// Get HTTP client - either from registry by UID or default client
+	client := e.getHTTPClient(ctx, node, config)
 
-	// Get or create shared HTTP client with connection pooling
-	client := e.getOrCreateClient(config)
+	// Validate URL for security (SSRF protection) if using default client
+	// Named clients handle SSRF protection in their own middleware
+	if node.Data.HTTPClientUID == nil || *node.Data.HTTPClientUID == "" {
+		if err := isAllowedURL(*node.Data.URL, config); err != nil {
+			return nil, fmt.Errorf("URL validation failed: %w", err)
+		}
+	}
 
 	// Make HTTP GET request
 	resp, err := client.Get(*node.Data.URL)
@@ -88,6 +96,34 @@ func (e *HTTPExecutor) Execute(ctx ExecutionContext, node types.Node) (interface
 	}
 
 	return string(body), nil
+}
+
+// getHTTPClient returns the appropriate HTTP client for the request.
+// If a named client UID is specified, it retrieves it from the registry.
+// Otherwise, it uses the default shared client.
+func (e *HTTPExecutor) getHTTPClient(ctx ExecutionContext, node types.Node, config types.Config) *http.Client {
+	// Check if a named client UID is specified
+	if node.Data.HTTPClientUID != nil && *node.Data.HTTPClientUID != "" {
+		// Try to get the named client from the registry
+		registryInterface := ctx.GetHTTPClientRegistry()
+		if registryInterface != nil {
+			// Type assert to get the client
+			type httpClientGetter interface {
+				Get(uid string) (*http.Client, error)
+			}
+
+			if registry, ok := registryInterface.(httpClientGetter); ok {
+				client, err := registry.Get(*node.Data.HTTPClientUID)
+				if err == nil && client != nil {
+					return client
+				}
+				// If error or nil client, fall through to default client
+			}
+		}
+	}
+
+	// Use default client
+	return e.getOrCreateClient(config)
 }
 
 // getOrCreateClient returns the shared HTTP client, creating it if necessary

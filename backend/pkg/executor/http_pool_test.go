@@ -336,6 +336,10 @@ func (m *mockExecutionContext) GetConfig() types.Config {
 	return m.config
 }
 
+func (m *mockExecutionContext) GetHTTPClientRegistry() interface{} {
+	return nil
+}
+
 func (m *mockExecutionContext) IncrementNodeExecution() error {
 	return nil
 }
