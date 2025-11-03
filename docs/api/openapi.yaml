@@ -1,0 +1,352 @@
+openapi: 3.0.3
+info:
+  title: Thaiyyal Workflow Engine API
+  description: |
+    RESTful API for the Thaiyyal visual workflow engine.
+    
+    This API provides endpoints for executing and validating workflows,
+    as well as monitoring the health of the service.
+    
+    ## Features
+    - Execute complex workflows with visual DAG representation
+    - Validate workflow definitions before execution
+    - Comprehensive health and readiness checks
+    - Prometheus metrics for observability
+    - OpenTelemetry tracing support
+    
+  version: 0.1.0
+  contact:
+    name: Thaiyyal Team
+    url: https://github.com/yesoreyeram/thaiyyal
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+  - url: http://localhost:8080/api/v1
+    description: API v1 base path
+
+tags:
+  - name: workflow
+    description: Workflow execution and validation
+  - name: health
+    description: Health check and monitoring endpoints
+  - name: metrics
+    description: Prometheus metrics
+
+paths:
+  /api/v1/workflow/execute:
+    post:
+      tags:
+        - workflow
+      summary: Execute a workflow
+      description: |
+        Executes a workflow defined in JSON format.
+        
+        The workflow is defined as a directed acyclic graph (DAG) with nodes and edges.
+        Each node represents an operation, and edges define the data flow between nodes.
+        
+        The execution follows topological ordering to ensure dependencies are met.
+      operationId: executeWorkflow
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkflowDefinition'
+            examples:
+              simpleAddition:
+                summary: Simple Addition
+                value:
+                  nodes:
+                    - id: "1"
+                      type: "number"
+                      data:
+                        value: 10
+                    - id: "2"
+                      type: "number"
+                      data:
+                        value: 5
+                    - id: "3"
+                      type: "operation"
+                      data:
+                        op: "add"
+                  edges:
+                    - source: "1"
+                      target: "3"
+                    - source: "2"
+                      target: "3"
+      responses:
+        '200':
+          description: Workflow executed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExecutionResult'
+        '400':
+          description: Invalid workflow definition
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Workflow execution failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/workflow/validate:
+    post:
+      tags:
+        - workflow
+      summary: Validate a workflow
+      description: |
+        Validates a workflow definition without executing it.
+        
+        Checks for:
+        - Valid JSON structure
+        - No circular dependencies
+        - Valid node types
+        - Required node data fields
+      operationId: validateWorkflow
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkflowDefinition'
+      responses:
+        '200':
+          description: Validation result
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResult'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /health:
+    get:
+      tags:
+        - health
+      summary: Health check
+      description: |
+        Comprehensive health check that runs all registered health checks.
+        
+        Returns HTTP 200 if healthy, 503 if unhealthy.
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /health/live:
+    get:
+      tags:
+        - health
+      summary: Liveness probe
+      description: |
+        Simple liveness check for Kubernetes.
+        Always returns 200 if the server is running.
+      operationId: livenessProbe
+      responses:
+        '200':
+          description: Service is alive
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /health/ready:
+    get:
+      tags:
+        - health
+      summary: Readiness probe
+      description: |
+        Readiness check for Kubernetes.
+        Returns 200 if the service can handle requests, 503 otherwise.
+      operationId: readinessProbe
+      responses:
+        '200':
+          description: Service is ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Service is not ready
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /metrics:
+    get:
+      tags:
+        - metrics
+      summary: Prometheus metrics
+      description: |
+        Prometheus-compatible metrics endpoint.
+        
+        Exposes metrics for:
+        - Workflow execution counts and duration
+        - Node execution statistics
+        - HTTP call metrics
+        - System resource usage
+      operationId: prometheusMetrics
+      responses:
+        '200':
+          description: Prometheus metrics
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: |
+                  # HELP workflow_executions_total Total number of workflow executions
+                  # TYPE workflow_executions_total counter
+                  workflow_executions_total{workflow_id="",nodes_executed="3"} 1
+
+components:
+  schemas:
+    WorkflowDefinition:
+      type: object
+      required:
+        - nodes
+        - edges
+      properties:
+        workflow_id:
+          type: string
+          description: Optional workflow identifier
+        nodes:
+          type: array
+          description: Array of workflow nodes
+          items:
+            $ref: '#/components/schemas/Node'
+        edges:
+          type: array
+          description: Array of edges connecting nodes
+          items:
+            $ref: '#/components/schemas/Edge'
+
+    Node:
+      type: object
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: Unique node identifier
+        type:
+          type: string
+          description: Node type (e.g., 'number', 'operation', 'http')
+        data:
+          type: object
+          description: Node-specific data
+          additionalProperties: true
+
+    Edge:
+      type: object
+      required:
+        - source
+        - target
+      properties:
+        source:
+          type: string
+          description: Source node ID
+        target:
+          type: string
+          description: Target node ID
+
+    ExecutionResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Whether execution was successful
+        results:
+          type: object
+          description: Execution results keyed by node ID
+          additionalProperties: true
+        execution_time:
+          type: string
+          description: Total execution time
+
+    ValidationResult:
+      type: object
+      properties:
+        valid:
+          type: boolean
+          description: Whether the workflow is valid
+        error:
+          type: string
+          description: Validation error message (if invalid)
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy, degraded]
+          description: Overall health status
+        service_name:
+          type: string
+          description: Name of the service
+        service_version:
+          type: string
+          description: Version of the service
+        uptime:
+          type: string
+          description: Service uptime
+        timestamp:
+          type: string
+          format: date-time
+          description: Timestamp of the health check
+        checks:
+          type: object
+          description: Individual health check results
+          additionalProperties:
+            $ref: '#/components/schemas/CheckResult'
+
+    CheckResult:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [healthy, unhealthy, degraded]
+          description: Check status
+        last_checked:
+          type: string
+          format: date-time
+          description: When the check was last run
+        error:
+          type: string
+          description: Error message (if unhealthy)
+
+    Error:
+      type: object
+      properties:
+        success:
+          type: boolean
+          description: Always false for errors
+        error:
+          type: string
+          description: Error message
+        details:
+          type: string
+          description: Detailed error information
