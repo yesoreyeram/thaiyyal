@@ -1,0 +1,97 @@
+# Example HTTP Client Configuration for Thaiyyal Workflow Engine
+#
+# This file demonstrates how to configure named HTTP clients with different
+# authentication methods and settings. These clients can be referenced by name
+# in HTTP nodes to avoid repeating authentication and configuration.
+
+# Named HTTP Clients
+http_clients:
+  # Example 1: GitHub API client with Bearer token
+  - name: "github-api"
+    description: "GitHub API client with authentication"
+    auth_type: "bearer"
+    token: "${GITHUB_TOKEN}"  # Use environment variable for security
+    base_url: "https://api.github.com"
+    timeout: "30s"
+    max_response_size: 10485760  # 10MB
+    follow_redirects: true
+    max_redirects: 5
+    default_headers:
+      Accept: "application/vnd.github.v3+json"
+      User-Agent: "Thaiyyal-Workflow/1.0"
+
+  # Example 2: Internal API with Basic Authentication
+  - name: "internal-api"
+    description: "Internal service API with basic auth"
+    auth_type: "basic"
+    username: "${API_USERNAME}"  # Use environment variable
+    password: "${API_PASSWORD}"  # Use environment variable
+    base_url: "https://internal.example.com/api"
+    timeout: "15s"
+    max_response_size: 5242880  # 5MB
+    default_headers:
+      Content-Type: "application/json"
+
+  # Example 3: Public API with API key in header
+  - name: "weather-api"
+    description: "Weather API with API key"
+    auth_type: "none"
+    base_url: "https://api.weather.example.com"
+    timeout: "10s"
+    default_headers:
+      X-API-Key: "${WEATHER_API_KEY}"
+    default_query_params:
+      units: "metric"
+      lang: "en"
+
+  # Example 4: REST API with custom configuration
+  - name: "rest-api"
+    description: "REST API with custom network settings"
+    auth_type: "bearer"
+    token: "${REST_API_TOKEN}"
+    timeout: "60s"
+    max_idle_conns: 50
+    max_idle_conns_per_host: 5
+    max_conns_per_host: 50
+    idle_conn_timeout: "120s"
+    tls_handshake_timeout: "15s"
+    max_response_size: 20971520  # 20MB
+    follow_redirects: false
+
+  # Example 5: OAuth2 preparation (for future implementation)
+  - name: "oauth2-api"
+    description: "Placeholder for OAuth2 client (to be implemented)"
+    auth_type: "bearer"
+    token: "${OAUTH2_ACCESS_TOKEN}"
+    timeout: "30s"
+    default_headers:
+      Accept: "application/json"
+
+# Workflow Engine Configuration
+# These settings apply to all HTTP requests when named clients are not used
+allow_http: true  # Enable HTTP requests (set to false in production)
+http_timeout: "30s"
+max_http_redirects: 10
+max_response_size: 10485760  # 10MB
+
+# Zero Trust Security Settings
+block_private_ips: true
+block_localhost: true
+block_link_local: true
+block_cloud_metadata: true
+allowed_domains: []  # Empty = allow all domains when allow_http is true
+
+# Example usage in workflow JSON:
+# {
+#   "nodes": [
+#     {
+#       "id": "fetch-github-repos",
+#       "type": "http",
+#       "data": {
+#         "url": "https://api.github.com/users/octocat/repos",
+#         "client_name": "github-api"
+#       }
+#     }
+#   ],
+#   "edges": []
+# }
