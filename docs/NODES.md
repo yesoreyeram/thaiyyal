@@ -17,6 +17,7 @@ This document provides a comprehensive reference of all node types in the Thaiyy
 | **Number** | Numeric input node | None | `number` | `{"data": {"value": 42}}` | ✅ |
 | **Operation** | Arithmetic operations (add, subtract, multiply, divide) | 2+ `number` | `number` | `{"data": {"op": "add"}}` | ✅ |
 | **Visualization** | Output formatting for display | 1+ `any` | `object` with mode and value | `{"data": {"mode": "text"}}` | ✅ |
+| **Bar Chart** | Visual bar chart from array data | 1 `array` | `object` with chart config and data | `{"data": {"orientation": "vertical", "bar_color": "#3b82f6"}}` | ✅ |
 | **Text Input** | Text string input | None | `string` | `{"data": {"text": "Hello"}}` | ✅ |
 | **Text Operation** | Text transformations | 1+ `string` | `string` | See operations below | ✅ |
 | **HTTP** | HTTP GET request | None | `string` (response body) | `{"data": {"url": "https://api.example.com"}}` | ✅ |
@@ -47,6 +48,47 @@ This document provides a comprehensive reference of all node types in the Thaiyy
 | `inversecase` | Swap character case | None | "HeLLo" | "hEllO" |
 | `concat` | Concatenate multiple inputs | `separator` (optional) | ["Hello", "World"] | "HelloWorld" or "Hello World" |
 | `repeat` | Repeat text n times | `repeat_n` (required) | "Ha" with n=3 | "HaHaHa" |
+
+### Visualization Node Details
+
+#### Bar Chart Node
+- **Purpose**: Create beautiful bar charts from array data with extensive customization options
+- **Input Format**: Array of objects with `label` and `value` fields, or array of numbers
+- **Configuration Options**:
+  - `orientation`: "vertical" (default) or "horizontal" - Direction of bars
+  - `bar_color`: Hex color code (default: "#3b82f6") - Color of all bars
+  - `bar_width`: "thin", "medium" (default), or "thick" - Bar thickness
+  - `show_values`: boolean (default: true) - Display numeric values on bars
+  - `max_bars`: number (default: 20, range: 1-100) - Maximum bars to display
+- **Output**: Object containing chart configuration, data, and metadata
+- **Use Cases**: 
+  - Sales performance dashboards
+  - Error rate comparisons
+  - Survey result visualization
+  - Time series data (hourly, daily metrics)
+  - Top N rankings and leaderboards
+- **Common Workflows**:
+  - HTTP → Sort → Bar Chart (top performers)
+  - HTTP → Filter → Slice → Bar Chart (recent data)
+  - Multiple APIs → Join → Transform → Bar Chart (multi-source comparison)
+- **Best Practices**:
+  - Use Sort node before Bar Chart for meaningful ordering
+  - Use vertical orientation for time series
+  - Use horizontal orientation for long labels
+  - Limit to 20 bars or fewer for readability
+  - Enable show_values for precise data analysis
+- **Data Format Examples**:
+  ```json
+  // Recommended format
+  [
+    {"label": "Product A", "value": 150},
+    {"label": "Product B", "value": 230}
+  ]
+  
+  // Simple format (auto-generates labels)
+  [150, 230, 180, 290]
+  ```
+- **Complete Documentation**: See [BAR_CHART_NODE.md](./BAR_CHART_NODE.md) for detailed examples, patterns, and troubleshooting
 
 ### Control Flow Node Details
 
