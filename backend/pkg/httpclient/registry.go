@@ -6,82 +6,72 @@ import (
 	"sync"
 )
 
-// Registry manages named HTTP clients
+// Registry manages named HTTP clients by their UIDs
 type Registry struct {
-	clients map[string]*Client
+	clients map[string]*http.Client
 	mu      sync.RWMutex
 }
 
 // NewRegistry creates a new HTTP client registry
 func NewRegistry() *Registry {
 	return &Registry{
-		clients: make(map[string]*Client),
+		clients: make(map[string]*http.Client),
 	}
 }
 
-// Register adds a client to the registry
-func (r *Registry) Register(name string, client *Client) error {
-	if name == "" {
-		return fmt.Errorf("client name cannot be empty")
+// Register adds a client to the registry with the given UID
+func (r *Registry) Register(uid string, client *http.Client) error {
+	if uid == "" {
+		return fmt.Errorf("client UID cannot be empty")
+	}
+
+	if client == nil {
+		return fmt.Errorf("client cannot be nil")
 	}
 
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	if _, exists := r.clients[name]; exists {
-		return fmt.Errorf("client with name %q already exists", name)
+	if _, exists := r.clients[uid]; exists {
+		return fmt.Errorf("client with UID %q already exists", uid)
 	}
 
-	r.clients[name] = client
+	r.clients[uid] = client
 	return nil
 }
 
-// Get retrieves a client by name
-func (r *Registry) Get(name string) (*Client, error) {
+// Get retrieves a client by UID
+func (r *Registry) Get(uid string) (*http.Client, error) {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	client, exists := r.clients[name]
+	client, exists := r.clients[uid]
 	if !exists {
-		return nil, fmt.Errorf("client %q not found", name)
+		return nil, fmt.Errorf("client with UID %q not found", uid)
 	}
 
 	return client, nil
 }
 
-// GetHTTPClient retrieves the underlying HTTP client and max response size by name.
-// This is a convenience method for executors that need direct access to *http.Client.
-func (r *Registry) GetHTTPClient(name string) (*http.Client, int64, error) {
-	client, err := r.Get(name)
-	if err != nil {
-		return nil, 0, err
-	}
-
-	httpClient := client.GetHTTPClient()
-	maxResponseSize := client.GetConfig().MaxResponseSize
-
-	return httpClient, maxResponseSize, nil
-}
-
-// Has checks if a client exists
-func (r *Registry) Has(name string) bool {
+// Has checks if a client exists with the given UID
+func (r *Registry) Has(uid string) bool {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	_, exists := r.clients[name]
+	_, exists := r.clients[uid]
 	return exists
 }
 
-// List returns all registered client names
+// List returns all registered client UIDs
 func (r *Registry) List() []string {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 
-	names := make([]string, 0, len(r.clients))
-	for name := range r.clients {
-		names = append(names, name)
+	uids := make([]string, 0, len(r.clients))
+	for uid := range r.clients {
+		uids = append(uids, uid)
 	}
-	return names
+	return uids
 }
 
 // Count returns the number of registered clients
@@ -97,5 +87,18 @@ func (r *Registry) Clear() {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
-	r.clients = make(map[string]*Client)
+	r.clients = make(map[string]*http.Client)
+}
+
+// Unregister removes a client from the registry
+func (r *Registry) Unregister(uid string) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if _, exists := r.clients[uid]; !exists {
+		return fmt.Errorf("client with UID %q not found", uid)
+	}
+
+	delete(r.clients, uid)
+	return nil
 }

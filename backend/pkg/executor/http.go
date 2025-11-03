@@ -27,9 +27,9 @@ func NewHTTPExecutor() *HTTPExecutor {
 // Uses a shared connection pool for better performance.
 //
 // Named HTTP Clients:
-//   - If node.Data.ClientName is specified, uses the named client from the registry
+//   - If node.Data.HTTPClientUID is specified, uses the named client from the registry
 //   - Named clients have pre-configured authentication, headers, and settings
-//   - Falls back to default client if ClientName is not specified
+//   - Falls back to default client if HTTPClientUID is not specified
 //
 // Security features:
 //   - Zero trust by default: HTTP must be explicitly enabled via config.AllowHTTP
@@ -56,15 +56,15 @@ func (e *HTTPExecutor) Execute(ctx ExecutionContext, node types.Node) (interface
 		return nil, err
 	}
 
-	// Validate URL for security (SSRF protection)
-	if err := isAllowedURL(*node.Data.URL, config); err != nil {
-		return nil, fmt.Errorf("URL validation failed: %w", err)
-	}
+	// Get HTTP client - either from registry by UID or default client
+	client := e.getHTTPClient(ctx, node, config)
 
-	// Get HTTP client - either named client from registry or default client
-	client, maxResponseSize, err := e.getHTTPClient(ctx, node, config)
-	if err != nil {
-		return nil, err
+	// Validate URL for security (SSRF protection) if using default client
+	// Named clients handle SSRF protection in their own middleware
+	if node.Data.HTTPClientUID == nil || *node.Data.HTTPClientUID == "" {
+		if err := isAllowedURL(*node.Data.URL, config); err != nil {
+			return nil, fmt.Errorf("URL validation failed: %w", err)
+		}
 	}
 
 	// Make HTTP GET request
@@ -80,18 +80,18 @@ func (e *HTTPExecutor) Execute(ctx ExecutionContext, node types.Node) (interface
 	}
 
 	// Read response body with size limit
-	limitedReader := io.LimitReader(resp.Body, maxResponseSize)
+	limitedReader := io.LimitReader(resp.Body, config.MaxResponseSize)
 	body, err := io.ReadAll(limitedReader)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
 	// Check if response was truncated due to size limit
-	if int64(len(body)) == maxResponseSize {
+	if int64(len(body)) == config.MaxResponseSize {
 		// Try to read one more byte to see if there's more data
 		oneByte := make([]byte, 1)
 		if n, _ := resp.Body.Read(oneByte); n > 0 {
-			return nil, fmt.Errorf("response too large (exceeds %d bytes limit)", maxResponseSize)
+			return nil, fmt.Errorf("response too large (exceeds %d bytes limit)", config.MaxResponseSize)
 		}
 	}
 
@@ -99,34 +99,31 @@ func (e *HTTPExecutor) Execute(ctx ExecutionContext, node types.Node) (interface
 }
 
 // getHTTPClient returns the appropriate HTTP client for the request.
-// If a named client is specified, it retrieves it from the registry.
+// If a named client UID is specified, it retrieves it from the registry.
 // Otherwise, it uses the default shared client.
-// Returns the client, max response size, and any error.
-func (e *HTTPExecutor) getHTTPClient(ctx ExecutionContext, node types.Node, config types.Config) (*http.Client, int64, error) {
-	// Check if a named client is specified
-	if node.Data.ClientName != nil && *node.Data.ClientName != "" {
+func (e *HTTPExecutor) getHTTPClient(ctx ExecutionContext, node types.Node, config types.Config) *http.Client {
+	// Check if a named client UID is specified
+	if node.Data.HTTPClientUID != nil && *node.Data.HTTPClientUID != "" {
 		// Try to get the named client from the registry
 		registryInterface := ctx.GetHTTPClientRegistry()
-		if registryInterface == nil {
-			return nil, 0, fmt.Errorf("HTTP client %q requested but no client registry configured", *node.Data.ClientName)
-		}
+		if registryInterface != nil {
+			// Type assert to get the client
+			type httpClientGetter interface {
+				Get(uid string) (*http.Client, error)
+			}
 
-		// Type assert to get the registry with GetHTTPClient method
-		type httpClientGetter interface {
-			GetHTTPClient(name string) (*http.Client, int64, error)
+			if registry, ok := registryInterface.(httpClientGetter); ok {
+				client, err := registry.Get(*node.Data.HTTPClientUID)
+				if err == nil && client != nil {
+					return client
+				}
+				// If error or nil client, fall through to default client
+			}
 		}
-
-		registry, ok := registryInterface.(httpClientGetter)
-		if !ok {
-			return nil, 0, fmt.Errorf("HTTP client registry does not implement GetHTTPClient method")
-		}
-
-		return registry.GetHTTPClient(*node.Data.ClientName)
 	}
 
 	// Use default client
-	defaultClient := e.getOrCreateClient(config)
-	return defaultClient, config.MaxResponseSize, nil
+	return e.getOrCreateClient(config)
 }
 
 // getOrCreateClient returns the shared HTTP client, creating it if necessary

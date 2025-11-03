@@ -1,25 +1,23 @@
 package httpclient
 
 import (
+	"context"
+	"net/http"
 	"strconv"
 	"testing"
-
-	"github.com/yesoreyeram/thaiyyal/backend/pkg/config"
 )
 
 func TestRegistry_Register(t *testing.T) {
 	registry := NewRegistry()
-	engineConfig := config.Testing()
-	builder := NewBuilder(*engineConfig)
 
-	clientConfig := &ClientConfig{
-		Name:     "test-client",
+	config := &Config{
+		UID:      "test-client",
 		AuthType: AuthTypeNone,
 	}
 
-	client, err := builder.Build(clientConfig)
+	client, err := New(context.Background(), config)
 	if err != nil {
-		t.Fatalf("Build() error = %v", err)
+		t.Fatalf("New() error = %v", err)
 	}
 
 	// Test successful registration
@@ -34,26 +32,30 @@ func TestRegistry_Register(t *testing.T) {
 		t.Error("Register() expected error for duplicate, got nil")
 	}
 
-	// Test empty name
+	// Test empty UID
 	err = registry.Register("", client)
 	if err == nil {
-		t.Error("Register() expected error for empty name, got nil")
+		t.Error("Register() expected error for empty UID, got nil")
+	}
+
+	// Test nil client
+	err = registry.Register("nil-client", nil)
+	if err == nil {
+		t.Error("Register() expected error for nil client, got nil")
 	}
 }
 
 func TestRegistry_Get(t *testing.T) {
 	registry := NewRegistry()
-	engineConfig := config.Testing()
-	builder := NewBuilder(*engineConfig)
 
-	clientConfig := &ClientConfig{
-		Name:     "test-client",
+	config := &Config{
+		UID:      "test-client",
 		AuthType: AuthTypeNone,
 	}
 
-	client, err := builder.Build(clientConfig)
+	client, err := New(context.Background(), config)
 	if err != nil {
-		t.Fatalf("Build() error = %v", err)
+		t.Fatalf("New() error = %v", err)
 	}
 
 	// Register client
@@ -67,8 +69,8 @@ func TestRegistry_Get(t *testing.T) {
 	if retrieved == nil {
 		t.Error("Get() returned nil client")
 	}
-	if retrieved.GetConfig().Name != "test-client" {
-		t.Errorf("Get() client name = %v, want test-client", retrieved.GetConfig().Name)
+	if retrieved != client {
+		t.Error("Get() returned different client instance")
 	}
 
 	// Test get non-existent client
@@ -80,17 +82,15 @@ func TestRegistry_Get(t *testing.T) {
 
 func TestRegistry_Has(t *testing.T) {
 	registry := NewRegistry()
-	engineConfig := config.Testing()
-	builder := NewBuilder(*engineConfig)
 
-	clientConfig := &ClientConfig{
-		Name:     "test-client",
+	config := &Config{
+		UID:      "test-client",
 		AuthType: AuthTypeNone,
 	}
 
-	client, err := builder.Build(clientConfig)
+	client, err := New(context.Background(), config)
 	if err != nil {
-		t.Fatalf("Build() error = %v", err)
+		t.Fatalf("New() error = %v", err)
 	}
 
 	// Test before registration
@@ -114,8 +114,6 @@ func TestRegistry_Has(t *testing.T) {
 
 func TestRegistry_List(t *testing.T) {
 	registry := NewRegistry()
-	engineConfig := config.Testing()
-	builder := NewBuilder(*engineConfig)
 
 	// Empty registry
 	if len(registry.List()) != 0 {
@@ -123,16 +121,16 @@ func TestRegistry_List(t *testing.T) {
 	}
 
 	// Add clients
-	for i, name := range []string{"client1", "client2", "client3"} {
-		clientConfig := &ClientConfig{
-			Name:     name,
+	for i, uid := range []string{"client1", "client2", "client3"} {
+		config := &Config{
+			UID:      uid,
 			AuthType: AuthTypeNone,
 		}
-		client, err := builder.Build(clientConfig)
+		client, err := New(context.Background(), config)
 		if err != nil {
-			t.Fatalf("Build() error = %v", err)
+			t.Fatalf("New() error = %v", err)
 		}
-		registry.Register(name, client)
+		registry.Register(uid, client)
 
 		list := registry.List()
 		if len(list) != i+1 {
@@ -145,23 +143,21 @@ func TestRegistry_List(t *testing.T) {
 		t.Errorf("List() length = %v, want 3", len(list))
 	}
 
-	// Verify all names are present
-	names := make(map[string]bool)
-	for _, name := range list {
-		names[name] = true
+	// Verify all UIDs are present
+	uids := make(map[string]bool)
+	for _, uid := range list {
+		uids[uid] = true
 	}
 
 	for _, expected := range []string{"client1", "client2", "client3"} {
-		if !names[expected] {
-			t.Errorf("List() missing expected name %v", expected)
+		if !uids[expected] {
+			t.Errorf("List() missing expected UID %v", expected)
 		}
 	}
 }
 
 func TestRegistry_Count(t *testing.T) {
 	registry := NewRegistry()
-	engineConfig := config.Testing()
-	builder := NewBuilder(*engineConfig)
 
 	// Empty registry
 	if registry.Count() != 0 {
@@ -170,15 +166,15 @@ func TestRegistry_Count(t *testing.T) {
 
 	// Add clients
 	for i := 1; i <= 3; i++ {
-		clientConfig := &ClientConfig{
-			Name:     "client" + strconv.Itoa(i),
+		config := &Config{
+			UID:      "client" + strconv.Itoa(i),
 			AuthType: AuthTypeNone,
 		}
-		client, err := builder.Build(clientConfig)
+		client, err := New(context.Background(), config)
 		if err != nil {
-			t.Fatalf("Build() error = %v", err)
+			t.Fatalf("New() error = %v", err)
 		}
-		registry.Register(clientConfig.Name, client)
+		registry.Register(config.UID, client)
 
 		if registry.Count() != i {
 			t.Errorf("Count() = %v, want %v", registry.Count(), i)
@@ -188,20 +184,18 @@ func TestRegistry_Count(t *testing.T) {
 
 func TestRegistry_Clear(t *testing.T) {
 	registry := NewRegistry()
-	engineConfig := config.Testing()
-	builder := NewBuilder(*engineConfig)
 
 	// Add clients
-	for _, name := range []string{"client1", "client2", "client3"} {
-		clientConfig := &ClientConfig{
-			Name:     name,
+	for _, uid := range []string{"client1", "client2", "client3"} {
+		config := &Config{
+			UID:      uid,
 			AuthType: AuthTypeNone,
 		}
-		client, err := builder.Build(clientConfig)
+		client, err := New(context.Background(), config)
 		if err != nil {
-			t.Fatalf("Build() error = %v", err)
+			t.Fatalf("New() error = %v", err)
 		}
-		registry.Register(name, client)
+		registry.Register(uid, client)
 	}
 
 	if registry.Count() != 3 {
@@ -216,32 +210,69 @@ func TestRegistry_Clear(t *testing.T) {
 	}
 
 	// Verify clients are gone
-	for _, name := range []string{"client1", "client2", "client3"} {
-		if registry.Has(name) {
-			t.Errorf("Has(%v) returned true after clear", name)
+	for _, uid := range []string{"client1", "client2", "client3"} {
+		if registry.Has(uid) {
+			t.Errorf("Has(%v) returned true after clear", uid)
 		}
+	}
+}
+
+func TestRegistry_Unregister(t *testing.T) {
+	registry := NewRegistry()
+
+	config := &Config{
+		UID:      "test-client",
+		AuthType: AuthTypeNone,
+	}
+
+	client, err := New(context.Background(), config)
+	if err != nil {
+		t.Fatalf("New() error = %v", err)
+	}
+
+	// Register client
+	registry.Register("test-client", client)
+
+	// Verify it's there
+	if !registry.Has("test-client") {
+		t.Error("Client not found after registration")
+	}
+
+	// Unregister
+	err = registry.Unregister("test-client")
+	if err != nil {
+		t.Errorf("Unregister() error = %v", err)
+	}
+
+	// Verify it's gone
+	if registry.Has("test-client") {
+		t.Error("Client still exists after unregister")
+	}
+
+	// Try to unregister again (should error)
+	err = registry.Unregister("test-client")
+	if err == nil {
+		t.Error("Unregister() expected error for non-existent client, got nil")
 	}
 }
 
 func TestRegistry_Concurrent(t *testing.T) {
 	registry := NewRegistry()
-	engineConfig := config.Testing()
-	builder := NewBuilder(*engineConfig)
 
 	done := make(chan bool)
 
 	// Concurrent registrations
 	for i := 0; i < 10; i++ {
 		go func(id int) {
-			clientConfig := &ClientConfig{
-				Name:     "client" + strconv.Itoa(id),
+			config := &Config{
+				UID:      "client" + strconv.Itoa(id),
 				AuthType: AuthTypeNone,
 			}
-			client, err := builder.Build(clientConfig)
+			client, err := New(context.Background(), config)
 			if err != nil {
-				t.Errorf("Build() error = %v", err)
+				t.Errorf("New() error = %v", err)
 			}
-			registry.Register(clientConfig.Name, client)
+			registry.Register(config.UID, client)
 			done <- true
 		}(i)
 	}
@@ -260,13 +291,13 @@ func TestRegistry_Concurrent(t *testing.T) {
 	// Concurrent reads
 	for i := 0; i < 10; i++ {
 		go func(id int) {
-			name := "client" + strconv.Itoa(id)
-			if !registry.Has(name) {
-				t.Errorf("Has(%v) returned false", name)
+			uid := "client" + strconv.Itoa(id)
+			if !registry.Has(uid) {
+				t.Errorf("Has(%v) returned false", uid)
 			}
-			_, err := registry.Get(name)
+			_, err := registry.Get(uid)
 			if err != nil {
-				t.Errorf("Get(%v) error = %v", name, err)
+				t.Errorf("Get(%v) error = %v", uid, err)
 			}
 			done <- true
 		}(i)
@@ -275,5 +306,43 @@ func TestRegistry_Concurrent(t *testing.T) {
 	// Wait for all goroutines
 	for i := 0; i < 10; i++ {
 		<-done
+	}
+}
+
+// Benchmark registry operations
+func BenchmarkRegistry_Register(b *testing.B) {
+	registry := NewRegistry()
+	clients := make([]*http.Client, b.N)
+
+	for i := 0; i < b.N; i++ {
+		config := &Config{
+			UID:      "client" + strconv.Itoa(i),
+			AuthType: AuthTypeNone,
+		}
+		clients[i], _ = New(context.Background(), config)
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		registry.Register("client"+strconv.Itoa(i), clients[i])
+	}
+}
+
+func BenchmarkRegistry_Get(b *testing.B) {
+	registry := NewRegistry()
+
+	// Pre-populate registry
+	for i := 0; i < 100; i++ {
+		config := &Config{
+			UID:      "client" + strconv.Itoa(i),
+			AuthType: AuthTypeNone,
+		}
+		client, _ := New(context.Background(), config)
+		registry.Register(config.UID, client)
+	}
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		registry.Get("client" + strconv.Itoa(i%100))
 	}
 }

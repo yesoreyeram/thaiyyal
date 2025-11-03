@@ -58,7 +58,7 @@ type Engine struct {
 	// Structured logging
 	structuredLogger *logging.Logger
 	
-	// HTTP client registry for named clients
+	// HTTP client registry for named HTTP clients (uses standalone httpclient.Registry)
 	httpClientRegistry interface{}
 }
 
@@ -274,8 +274,7 @@ func (e *Engine) SetLogger(logger observer.Logger) *Engine {
 }
 
 // SetHTTPClientRegistry sets the HTTP client registry for named HTTP clients.
-// This allows HTTP nodes to reference pre-configured clients by name.
-// The registry should be of type *httpclient.Registry.
+// The registry should be of type *httpclient.Registry from the standalone httpclient package.
 // Returns the engine for method chaining.
 func (e *Engine) SetHTTPClientRegistry(registry interface{}) *Engine {
 	e.httpClientRegistry = registry

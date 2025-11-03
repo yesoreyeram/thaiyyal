@@ -1,383 +1,351 @@
-# HTTP Client Builder Package
+# HTTP Client Package
 
-The `httpclient` package provides a configurable HTTP client builder system for the Thaiyyal workflow engine. It allows SDK consumers to define named HTTP clients with custom authentication, headers, timeouts, and other options via configuration.
+A standalone, zero-dependency HTTP client builder with middleware support for Go.
 
 ## Features
 
-- 🔐 **Multiple Authentication Types**: None, Basic Auth, Bearer Token (extensible for OAuth2)
-- 🏷️ **Named Clients**: Reference pre-configured clients by name in HTTP nodes
-- ⚙️ **Highly Configurable**: Timeouts, connection pooling, headers, query params
-- 🛡️ **Security First**: Integrated SSRF protection, validates URLs against engine security settings
-- 🔄 **Thread-Safe**: Concurrent access to client registry is fully synchronized
-- ⬅️ **Backward Compatible**: Works seamlessly with existing HTTP nodes
+- **Standalone Package**: No dependencies on other project packages
+- **Immutable UIDs**: Clients identified by unique, immutable UIDs
+- **Middleware Pattern**: Composable roundtrippers for extensibility
+- **Duplicate Keys Support**: Headers and query params use `[]KeyValue` structure
+- **Multiple Auth Types**: None, Basic Auth, Bearer Token (OAuth2-ready)
+- **SSRF Protection**: Built-in security against Server-Side Request Forgery
+- **Thread-Safe Registry**: Concurrent-safe client management
+- **Security First**: Configurable protection against private IPs, localhost, cloud metadata
+
+## Installation
+
+```bash
+go get github.com/yesoreyeram/thaiyyal/backend/pkg/httpclient
+```
 
 ## Quick Start
 
-### 1. Define HTTP Clients in Configuration
-
-```yaml
-http_clients:
-  - name: "github-api"
-    description: "GitHub API client"
-    auth_type: "bearer"
-    token: "${GITHUB_TOKEN}"
-    timeout: "30s"
-    default_headers:
-      Accept: "application/vnd.github.v3+json"
-      User-Agent: "MyApp/1.0"
-  
-  - name: "internal-api"
-    description: "Internal service"
-    auth_type: "basic"
-    username: "${API_USERNAME}"
-    password: "${API_PASSWORD}"
-    timeout: "15s"
-```
-
-### 2. Build and Register Clients
+### Basic Usage
 
 ```go
 package main
 
 import (
+    "context"
+    "fmt"
+    "log"
     "time"
-    
-    "github.com/yesoreyeram/thaiyyal/backend/pkg/config"
+
     "github.com/yesoreyeram/thaiyyal/backend/pkg/httpclient"
-    "github.com/yesoreyeram/thaiyyal/backend/pkg/engine"
 )
 
 func main() {
-    // Load configuration
-    cfg := config.Default()
-    cfg.HTTPClients = []config.HTTPClientConfig{
-        {
-            Name:     "github-api",
-            AuthType: "bearer",
-            Token:    "ghp_your_token_here",
-            Timeout:  30 * time.Second,
-            DefaultHeaders: map[string]string{
-                "Accept": "application/vnd.github.v3+json",
-            },
+    // Create configuration
+    config := &httpclient.Config{
+        UID:      "github-api-client",
+        AuthType: httpclient.AuthTypeBearer,
+        Token:    "ghp_your_token_here",
+        Timeout:  30 * time.Second,
+        Headers: []httpclient.KeyValue{
+            {Key: "Accept", Value: "application/vnd.github.v3+json"},
+            {Key: "User-Agent", Value: "MyApp/1.0"},
         },
     }
-    
-    // Build HTTP client registry
-    builder := httpclient.NewBuilder(*cfg)
-    registry := httpclient.NewRegistry()
-    
-    for _, clientConfig := range cfg.HTTPClients {
-        httpClient := httpclient.FromConfigHTTPClient(clientConfig)
-        client, err := builder.Build(httpClient)
-        if err != nil {
-            panic(err)
-        }
-        registry.Register(clientConfig.Name, client)
+
+    // Create HTTP client
+    client, err := httpclient.New(context.Background(), config)
+    if err != nil {
+        log.Fatal(err)
     }
-    
-    // Create engine and set registry
-    payload := []byte(`{
-        "nodes": [{
-            "id": "1",
-            "type": "http",
-            "data": {
-                "url": "https://api.github.com/users/octocat",
-                "client_name": "github-api"
-            }
-        }],
-        "edges": []
-    }`)
-    
-    engine, _ := engine.NewWithConfig(payload, *cfg)
-    engine.SetHTTPClientRegistry(registry)
-    
-    result, _ := engine.Execute()
-    println(result.FinalOutput)
+
+    // Use the client
+    resp, err := client.Get("https://api.github.com/users/octocat")
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer resp.Body.Close()
+
+    fmt.Println("Status:", resp.Status)
 }
 ```
 
-### 3. Use Named Clients in Workflows
+### Using Registry
 
-```json
-{
-  "nodes": [
+```go
+// Create registry
+registry := httpclient.NewRegistry()
+
+// Build and register clients
+configs := []*httpclient.Config{
     {
-      "id": "fetch-data",
-      "type": "http",
-      "data": {
-        "url": "https://api.example.com/data",
-        "client_name": "github-api"
-      }
-    }
-  ],
-  "edges": []
+        UID:      "github-api",
+        AuthType: httpclient.AuthTypeBearer,
+        Token:    "token1",
+    },
+    {
+        UID:      "internal-api",
+        AuthType: httpclient.AuthTypeBasic,
+        Username: "user",
+        Password: "pass",
+    },
 }
-```
 
-## Authentication Types
+for _, cfg := range configs {
+    client, err := httpclient.New(context.Background(), cfg)
+    if err != nil {
+        log.Fatal(err)
+    }
+    registry.Register(cfg.UID, client)
+}
 
-### None (Default)
-
-No authentication headers are added:
-
-```yaml
-- name: "public-api"
-  auth_type: "none"
-  timeout: "10s"
-```
-
-### Basic Authentication
-
-Adds HTTP Basic Auth headers:
-
-```yaml
-- name: "protected-api"
-  auth_type: "basic"
-  username: "user"
-  password: "secret"
-```
-
-### Bearer Token
-
-Adds `Authorization: Bearer <token>` header:
-
-```yaml
-- name: "api-with-token"
-  auth_type: "bearer"
-  token: "your-secret-token"
+// Retrieve and use clients
+client, err := registry.Get("github-api")
+if err != nil {
+    log.Fatal(err)
+}
+resp, _ := client.Get("https://api.github.com/repos/owner/repo")
 ```
 
 ## Configuration Options
 
-### Network Settings
+### Authentication
 
-```yaml
-- name: "custom-network"
-  timeout: "60s"                  # Request timeout
-  max_idle_conns: 100             # Max idle connections
-  max_idle_conns_per_host: 10     # Max idle connections per host
-  max_conns_per_host: 100         # Max connections per host
-  idle_conn_timeout: "90s"        # Idle connection timeout
-  tls_handshake_timeout: "10s"    # TLS handshake timeout
-  disable_keep_alives: false      # Enable keep-alives
+```go
+// No authentication
+config := &httpclient.Config{
+    UID:      "public-api",
+    AuthType: httpclient.AuthTypeNone,
+}
+
+// Basic authentication
+config := &httpclient.Config{
+    UID:      "basic-auth-api",
+    AuthType: httpclient.AuthTypeBasic,
+    Username: "user",
+    Password: "secret",
+}
+
+// Bearer token
+config := &httpclient.Config{
+    UID:      "bearer-api",
+    AuthType: httpclient.AuthTypeBearer,
+    Token:    "your-token-here",
+}
 ```
 
-### Security Settings
+### Headers and Query Parameters
 
-```yaml
-- name: "secure-api"
-  max_redirects: 5                # Maximum redirects to follow
-  max_response_size: 10485760     # Max response size (10MB)
-  follow_redirects: true          # Follow HTTP redirects
+```go
+config := &httpclient.Config{
+    UID: "custom-client",
+    
+    // Headers support duplicate keys
+    Headers: []httpclient.KeyValue{
+        {Key: "X-Custom", Value: "value1"},
+        {Key: "X-Custom", Value: "value2"}, // Duplicate key
+        {Key: "User-Agent", Value: "MyApp/1.0"},
+    },
+    
+    // Query params support duplicate keys
+    QueryParams: []httpclient.KeyValue{
+        {Key: "api_key", Value: "secret"},
+        {Key: "format", Value: "json"},
+        {Key: "tag", Value: "v1"},
+        {Key: "tag", Value: "v2"}, // Duplicate key
+    },
+}
 ```
 
-### Default Headers
+### Network Configuration
 
-```yaml
-- name: "custom-headers"
-  default_headers:
-    Content-Type: "application/json"
-    User-Agent: "MyApp/1.0"
-    X-Custom-Header: "custom-value"
+```go
+config := &httpclient.Config{
+    UID:                 "optimized-client",
+    Timeout:             60 * time.Second,
+    MaxIdleConns:        100,
+    MaxIdleConnsPerHost: 10,
+    MaxConnsPerHost:     100,
+    IdleConnTimeout:     90 * time.Second,
+    TLSHandshakeTimeout: 10 * time.Second,
+    DisableKeepAlives:   false,
+}
 ```
 
-### Default Query Parameters
+### Security Configuration
 
-```yaml
-- name: "api-with-params"
-  default_query_params:
-    api_key: "secret-key"
-    format: "json"
-    version: "v2"
+```go
+config := &httpclient.Config{
+    UID: "secure-client",
+    
+    // SSRF Protection
+    BlockPrivateIPs:    true,
+    BlockLocalhost:     true,
+    BlockLinkLocal:     true,
+    BlockCloudMetadata: true,
+    AllowedDomains:     []string{"api.example.com", "data.example.com"},
+    
+    // Response limits
+    MaxResponseSize:    10 * 1024 * 1024, // 10MB
+    
+    // Redirect handling
+    FollowRedirects: true,
+    MaxRedirects:    5,
+}
 ```
+
+## Architecture
+
+### Middleware Pattern
+
+The package uses the middleware/roundtripper pattern for composability:
+
+```
+Request
+    ↓
+[Auth Middleware] → Adds authentication headers
+    ↓
+[Headers Middleware] → Adds default headers
+    ↓
+[Query Params Middleware] → Adds default query params
+    ↓
+[SSRF Protection Middleware] → Validates URL
+    ↓
+[Base Transport] → Makes actual HTTP request
+    ↓
+Response
+```
+
+### Components
+
+- **Config**: Configuration structure with validation
+- **Client Builder**: Creates HTTP clients from configuration
+- **Middlewares**: Composable request/response interceptors
+- **Registry**: Thread-safe client management
+- **SSRF Protection**: Security validation for URLs and IPs
 
 ## API Reference
 
-### Builder
+### Config
 
 ```go
-type Builder struct {
-    // Creates configured HTTP clients
+type Config struct {
+    UID                 string        // Unique immutable identifier (required)
+    Description         string        // Human-readable description
+    AuthType            AuthType      // "none", "basic", or "bearer"
+    Username            string        // For basic auth
+    Password            string        // For basic auth
+    Token               string        // For bearer token
+    Timeout             time.Duration // Request timeout (default: 30s)
+    MaxIdleConns        int          // Max idle connections (default: 100)
+    MaxIdleConnsPerHost int          // Max idle conns per host (default: 10)
+    MaxConnsPerHost     int          // Max conns per host (default: 100)
+    IdleConnTimeout     time.Duration // Idle conn timeout (default: 90s)
+    TLSHandshakeTimeout time.Duration // TLS timeout (default: 10s)
+    DisableKeepAlives   bool         // Disable keep-alives (default: false)
+    MaxRedirects        int          // Max redirects (default: 10)
+    MaxResponseSize     int64        // Max response size (default: 10MB)
+    FollowRedirects     bool         // Follow redirects (default: true)
+    BlockPrivateIPs     bool         // Block private IPs
+    BlockLocalhost      bool         // Block localhost
+    BlockLinkLocal      bool         // Block link-local addresses
+    BlockCloudMetadata  bool         // Block cloud metadata endpoints
+    AllowedDomains      []string     // Whitelist of allowed domains
+    Headers             []KeyValue   // Default headers
+    QueryParams         []KeyValue   // Default query parameters
+    BaseURL             string       // Base URL for requests
 }
 
-func NewBuilder(engineConfig types.Config) *Builder
-
-func (b *Builder) Build(config *ClientConfig) (*Client, error)
+func (c *Config) Validate() error
+func (c *Config) ApplyDefaults()
+func (c *Config) Clone() *Config
 ```
+
+### Client Builder
+
+```go
+func New(ctx context.Context, config *Config) (*http.Client, error)
+```
+
+Creates a new HTTP client with the given configuration. The context parameter is for future extensibility.
 
 ### Registry
 
 ```go
-type Registry struct {
-    // Manages named HTTP clients
-}
+type Registry struct { /* ... */ }
 
 func NewRegistry() *Registry
-
-func (r *Registry) Register(name string, client *Client) error
-func (r *Registry) Get(name string) (*Client, error)
-func (r *Registry) GetHTTPClient(name string) (*http.Client, int64, error)
-func (r *Registry) Has(name string) bool
+func (r *Registry) Register(uid string, client *http.Client) error
+func (r *Registry) Get(uid string) (*http.Client, error)
+func (r *Registry) Has(uid string) bool
 func (r *Registry) List() []string
 func (r *Registry) Count() int
 func (r *Registry) Clear()
-```
-
-### ClientConfig
-
-```go
-type ClientConfig struct {
-    Name                string
-    Description         string
-    AuthType            AuthType  // "none", "basic", "bearer"
-    Username            string    // For basic auth
-    Password            string    // For basic auth
-    Token               string    // For bearer token
-    Timeout             time.Duration
-    MaxIdleConns        int
-    MaxIdleConnsPerHost int
-    MaxConnsPerHost     int
-    IdleConnTimeout     time.Duration
-    TLSHandshakeTimeout time.Duration
-    DisableKeepAlives   bool
-    MaxRedirects        int
-    MaxResponseSize     int64
-    FollowRedirects     bool
-    DefaultHeaders      map[string]string
-    DefaultQueryParams  map[string]string
-    BaseURL             string
-}
-
-func (c *ClientConfig) Validate() error
-func (c *ClientConfig) ApplyDefaults()
-func (c *ClientConfig) Clone() *ClientConfig
+func (r *Registry) Unregister(uid string) error
 ```
 
 ## Security
 
 ### SSRF Protection
 
-All HTTP clients inherit SSRF protection from the engine configuration:
+The package includes built-in SSRF (Server-Side Request Forgery) protection:
 
-- URL validation against private IPs
-- Blocking of localhost and link-local addresses
-- Cloud metadata endpoint protection
-- Domain whitelisting support
-- Redirect validation
+- **Private IP blocking**: Blocks 10.x, 172.16.x, 192.168.x ranges
+- **Localhost blocking**: Blocks loopback addresses
+- **Link-local blocking**: Blocks 169.254.x.x addresses
+- **Cloud metadata blocking**: Blocks AWS/Azure/GCP metadata endpoints
+- **Domain whitelisting**: Restrict requests to specific domains
 
-### Credential Management
-
-**Best Practices:**
-
-- ✅ Use environment variables for sensitive data
-- ✅ Load credentials from secure vaults
-- ❌ Never hardcode credentials in configuration files
-- ❌ Never commit credentials to version control
-
-Example using environment variables:
-
-```yaml
-http_clients:
-  - name: "secure-api"
-    auth_type: "bearer"
-    token: "${API_TOKEN}"  # References $API_TOKEN environment variable
+```go
+config := &httpclient.Config{
+    UID:                "secure-client",
+    BlockPrivateIPs:    true,
+    BlockLocalhost:     true,
+    BlockCloudMetadata: true,
+    AllowedDomains:     []string{"trusted.com"},
+}
 ```
 
-### Response Size Limits
+### Best Practices
 
-Clients enforce maximum response sizes to prevent memory exhaustion:
+1. **Use environment variables** for sensitive data:
+   ```go
+   Token: os.Getenv("API_TOKEN"),
+   ```
 
-```yaml
-- name: "limited-api"
-  max_response_size: 5242880  # 5MB limit
-```
+2. **Enable SSRF protection** in production:
+   ```go
+   BlockPrivateIPs:    true,
+   BlockLocalhost:     true,
+   BlockCloudMetadata: true,
+   ```
+
+3. **Set response size limits**:
+   ```go
+   MaxResponseSize: 10 * 1024 * 1024, // 10MB
+   ```
+
+4. **Use domain whitelisting** when possible:
+   ```go
+   AllowedDomains: []string{"api.trusted.com"},
+   ```
 
 ## Examples
 
-### GitHub API Integration
+See the [examples directory](../../examples/httpclient_standalone/) for complete working examples:
 
-```go
-cfg := config.Default()
-cfg.HTTPClients = []config.HTTPClientConfig{
-    {
-        Name:     "github",
-        AuthType: "bearer",
-        Token:    os.Getenv("GITHUB_TOKEN"),
-        Timeout:  30 * time.Second,
-        DefaultHeaders: map[string]string{
-            "Accept": "application/vnd.github.v3+json",
-        },
-    },
-}
-
-builder := httpclient.NewBuilder(*cfg)
-registry := httpclient.NewRegistry()
-
-client, _ := builder.Build(httpclient.FromConfigHTTPClient(cfg.HTTPClients[0]))
-registry.Register("github", client)
-
-engine.SetHTTPClientRegistry(registry)
-```
-
-### Multiple APIs with Different Auth
-
-```go
-cfg.HTTPClients = []config.HTTPClientConfig{
-    {
-        Name:     "api-basic",
-        AuthType: "basic",
-        Username: "user",
-        Password: "pass",
-    },
-    {
-        Name:     "api-bearer",
-        AuthType: "bearer",
-        Token:    "token123",
-    },
-    {
-        Name:     "api-key",
-        AuthType: "none",
-        DefaultHeaders: map[string]string{
-            "X-API-Key": "secret-key",
-        },
-    },
-}
-```
+- Basic usage
+- Multiple authentication types
+- Registry management
+- SSRF protection demo
+- Duplicate headers/params
 
 ## Testing
 
-### Unit Tests
-
+Run tests:
 ```bash
-go test ./pkg/httpclient -v
+go test ./pkg/httpclient/...
 ```
 
-### Integration Tests
-
+Run benchmarks:
 ```bash
-go test ./pkg/httpclient -v -run TestNamedHTTPClient_Integration
+go test -bench=. ./pkg/httpclient/...
 ```
-
-## Future Enhancements
-
-- [ ] OAuth2 authentication support
-- [ ] Client certificate authentication
-- [ ] Request/response interceptors
-- [ ] Retry policies per client
-- [ ] Circuit breaker pattern
-- [ ] Metrics and observability hooks
-- [ ] Dynamic client registration
-- [ ] Client health checks
-
-## Contributing
-
-When adding new features:
-
-1. Maintain backward compatibility
-2. Add comprehensive tests
-3. Update documentation
-4. Follow existing code patterns
-5. Ensure security best practices
 
 ## License
 

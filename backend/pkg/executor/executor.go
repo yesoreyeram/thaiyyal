@@ -47,7 +47,7 @@ type ExecutionContext interface {
 	GetConfig() types.Config
 	
 	// HTTP Client Registry - provides access to named HTTP clients
-	// Returns nil if no registry is configured
+	// Returns nil if no registry is configured (uses standalone httpclient.Registry)
 	GetHTTPClientRegistry() interface{}
 	
 	// Protection counters

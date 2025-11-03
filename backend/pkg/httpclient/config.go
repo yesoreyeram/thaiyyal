@@ -3,8 +3,6 @@ package httpclient
 import (
 	"fmt"
 	"time"
-
-	"github.com/yesoreyeram/thaiyyal/backend/pkg/config"
 )
 
 // AuthType represents the type of authentication to use
@@ -19,10 +17,18 @@ const (
 	AuthTypeBearer AuthType = "bearer"
 )
 
-// ClientConfig represents the configuration for a named HTTP client
-type ClientConfig struct {
-	// Name is the unique identifier for this HTTP client
-	Name string `json:"name" yaml:"name"`
+// KeyValue represents a key-value pair for headers and query parameters.
+// This structure allows duplicate keys, which is important for some HTTP scenarios.
+type KeyValue struct {
+	Key   string `json:"key" yaml:"key"`
+	Value string `json:"value" yaml:"value"`
+}
+
+// Config represents the configuration for an HTTP client.
+// All fields are self-contained with no external dependencies.
+type Config struct {
+	// UID is the unique immutable identifier for this HTTP client
+	UID string `json:"uid" yaml:"uid"`
 
 	// Description provides human-readable documentation for this client
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
@@ -43,24 +49,31 @@ type ClientConfig struct {
 	DisableKeepAlives   bool          `json:"disable_keep_alives,omitempty" yaml:"disable_keep_alives,omitempty"`     // Disable keep-alives (default: false)
 
 	// Security configuration
-	MaxRedirects    int  `json:"max_redirects,omitempty" yaml:"max_redirects,omitempty"`       // Max redirects (default: 10)
+	MaxRedirects    int   `json:"max_redirects,omitempty" yaml:"max_redirects,omitempty"`       // Max redirects (default: 10)
 	MaxResponseSize int64 `json:"max_response_size,omitempty" yaml:"max_response_size,omitempty"` // Max response size in bytes (default: 10MB)
-	FollowRedirects bool `json:"follow_redirects,omitempty" yaml:"follow_redirects,omitempty"` // Follow redirects (default: true)
+	FollowRedirects bool  `json:"follow_redirects,omitempty" yaml:"follow_redirects,omitempty"` // Follow redirects (default: true)
 
-	// Default headers to include in all requests
-	DefaultHeaders map[string]string `json:"default_headers,omitempty" yaml:"default_headers,omitempty"`
+	// SSRF Protection
+	BlockPrivateIPs    bool     `json:"block_private_ips,omitempty" yaml:"block_private_ips,omitempty"`       // Block private IP ranges
+	BlockLocalhost     bool     `json:"block_localhost,omitempty" yaml:"block_localhost,omitempty"`           // Block localhost
+	BlockLinkLocal     bool     `json:"block_link_local,omitempty" yaml:"block_link_local,omitempty"`         // Block link-local addresses
+	BlockCloudMetadata bool     `json:"block_cloud_metadata,omitempty" yaml:"block_cloud_metadata,omitempty"` // Block cloud metadata endpoints
+	AllowedDomains     []string `json:"allowed_domains,omitempty" yaml:"allowed_domains,omitempty"`           // Whitelist of allowed domains
 
-	// Default query parameters to include in all requests
-	DefaultQueryParams map[string]string `json:"default_query_params,omitempty" yaml:"default_query_params,omitempty"`
+	// Default headers to include in all requests (supports duplicate keys)
+	Headers []KeyValue `json:"headers,omitempty" yaml:"headers,omitempty"`
+
+	// Default query parameters to include in all requests (supports duplicate keys)
+	QueryParams []KeyValue `json:"query_params,omitempty" yaml:"query_params,omitempty"`
 
 	// BaseURL is the base URL for all requests (optional)
 	BaseURL string `json:"base_url,omitempty" yaml:"base_url,omitempty"`
 }
 
 // Validate checks if the client configuration is valid
-func (c *ClientConfig) Validate() error {
-	if c.Name == "" {
-		return fmt.Errorf("client name is required")
+func (c *Config) Validate() error {
+	if c.UID == "" {
+		return fmt.Errorf("client UID is required")
 	}
 
 	// Validate auth type
@@ -117,7 +130,7 @@ func (c *ClientConfig) Validate() error {
 }
 
 // ApplyDefaults fills in default values for unset fields
-func (c *ClientConfig) ApplyDefaults() {
+func (c *Config) ApplyDefaults() {
 	if c.AuthType == "" {
 		c.AuthType = AuthTypeNone
 	}
@@ -154,52 +167,28 @@ func (c *ClientConfig) ApplyDefaults() {
 		c.MaxResponseSize = 10 * 1024 * 1024 // 10MB
 	}
 
-	// FollowRedirects defaults to true (zero value for bool is false, so we use a pointer check in builder)
+	// FollowRedirects defaults to true (handled in client creation)
 }
 
-// Clone creates a deep copy of the client configuration
-func (c *ClientConfig) Clone() *ClientConfig {
+// Clone creates a deep copy of the configuration
+func (c *Config) Clone() *Config {
 	clone := *c
 
-	// Deep copy maps
-	if c.DefaultHeaders != nil {
-		clone.DefaultHeaders = make(map[string]string, len(c.DefaultHeaders))
-		for k, v := range c.DefaultHeaders {
-			clone.DefaultHeaders[k] = v
-		}
+	// Deep copy slices
+	if c.AllowedDomains != nil {
+		clone.AllowedDomains = make([]string, len(c.AllowedDomains))
+		copy(clone.AllowedDomains, c.AllowedDomains)
 	}
 
-	if c.DefaultQueryParams != nil {
-		clone.DefaultQueryParams = make(map[string]string, len(c.DefaultQueryParams))
-		for k, v := range c.DefaultQueryParams {
-			clone.DefaultQueryParams[k] = v
-		}
+	if c.Headers != nil {
+		clone.Headers = make([]KeyValue, len(c.Headers))
+		copy(clone.Headers, c.Headers)
+	}
+
+	if c.QueryParams != nil {
+		clone.QueryParams = make([]KeyValue, len(c.QueryParams))
+		copy(clone.QueryParams, c.QueryParams)
 	}
 
 	return &clone
-}
-
-// FromConfigHTTPClient converts a config.HTTPClientConfig to a ClientConfig
-func FromConfigHTTPClient(c config.HTTPClientConfig) *ClientConfig {
-	return &ClientConfig{
-		Name:                c.Name,
-		Description:         c.Description,
-		AuthType:            AuthType(c.AuthType),
-		Username:            c.Username,
-		Password:            c.Password,
-		Token:               c.Token,
-		Timeout:             c.Timeout,
-		MaxIdleConns:        c.MaxIdleConns,
-		MaxIdleConnsPerHost: c.MaxIdleConnsPerHost,
-		MaxConnsPerHost:     c.MaxConnsPerHost,
-		IdleConnTimeout:     c.IdleConnTimeout,
-		TLSHandshakeTimeout: c.TLSHandshakeTimeout,
-		DisableKeepAlives:   c.DisableKeepAlives,
-		MaxRedirects:        c.MaxRedirects,
-		MaxResponseSize:     c.MaxResponseSize,
-		FollowRedirects:     c.FollowRedirects,
-		DefaultHeaders:      c.DefaultHeaders,
-		DefaultQueryParams:  c.DefaultQueryParams,
-		BaseURL:             c.BaseURL,
-	}
 }
