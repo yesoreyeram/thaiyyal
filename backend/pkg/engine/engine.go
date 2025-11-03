@@ -162,12 +162,12 @@ func NewWithRegistry(payloadJSON []byte, config types.Config, registry *executor
 //	registry.MustRegister(&MyCustomExecutor{})
 //	engine, err := engine.NewWithRegistry(payload, config, registry)
 //
-// Returns a registry with all 40 built-in node types registered:
+// Returns a registry with all 41 built-in node types registered:
 //   - Basic I/O: Number, TextInput, Visualization
 //   - Operations: Operation, TextOperation, HTTP
 //   - Control Flow: Condition, ForEach, WhileLoop, Filter, Map, Reduce
 //   - Array Processing: Slice, Sort, Find, FlatMap, GroupBy, Unique, Chunk, Reverse, Partition, Zip, Sample, Range, Compact, Transpose
-//   - State & Memory: Variable, Extract, Transform, Accumulator, Counter
+//   - State & Memory: Variable, Extract, Transform, Accumulator, Counter, Parse
 //   - Advanced Control: Switch, Parallel, Join, Split, Delay, Cache
 //   - Error Handling: Retry, TryCatch, Timeout
 //   - Context: ContextVariable, ContextConstant
@@ -215,6 +215,7 @@ func DefaultRegistry() *executor.Registry {
 	reg.MustRegister(&executor.TransformExecutor{})
 	reg.MustRegister(&executor.AccumulatorExecutor{})
 	reg.MustRegister(&executor.CounterExecutor{})
+	reg.MustRegister(&executor.ParseExecutor{})
 
 	// Advanced control flow nodes
 	reg.MustRegister(&executor.SwitchExecutor{})
