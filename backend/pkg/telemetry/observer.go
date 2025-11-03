@@ -52,13 +52,13 @@ func (o *TelemetryObserver) OnEvent(ctx context.Context, event observer.Event) {
 
 func (o *TelemetryObserver) handleWorkflowStart(ctx context.Context, event observer.Event) {
 	// Start workflow span
-	spanCtx, span := o.provider.Tracer().Start(ctx, "workflow.execute",
+	// Note: spanCtx can be used for context propagation if needed in the future
+	_, span := o.provider.Tracer().Start(ctx, "workflow.execute",
 		trace.WithAttributes(
 			attribute.String("workflow.id", event.WorkflowID),
 			attribute.String("execution.id", event.ExecutionID),
 		),
 	)
-	_ = spanCtx // Use spanCtx if needed for propagation
 	
 	o.workflowSpan = span
 	o.workflowStartTime = event.Timestamp

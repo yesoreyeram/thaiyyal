@@ -137,6 +137,8 @@ metadata:
 
 ---
 # HorizontalPodAutoscaler
+# Requires Kubernetes 1.23+ for autoscaling/v2 API
+# For Kubernetes 1.22 and below, use autoscaling/v2beta2
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:

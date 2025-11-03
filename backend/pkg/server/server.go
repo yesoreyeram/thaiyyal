@@ -6,7 +6,11 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	_ "net/http/pprof" // Import pprof for profiling endpoints
+	// Import pprof for profiling endpoints
+	// WARNING: In production, consider restricting access to /debug/pprof/* endpoints
+	// using authentication, IP allowlisting, or a separate admin port.
+	// These endpoints expose sensitive runtime information.
+	_ "net/http/pprof"
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"

@@ -156,6 +156,38 @@ MAX_NODE_EXECUTIONS: 1000
 MAX_HTTP_CALLS: 10
 ```
 
+### Security Considerations
+
+#### Production Deployment
+
+**⚠️ IMPORTANT: Profiling Endpoints**
+
+The server exposes pprof endpoints at `/debug/pprof/*` for performance profiling. These endpoints provide sensitive runtime information and should be restricted in production:
+
+**Option 1: Use a separate admin port (Recommended)**
+```go
+// Run pprof on separate admin port with restricted access
+go func() {
+    log.Println(http.ListenAndServe("localhost:6060", nil))
+}()
+```
+
+**Option 2: Add authentication middleware**
+- Require API keys or JWT tokens
+- Implement IP allowlisting
+- Use mutual TLS (mTLS)
+
+**Option 3: Disable in production builds**
+```bash
+# Build without pprof
+go build -tags nopprof ./cmd/server
+```
+
+**Network-level protection:**
+- Use network policies to restrict access
+- Place behind firewall or VPN
+- Only expose to monitoring/admin networks
+
 ## Monitoring
 
 ### Health Endpoints

@@ -21,8 +21,8 @@ RUN cd backend/cmd/server && \
 # Runtime stage
 FROM alpine:3.19
 
-# Install ca-certificates for HTTPS
-RUN apk --no-cache add ca-certificates
+# Install ca-certificates for HTTPS and wget for health checks
+RUN apk --no-cache add ca-certificates wget
 
 # Create non-root user
 RUN addgroup -g 1000 thaiyyal && \
