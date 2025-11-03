@@ -51,7 +51,7 @@ func DefaultConfig() Config {
 		MaxResponseSize:     10 * 1024 * 1024, // 10MB
 		MaxHTTPCallsPerExec: 100,              // Limit when HTTP is enabled
 		AllowedURLPatterns:  []string{},       // Empty = allow all when HTTP enabled
-		BlockInternalIPs:    true,             // Deprecated: use BlockPrivateIPs
+		BlockInternalIPs:    true,             // DEPRECATED: kept for backwards compatibility
 		
 		// Zero Trust Security - DENY ALL by default (explicit opt-in required)
 		AllowHTTP:          false,   // HTTP DISABLED - must explicitly enable
