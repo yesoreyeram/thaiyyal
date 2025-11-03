@@ -45,7 +45,7 @@ func (e *HTTPExecutor) Execute(ctx ExecutionContext, node types.Node) (interface
 	}
 
 	config := ctx.GetConfig()
-	
+
 	// Zero Trust: Check if HTTP is allowed at all
 	if !config.AllowHTTP {
 		return nil, fmt.Errorf("HTTP requests are not allowed (AllowHTTP=false). Enable AllowHTTP in config to make HTTP requests")
@@ -153,12 +153,12 @@ func (e *HTTPExecutor) getOrCreateClient(config types.Config) *http.Client {
 			MaxIdleConnsPerHost: 10,               // Max idle connections per host
 			MaxConnsPerHost:     100,              // Max connections per host
 			IdleConnTimeout:     90 * time.Second, // How long idle connections are kept
-			
+
 			// Performance settings
 			TLSHandshakeTimeout:   10 * time.Second,
 			ResponseHeaderTimeout: 30 * time.Second,
 			ExpectContinueTimeout: 1 * time.Second,
-			
+
 			// Keep connections alive for reuse
 			DisableKeepAlives: false,
 		},
@@ -204,9 +204,9 @@ func isAllowedURL(url string, config types.Config) error {
 		AllowedDomains:     config.AllowedDomains,
 		BlockedDomains:     []string{},
 	}
-	
+
 	protection := security.NewSSRFProtectionWithConfig(ssrfConfig)
-	
+
 	// Validate URL
 	return protection.ValidateURL(url)
 }

@@ -11,6 +11,8 @@ import (
 func testConfig() Config {
 	cfg := DefaultConfig()
 	cfg.BlockInternalIPs = false // Allow localhost/internal IPs for tests
+	cfg.AllowHTTP = true
+	cfg.BlockLocalhost = false
 	return cfg
 }
 

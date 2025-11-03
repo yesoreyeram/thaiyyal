@@ -112,4 +112,3 @@ func (e *TextOperationExecutor) executeTextRepeat(input interface{}, repeatN *in
 	// Repeat the text efficiently
 	return strings.Repeat(inputText, repeatCount), nil
 }
-

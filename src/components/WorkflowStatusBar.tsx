@@ -7,10 +7,10 @@ interface WorkflowStatusBarProps {
   selectedCount?: number;
 }
 
-export function WorkflowStatusBar({ 
-  nodeCount, 
-  edgeCount, 
-  selectedCount = 0 
+export function WorkflowStatusBar({
+  nodeCount,
+  edgeCount,
+  selectedCount = 0,
 }: WorkflowStatusBarProps) {
   return (
     <div className="h-7 bg-gray-900 border-t border-gray-800 flex items-center justify-between px-4 text-xs text-gray-400">

@@ -42,14 +42,14 @@ type ExecutionContext interface {
 	GetAllNodeResults() map[string]interface{}
 	GetVariables() map[string]interface{}
 	GetContextVariables() map[string]interface{}
-	
+
 	// Configuration
 	GetConfig() types.Config
-	
+
 	// HTTP Client Registry - provides access to named HTTP clients
 	// Returns nil if no registry is configured (uses standalone httpclient.Registry)
 	GetHTTPClientRegistry() interface{}
-	
+
 	// Protection counters
 	IncrementNodeExecution() error
 	IncrementHTTPCall() error

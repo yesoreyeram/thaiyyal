@@ -29,7 +29,7 @@ func (o *testObserver) OnEvent(ctx context.Context, event observer.Event) {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 	defer o.wg.Done()
-	
+
 	o.events = append(o.events, event)
 }
 
@@ -50,7 +50,7 @@ func (o *testObserver) getEvents() []observer.Event {
 func (o *testObserver) getEventsByType(eventType observer.EventType) []observer.Event {
 	o.mu.Lock()
 	defer o.mu.Unlock()
-	
+
 	filtered := []observer.Event{}
 	for _, e := range o.events {
 		if e.Type == eventType {

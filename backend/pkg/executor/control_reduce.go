@@ -28,10 +28,11 @@ type ReduceExecutor struct{}
 // - `expression` (required): Expression to compute new accumulator value
 //
 // Examples:
-//   Sum: [1,2,3] → Reduce(init=0, expr="accumulator + item") → 6
-//   Sum ages: [{age:25},{age:30}] → Reduce(init=0, expr="accumulator + item.age") → 55
-//   Max: [5,2,8,1] → Reduce(init=0, expr="item > accumulator ? item : accumulator") → 8
-//   Concat: ["A","B","C"] → Reduce(init="", expr="accumulator + item") → "ABC"
+//
+//	Sum: [1,2,3] → Reduce(init=0, expr="accumulator + item") → 6
+//	Sum ages: [{age:25},{age:30}] → Reduce(init=0, expr="accumulator + item.age") → 55
+//	Max: [5,2,8,1] → Reduce(init=0, expr="item > accumulator ? item : accumulator") → 8
+//	Concat: ["A","B","C"] → Reduce(init="", expr="accumulator + item") → "ABC"
 func (e *ReduceExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {

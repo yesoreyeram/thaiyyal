@@ -19,9 +19,9 @@ func BenchmarkHTTPExecutor_Sequential(b *testing.B) {
 
 	executor := NewHTTPExecutor()
 	config := types.Config{
-		HTTPTimeout:       30 * time.Second,
-		MaxHTTPRedirects:  10,
-		MaxResponseSize:   10 * 1024 * 1024,
+		HTTPTimeout:      30 * time.Second,
+		MaxHTTPRedirects: 10,
+		MaxResponseSize:  10 * 1024 * 1024,
 	}
 	ctx := &mockExecutionContext{config: config}
 
@@ -52,9 +52,9 @@ func BenchmarkHTTPExecutor_NoPooling(b *testing.B) {
 	defer server.Close()
 
 	config := types.Config{
-		HTTPTimeout:       30 * time.Second,
-		MaxHTTPRedirects:  10,
-		MaxResponseSize:   10 * 1024 * 1024,
+		HTTPTimeout:      30 * time.Second,
+		MaxHTTPRedirects: 10,
+		MaxResponseSize:  10 * 1024 * 1024,
 	}
 
 	url := server.URL
@@ -92,9 +92,9 @@ func BenchmarkHTTPExecutor_Concurrent(b *testing.B) {
 
 	executor := NewHTTPExecutor()
 	config := types.Config{
-		HTTPTimeout:       30 * time.Second,
-		MaxHTTPRedirects:  10,
-		MaxResponseSize:   10 * 1024 * 1024,
+		HTTPTimeout:      30 * time.Second,
+		MaxHTTPRedirects: 10,
+		MaxResponseSize:  10 * 1024 * 1024,
 	}
 	ctx := &mockExecutionContext{config: config}
 
@@ -134,9 +134,9 @@ func BenchmarkHTTPExecutor_MultipleHosts(b *testing.B) {
 
 	executor := NewHTTPExecutor()
 	config := types.Config{
-		HTTPTimeout:       30 * time.Second,
-		MaxHTTPRedirects:  10,
-		MaxResponseSize:   10 * 1024 * 1024,
+		HTTPTimeout:      30 * time.Second,
+		MaxHTTPRedirects: 10,
+		MaxResponseSize:  10 * 1024 * 1024,
 	}
 	ctx := &mockExecutionContext{config: config}
 

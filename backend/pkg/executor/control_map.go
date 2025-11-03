@@ -26,9 +26,10 @@ type MapExecutor struct{}
 // - All workflow variables and context
 //
 // Examples:
-//   Transform numbers: [1,2,3] → Map(expr="item * 2") → [2,4,6]
-//   Extract field: [{name:"Alice"}] → Map(field="name") → ["Alice"]
-//   Complex expression: [users] → Map(expr="item.age * 1.1") → [ages with 10% increase]
+//
+//	Transform numbers: [1,2,3] → Map(expr="item * 2") → [2,4,6]
+//	Extract field: [{name:"Alice"}] → Map(field="name") → ["Alice"]
+//	Complex expression: [users] → Map(expr="item.age * 1.1") → [ages with 10% increase]
 func (e *MapExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {

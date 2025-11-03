@@ -183,7 +183,7 @@ func (m *Manager) Notify(ctx context.Context, event Event) {
 		// Call observer in a goroutine for async execution
 		// Note: Explicit copy not strictly needed in Go 1.22+ but kept for compatibility
 		obs := observer
-		
+
 		// Execute observer asynchronously in a goroutine
 		go func() {
 			// Recover from any panics in observer code
@@ -194,7 +194,7 @@ func (m *Manager) Notify(ctx context.Context, event Event) {
 					// For now, we silently recover to maintain system stability
 				}
 			}()
-			
+
 			// Call the observer with the event
 			obs.OnEvent(ctx, event)
 		}()

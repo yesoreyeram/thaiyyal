@@ -17,9 +17,10 @@ type ForEachExecutor struct{}
 // The ForEach node is a pure iterator that:
 // 1. Takes an array as input
 // 2. For each element, makes variables available:
-//    - `variables.item` - Current array element
-//    - `variables.index` - Current index (0-based)
-//    - `variables.items` - Full input array
+//   - `variables.item` - Current array element
+//   - `variables.index` - Current index (0-based)
+//   - `variables.items` - Full input array
+//
 // 3. Executes child nodes for each iteration (handled by workflow engine)
 // 4. Returns execution metadata
 //
@@ -34,9 +35,10 @@ type ForEachExecutor struct{}
 //   - Filter node: Remove elements that don't match condition
 //
 // Example:
-//   Input: [{"name":"Alice"}, {"name":"Bob"}]
-//   Each iteration: variables.item = {"name":"Alice"}, variables.index = 0
-//   Output: {iterations: 2, successful: 2, failed: 0}
+//
+//	Input: [{"name":"Alice"}, {"name":"Bob"}]
+//	Each iteration: variables.item = {"name":"Alice"}, variables.index = 0
+//	Output: {iterations: 2, successful: 2, failed: 0}
 func (e *ForEachExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {

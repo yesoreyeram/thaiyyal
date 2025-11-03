@@ -1,8 +1,7 @@
 "use client";
-import React, { useCallback, useMemo, useState, useEffect } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import ReactFlow, {
   addEdge,
-  Background,
   ReactFlowProvider,
   useEdgesState,
   useNodesState,
@@ -75,7 +74,7 @@ type NodePropsWithOptions = NodeProps<NodeData> & {
 
 // Higher-order component to add context menu and palette close to nodes
 const withContextMenu = (
-  Component: React.ComponentType<NodePropsWithOptions>, 
+  Component: React.ComponentType<NodePropsWithOptions>,
   handleContextMenu: (nodeId: string, x: number, y: number) => void,
   closePalette: () => void
 ) => {
@@ -86,12 +85,24 @@ const withContextMenu = (
     const onOpenInfo = () => {
       closePalette();
     };
-    return <Component {...(props as NodePropsWithOptions)} onShowOptions={onShowOptions} onOpenInfo={onOpenInfo} />;
+    return (
+      <Component
+        {...(props as NodePropsWithOptions)}
+        onShowOptions={onShowOptions}
+        onOpenInfo={onOpenInfo}
+      />
+    );
   };
 };
 
 // Original three node components - Updated to use NodeWrapper
-function NumberNode({ id, data, onShowOptions, onOpenInfo, ...props }: NodePropsWithOptions) {
+function NumberNode({
+  id,
+  data,
+  onShowOptions,
+  onOpenInfo,
+  ...props
+}: NodePropsWithOptions) {
   const { setNodes } = useReactFlow();
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = Number(e.target.value);
@@ -121,21 +132,33 @@ function NumberNode({ id, data, onShowOptions, onOpenInfo, ...props }: NodeProps
       onShowOptions={onShowOptions}
       onTitleChange={handleTitleChange}
       onOpenInfo={onOpenInfo}
-      
     >
-      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-2 h-2 bg-blue-400"
+      />
       <input
         value={typeof data?.value === "number" ? data.value : 0}
         type="number"
         onChange={onChange}
         className="w-24 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
       />
-      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-2 h-2 bg-green-400"
+      />
     </NodeWrapper>
   );
 }
 
-function OperationNode({ id, data, onShowOptions, ...props }: NodePropsWithOptions) {
+function OperationNode({
+  id,
+  data,
+  onShowOptions,
+  ...props
+}: NodePropsWithOptions) {
   const { setNodes } = useReactFlow();
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const op = e.target.value;
@@ -161,9 +184,12 @@ function OperationNode({ id, data, onShowOptions, ...props }: NodePropsWithOptio
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
       onTitleChange={handleTitleChange}
-      
     >
-      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-2 h-2 bg-blue-400"
+      />
       <select
         value={typeof data?.op === "string" ? data.op : "add"}
         onChange={onChange}
@@ -174,7 +200,11 @@ function OperationNode({ id, data, onShowOptions, ...props }: NodePropsWithOptio
         <option value="multiply">Multiply</option>
         <option value="divide">Divide</option>
       </select>
-      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-2 h-2 bg-green-400"
+      />
     </NodeWrapper>
   );
 }
@@ -205,9 +235,12 @@ function VizNode({ id, data, onShowOptions, ...props }: NodePropsWithOptions) {
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
       onTitleChange={handleTitleChange}
-      
     >
-      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-2 h-2 bg-blue-400"
+      />
       <select
         value={typeof data?.mode === "string" ? data.mode : "text"}
         onChange={onChange}
@@ -216,7 +249,11 @@ function VizNode({ id, data, onShowOptions, ...props }: NodePropsWithOptions) {
         <option value="text">Text</option>
         <option value="table">Table</option>
       </select>
-      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-2 h-2 bg-green-400"
+      />
     </NodeWrapper>
   );
 }
@@ -287,12 +324,12 @@ const nodeCategories = [
         type: "barChartNode",
         label: "Bar Chart",
         color: "bg-violet-600",
-        defaultData: { 
-          orientation: "vertical", 
-          bar_color: "#3b82f6", 
+        defaultData: {
+          orientation: "vertical",
+          bar_color: "#3b82f6",
           bar_width: "medium",
           show_values: true,
-          max_bars: 20
+          max_bars: 20,
         },
       },
     ],
@@ -561,8 +598,15 @@ function Canvas() {
   const [showPayload, setShowPayload] = useState(false);
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
   const [workflowTitle, setWorkflowTitle] = useState("Untitled Workflow");
-  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; nodeId: string } | null>(null);
-  const [deleteConfirm, setDeleteConfirm] = useState<{ nodeId: string; nodeName: string } | null>(null);
+  const [contextMenu, setContextMenu] = useState<{
+    x: number;
+    y: number;
+    nodeId: string;
+  } | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    nodeId: string;
+    nodeName: string;
+  } | null>(null);
   const { project, getNodes } = useReactFlow();
 
   const onConnect = useCallback(
@@ -570,13 +614,21 @@ function Canvas() {
     [setEdges]
   );
 
-  const handleNodeContextMenu = useCallback((nodeId: string, x: number, y: number) => {
-    setContextMenu({ x, y, nodeId });
-  }, []);
+  const handleNodeContextMenu = useCallback(
+    (nodeId: string, x: number, y: number) => {
+      setContextMenu({ x, y, nodeId });
+    },
+    []
+  );
 
   const payload = useMemo(
     () => ({
-      nodes: nodes.map((n) => ({ id: n.id, type: n.type, data: n.data, position: n.position })),
+      nodes: nodes.map((n) => ({
+        id: n.id,
+        type: n.type,
+        data: n.data,
+        position: n.position,
+      })),
       edges: edges.map((e) => ({
         id: e.id,
         source: e.source,
@@ -588,47 +640,133 @@ function Canvas() {
 
   const nodeTypes = useMemo(
     () => ({
-      numberNode: withContextMenu(NumberNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      opNode: withContextMenu(OperationNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      vizNode: withContextMenu(VizNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      barChartNode: withContextMenu(BarChartNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      textInputNode: withContextMenu(TextInputNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      textOpNode: withContextMenu(TextOperationNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      httpNode: withContextMenu(HttpNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      conditionNode: withContextMenu(ConditionNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      filterNode: withContextMenu(FilterNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      forEachNode: withContextMenu(ForEachNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      whileLoopNode: withContextMenu(WhileLoopNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      variableNode: withContextMenu(VariableNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      extractNode: withContextMenu(ExtractNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      transformNode: withContextMenu(TransformNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      parseNode: withContextMenu(ParseNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      accumulatorNode: withContextMenu(AccumulatorNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      counterNode: withContextMenu(CounterNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      switchNode: withContextMenu(SwitchNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      parallelNode: withContextMenu(ParallelNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      joinNode: withContextMenu(JoinNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      splitNode: withContextMenu(SplitNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      delayNode: withContextMenu(DelayNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      cacheNode: withContextMenu(CacheNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      retryNode: withContextMenu(RetryNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      tryCatchNode: withContextMenu(TryCatchNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      timeoutNode: withContextMenu(TimeoutNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      mapNode: withContextMenu(MapNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      reduceNode: withContextMenu(ReduceNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      sliceNode: withContextMenu(SliceNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      sortNode: withContextMenu(SortNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      findNode: withContextMenu(FindNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      flatMapNode: withContextMenu(FlatMapNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      groupByNode: withContextMenu(GroupByNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      uniqueNode: withContextMenu(UniqueNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      chunkNode: withContextMenu(ChunkNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      reverseNode: withContextMenu(ReverseNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      partitionNode: withContextMenu(PartitionNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      zipNode: withContextMenu(ZipNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      sampleNode: withContextMenu(SampleNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      rangeNode: withContextMenu(RangeNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
-      transposeNode: withContextMenu(TransposeNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
+      numberNode: withContextMenu(NumberNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      opNode: withContextMenu(OperationNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      vizNode: withContextMenu(VizNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      barChartNode: withContextMenu(BarChartNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      textInputNode: withContextMenu(TextInputNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      textOpNode: withContextMenu(
+        TextOperationNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false)
+      ),
+      httpNode: withContextMenu(HttpNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      conditionNode: withContextMenu(ConditionNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      filterNode: withContextMenu(FilterNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      forEachNode: withContextMenu(ForEachNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      whileLoopNode: withContextMenu(WhileLoopNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      variableNode: withContextMenu(VariableNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      extractNode: withContextMenu(ExtractNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      transformNode: withContextMenu(TransformNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      parseNode: withContextMenu(ParseNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      accumulatorNode: withContextMenu(
+        AccumulatorNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false)
+      ),
+      counterNode: withContextMenu(CounterNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      switchNode: withContextMenu(SwitchNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      parallelNode: withContextMenu(ParallelNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      joinNode: withContextMenu(JoinNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      splitNode: withContextMenu(SplitNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      delayNode: withContextMenu(DelayNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      cacheNode: withContextMenu(CacheNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      retryNode: withContextMenu(RetryNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      tryCatchNode: withContextMenu(TryCatchNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      timeoutNode: withContextMenu(TimeoutNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      mapNode: withContextMenu(MapNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      reduceNode: withContextMenu(ReduceNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      sliceNode: withContextMenu(SliceNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      sortNode: withContextMenu(SortNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      findNode: withContextMenu(FindNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      flatMapNode: withContextMenu(FlatMapNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      groupByNode: withContextMenu(GroupByNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      uniqueNode: withContextMenu(UniqueNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      chunkNode: withContextMenu(ChunkNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      reverseNode: withContextMenu(ReverseNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      partitionNode: withContextMenu(PartitionNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      zipNode: withContextMenu(ZipNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      sampleNode: withContextMenu(SampleNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      rangeNode: withContextMenu(RangeNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      transposeNode: withContextMenu(TransposeNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
     }),
     [handleNodeContextMenu]
   );
@@ -641,47 +779,47 @@ function Canvas() {
     const nodeWidth = 150;
     const nodeHeight = 80;
     const padding = 20;
-    
+
     let position = { ...basePosition };
     let attempts = 0;
     const maxAttempts = 50;
-    
+
     while (attempts < maxAttempts) {
-      const overlaps = existingNodes.some(node => {
+      const overlaps = existingNodes.some((node) => {
         const dx = Math.abs(node.position.x - position.x);
         const dy = Math.abs(node.position.y - position.y);
-        return dx < (nodeWidth + padding) && dy < (nodeHeight + padding);
+        return dx < nodeWidth + padding && dy < nodeHeight + padding;
       });
-      
+
       if (!overlaps) {
         return position;
       }
-      
+
       // Try offset positions
       position = {
-        x: basePosition.x + (attempts * 30),
-        y: basePosition.y + ((attempts % 5) * 25),
+        x: basePosition.x + attempts * 30,
+        y: basePosition.y + (attempts % 5) * 25,
       };
       attempts++;
     }
-    
+
     return position;
   };
 
   const addNode = (type: string, defaultData: Record<string, unknown>) => {
     const id = String(nextId);
     setNextId((s) => s + 1);
-    
+
     // Get viewport dimensions (accounting for nav bars: 14px app + 12px workflow + 7px status = 33px total)
     const navHeight = 112; // Total height of both navs + status bar
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight - navHeight;
-    
+
     // Get base position at center of visible viewport
     const basePosition: XYPosition = project
       ? project({ x: viewportWidth / 2 - 75, y: viewportHeight / 2 })
       : { x: 400, y: 200 };
-    
+
     // Find non-overlapping position
     const position = findNonOverlappingPosition(basePosition);
 
@@ -691,7 +829,7 @@ function Canvas() {
   };
 
   const handleNewWorkflow = () => {
-    router.push('/');
+    router.push("/");
   };
 
   const handleOpenWorkflow = () => {
@@ -700,7 +838,7 @@ function Canvas() {
 
   const handleSave = () => {
     // TODO: Save workflow
-    console.log('Save workflow', payload);
+    console.log("Save workflow", payload);
   };
 
   const handleDelete = () => {
@@ -709,20 +847,22 @@ function Canvas() {
 
   const handleRun = () => {
     // TODO: Run workflow
-    console.log('Run workflow', payload);
+    console.log("Run workflow", payload);
   };
 
   const handleExport = () => {
     const jsonString = JSON.stringify(payload, null, 2);
-    const blob = new Blob([jsonString], { type: 'application/json' });
+    const blob = new Blob([jsonString], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
-    
+
     // Use workflow title for filename, sanitize it
-    const sanitizedTitle = workflowTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    const sanitizedTitle = workflowTitle
+      .replace(/[^a-z0-9]/gi, "_")
+      .toLowerCase();
     link.download = `${sanitizedTitle}_workflow.json`;
-    
+
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -733,17 +873,17 @@ function Canvas() {
     // Type cast and validate the imported data
     const importedNodes = data.nodes as RFNode<NodeData>[];
     const importedEdges = data.edges as RFEdge[];
-    
+
     // Ensure all nodes have position data, add default position if missing
     const nodesWithPositions = importedNodes.map((node, index) => ({
       ...node,
-      position: node.position || { x: 50 + index * 200, y: 50 + index * 100 }
+      position: node.position || { x: 50 + index * 200, y: 50 + index * 100 },
     }));
-    
+
     // Set the imported nodes and edges
     setNodes(nodesWithPositions);
     setEdges(importedEdges);
-    
+
     // Update the next ID to be higher than any existing node ID
     const maxId = importedNodes.reduce((max, node) => {
       const nodeId = parseInt(node.id, 10);
@@ -755,7 +895,10 @@ function Canvas() {
   const handleDeleteNode = (nodeId: string) => {
     const node = nodes.find((n) => n.id === nodeId);
     if (node) {
-      setDeleteConfirm({ nodeId, nodeName: String(node.data?.label || `Node ${nodeId}`) });
+      setDeleteConfirm({
+        nodeId,
+        nodeName: String(node.data?.label || `Node ${nodeId}`),
+      });
     }
     setContextMenu(null);
   };
@@ -763,7 +906,13 @@ function Canvas() {
   const confirmDelete = () => {
     if (deleteConfirm) {
       setNodes((nds) => nds.filter((n) => n.id !== deleteConfirm.nodeId));
-      setEdges((eds) => eds.filter((e) => e.source !== deleteConfirm.nodeId && e.target !== deleteConfirm.nodeId));
+      setEdges((eds) =>
+        eds.filter(
+          (e) =>
+            e.source !== deleteConfirm.nodeId &&
+            e.target !== deleteConfirm.nodeId
+        )
+      );
     }
     setDeleteConfirm(null);
   };
@@ -820,11 +969,7 @@ function Canvas() {
           nodeTypes={nodeTypes}
           fitView
           className="bg-gray-950"
-        >
-          <Background className="bg-gray-950" />
-        </ReactFlow>
-
-        {/* JSON Payload Modal */}
+        />
         <JSONPayloadModal
           isOpen={showPayload}
           onClose={() => setShowPayload(false)}
@@ -832,8 +977,6 @@ function Canvas() {
           workflowTitle={workflowTitle}
         />
       </div>
-
-      {/* Context Menu */}
       {contextMenu && (
         <NodeContextMenu
           x={contextMenu.x}
@@ -853,10 +996,7 @@ function Canvas() {
       )}
 
       {/* Bottom Status Bar */}
-      <WorkflowStatusBar
-        nodeCount={nodes.length}
-        edgeCount={edges.length}
-      />
+      <WorkflowStatusBar nodeCount={nodes.length} edgeCount={edges.length} />
     </div>
   );
 }

@@ -24,22 +24,22 @@ type SSRFProtection struct {
 type SSRFConfig struct {
 	// AllowedSchemes lists allowed URL schemes (default: http, https)
 	AllowedSchemes []string
-	
+
 	// BlockPrivateIPs blocks private IP ranges (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16)
 	BlockPrivateIPs bool
-	
+
 	// BlockLocalhost blocks localhost and loopback addresses
 	BlockLocalhost bool
-	
+
 	// BlockLinkLocal blocks link-local addresses (169.254.0.0/16)
 	BlockLinkLocal bool
-	
+
 	// BlockCloudMetadata blocks cloud metadata endpoints (169.254.169.254, fd00:ec2::254)
 	BlockCloudMetadata bool
-	
+
 	// AllowedDomains is a whitelist of allowed domains (empty = all allowed)
 	AllowedDomains []string
-	
+
 	// BlockedDomains is a blacklist of blocked domains
 	BlockedDomains []string
 }
@@ -73,7 +73,7 @@ func NewSSRFProtectionWithConfig(config SSRFConfig) *SSRFProtection {
 		allowedDomains:     make(map[string]bool),
 		blockedDomains:     make(map[string]bool),
 	}
-	
+
 	// Set allowed schemes
 	if len(config.AllowedSchemes) == 0 {
 		p.allowedSchemes["http"] = true
@@ -83,17 +83,17 @@ func NewSSRFProtectionWithConfig(config SSRFConfig) *SSRFProtection {
 			p.allowedSchemes[strings.ToLower(scheme)] = true
 		}
 	}
-	
+
 	// Set allowed domains
 	for _, domain := range config.AllowedDomains {
 		p.allowedDomains[strings.ToLower(domain)] = true
 	}
-	
+
 	// Set blocked domains
 	for _, domain := range config.BlockedDomains {
 		p.blockedDomains[strings.ToLower(domain)] = true
 	}
-	
+
 	return p
 }
 
@@ -104,28 +104,28 @@ func (p *SSRFProtection) ValidateURL(urlStr string) error {
 	if err != nil {
 		return fmt.Errorf("invalid URL: %w", err)
 	}
-	
+
 	// Check scheme
 	if !p.allowedSchemes[strings.ToLower(parsedURL.Scheme)] {
 		return fmt.Errorf("URL scheme not allowed: %s (allowed: %v)", parsedURL.Scheme, p.getAllowedSchemesList())
 	}
-	
+
 	// Get hostname
 	hostname := parsedURL.Hostname()
 	if hostname == "" {
 		return fmt.Errorf("URL missing hostname")
 	}
-	
+
 	// Check domain blocklist
 	if p.blockedDomains[strings.ToLower(hostname)] {
 		return fmt.Errorf("domain is blocked: %s", hostname)
 	}
-	
+
 	// Check domain whitelist (if configured)
 	if len(p.allowedDomains) > 0 && !p.allowedDomains[strings.ToLower(hostname)] {
 		return fmt.Errorf("domain not in allowlist: %s", hostname)
 	}
-	
+
 	// Try to parse as IP first
 	ip := net.ParseIP(hostname)
 	if ip != nil {
@@ -135,26 +135,26 @@ func (p *SSRFProtection) ValidateURL(urlStr string) error {
 		}
 		return nil
 	}
-	
+
 	// Check hostname-based validation first
 	if err := p.validateHostname(hostname); err != nil {
 		return err
 	}
-	
+
 	// Try to resolve hostname to IP
 	ips, err := net.LookupIP(hostname)
 	if err != nil {
 		// If we can't resolve, hostname validation already passed
 		return nil
 	}
-	
+
 	// Check each resolved IP
 	for _, ip := range ips {
 		if err := p.validateIP(ip); err != nil {
 			return fmt.Errorf("IP validation failed for %s (%s): %w", hostname, ip, err)
 		}
 	}
-	
+
 	return nil
 }
 
@@ -164,29 +164,29 @@ func (p *SSRFProtection) validateIP(ip net.IP) error {
 	if p.blockLocalhost && isLocalhost(ip) {
 		return fmt.Errorf("localhost addresses are blocked")
 	}
-	
+
 	// Check private IPs
 	if p.blockPrivateIPs && isPrivateIP(ip) {
 		return fmt.Errorf("private IP addresses are blocked")
 	}
-	
+
 	// Check link-local
 	if p.blockLinkLocal && isLinkLocal(ip) {
 		return fmt.Errorf("link-local addresses are blocked")
 	}
-	
+
 	// Check cloud metadata
 	if p.blockCloudMetadata && isCloudMetadata(ip) {
 		return fmt.Errorf("cloud metadata endpoints are blocked")
 	}
-	
+
 	return nil
 }
 
 // validateHostname validates a hostname (when IP resolution fails)
 func (p *SSRFProtection) validateHostname(hostname string) error {
 	hostname = strings.ToLower(hostname)
-	
+
 	// Check for localhost variations
 	if p.blockLocalhost {
 		localhostNames := []string{"localhost", "127.0.0.1", "::1", "0.0.0.0"}
@@ -196,7 +196,7 @@ func (p *SSRFProtection) validateHostname(hostname string) error {
 			}
 		}
 	}
-	
+
 	// Check for cloud metadata hostnames
 	if p.blockCloudMetadata {
 		metadataHosts := []string{
@@ -210,7 +210,7 @@ func (p *SSRFProtection) validateHostname(hostname string) error {
 			}
 		}
 	}
-	
+
 	return nil
 }
 
@@ -228,14 +228,14 @@ func isLocalhost(ip net.IP) bool {
 	if ip.IsLoopback() {
 		return true
 	}
-	
+
 	// Also check for 0.0.0.0 (all interfaces - often treated as localhost)
 	if ipv4 := ip.To4(); ipv4 != nil {
 		if ipv4[0] == 0 && ipv4[1] == 0 && ipv4[2] == 0 && ipv4[3] == 0 {
 			return true
 		}
 	}
-	
+
 	return false
 }
 
@@ -257,12 +257,12 @@ func isPrivateIP(ip net.IP) bool {
 		}
 		return false
 	}
-	
+
 	// Check for IPv6 private ranges (ULA: fc00::/7)
 	if len(ip) == 16 && (ip[0]&0xfe) == 0xfc {
 		return true
 	}
-	
+
 	return false
 }
 
@@ -276,12 +276,12 @@ func isLinkLocal(ip net.IP) bool {
 		}
 		return false
 	}
-	
+
 	// IPv6 link-local: fe80::/10
 	if len(ip) == 16 && ip[0] == 0xfe && (ip[1]&0xc0) == 0x80 {
 		return true
 	}
-	
+
 	return ip.IsLinkLocalUnicast()
 }
 
@@ -295,7 +295,7 @@ func isCloudMetadata(ip net.IP) bool {
 		}
 		return false
 	}
-	
+
 	// AWS IMDSv2 (IPv6): fd00:ec2::254
 	if len(ip) == 16 {
 		if ip[0] == 0xfd && ip[1] == 0x00 && ip[2] == 0x0e && ip[3] == 0xc2 {
@@ -312,6 +312,6 @@ func isCloudMetadata(ip net.IP) bool {
 			}
 		}
 	}
-	
+
 	return false
 }

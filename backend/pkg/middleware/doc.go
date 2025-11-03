@@ -19,20 +19,22 @@
 // # Middleware Types
 //
 // Workflow Middleware:
-//   Wraps entire workflow execution, can:
-//   - Add execution metadata
-//   - Implement caching
-//   - Add authentication/authorization
-//   - Collect workflow-level metrics
-//   - Transform workflow before execution
+//
+//	Wraps entire workflow execution, can:
+//	- Add execution metadata
+//	- Implement caching
+//	- Add authentication/authorization
+//	- Collect workflow-level metrics
+//	- Transform workflow before execution
 //
 // Node Middleware:
-//   Wraps individual node execution, can:
-//   - Add node-level logging
-//   - Implement retry logic
-//   - Add timeout enforcement
-//   - Collect node-level metrics
-//   - Transform node inputs/outputs
+//
+//	Wraps individual node execution, can:
+//	- Add node-level logging
+//	- Implement retry logic
+//	- Add timeout enforcement
+//	- Collect node-level metrics
+//	- Transform node inputs/outputs
 //
 // # Middleware Interface
 //

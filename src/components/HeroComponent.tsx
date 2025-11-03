@@ -7,21 +7,21 @@ interface HeroComponentProps {
 
 export function HeroComponent({ onCreateWorkflow }: HeroComponentProps) {
   return (
-    <div className="h-full w-full overflow-y-auto bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950">
+    <div className="h-full w-full overflow-y-auto bg-linear-to-br from-gray-950 via-gray-900 to-gray-950">
       {/* Above the fold - Hero Section */}
       <div className="min-h-screen flex items-center justify-center px-8">
         <div className="text-center max-w-3xl">
           {/* Icon/Logo */}
           <div className="mb-8 flex justify-center">
             <div className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full blur-2xl opacity-30 animate-pulse"></div>
+              <div className="absolute inset-0 bg-linear-to-r from-blue-500 to-purple-500 rounded-full blur-2xl opacity-30 animate-pulse"></div>
               <div className="relative text-9xl">⚡</div>
             </div>
           </div>
 
           {/* Title */}
           <h1 className="text-6xl font-bold mb-6">
-            <span className="bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+            <span className="bg-linear-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
               Welcome to Thaiyyal
             </span>
           </h1>
@@ -35,7 +35,7 @@ export function HeroComponent({ onCreateWorkflow }: HeroComponentProps) {
           {/* CTA Button */}
           <button
             onClick={onCreateWorkflow}
-            className="group relative px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-xl font-semibold rounded-xl transition-all shadow-2xl hover:shadow-blue-500/50 hover:scale-105 mb-6"
+            className="group relative px-4 py-2 bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-xl font-semibold rounded-xl transition-all shadow-2xl hover:shadow-blue-500/50 hover:scale-105 mb-6"
             aria-label="Create New Workflow"
           >
             <span className="relative z-10 flex items-center gap-3">
@@ -45,11 +45,10 @@ export function HeroComponent({ onCreateWorkflow }: HeroComponentProps) {
                 →
               </span>
             </span>
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 rounded-xl blur opacity-0 group-hover:opacity-30 transition-opacity"></div>
+            <div className="absolute inset-0 bg-linear-to-r from-blue-400 to-purple-400 rounded-xl blur opacity-0 group-hover:opacity-30 transition-opacity"></div>
           </button>
         </div>
       </div>
-
       {/* Below the fold - Features Section */}
       <div className="min-h-screen flex items-center justify-center px-8 py-20">
         <div className="max-w-6xl w-full">
@@ -144,7 +143,6 @@ export function HeroComponent({ onCreateWorkflow }: HeroComponentProps) {
                 </div>
               </div>
             </div>
-
             <div className="p-6 bg-gray-800/30 rounded-lg border border-gray-700/30">
               <div className="flex items-start gap-4">
                 <div className="text-3xl">⌨️</div>
@@ -160,12 +158,10 @@ export function HeroComponent({ onCreateWorkflow }: HeroComponentProps) {
               </div>
             </div>
           </div>
-
-          {/* Bottom CTA */}
           <div className="text-center mt-16">
             <button
               onClick={onCreateWorkflow}
-              className="px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-lg font-semibold rounded-lg transition-all shadow-lg hover:shadow-blue-500/30"
+              className="px-8 py-3 bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white text-lg font-semibold rounded-lg transition-all shadow-lg hover:shadow-blue-500/30"
               aria-label="Get Started"
             >
               Get Started Now

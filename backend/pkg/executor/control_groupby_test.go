@@ -8,13 +8,13 @@ import (
 
 func TestGroupByExecutor_Basic(t *testing.T) {
 	tests := []struct {
-		name          string
-		inputArray    []interface{}
-		field         string
-		aggregate     *string
-		valueField    *string
+		name           string
+		inputArray     []interface{}
+		field          string
+		aggregate      *string
+		valueField     *string
 		expectedGroups int
-		description   string
+		description    string
 	}{
 		{
 			name: "Group by status with count",

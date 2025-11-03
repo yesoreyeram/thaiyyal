@@ -161,15 +161,15 @@ func BenchmarkEngine_ComplexWorkflow(b *testing.B) {
 			map[string]interface{}{"id": "input1", "type": "number", "data": map[string]interface{}{"value": 100.0}},
 			map[string]interface{}{"id": "input2", "type": "number", "data": map[string]interface{}{"value": 50.0}},
 			map[string]interface{}{"id": "add1", "type": "operation", "data": map[string]interface{}{"op": "add"}},
-			
+
 			// Stage 2: Arithmetic operations
 			map[string]interface{}{"id": "num3", "type": "number", "data": map[string]interface{}{"value": 2.0}},
 			map[string]interface{}{"id": "mul1", "type": "operation", "data": map[string]interface{}{"op": "multiply"}},
-			
+
 			// Stage 3: State management
 			map[string]interface{}{"id": "var1", "type": "variable", "data": map[string]interface{}{"var_op": "set", "var_name": "result"}},
 			map[string]interface{}{"id": "var2", "type": "variable", "data": map[string]interface{}{"var_op": "get", "var_name": "result"}},
-			
+
 			// Stage 4: Final output
 			map[string]interface{}{"id": "viz", "type": "visualization", "data": map[string]interface{}{"mode": "text"}},
 		},

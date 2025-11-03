@@ -149,7 +149,7 @@ func detectFormat(input string) string {
 		// Count separators
 		commas := strings.Count(firstLine, ",")
 		tabs := strings.Count(firstLine, "\t")
-		
+
 		if tabs > commas && tabs > 0 {
 			return "TSV"
 		}
@@ -165,7 +165,7 @@ func detectFormat(input string) string {
 // parseJSON parses JSON string to structured data
 func parseJSON(input string) (interface{}, error) {
 	trimmed := strings.TrimSpace(input)
-	
+
 	// Handle primitive types without quotes
 	if trimmed == "true" {
 		return true, nil
@@ -176,24 +176,24 @@ func parseJSON(input string) (interface{}, error) {
 	if trimmed == "null" {
 		return nil, nil
 	}
-	
+
 	// Try to parse as number
 	if num, err := strconv.ParseFloat(trimmed, 64); err == nil {
 		return num, nil
 	}
-	
+
 	// Parse as JSON
 	var result interface{}
 	decoder := json.NewDecoder(strings.NewReader(trimmed))
 	decoder.UseNumber() // Preserve number precision
-	
+
 	if err := decoder.Decode(&result); err != nil {
 		return nil, fmt.Errorf("invalid JSON: %w", err)
 	}
-	
+
 	// Convert json.Number to float64
 	result = convertJSONNumbers(result)
-	
+
 	return result, nil
 }
 
@@ -227,25 +227,25 @@ func parseCSV(input string, delimiter rune) (interface{}, error) {
 	reader := csv.NewReader(strings.NewReader(input))
 	reader.Comma = delimiter
 	reader.TrimLeadingSpace = true
-	
+
 	records, err := reader.ReadAll()
 	if err != nil {
 		return nil, fmt.Errorf("invalid CSV/TSV: %w", err)
 	}
-	
+
 	if len(records) == 0 {
 		return []map[string]interface{}{}, nil
 	}
-	
+
 	// First row is headers
 	headers := records[0]
-	
+
 	// Convert remaining rows to objects
 	result := make([]map[string]interface{}, 0, len(records)-1)
 	for i := 1; i < len(records); i++ {
 		row := records[i]
 		obj := make(map[string]interface{})
-		
+
 		for j, header := range headers {
 			if j < len(row) {
 				// Try to parse as number, bool, or keep as string
@@ -256,19 +256,19 @@ func parseCSV(input string, delimiter rune) (interface{}, error) {
 		}
 		result = append(result, obj)
 	}
-	
+
 	return result, nil
 }
 
 // parseValue attempts to parse a string value to its appropriate type
 func parseValue(s string) interface{} {
 	trimmed := strings.TrimSpace(s)
-	
+
 	// Empty string
 	if trimmed == "" {
 		return ""
 	}
-	
+
 	// Boolean
 	if trimmed == "true" {
 		return true
@@ -276,17 +276,17 @@ func parseValue(s string) interface{} {
 	if trimmed == "false" {
 		return false
 	}
-	
+
 	// Null
 	if trimmed == "null" {
 		return nil
 	}
-	
+
 	// Number
 	if num, err := strconv.ParseFloat(trimmed, 64); err == nil {
 		return num
 	}
-	
+
 	// Default to string
 	return trimmed
 }
@@ -297,22 +297,22 @@ func parseValue(s string) interface{} {
 func parseYAML(input string) (interface{}, error) {
 	trimmed := strings.TrimSpace(input)
 	lines := strings.Split(trimmed, "\n")
-	
+
 	if len(lines) == 0 {
 		return nil, fmt.Errorf("empty YAML input")
 	}
-	
+
 	// Simple YAML parser for basic structures
 	result := make(map[string]interface{})
-	
+
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
-		
+
 		// Skip empty lines and comments
 		if line == "" || strings.HasPrefix(line, "#") {
 			continue
 		}
-		
+
 		// Parse key: value
 		parts := strings.SplitN(line, ":", 2)
 		if len(parts) == 2 {
@@ -321,18 +321,18 @@ func parseYAML(input string) (interface{}, error) {
 			result[key] = parseValue(value)
 		}
 	}
-	
+
 	if len(result) == 0 {
 		return nil, fmt.Errorf("no valid YAML key-value pairs found")
 	}
-	
+
 	return result, nil
 }
 
 // parseXML parses XML string to structured data
 func parseXML(input string) (interface{}, error) {
 	trimmed := strings.TrimSpace(input)
-	
+
 	// Parse into a generic map structure
 	var result map[string]interface{}
 	if err := xml.Unmarshal([]byte(trimmed), &result); err != nil {
@@ -344,12 +344,12 @@ func parseXML(input string) (interface{}, error) {
 		if err2 := xml.Unmarshal([]byte(trimmed), &simple); err2 != nil {
 			return nil, fmt.Errorf("invalid XML: %w", err)
 		}
-		
+
 		// Return as a map with the tag name as key
 		return map[string]interface{}{
 			simple.XMLName.Local: parseValue(simple.Content),
 		}, nil
 	}
-	
+
 	return result, nil
 }

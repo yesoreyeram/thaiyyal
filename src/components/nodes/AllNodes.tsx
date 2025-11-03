@@ -11,9 +11,13 @@ type ForEachNodeData = {
   label?: string;
 };
 
-export function ForEachNode({ id, data, ...props }: NodeProps<ForEachNodeData>) {
+export function ForEachNode({
+  id,
+  data,
+  ...props
+}: NodeProps<ForEachNodeData>) {
   const { setNodes } = useReactFlow();
-  
+
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const max_iterations = Number(e.target.value);
     setNodes((nds) =>
@@ -41,7 +45,11 @@ export function ForEachNode({ id, data, ...props }: NodeProps<ForEachNodeData>) 
       onShowOptions={onShowOptions}
       onTitleChange={handleTitleChange}
     >
-      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-2 h-2 bg-blue-400"
+      />
       <input
         value={Number(data?.max_iterations ?? 1000)}
         type="number"
@@ -50,7 +58,11 @@ export function ForEachNode({ id, data, ...props }: NodeProps<ForEachNodeData>) 
         placeholder="Max iter"
         aria-label="Max iterations"
       />
-      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-2 h-2 bg-green-400"
+      />
     </NodeWrapper>
   );
 }
@@ -61,9 +73,13 @@ type WhileLoopNodeData = {
   label?: string;
 };
 
-export function WhileLoopNode({ id, data, ...props }: NodeProps<WhileLoopNodeData>) {
+export function WhileLoopNode({
+  id,
+  data,
+  ...props
+}: NodeProps<WhileLoopNodeData>) {
   const { setNodes } = useReactFlow();
-  
+
   const onConditionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const condition = e.target.value;
     setNodes((nds) =>
@@ -100,7 +116,11 @@ export function WhileLoopNode({ id, data, ...props }: NodeProps<WhileLoopNodeDat
       onShowOptions={onShowOptions}
       onTitleChange={handleTitleChange}
     >
-      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-2 h-2 bg-blue-400"
+      />
       <div className="flex flex-col gap-0.5">
         <input
           value={String(data?.condition ?? ">0")}
@@ -119,7 +139,11 @@ export function WhileLoopNode({ id, data, ...props }: NodeProps<WhileLoopNodeDat
           aria-label="Max iterations"
         />
       </div>
-      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-2 h-2 bg-green-400"
+      />
     </NodeWrapper>
   );
 }
@@ -132,9 +156,13 @@ type VariableNodeData = {
   label?: string;
 };
 
-export function VariableNode({ id, data, ...props }: NodeProps<VariableNodeData>) {
+export function VariableNode({
+  id,
+  data,
+  ...props
+}: NodeProps<VariableNodeData>) {
   const { setNodes } = useReactFlow();
-  
+
   const onNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const var_name = e.target.value;
     setNodes((nds) =>
@@ -147,9 +175,7 @@ export function VariableNode({ id, data, ...props }: NodeProps<VariableNodeData>
   const onOpChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const var_op = e.target.value;
     setNodes((nds) =>
-      nds.map((n) =>
-        n.id === id ? { ...n, data: { ...n.data, var_op } } : n
-      )
+      nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, var_op } } : n))
     );
   };
 
@@ -171,7 +197,11 @@ export function VariableNode({ id, data, ...props }: NodeProps<VariableNodeData>
       onShowOptions={onShowOptions}
       onTitleChange={handleTitleChange}
     >
-      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-2 h-2 bg-blue-400"
+      />
       <div className="flex items-center gap-0.5">
         <input
           value={String(data?.var_name ?? "")}
@@ -189,7 +219,11 @@ export function VariableNode({ id, data, ...props }: NodeProps<VariableNodeData>
           <option value="set">Set</option>
         </select>
       </div>
-      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-2 h-2 bg-green-400"
+      />
     </NodeWrapper>
   );
 }
@@ -202,20 +236,24 @@ type ExtractNodeData = {
 
 export function ExtractNode({ id, data }: NodeProps<ExtractNodeData>) {
   const { setNodes } = useReactFlow();
-  
+
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const field = e.target.value;
     setNodes((nds) =>
-      nds.map((n) =>
-        n.id === id ? { ...n, data: { ...n.data, field } } : n
-      )
+      nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, field } } : n))
     );
   };
 
   return (
     <div className="px-2 py-1 bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all">
-      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Extract")}</div>
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-2 h-2 bg-blue-400"
+      />
+      <div className="text-xs font-semibold mb-1 text-gray-200">
+        {String(data?.label || "Extract")}
+      </div>
       <input
         value={String(data?.field ?? "")}
         type="text"
@@ -223,7 +261,11 @@ export function ExtractNode({ id, data }: NodeProps<ExtractNodeData>) {
         className="w-28 text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-400 focus:outline-none"
         placeholder="Field name"
       />
-      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-2 h-2 bg-green-400"
+      />
     </div>
   );
 }
@@ -235,7 +277,7 @@ type TransformNodeData = {
 
 export function TransformNode({ id, data }: NodeProps<TransformNodeData>) {
   const { setNodes } = useReactFlow();
-  
+
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const transform_type = e.target.value;
     setNodes((nds) =>
@@ -247,8 +289,14 @@ export function TransformNode({ id, data }: NodeProps<TransformNodeData>) {
 
   return (
     <div className="px-2 py-1 bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all">
-      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Transform")}</div>
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-2 h-2 bg-blue-400"
+      />
+      <div className="text-xs font-semibold mb-1 text-gray-200">
+        {String(data?.label || "Transform")}
+      </div>
       <select
         value={String(data?.transform_type ?? "to_array")}
         onChange={onChange}
@@ -260,7 +308,11 @@ export function TransformNode({ id, data }: NodeProps<TransformNodeData>) {
         <option value="keys">Keys</option>
         <option value="values">Values</option>
       </select>
-      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-2 h-2 bg-green-400"
+      />
     </div>
   );
 }
@@ -272,7 +324,7 @@ type ParseNodeData = {
 
 export function ParseNode({ id, data }: NodeProps<ParseNodeData>) {
   const { setNodes } = useReactFlow();
-  
+
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const input_type = e.target.value;
     setNodes((nds) =>
@@ -284,8 +336,14 @@ export function ParseNode({ id, data }: NodeProps<ParseNodeData>) {
 
   return (
     <div className="px-2 py-1 bg-gradient-to-br from-purple-700 to-purple-800 text-white shadow-lg rounded border border-purple-600 hover:border-purple-500 transition-all">
-      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-purple-100">{String(data?.label || "Parse")}</div>
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-2 h-2 bg-blue-400"
+      />
+      <div className="text-xs font-semibold mb-1 text-purple-100">
+        {String(data?.label || "Parse")}
+      </div>
       <select
         value={String(data?.input_type ?? "AUTO")}
         onChange={onChange}
@@ -298,7 +356,11 @@ export function ParseNode({ id, data }: NodeProps<ParseNodeData>) {
         <option value="YAML">YAML</option>
         <option value="XML">XML</option>
       </select>
-      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-2 h-2 bg-green-400"
+      />
     </div>
   );
 }
@@ -311,7 +373,7 @@ type AccumulatorNodeData = {
 
 export function AccumulatorNode({ id, data }: NodeProps<AccumulatorNodeData>) {
   const { setNodes } = useReactFlow();
-  
+
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const accum_op = e.target.value;
     setNodes((nds) =>
@@ -323,8 +385,14 @@ export function AccumulatorNode({ id, data }: NodeProps<AccumulatorNodeData>) {
 
   return (
     <div className="px-2 py-1 bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all">
-      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Accumulator")}</div>
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-2 h-2 bg-blue-400"
+      />
+      <div className="text-xs font-semibold mb-1 text-gray-200">
+        {String(data?.label || "Accumulator")}
+      </div>
       <select
         value={String(data?.accum_op ?? "sum")}
         onChange={onChange}
@@ -336,7 +404,11 @@ export function AccumulatorNode({ id, data }: NodeProps<AccumulatorNodeData>) {
         <option value="array">Array</option>
         <option value="count">Count</option>
       </select>
-      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-2 h-2 bg-green-400"
+      />
     </div>
   );
 }
@@ -350,7 +422,7 @@ type CounterNodeData = {
 
 export function CounterNode({ id, data }: NodeProps<CounterNodeData>) {
   const { setNodes } = useReactFlow();
-  
+
   const onOpChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const counter_op = e.target.value;
     setNodes((nds) =>
@@ -363,16 +435,20 @@ export function CounterNode({ id, data }: NodeProps<CounterNodeData>) {
   const onDeltaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const delta = Number(e.target.value);
     setNodes((nds) =>
-      nds.map((n) =>
-        n.id === id ? { ...n, data: { ...n.data, delta } } : n
-      )
+      nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, delta } } : n))
     );
   };
 
   return (
     <div className="px-2 py-1 bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all">
-      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Counter")}</div>
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-2 h-2 bg-blue-400"
+      />
+      <div className="text-xs font-semibold mb-1 text-gray-200">
+        {String(data?.label || "Counter")}
+      </div>
       <select
         value={String(data?.counter_op ?? "increment")}
         onChange={onOpChange}
@@ -383,7 +459,8 @@ export function CounterNode({ id, data }: NodeProps<CounterNodeData>) {
         <option value="reset">Reset</option>
         <option value="get">Get</option>
       </select>
-      {(data?.counter_op === "increment" || data?.counter_op === "decrement") && (
+      {(data?.counter_op === "increment" ||
+        data?.counter_op === "decrement") && (
         <input
           value={Number(data?.delta ?? 1)}
           type="number"
@@ -392,7 +469,11 @@ export function CounterNode({ id, data }: NodeProps<CounterNodeData>) {
           placeholder="Delta"
         />
       )}
-      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-2 h-2 bg-green-400"
+      />
     </div>
   );
 }
@@ -407,7 +488,7 @@ type SwitchNodeData = {
 
 export function SwitchNode({ id, data }: NodeProps<SwitchNodeData>) {
   const { setNodes } = useReactFlow();
-  
+
   const onDefaultPathChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const default_path = e.target.value;
     setNodes((nds) =>
@@ -419,8 +500,14 @@ export function SwitchNode({ id, data }: NodeProps<SwitchNodeData>) {
 
   return (
     <div className="px-2 py-1 bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all">
-      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Switch")}</div>
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-2 h-2 bg-blue-400"
+      />
+      <div className="text-xs font-semibold mb-1 text-gray-200">
+        {String(data?.label || "Switch")}
+      </div>
       <input
         value={String(data?.default_path ?? "default")}
         type="text"
@@ -429,7 +516,11 @@ export function SwitchNode({ id, data }: NodeProps<SwitchNodeData>) {
         placeholder="Default path"
       />
       <div className="text-xs mt-1">Cases: {data?.cases?.length ?? 0}</div>
-      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-2 h-2 bg-green-400"
+      />
     </div>
   );
 }
@@ -441,7 +532,7 @@ type ParallelNodeData = {
 
 export function ParallelNode({ id, data }: NodeProps<ParallelNodeData>) {
   const { setNodes } = useReactFlow();
-  
+
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const max_concurrency = Number(e.target.value);
     setNodes((nds) =>
@@ -453,8 +544,14 @@ export function ParallelNode({ id, data }: NodeProps<ParallelNodeData>) {
 
   return (
     <div className="px-2 py-1 bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all">
-      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Parallel")}</div>
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-2 h-2 bg-blue-400"
+      />
+      <div className="text-xs font-semibold mb-1 text-gray-200">
+        {String(data?.label || "Parallel")}
+      </div>
       <input
         value={Number(data?.max_concurrency ?? 10)}
         type="number"
@@ -462,7 +559,11 @@ export function ParallelNode({ id, data }: NodeProps<ParallelNodeData>) {
         className="w-24 text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 focus:outline-none"
         placeholder="Max concurrency"
       />
-      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-2 h-2 bg-green-400"
+      />
     </div>
   );
 }
@@ -475,7 +576,7 @@ type JoinNodeData = {
 
 export function JoinNode({ id, data }: NodeProps<JoinNodeData>) {
   const { setNodes } = useReactFlow();
-  
+
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const join_strategy = e.target.value;
     setNodes((nds) =>
@@ -487,8 +588,14 @@ export function JoinNode({ id, data }: NodeProps<JoinNodeData>) {
 
   return (
     <div className="px-2 py-1 bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all">
-      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Join")}</div>
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-2 h-2 bg-blue-400"
+      />
+      <div className="text-xs font-semibold mb-1 text-gray-200">
+        {String(data?.label || "Join")}
+      </div>
       <select
         value={String(data?.join_strategy ?? "all")}
         onChange={onChange}
@@ -498,7 +605,11 @@ export function JoinNode({ id, data }: NodeProps<JoinNodeData>) {
         <option value="any">Any</option>
         <option value="first">First</option>
       </select>
-      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-2 h-2 bg-green-400"
+      />
     </div>
   );
 }
@@ -511,10 +622,20 @@ type SplitNodeData = {
 export function SplitNode({ data }: NodeProps<SplitNodeData>) {
   return (
     <div className="px-2 py-1 bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all">
-      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Split")}</div>
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-2 h-2 bg-blue-400"
+      />
+      <div className="text-xs font-semibold mb-1 text-gray-200">
+        {String(data?.label || "Split")}
+      </div>
       <div className="text-xs mt-1">Paths: {data?.paths?.length ?? 2}</div>
-      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-2 h-2 bg-green-400"
+      />
     </div>
   );
 }
@@ -526,7 +647,7 @@ type DelayNodeData = {
 
 export function DelayNode({ id, data }: NodeProps<DelayNodeData>) {
   const { setNodes } = useReactFlow();
-  
+
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const duration = e.target.value;
     setNodes((nds) =>
@@ -538,8 +659,14 @@ export function DelayNode({ id, data }: NodeProps<DelayNodeData>) {
 
   return (
     <div className="px-2 py-1 bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all">
-      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Delay")}</div>
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-2 h-2 bg-blue-400"
+      />
+      <div className="text-xs font-semibold mb-1 text-gray-200">
+        {String(data?.label || "Delay")}
+      </div>
       <input
         value={String(data?.duration ?? "1s")}
         type="text"
@@ -547,7 +674,11 @@ export function DelayNode({ id, data }: NodeProps<DelayNodeData>) {
         className="w-24 text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 focus:outline-none"
         placeholder="1s, 100ms..."
       />
-      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-2 h-2 bg-green-400"
+      />
     </div>
   );
 }
@@ -561,7 +692,7 @@ type CacheNodeData = {
 
 export function CacheNode({ id, data }: NodeProps<CacheNodeData>) {
   const { setNodes } = useReactFlow();
-  
+
   const onOpChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const cache_op = e.target.value;
     setNodes((nds) =>
@@ -583,16 +714,20 @@ export function CacheNode({ id, data }: NodeProps<CacheNodeData>) {
   const onTTLChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const ttl = e.target.value;
     setNodes((nds) =>
-      nds.map((n) =>
-        n.id === id ? { ...n, data: { ...n.data, ttl } } : n
-      )
+      nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, ttl } } : n))
     );
   };
 
   return (
     <div className="px-2 py-1 bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all">
-      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Cache")}</div>
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-2 h-2 bg-blue-400"
+      />
+      <div className="text-xs font-semibold mb-1 text-gray-200">
+        {String(data?.label || "Cache")}
+      </div>
       <select
         value={String(data?.cache_op ?? "get")}
         onChange={onOpChange}
@@ -618,7 +753,11 @@ export function CacheNode({ id, data }: NodeProps<CacheNodeData>) {
           placeholder="TTL (5m, 1h)"
         />
       )}
-      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-2 h-2 bg-green-400"
+      />
     </div>
   );
 }
@@ -636,7 +775,7 @@ type RetryNodeData = {
 
 export function RetryNode({ id, data }: NodeProps<RetryNodeData>) {
   const { setNodes } = useReactFlow();
-  
+
   const onAttemptsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const max_attempts = Number(e.target.value);
     setNodes((nds) =>
@@ -666,8 +805,14 @@ export function RetryNode({ id, data }: NodeProps<RetryNodeData>) {
 
   return (
     <div className="px-2 py-1 bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all">
-      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Retry")}</div>
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-2 h-2 bg-blue-400"
+      />
+      <div className="text-xs font-semibold mb-1 text-gray-200">
+        {String(data?.label || "Retry")}
+      </div>
       <input
         value={Number(data?.max_attempts ?? 3)}
         type="number"
@@ -691,7 +836,11 @@ export function RetryNode({ id, data }: NodeProps<RetryNodeData>) {
         className="w-24 text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 focus:outline-none"
         placeholder="Initial delay"
       />
-      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-2 h-2 bg-green-400"
+      />
     </div>
   );
 }
@@ -705,7 +854,7 @@ type TryCatchNodeData = {
 
 export function TryCatchNode({ id, data }: NodeProps<TryCatchNodeData>) {
   const { setNodes } = useReactFlow();
-  
+
   const onContinueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const continue_on_error = e.target.checked;
     setNodes((nds) =>
@@ -717,8 +866,14 @@ export function TryCatchNode({ id, data }: NodeProps<TryCatchNodeData>) {
 
   return (
     <div className="px-2 py-1 bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all">
-      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Try-Catch")}</div>
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-2 h-2 bg-blue-400"
+      />
+      <div className="text-xs font-semibold mb-1 text-gray-200">
+        {String(data?.label || "Try-Catch")}
+      </div>
       <label className="flex items-center gap-1 mt-1">
         <input
           type="checkbox"
@@ -728,7 +883,11 @@ export function TryCatchNode({ id, data }: NodeProps<TryCatchNodeData>) {
         />
         <span className="text-xs">Continue on error</span>
       </label>
-      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-2 h-2 bg-green-400"
+      />
     </div>
   );
 }
@@ -741,13 +900,11 @@ type TimeoutNodeData = {
 
 export function TimeoutNode({ id, data }: NodeProps<TimeoutNodeData>) {
   const { setNodes } = useReactFlow();
-  
+
   const onTimeoutChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const timeout = e.target.value;
     setNodes((nds) =>
-      nds.map((n) =>
-        n.id === id ? { ...n, data: { ...n.data, timeout } } : n
-      )
+      nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, timeout } } : n))
     );
   };
 
@@ -762,8 +919,14 @@ export function TimeoutNode({ id, data }: NodeProps<TimeoutNodeData>) {
 
   return (
     <div className="px-2 py-1 bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all">
-      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      <div className="text-xs font-semibold mb-1 text-gray-200">{String(data?.label || "Timeout")}</div>
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-2 h-2 bg-blue-400"
+      />
+      <div className="text-xs font-semibold mb-1 text-gray-200">
+        {String(data?.label || "Timeout")}
+      </div>
       <input
         value={String(data?.timeout ?? "30s")}
         type="text"
@@ -779,7 +942,11 @@ export function TimeoutNode({ id, data }: NodeProps<TimeoutNodeData>) {
         <option value="error">Error</option>
         <option value="continue_with_partial">Continue with partial</option>
       </select>
-      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-2 h-2 bg-green-400"
+      />
     </div>
   );
 }

@@ -20,10 +20,15 @@ interface NodePaletteProps {
   onAddNode: (type: string, defaultData: Record<string, unknown>) => void;
 }
 
-export function NodePalette({ isOpen, onClose, categories, onAddNode }: NodePaletteProps) {
+export function NodePalette({
+  isOpen,
+  onClose,
+  categories,
+  onAddNode,
+}: NodePaletteProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
-    new Set(categories.map(c => c.name))
+    new Set(categories.map((c) => c.name))
   );
   const searchInputRef = useRef<HTMLInputElement>(null);
   const paletteRef = useRef<HTMLDivElement>(null);
@@ -36,7 +41,11 @@ export function NodePalette({ isOpen, onClose, categories, onAddNode }: NodePale
     };
 
     const handleClickOutside = (e: MouseEvent) => {
-      if (isOpen && paletteRef.current && !paletteRef.current.contains(e.target as Node)) {
+      if (
+        isOpen &&
+        paletteRef.current &&
+        !paletteRef.current.contains(e.target as Node)
+      ) {
         onClose();
       }
     };
@@ -55,7 +64,7 @@ export function NodePalette({ isOpen, onClose, categories, onAddNode }: NodePale
   }, [isOpen, onClose]);
 
   const toggleCategory = (categoryName: string) => {
-    setExpandedCategories(prev => {
+    setExpandedCategories((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(categoryName)) {
         newSet.delete(categoryName);
@@ -66,15 +75,21 @@ export function NodePalette({ isOpen, onClose, categories, onAddNode }: NodePale
     });
   };
 
-  const filteredCategories = categories.map(category => ({
-    ...category,
-    nodes: category.nodes.filter(node =>
-      node.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      node.type.toLowerCase().includes(searchQuery.toLowerCase())
-    ),
-  })).filter(category => category.nodes.length > 0);
+  const filteredCategories = categories
+    .map((category) => ({
+      ...category,
+      nodes: category.nodes.filter(
+        (node) =>
+          node.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          node.type.toLowerCase().includes(searchQuery.toLowerCase())
+      ),
+    }))
+    .filter((category) => category.nodes.length > 0);
 
-  const handleAddNode = (type: string, defaultData: Record<string, unknown>) => {
+  const handleAddNode = (
+    type: string,
+    defaultData: Record<string, unknown>
+  ) => {
     onAddNode(type, defaultData);
     setSearchQuery(""); // Clear search after adding
     onClose(); // Close palette after adding a node
@@ -83,7 +98,10 @@ export function NodePalette({ isOpen, onClose, categories, onAddNode }: NodePale
   if (!isOpen) return null;
 
   return (
-    <div ref={paletteRef} className="absolute left-4 bottom-12 z-10 bg-gray-900 border border-gray-700 rounded-lg shadow-2xl max-h-[calc(100vh-200px)] overflow-hidden w-64 flex flex-col">
+    <div
+      ref={paletteRef}
+      className="absolute left-4 bottom-12 z-10 bg-gray-900 border border-gray-700 rounded-lg shadow-2xl max-h-[calc(100vh-200px)] overflow-hidden w-64 flex flex-col"
+    >
       {/* Header with Search */}
       <div className="sticky top-0 bg-gray-900 border-b border-gray-700 p-3">
         <div className="flex items-center justify-between mb-2">
@@ -109,7 +127,7 @@ export function NodePalette({ isOpen, onClose, categories, onAddNode }: NodePale
             </svg>
           </button>
         </div>
-        
+
         {/* Search Input */}
         <input
           ref={searchInputRef}
@@ -125,11 +143,14 @@ export function NodePalette({ isOpen, onClose, categories, onAddNode }: NodePale
       <div className="flex-1 overflow-y-auto">
         {filteredCategories.length === 0 ? (
           <div className="p-4 text-center text-gray-500 text-sm">
-            No nodes found matching "{searchQuery}"
+            No nodes found matching &ldquo;{searchQuery}&rdquo;
           </div>
         ) : (
           filteredCategories.map((category) => (
-            <div key={category.name} className="border-b border-gray-800 last:border-b-0">
+            <div
+              key={category.name}
+              className="border-b border-gray-800 last:border-b-0"
+            >
               <button
                 onClick={() => toggleCategory(category.name)}
                 className="w-full p-3 flex items-center justify-between hover:bg-gray-800 transition-colors"
@@ -144,7 +165,7 @@ export function NodePalette({ isOpen, onClose, categories, onAddNode }: NodePale
                   strokeWidth={2}
                   stroke="currentColor"
                   className={`w-4 h-4 text-gray-500 transition-transform ${
-                    expandedCategories.has(category.name) ? 'rotate-180' : ''
+                    expandedCategories.has(category.name) ? "rotate-180" : ""
                   }`}
                 >
                   <path
@@ -154,13 +175,15 @@ export function NodePalette({ isOpen, onClose, categories, onAddNode }: NodePale
                   />
                 </svg>
               </button>
-              
+
               {expandedCategories.has(category.name) && (
                 <div className="px-3 pb-3 flex flex-col gap-1">
                   {category.nodes.map((config) => (
                     <button
                       key={config.type}
-                      onClick={() => handleAddNode(config.type, config.defaultData)}
+                      onClick={() =>
+                        handleAddNode(config.type, config.defaultData)
+                      }
                       className="bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded text-sm transition-all text-left flex items-center gap-2"
                     >
                       <span className="text-xs">+</span>
@@ -173,10 +196,11 @@ export function NodePalette({ isOpen, onClose, categories, onAddNode }: NodePale
           ))
         )}
       </div>
-      
+
       {/* Footer hint */}
       <div className="border-t border-gray-800 px-3 py-2 text-xs text-gray-500">
-        Press <kbd className="px-1 py-0.5 bg-gray-800 rounded">ESC</kbd> to close
+        Press <kbd className="px-1 py-0.5 bg-gray-800 rounded">ESC</kbd> to
+        close
       </div>
     </div>
   );

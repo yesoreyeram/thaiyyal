@@ -9,13 +9,13 @@ import (
 // TestSwitchExecutor_ValueMatching tests switch with value matching
 func TestSwitchExecutor_ValueMatching(t *testing.T) {
 	tests := []struct {
-		name           string
-		input          interface{}
-		cases          []types.SwitchCase
-		defaultPath    *string
-		expectedMatch  bool
-		expectedPath   string
-		description    string
+		name          string
+		input         interface{}
+		cases         []types.SwitchCase
+		defaultPath   *string
+		expectedMatch bool
+		expectedPath  string
+		description   string
 	}{
 		{
 			name:  "Exact number match",
@@ -226,7 +226,7 @@ func TestSwitchExecutor_DefaultPath(t *testing.T) {
 	}
 
 	resultMap := result.(map[string]interface{})
-	
+
 	if resultMap["matched"].(bool) {
 		t.Error("Expected no match, got matched=true")
 	}
@@ -271,7 +271,7 @@ func TestSwitchExecutor_Validation(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			exec := &SwitchExecutor{}
 			err := exec.Validate(tt.node)
-			
+
 			if tt.expectError && err == nil {
 				t.Error("Expected validation error, got nil")
 			}

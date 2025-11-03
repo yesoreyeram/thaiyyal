@@ -21,14 +21,15 @@ func GenerateExecutionID() string {
 }
 
 // DefaultConfig returns the default engine configuration with zero-trust security model.
-// 
+//
 // **ZERO TRUST BY DEFAULT**: Network access and privileged operations are DISABLED by default.
 // You must explicitly enable them in your configuration.
 //
 // To enable HTTP requests:
-//   config := types.DefaultConfig()
-//   config.AllowHTTP = true
-//   config.AllowedDomains = []string{"api.example.com", "trusted-domain.com"}
+//
+//	config := types.DefaultConfig()
+//	config.AllowHTTP = true
+//	config.AllowedDomains = []string{"api.example.com", "trusted-domain.com"}
 //
 // Zero Trust Principles:
 //   - Network access disabled by default (AllowHTTP = false)
@@ -52,14 +53,14 @@ func DefaultConfig() Config {
 		MaxHTTPCallsPerExec: 100,              // Limit when HTTP is enabled
 		AllowedURLPatterns:  []string{},       // Empty = allow all when HTTP enabled
 		BlockInternalIPs:    true,             // DEPRECATED: kept for backwards compatibility
-		
+
 		// Zero Trust Security - DENY ALL by default (explicit opt-in required)
-		AllowHTTP:          false,   // HTTP DISABLED - must explicitly enable
+		AllowHTTP:          false,      // HTTP DISABLED - must explicitly enable
 		AllowedDomains:     []string{}, // No domains whitelisted (must configure if enabling HTTP)
-		BlockPrivateIPs:    true,    // Block all private IP ranges
-		BlockLocalhost:     true,    // Block localhost
-		BlockLinkLocal:     true,    // Block link-local
-		BlockCloudMetadata: true,    // Block cloud metadata
+		BlockPrivateIPs:    true,       // Block all private IP ranges
+		BlockLocalhost:     true,       // Block localhost
+		BlockLinkLocal:     true,       // Block link-local
+		BlockCloudMetadata: true,       // Block cloud metadata
 
 		// Cache configuration
 		DefaultCacheTTL: 1 * time.Hour,
@@ -70,11 +71,11 @@ func DefaultConfig() Config {
 		MaxPayloadSize:    1 * 1024 * 1024,  // 1MB
 		MaxNodes:          1000,
 		MaxEdges:          10000,
-		MaxNodeExecutions: 10000,            // Limit total node executions including loop iterations
-		MaxStringLength:   1024 * 1024,      // 1MB max string length
-		MaxArrayLength:    10000,            // 10k elements max in arrays
-		MaxVariables:      1000,             // Max 1000 variables in workflow state
-		MaxContextDepth:   32,               // Max 32 levels of nesting
+		MaxNodeExecutions: 10000,       // Limit total node executions including loop iterations
+		MaxStringLength:   1024 * 1024, // 1MB max string length
+		MaxArrayLength:    10000,       // 10k elements max in arrays
+		MaxVariables:      1000,        // Max 1000 variables in workflow state
+		MaxContextDepth:   32,          // Max 32 levels of nesting
 
 		// Retry configuration
 		DefaultMaxAttempts: 3,
@@ -92,7 +93,7 @@ func ValidationLimits() Config {
 	c.MaxEdges = 1000
 	c.MaxHTTPCallsPerExec = 10
 	c.MaxNodeExecutions = 1000
-	c.MaxStringLength = 100 * 1024  // 100KB
+	c.MaxStringLength = 100 * 1024 // 100KB
 	c.MaxArrayLength = 1000
 	c.MaxVariables = 100
 	c.MaxContextDepth = 16
@@ -135,9 +136,10 @@ func DevelopmentConfig() Config {
 //   - All security protections enabled at maximum level
 //
 // To enable specific capabilities, explicitly configure them:
-//   config := types.ZeroTrustConfig()
-//   config.AllowHTTP = true  // Enable HTTP
-//   config.AllowedDomains = []string{"api.example.com"}  // Whitelist specific domains
+//
+//	config := types.ZeroTrustConfig()
+//	config.AllowHTTP = true  // Enable HTTP
+//	config.AllowedDomains = []string{"api.example.com"}  // Whitelist specific domains
 func ZeroTrustConfig() Config {
 	return Config{
 		// Execution limits - Minimal
@@ -152,29 +154,29 @@ func ZeroTrustConfig() Config {
 		MaxHTTPCallsPerExec: 0,                // 0 = No HTTP calls allowed
 		AllowedURLPatterns:  []string{},       // Empty whitelist
 		BlockInternalIPs:    true,             // Block internal IPs
-		
+
 		// Zero Trust Security - DENY ALL by default
-		AllowHTTP:          false,   // Deny all HTTP access
+		AllowHTTP:          false,      // Deny all HTTP access
 		AllowedDomains:     []string{}, // No domains allowed (deny all)
-		BlockPrivateIPs:    true,    // Block all private IP ranges
-		BlockLocalhost:     true,    // Block localhost
-		BlockLinkLocal:     true,    // Block link-local
-		BlockCloudMetadata: true,    // Block cloud metadata
+		BlockPrivateIPs:    true,       // Block all private IP ranges
+		BlockLocalhost:     true,       // Block localhost
+		BlockLinkLocal:     true,       // Block link-local
+		BlockCloudMetadata: true,       // Block cloud metadata
 
 		// Cache configuration - Minimal
 		DefaultCacheTTL: 5 * time.Minute, // Short TTL
 		MaxCacheSize:    100,             // Small cache
 
 		// Resource limits - Minimal
-		MaxInputSize:      1 * 1024 * 1024,   // 1MB input
-		MaxPayloadSize:    512 * 1024,        // 512KB payload
-		MaxNodes:          50,                // Few nodes
-		MaxEdges:          200,               // Few edges
-		MaxNodeExecutions: 500,               // Limited executions
-		MaxStringLength:   50 * 1024,         // 50KB strings
-		MaxArrayLength:    500,               // Small arrays
-		MaxVariables:      50,                // Few variables
-		MaxContextDepth:   10,                // Shallow nesting
+		MaxInputSize:      1 * 1024 * 1024, // 1MB input
+		MaxPayloadSize:    512 * 1024,      // 512KB payload
+		MaxNodes:          50,              // Few nodes
+		MaxEdges:          200,             // Few edges
+		MaxNodeExecutions: 500,             // Limited executions
+		MaxStringLength:   50 * 1024,       // 50KB strings
+		MaxArrayLength:    500,             // Small arrays
+		MaxVariables:      50,              // Few variables
+		MaxContextDepth:   10,              // Shallow nesting
 
 		// Retry configuration - Minimal
 		DefaultMaxAttempts: 1, // No retries

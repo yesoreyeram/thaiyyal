@@ -321,10 +321,10 @@ func stringPtr(s string) *string {
 	return &s
 }
 
-// float64Ptr returns a pointer to a float64 value (for tests)
-func float64Ptr(f float64) *float64 {
-	return &f
-}
+// // float64Ptr returns a pointer to a float64 value (for tests)
+// func float64Ptr(f float64) *float64 {
+// 	return &f
+// }
 
 // boolPtr returns a pointer to a bool value (for tests)
 func boolPtr(b bool) *bool {

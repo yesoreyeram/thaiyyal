@@ -8,7 +8,11 @@ interface OpenWorkflowModalProps {
   onSelect: (workflow: Workflow) => void;
 }
 
-export function OpenWorkflowModal({ isOpen, onClose, onSelect }: OpenWorkflowModalProps) {
+export function OpenWorkflowModal({
+  isOpen,
+  onClose,
+  onSelect,
+}: OpenWorkflowModalProps) {
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
 
   const loadWorkflows = React.useCallback(() => {
@@ -42,7 +46,11 @@ export function OpenWorkflowModal({ isOpen, onClose, onSelect }: OpenWorkflowMod
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString() + " " + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return (
+      date.toLocaleDateString() +
+      " " +
+      date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    );
   };
 
   if (!isOpen) return null;
@@ -56,7 +64,7 @@ export function OpenWorkflowModal({ isOpen, onClose, onSelect }: OpenWorkflowMod
             <span className="text-2xl">📂</span>
             <h2 className="text-xl font-semibold text-white">Open Workflow</h2>
           </div>
-          
+
           <button
             onClick={onClose}
             className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm font-medium rounded-lg transition-colors"
@@ -65,14 +73,16 @@ export function OpenWorkflowModal({ isOpen, onClose, onSelect }: OpenWorkflowMod
             ✕
           </button>
         </div>
-        
+
         {/* Content */}
         <div className="flex-1 overflow-auto p-6 custom-scrollbar">
           {workflows.length === 0 ? (
             <div className="text-center py-12">
               <div className="text-6xl mb-4 opacity-50">📭</div>
               <p className="text-gray-400 text-lg mb-2">No saved workflows</p>
-              <p className="text-gray-600 text-sm">Create and save a workflow to see it here</p>
+              <p className="text-gray-600 text-sm">
+                Create and save a workflow to see it here
+              </p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -102,7 +112,7 @@ export function OpenWorkflowModal({ isOpen, onClose, onSelect }: OpenWorkflowMod
                         <span>Updated: {formatDate(workflow.updatedAt)}</span>
                       </div>
                     </div>
-                    
+
                     <button
                       onClick={(e) => handleDelete(workflow.id, e)}
                       className="ml-4 px-3 py-1.5 bg-red-600/10 hover:bg-red-600/20 text-red-400 text-sm rounded-lg transition-colors opacity-0 group-hover:opacity-100"
@@ -117,10 +127,12 @@ export function OpenWorkflowModal({ isOpen, onClose, onSelect }: OpenWorkflowMod
             </div>
           )}
         </div>
-        
+
         {/* Footer */}
         <div className="px-6 py-3 border-t border-gray-700 bg-gray-800/50 flex items-center justify-between text-xs text-gray-500">
-          <span>{workflows.length} workflow{workflows.length !== 1 ? 's' : ''} saved</span>
+          <span>
+            {workflows.length} workflow{workflows.length !== 1 ? "s" : ""} saved
+          </span>
           <span>Click to open • Press ESC to close</span>
         </div>
       </div>

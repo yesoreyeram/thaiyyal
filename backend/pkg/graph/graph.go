@@ -37,34 +37,34 @@ func New(nodes []types.Node, edges []types.Edge) *Graph {
 //  5. If nodes remain, there's a cycle in the graph
 //
 // Optimizations:
-//  - Pre-allocated slices with exact capacity to minimize allocations
-//  - Ring buffer for queue to avoid expensive slice operations
-//  - Insertion sort for small orphan node sets (faster than generic sort for small n)
-//  - Single pass edge processing to build both adjacency list and in-degree
+//   - Pre-allocated slices with exact capacity to minimize allocations
+//   - Ring buffer for queue to avoid expensive slice operations
+//   - Insertion sort for small orphan node sets (faster than generic sort for small n)
+//   - Single pass edge processing to build both adjacency list and in-degree
 func (g *Graph) TopologicalSort() ([]string, error) {
 	numNodes := len(g.nodes)
-	
+
 	// Early return for empty graph
 	if numNodes == 0 {
 		return []string{}, nil
 	}
-	
+
 	// Pre-allocate with exact capacity to avoid reallocation
 	inDegree := make(map[string]int, numNodes)
 	adjacency := make(map[string][]string, numNodes)
-	
+
 	// Initialize in-degree for all nodes to zero
 	for i := range g.nodes {
 		inDegree[g.nodes[i].ID] = 0
 	}
-	
+
 	// Build the graph structure in a single pass
 	for i := range g.edges {
 		edge := &g.edges[i]
 		adjacency[edge.Source] = append(adjacency[edge.Source], edge.Target)
 		inDegree[edge.Target]++
 	}
-	
+
 	// Find all nodes with no dependencies (in-degree = 0)
 	// Pre-allocate with capacity to avoid growing
 	orphanNodes := make([]string, 0, numNodes)
@@ -73,29 +73,29 @@ func (g *Graph) TopologicalSort() ([]string, error) {
 			orphanNodes = append(orphanNodes, nodeID)
 		}
 	}
-	
+
 	// Sort orphan nodes by ID to ensure deterministic execution order
 	// Use insertion sort for small arrays (typically faster than quicksort for n < 20)
 	// This is important for context nodes that need to execute before other nodes
 	insertionSort(orphanNodes)
-	
+
 	// Use a ring buffer for the queue to avoid expensive slice operations
 	// Pre-allocate with capacity for all nodes
 	queue := make([]string, numNodes)
 	queueStart := 0
 	queueEnd := len(orphanNodes)
 	copy(queue, orphanNodes)
-	
+
 	// Pre-allocate result with exact capacity
 	order := make([]string, 0, numNodes)
-	
+
 	// Process nodes in topological order
 	for queueStart < queueEnd {
 		// Dequeue using ring buffer (O(1) instead of O(n))
 		current := queue[queueStart]
 		queueStart++
 		order = append(order, current)
-		
+
 		// Reduce in-degree for all neighbors
 		neighbors := adjacency[current]
 		for i := range neighbors {
@@ -108,13 +108,13 @@ func (g *Graph) TopologicalSort() ([]string, error) {
 			}
 		}
 	}
-	
+
 	// Check if all nodes were processed
 	// If not, there's a cycle in the graph
 	if len(order) != numNodes {
 		return nil, fmt.Errorf("workflow contains cycles (circular dependencies)")
 	}
-	
+
 	return order, nil
 }
 

@@ -63,7 +63,7 @@ func TestZeroTrustConfig_HTTPEnabledWithWhitelist(t *testing.T) {
 	// Execute should succeed because domain is whitelisted
 	// Note: This will fail if no internet connection, but that's okay for this test
 	result, err := engine.Execute()
-	
+
 	// We don't care about network errors, just that it got past the AllowHTTP check
 	if err != nil && strings.Contains(err.Error(), "HTTP requests are not allowed") {
 		t.Errorf("HTTP should be allowed when AllowHTTP=true, got: %v", err)
@@ -223,9 +223,9 @@ func TestZeroTrustConfig_CloudMetadataBlocked(t *testing.T) {
 			}
 
 			// Check error message
-			if !strings.Contains(err.Error(), "cloud metadata") && 
-			   !strings.Contains(err.Error(), "link-local") && 
-			   !strings.Contains(err.Error(), "private IP") {
+			if !strings.Contains(err.Error(), "cloud metadata") &&
+				!strings.Contains(err.Error(), "link-local") &&
+				!strings.Contains(err.Error(), "private IP") {
 				t.Errorf("Expected cloud metadata/link-local/private IP blocking error, got: %v", err)
 			}
 		})
@@ -343,7 +343,7 @@ func TestDefaultConfig_ZeroTrustByDefault(t *testing.T) {
 	if !config.BlockCloudMetadata {
 		t.Error("Expected BlockCloudMetadata=true in default config")
 	}
-	
+
 	// Verify link-local is blocked
 	if !config.BlockLinkLocal {
 		t.Error("Expected BlockLinkLocal=true in default config")

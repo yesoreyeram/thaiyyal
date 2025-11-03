@@ -32,9 +32,9 @@ func NewTestObserver() *TestObserver {
 func (o *TestObserver) OnEvent(ctx context.Context, event Event) {
 	o.mu.Lock()
 	defer o.mu.Unlock()
-	
+
 	o.events = append(o.events, event)
-	
+
 	// Only call Done if we're expecting events
 	if o.expected > 0 {
 		o.wg.Done()
@@ -57,7 +57,7 @@ func (o *TestObserver) GetEventCount() int {
 func (o *TestObserver) GetEventsByType(eventType EventType) []Event {
 	o.mu.Lock()
 	defer o.mu.Unlock()
-	
+
 	filtered := []Event{}
 	for _, e := range o.events {
 		if e.Type == eventType {
@@ -443,7 +443,7 @@ func TestEventStructure(t *testing.T) {
 
 func TestObserverAsynchronousExecution(t *testing.T) {
 	mgr := NewManager()
-	
+
 	// Create an observer that sleeps for a bit
 	slowObserver := NewTestObserver()
 	mgr.Register(slowObserver)
@@ -480,11 +480,11 @@ func TestObserverAsynchronousExecution(t *testing.T) {
 
 func TestObserverPanicRecovery(t *testing.T) {
 	mgr := NewManager()
-	
+
 	// Create a panicking observer
 	panicObserver := &PanicObserver{}
 	normalObserver := NewTestObserver()
-	
+
 	mgr.Register(panicObserver)
 	mgr.Register(normalObserver)
 
@@ -520,7 +520,7 @@ func (o *PanicObserver) OnEvent(ctx context.Context, event Event) {
 
 func TestMultipleObserversParallelExecution(t *testing.T) {
 	mgr := NewManager()
-	
+
 	// Create multiple observers
 	observers := make([]*TestObserver, 10)
 	for i := 0; i < 10; i++ {

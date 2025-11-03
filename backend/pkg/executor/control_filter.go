@@ -36,7 +36,7 @@ func (e *FilterExecutor) Execute(ctx ExecutionContext, node types.Node) (interfa
 			slog.String("node_id", node.ID),
 			slog.String("input_type", fmt.Sprintf("%T", input)),
 		)
-		
+
 		return map[string]interface{}{
 			"input":         input,
 			"filtered":      input,
@@ -66,15 +66,15 @@ func (e *FilterExecutor) Execute(ctx ExecutionContext, node types.Node) (interfa
 			Variables:   make(map[string]interface{}),
 			ContextVars: exprCtx.ContextVars,
 		}
-		
+
 		// Copy existing variables
 		for k, v := range exprCtx.Variables {
 			itemCtx.Variables[k] = v
 		}
-		
+
 		// Add the current item as 'item' variable
 		itemCtx.Variables["item"] = item
-		
+
 		// Also add index for potential use
 		itemCtx.Variables["index"] = float64(i)
 

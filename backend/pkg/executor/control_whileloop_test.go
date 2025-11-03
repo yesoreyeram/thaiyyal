@@ -64,7 +64,7 @@ func TestWhileLoopExecutor_Basic(t *testing.T) {
 			}
 
 			result, err := exec.Execute(ctx, node)
-			
+
 			if tt.expectError {
 				if err == nil {
 					t.Error("Expected error for exceeding max iterations, got nil")
@@ -130,7 +130,7 @@ func TestWhileLoopExecutor_Validation(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			exec := &WhileLoopExecutor{}
 			err := exec.Validate(tt.node)
-			
+
 			if tt.expectError && err == nil {
 				t.Error("Expected validation error, got nil")
 			}

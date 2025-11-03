@@ -45,7 +45,7 @@ func (e *UniqueExecutor) Execute(ctx ExecutionContext, node types.Node) (interfa
 
 	for _, item := range arr {
 		var key string
-		
+
 		if field != "" {
 			// Use specific field for uniqueness
 			if obj, ok := item.(map[string]interface{}); ok {

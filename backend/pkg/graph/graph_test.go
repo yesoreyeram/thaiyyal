@@ -11,12 +11,12 @@ import (
 // TestTopologicalSort_Simple tests basic topological sorting
 func TestTopologicalSort_Simple(t *testing.T) {
 	tests := []struct {
-		name          string
-		nodes         []types.Node
-		edges         []types.Edge
-		wantOrder     []string
-		wantErr       bool
-		checkOrder    bool // if false, just check success/failure
+		name       string
+		nodes      []types.Node
+		edges      []types.Edge
+		wantOrder  []string
+		wantErr    bool
+		checkOrder bool // if false, just check success/failure
 	}{
 		{
 			name: "linear chain",
@@ -71,9 +71,9 @@ func TestTopologicalSort_Simple(t *testing.T) {
 			checkOrder: false,
 		},
 		{
-			name: "empty graph",
-			nodes: []types.Node{},
-			edges: []types.Edge{},
+			name:      "empty graph",
+			nodes:     []types.Node{},
+			edges:     []types.Edge{},
 			wantOrder: []string{},
 		},
 	}
@@ -82,16 +82,16 @@ func TestTopologicalSort_Simple(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			g := New(tt.nodes, tt.edges)
 			got, err := g.TopologicalSort()
-			
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("TopologicalSort() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			
+
 			if err != nil {
 				return
 			}
-			
+
 			if tt.checkOrder {
 				if !equalSlices(got, tt.wantOrder) {
 					t.Errorf("TopologicalSort() = %v, want %v", got, tt.wantOrder)
@@ -152,7 +152,7 @@ func TestTopologicalSort_Cycles(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			g := New(tt.nodes, tt.edges)
 			_, err := g.TopologicalSort()
-			
+
 			if err == nil {
 				t.Error("TopologicalSort() expected error for cyclic graph, got nil")
 			}
@@ -163,8 +163,8 @@ func TestTopologicalSort_Cycles(t *testing.T) {
 // TestTopologicalSort_Large tests performance with larger graphs
 func TestTopologicalSort_Large(t *testing.T) {
 	tests := []struct {
-		name      string
-		numNodes  int
+		name     string
+		numNodes int
 	}{
 		{name: "100 nodes linear", numNodes: 100},
 		{name: "1000 nodes linear", numNodes: 1000},
@@ -175,26 +175,26 @@ func TestTopologicalSort_Large(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			var nodes []types.Node
 			var edges []types.Edge
-			
+
 			// Generate different graph types based on test name
 			if strings.Contains(tt.name, "linear") {
 				nodes, edges = generateLinearChain(tt.numNodes)
 			} else if strings.Contains(tt.name, "wide") {
 				nodes, edges = generateWideGraph(tt.numNodes)
 			}
-			
+
 			g := New(nodes, edges)
-			
+
 			order, err := g.TopologicalSort()
 			if err != nil {
 				t.Errorf("TopologicalSort() unexpected error: %v", err)
 				return
 			}
-			
+
 			if len(order) != len(nodes) {
 				t.Errorf("TopologicalSort() returned %d nodes, want %d", len(order), len(nodes))
 			}
-			
+
 			if !isValidTopologicalOrder(order, edges) {
 				t.Error("TopologicalSort() returned invalid order")
 			}
@@ -239,7 +239,7 @@ func TestDetectCycles(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			g := New(tt.nodes, tt.edges)
 			err := g.DetectCycles()
-			
+
 			if (err != nil) != tt.wantErr {
 				t.Errorf("DetectCycles() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -387,10 +387,10 @@ func TestGetTerminalNodes(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			g := New(tt.nodes, tt.edges)
 			got := g.GetTerminalNodes()
-			
+
 			sort.Strings(got)
 			sort.Strings(tt.want)
-			
+
 			if !equalSlices(got, tt.want) {
 				t.Errorf("GetTerminalNodes() = %v, want %v", got, tt.want)
 			}
@@ -418,21 +418,21 @@ func isValidTopologicalOrder(order []string, edges []types.Edge) bool {
 	for i, nodeID := range order {
 		pos[nodeID] = i
 	}
-	
+
 	// Check all edges respect the order
 	for _, edge := range edges {
 		sourcePos, sourceExists := pos[edge.Source]
 		targetPos, targetExists := pos[edge.Target]
-		
+
 		if !sourceExists || !targetExists {
 			return false
 		}
-		
+
 		// Source must come before target
 		if sourcePos >= targetPos {
 			return false
 		}
 	}
-	
+
 	return true
 }

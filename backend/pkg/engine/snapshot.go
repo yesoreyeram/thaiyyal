@@ -19,32 +19,32 @@ import (
 // It contains all information needed to restore and resume execution from a specific point.
 type Snapshot struct {
 	// Metadata
-	Version       string    `json:"version"`        // Snapshot format version
-	SnapshotTime  time.Time `json:"snapshot_time"`  // When snapshot was created
-	WorkflowID    string    `json:"workflow_id"`    // Workflow definition ID
-	ExecutionID   string    `json:"execution_id"`   // Unique execution ID
-	
+	Version      string    `json:"version"`       // Snapshot format version
+	SnapshotTime time.Time `json:"snapshot_time"` // When snapshot was created
+	WorkflowID   string    `json:"workflow_id"`   // Workflow definition ID
+	ExecutionID  string    `json:"execution_id"`  // Unique execution ID
+
 	// Workflow Definition
-	Nodes         []types.Node `json:"nodes"`          // Node definitions
-	Edges         []types.Edge `json:"edges"`          // Edge definitions
-	
+	Nodes []types.Node `json:"nodes"` // Node definitions
+	Edges []types.Edge `json:"edges"` // Edge definitions
+
 	// Execution State
-	Results       map[string]interface{}       `json:"results"`        // Node execution results
-	CompletedNodes []string                    `json:"completed_nodes"` // IDs of completed nodes
-	CurrentLevel  int                          `json:"current_level"`   // Current execution level in DAG
-	
+	Results        map[string]interface{} `json:"results"`         // Node execution results
+	CompletedNodes []string               `json:"completed_nodes"` // IDs of completed nodes
+	CurrentLevel   int                    `json:"current_level"`   // Current execution level in DAG
+
 	// State Manager Data
-	Variables     map[string]interface{}       `json:"variables"`       // Workflow variables
-	Accumulator   interface{}                  `json:"accumulator"`     // Accumulator value
-	Counter       float64                      `json:"counter"`         // Counter value
-	Cache         map[string]*types.CacheEntry `json:"cache"`           // Cached entries
-	ContextVars   map[string]interface{}       `json:"context_vars"`    // Context variables
-	ContextConsts map[string]interface{}       `json:"context_consts"`  // Context constants
-	
+	Variables     map[string]interface{}       `json:"variables"`      // Workflow variables
+	Accumulator   interface{}                  `json:"accumulator"`    // Accumulator value
+	Counter       float64                      `json:"counter"`        // Counter value
+	Cache         map[string]*types.CacheEntry `json:"cache"`          // Cached entries
+	ContextVars   map[string]interface{}       `json:"context_vars"`   // Context variables
+	ContextConsts map[string]interface{}       `json:"context_consts"` // Context constants
+
 	// Runtime Protection Counters
 	NodeExecutionCount int `json:"node_execution_count"` // Number of nodes executed
 	HTTPCallCount      int `json:"http_call_count"`      // Number of HTTP calls made
-	
+
 	// Configuration
 	Config types.Config `json:"config"` // Engine configuration
 }
@@ -155,19 +155,19 @@ func LoadSnapshot(snapshot *Snapshot, registry *executor.Registry) (*Engine, err
 
 	// Create new engine with restored state
 	engine := &Engine{
-		state:            state.New(),
-		registry:         registry,
-		config:           snapshot.Config,
-		results:          make(map[string]interface{}),
-		executionID:      snapshot.ExecutionID, // Keep original execution ID
-		workflowID:       snapshot.WorkflowID,
-		nodes:            snapshot.Nodes,
-		edges:            snapshot.Edges,
+		state:              state.New(),
+		registry:           registry,
+		config:             snapshot.Config,
+		results:            make(map[string]interface{}),
+		executionID:        snapshot.ExecutionID, // Keep original execution ID
+		workflowID:         snapshot.WorkflowID,
+		nodes:              snapshot.Nodes,
+		edges:              snapshot.Edges,
 		nodeExecutionCount: snapshot.NodeExecutionCount,
 		httpCallCount:      snapshot.HTTPCallCount,
-		observerMgr:      observer.NewManager(),
-		logger:           &observer.NoOpLogger{},
-		structuredLogger: structuredLogger,
+		observerMgr:        observer.NewManager(),
+		logger:             &observer.NoOpLogger{},
+		structuredLogger:   structuredLogger,
 	}
 
 	// Restore results
@@ -179,13 +179,13 @@ func LoadSnapshot(snapshot *Snapshot, registry *executor.Registry) (*Engine, err
 	for name, value := range snapshot.Variables {
 		engine.state.SetVariable(name, value)
 	}
-	
+
 	if snapshot.Accumulator != nil {
 		engine.state.SetAccumulator(snapshot.Accumulator)
 	}
-	
+
 	engine.state.SetCounter(snapshot.Counter)
-	
+
 	// Restore cache entries (with updated TTL)
 	now := time.Now()
 	for key, entry := range snapshot.Cache {
@@ -195,12 +195,12 @@ func LoadSnapshot(snapshot *Snapshot, registry *executor.Registry) (*Engine, err
 			engine.state.SetCache(key, entry.Value, ttl)
 		}
 	}
-	
+
 	// Restore context variables and constants
 	for name, value := range snapshot.ContextVars {
 		engine.state.SetContextVariable(name, value)
 	}
-	
+
 	for name, value := range snapshot.ContextConsts {
 		engine.state.SetContextConstant(name, value)
 	}
@@ -241,16 +241,16 @@ func DeserializeSnapshot(data []byte) (*Snapshot, error) {
 	if err := json.Unmarshal(data, &snapshot); err != nil {
 		return nil, fmt.Errorf("failed to deserialize snapshot: %w", err)
 	}
-	
+
 	// Validate deserialized snapshot
 	if snapshot.Version == "" {
 		return nil, fmt.Errorf("invalid snapshot: missing version")
 	}
-	
+
 	if snapshot.ExecutionID == "" {
 		return nil, fmt.Errorf("invalid snapshot: missing execution_id")
 	}
-	
+
 	return &snapshot, nil
 }
 
@@ -272,6 +272,6 @@ func ExecuteFromSnapshot(snapshot *Snapshot, registry *executor.Registry) (*type
 	if err != nil {
 		return nil, fmt.Errorf("failed to load snapshot: %w", err)
 	}
-	
+
 	return engine.Execute()
 }

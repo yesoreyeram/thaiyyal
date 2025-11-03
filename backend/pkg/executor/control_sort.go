@@ -40,7 +40,7 @@ func (e *SortExecutor) Execute(ctx ExecutionContext, node types.Node) (interface
 	if node.Data.Field != nil {
 		field = *node.Data.Field
 	}
-	
+
 	// Get order (default: asc)
 	order := "asc"
 	if node.Data.Order != nil {
@@ -71,7 +71,7 @@ func (e *SortExecutor) Execute(ctx ExecutionContext, node types.Node) (interface
 
 		// Use helper function for comparison
 		less := compareValuesHelper(vi, vj)
-		
+
 		if order == "desc" {
 			return !less
 		}

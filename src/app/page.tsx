@@ -12,13 +12,13 @@ export default function HomePage() {
 
   const handleNewWorkflow = () => {
     // Navigate to workflow builder
-    router.push('/workflow');
+    router.push("/workflow");
   };
 
   const handleOpenWorkflow = (workflow: Workflow) => {
     // Save the workflow ID to localStorage and navigate
-    localStorage.setItem('current_workflow_id', workflow.id);
-    router.push('/workflow');
+    localStorage.setItem("current_workflow_id", workflow.id);
+    router.push("/workflow");
   };
 
   return (

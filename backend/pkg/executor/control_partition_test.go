@@ -8,12 +8,12 @@ import (
 
 func TestPartitionExecutor_Basic(t *testing.T) {
 	tests := []struct {
-		name          string
-		inputArray    []interface{}
-		condition     string
+		name           string
+		inputArray     []interface{}
+		condition      string
 		expectedPassed int
 		expectedFailed int
-		description   string
+		description    string
 	}{
 		{
 			name:           "Partition numbers by > 10",

@@ -10,34 +10,34 @@ import (
 // TestMaxStringLength tests that string length limits are enforced
 func TestMaxStringLength(t *testing.T) {
 	tests := []struct {
-		name          string
-		maxLength     int
-		stringLength  int
-		shouldFail    bool
+		name         string
+		maxLength    int
+		stringLength int
+		shouldFail   bool
 	}{
 		{
-			name:          "under limit",
-			maxLength:     1000,
-			stringLength:  500,
-			shouldFail:    false,
+			name:         "under limit",
+			maxLength:    1000,
+			stringLength: 500,
+			shouldFail:   false,
 		},
 		{
-			name:          "at limit",
-			maxLength:     1000,
-			stringLength:  1000,
-			shouldFail:    false,
+			name:         "at limit",
+			maxLength:    1000,
+			stringLength: 1000,
+			shouldFail:   false,
 		},
 		{
-			name:          "exceed limit",
-			maxLength:     100,
-			stringLength:  200,
-			shouldFail:    true,
+			name:         "exceed limit",
+			maxLength:    100,
+			stringLength: 200,
+			shouldFail:   true,
 		},
 		{
-			name:          "unlimited",
-			maxLength:     0,
-			stringLength:  1000000,
-			shouldFail:    false,
+			name:         "unlimited",
+			maxLength:    0,
+			stringLength: 1000000,
+			shouldFail:   false,
 		},
 	}
 
@@ -87,22 +87,22 @@ func TestMaxStringLength(t *testing.T) {
 // TestMaxArrayLength tests that array length limits are enforced
 func TestMaxArrayLength(t *testing.T) {
 	tests := []struct {
-		name         string
-		maxLength    int
-		arrayLength  int
-		shouldFail   bool
+		name        string
+		maxLength   int
+		arrayLength int
+		shouldFail  bool
 	}{
 		{
-			name:         "under limit",
-			maxLength:    1000,
-			arrayLength:  500,
-			shouldFail:   false,
+			name:        "under limit",
+			maxLength:   1000,
+			arrayLength: 500,
+			shouldFail:  false,
 		},
 		{
-			name:         "exceed limit",
-			maxLength:    10,
-			arrayLength:  20,
-			shouldFail:   true,
+			name:        "exceed limit",
+			maxLength:   10,
+			arrayLength: 20,
+			shouldFail:  true,
 		},
 	}
 
@@ -152,22 +152,22 @@ func TestMaxArrayLength(t *testing.T) {
 // TestMaxContextDepth tests that nesting depth limits are enforced
 func TestMaxContextDepth(t *testing.T) {
 	tests := []struct {
-		name        string
-		maxDepth    int
-		nestDepth   int
-		shouldFail  bool
+		name       string
+		maxDepth   int
+		nestDepth  int
+		shouldFail bool
 	}{
 		{
-			name:        "under limit",
-			maxDepth:    10,
-			nestDepth:   5,
-			shouldFail:  false,
+			name:       "under limit",
+			maxDepth:   10,
+			nestDepth:  5,
+			shouldFail: false,
 		},
 		{
-			name:        "exceed limit",
-			maxDepth:    5,
-			nestDepth:   10,
-			shouldFail:  true,
+			name:       "exceed limit",
+			maxDepth:   5,
+			nestDepth:  10,
+			shouldFail: true,
 		},
 	}
 
@@ -214,28 +214,28 @@ func TestMaxContextDepth(t *testing.T) {
 // TestMaxVariables tests that variable count limits are enforced
 func TestMaxVariables(t *testing.T) {
 	tests := []struct {
-		name         string
-		maxVars      int
-		varCount     int
-		shouldFail   bool
+		name       string
+		maxVars    int
+		varCount   int
+		shouldFail bool
 	}{
 		{
-			name:         "under limit",
-			maxVars:      10,
-			varCount:     5,
-			shouldFail:   false,
+			name:       "under limit",
+			maxVars:    10,
+			varCount:   5,
+			shouldFail: false,
 		},
 		{
-			name:         "at limit",
-			maxVars:      10,
-			varCount:     10,
-			shouldFail:   false,
+			name:       "at limit",
+			maxVars:    10,
+			varCount:   10,
+			shouldFail: false,
 		},
 		{
-			name:         "exceed limit",
-			maxVars:      5,
-			varCount:     10,
-			shouldFail:   true,
+			name:       "exceed limit",
+			maxVars:    5,
+			varCount:   10,
+			shouldFail: true,
 		},
 	}
 

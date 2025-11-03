@@ -70,20 +70,29 @@ export function WorkflowNavBar({
     reader.onload = (event) => {
       try {
         const json = JSON.parse(event.target?.result as string);
-        if (json.nodes && json.edges && Array.isArray(json.nodes) && Array.isArray(json.edges)) {
+        if (
+          json.nodes &&
+          json.edges &&
+          Array.isArray(json.nodes) &&
+          Array.isArray(json.edges)
+        ) {
           onImport(json);
         } else {
-          alert('Invalid workflow file format. Expected JSON with "nodes" and "edges" arrays.');
+          alert(
+            'Invalid workflow file format. Expected JSON with "nodes" and "edges" arrays.'
+          );
         }
       } catch {
-        alert('Failed to parse JSON file. Please ensure it is a valid JSON workflow file.');
+        alert(
+          "Failed to parse JSON file. Please ensure it is a valid JSON workflow file."
+        );
       }
     };
     reader.readAsText(file);
-    
+
     // Reset input so the same file can be selected again
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
@@ -143,7 +152,6 @@ export function WorkflowNavBar({
           </span>
         )}
       </div>
-
       <div className="flex items-center gap-2">
         <button
           onClick={onSave}
@@ -201,7 +209,7 @@ export function WorkflowNavBar({
           </svg>
           <span>Import</span>
         </button>
-        
+
         <input
           ref={fileInputRef}
           type="file"

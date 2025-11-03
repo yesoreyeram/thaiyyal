@@ -15,16 +15,16 @@ type ZipExecutor struct{}
 func (e *ZipExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
 	// Get arrays to zip (can be from inputs or specified as array references)
 	var arrays [][]interface{}
-	
+
 	inputs := ctx.GetNodeInputs(node.ID)
-	
+
 	// Check for direct input arrays
 	if len(inputs) > 0 {
 		if arr, ok := inputs[0].([]interface{}); ok {
 			arrays = append(arrays, arr)
 		}
 	}
-	
+
 	// Check for additional arrays specified in config
 	if arraysConfig, ok := node.Data.Arrays.([]interface{}); ok {
 		for _, arrRef := range arraysConfig {

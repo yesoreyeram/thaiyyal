@@ -71,8 +71,9 @@ func (c *Chain) Use(middleware Middleware) *Chain {
 //   - Short-circuit by not calling next
 //
 // Example execution flow with 3 middleware:
-//   M1.Process(pre) -> M2.Process(pre) -> M3.Process(pre) -> handler() ->
-//   M3.Process(post) -> M2.Process(post) -> M1.Process(post) -> return
+//
+//	M1.Process(pre) -> M2.Process(pre) -> M3.Process(pre) -> handler() ->
+//	M3.Process(post) -> M2.Process(post) -> M1.Process(post) -> return
 func (c *Chain) Execute(ctx executor.ExecutionContext, node types.Node, handler Handler) (interface{}, error) {
 	if len(c.middlewares) == 0 {
 		return handler(ctx, node)

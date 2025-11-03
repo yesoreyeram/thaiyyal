@@ -307,9 +307,9 @@ score: 95.5`,
 // TestParseExecutor_XML tests XML parsing
 func TestParseExecutor_XML(t *testing.T) {
 	tests := []struct {
-		name     string
-		input    string
-		wantErr  bool
+		name    string
+		input   string
+		wantErr bool
 	}{
 		{
 			name:    "Simple XML",

@@ -15,7 +15,7 @@ export function AppNavBar({ onNewWorkflow, onOpenWorkflow }: AppNavBarProps) {
   };
 
   return (
-    <div className="h-10 bg-black border-b border-gray-700 flex items-center justify-between px-4">
+    <div className="h-12 bg-gray-950 border-b border-gray-800 flex items-center justify-between px-4">
       <div className="flex items-center gap-3">
         <button
           onClick={handleTitleClick}
@@ -23,24 +23,24 @@ export function AppNavBar({ onNewWorkflow, onOpenWorkflow }: AppNavBarProps) {
           title="Go to Home"
         >
           <span className="text-l">⚡</span>
-          <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+          <span className="bg-linear-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
             Thaiyyal
           </span>
         </button>
       </div>
-
       <div className="flex items-center gap-3">
         <button
           onClick={onOpenWorkflow}
-          className="p-2 bg-gray-700 hover:bg-gray-600 text-gray-300 hover:text-white rounded-lg transition-all"
+          className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded transition-all text-sm font-medium flex items-center gap-1.5"
           title="Open Workflow"
           aria-label="Open Workflow"
         >
           <span>📂</span>
+          <span>Open</span>
         </button>
         <button
           onClick={onNewWorkflow}
-          className="px-2 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-all flex items-center gap-2 hover:shadow-lg hover:shadow-blue-500/20"
+          className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded transition-all flex items-center gap-1.5 shadow-sm hover:shadow-md"
           title="Create New Workflow"
           aria-label="Create New Workflow"
         >

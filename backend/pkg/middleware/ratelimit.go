@@ -14,7 +14,7 @@ type RateLimiter interface {
 	// Allow checks if a request is allowed based on rate limits
 	// Returns true if allowed, false if rate limit exceeded
 	Allow(key string) bool
-	
+
 	// Reset clears all rate limit state
 	Reset()
 }
@@ -22,32 +22,32 @@ type RateLimiter interface {
 // RateLimitMiddleware enforces rate limits to prevent DoS attacks.
 // It uses the token bucket algorithm for smooth rate limiting.
 type RateLimitMiddleware struct {
-	globalLimiter     RateLimiter
-	nodeTypeLimiters  map[types.NodeType]RateLimiter
-	workflowLimiters  map[string]RateLimiter
-	mu                sync.RWMutex
-	
+	globalLimiter    RateLimiter
+	nodeTypeLimiters map[types.NodeType]RateLimiter
+	workflowLimiters map[string]RateLimiter
+	mu               sync.RWMutex
+
 	// Configuration
 	enableGlobal      bool
 	enablePerNodeType bool
 	enablePerWorkflow bool
-	
+
 	// Metrics
-	rejectedCount     int64
-	rejectedCountMu   sync.Mutex
+	rejectedCount   int64
+	rejectedCountMu sync.Mutex
 }
 
 // RateLimitConfig configures rate limiting behavior
 type RateLimitConfig struct {
 	// Global rate limit (requests per second across all nodes)
 	GlobalRPS float64
-	
+
 	// Per-node-type rate limits
 	NodeTypeRPS map[types.NodeType]float64
-	
+
 	// Per-workflow rate limits (requests per second per workflow)
 	WorkflowRPS float64
-	
+
 	// Enable flags
 	EnableGlobal      bool
 	EnablePerNodeType bool
@@ -57,8 +57,8 @@ type RateLimitConfig struct {
 // DefaultRateLimitConfig returns default rate limit configuration
 func DefaultRateLimitConfig() RateLimitConfig {
 	return RateLimitConfig{
-		GlobalRPS:         100,  // 100 requests/sec globally
-		WorkflowRPS:       10,   // 10 requests/sec per workflow
+		GlobalRPS:         100, // 100 requests/sec globally
+		WorkflowRPS:       10,  // 10 requests/sec per workflow
 		EnableGlobal:      true,
 		EnablePerNodeType: false,
 		EnablePerWorkflow: false,
@@ -80,12 +80,12 @@ func NewRateLimitMiddlewareWithConfig(config RateLimitConfig) *RateLimitMiddlewa
 		enablePerNodeType: config.EnablePerNodeType,
 		enablePerWorkflow: config.EnablePerWorkflow,
 	}
-	
+
 	// Create global limiter
 	if config.EnableGlobal && config.GlobalRPS > 0 {
 		m.globalLimiter = NewTokenBucket(config.GlobalRPS, int64(config.GlobalRPS))
 	}
-	
+
 	// Create per-node-type limiters
 	if config.EnablePerNodeType {
 		for nodeType, rps := range config.NodeTypeRPS {
@@ -94,7 +94,7 @@ func NewRateLimitMiddlewareWithConfig(config RateLimitConfig) *RateLimitMiddlewa
 			}
 		}
 	}
-	
+
 	return m
 }
 
@@ -107,19 +107,19 @@ func (m *RateLimitMiddleware) Process(ctx executor.ExecutionContext, node types.
 			return nil, fmt.Errorf("global rate limit exceeded")
 		}
 	}
-	
+
 	// Check per-node-type rate limit
 	if m.enablePerNodeType {
 		m.mu.RLock()
 		limiter, exists := m.nodeTypeLimiters[node.Type]
 		m.mu.RUnlock()
-		
+
 		if exists && !limiter.Allow(string(node.Type)) {
 			m.incrementRejected()
 			return nil, fmt.Errorf("rate limit exceeded for node type: %s", node.Type)
 		}
 	}
-	
+
 	// Check per-workflow rate limit
 	if m.enablePerWorkflow {
 		workflowID := getWorkflowID(ctx)
@@ -131,7 +131,7 @@ func (m *RateLimitMiddleware) Process(ctx executor.ExecutionContext, node types.
 			}
 		}
 	}
-	
+
 	// Rate limits passed, execute node
 	return next(ctx, node)
 }
@@ -160,20 +160,20 @@ func (m *RateLimitMiddleware) getOrCreateWorkflowLimiter(workflowID string) Rate
 	m.mu.RLock()
 	limiter, exists := m.workflowLimiters[workflowID]
 	m.mu.RUnlock()
-	
+
 	if exists {
 		return limiter
 	}
-	
+
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	
+
 	// Double-check after acquiring write lock
 	limiter, exists = m.workflowLimiters[workflowID]
 	if exists {
 		return limiter
 	}
-	
+
 	// Create new limiter (default: 10 RPS per workflow)
 	limiter = NewTokenBucket(10, 10)
 	m.workflowLimiters[workflowID] = limiter
@@ -210,19 +210,19 @@ func NewTokenBucket(rate float64, capacity int64) *TokenBucket {
 func (tb *TokenBucket) Allow(key string) bool {
 	tb.mu.Lock()
 	defer tb.mu.Unlock()
-	
+
 	// Refill tokens based on time elapsed
 	now := time.Now()
 	elapsed := now.Sub(tb.lastRefill).Seconds()
 	tb.tokens = min(tb.tokens+elapsed*tb.rate, float64(tb.capacity))
 	tb.lastRefill = now
-	
+
 	// Check if we have at least 1 token
 	if tb.tokens >= 1.0 {
 		tb.tokens -= 1.0
 		return true
 	}
-	
+
 	return false
 }
 
@@ -230,7 +230,7 @@ func (tb *TokenBucket) Allow(key string) bool {
 func (tb *TokenBucket) Reset() {
 	tb.mu.Lock()
 	defer tb.mu.Unlock()
-	
+
 	tb.tokens = float64(tb.capacity)
 	tb.lastRefill = time.Now()
 }

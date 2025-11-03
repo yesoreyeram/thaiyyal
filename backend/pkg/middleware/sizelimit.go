@@ -28,12 +28,12 @@ type SizeLimitConfig struct {
 	MaxResultSize   int64 // Maximum result size per node (default: 50MB)
 	MaxStringLength int   // Maximum string length (default: 1MB)
 	MaxArrayLength  int   // Maximum array length (default: 10000)
-	
+
 	// Workflow limits
 	MaxWorkflowSize int64 // Maximum total workflow size (default: 100MB)
 	MaxNodeCount    int   // Maximum nodes in workflow (default: 1000)
 	MaxEdgeCount    int   // Maximum edges in workflow (default: 5000)
-	
+
 	// Control flags
 	EnforceInputSize  bool // Enforce input size limits (default: true)
 	EnforceResultSize bool // Enforce result size limits (default: true)
@@ -83,20 +83,20 @@ func (m *SizeLimitMiddleware) Process(ctx executor.ExecutionContext, node types.
 			return nil, fmt.Errorf("input size limit exceeded: %w", err)
 		}
 	}
-	
+
 	// Execute node
 	result, err := next(ctx, node)
 	if err != nil {
 		return result, err
 	}
-	
+
 	// Check result size if enabled
 	if m.enforceResultSize && result != nil {
 		if err := m.validateResultSize(result); err != nil {
 			return nil, fmt.Errorf("result size limit exceeded: %w", err)
 		}
 	}
-	
+
 	return result, nil
 }
 
@@ -112,17 +112,17 @@ func (m *SizeLimitMiddleware) validateInputSize(inputs []interface{}) error {
 		if err != nil {
 			return fmt.Errorf("failed to estimate size of input %d: %w", i, err)
 		}
-		
+
 		if size > m.maxInputSize {
 			return fmt.Errorf("input %d size %d bytes exceeds limit %d bytes", i, size, m.maxInputSize)
 		}
-		
+
 		// Check specific type limits
 		if err := m.validateValue(input); err != nil {
 			return fmt.Errorf("input %d validation failed: %w", i, err)
 		}
 	}
-	
+
 	return nil
 }
 
@@ -132,11 +132,11 @@ func (m *SizeLimitMiddleware) validateResultSize(result interface{}) error {
 	if err != nil {
 		return fmt.Errorf("failed to estimate result size: %w", err)
 	}
-	
+
 	if size > m.maxResultSize {
 		return fmt.Errorf("result size %d bytes exceeds limit %d bytes", size, m.maxResultSize)
 	}
-	
+
 	// Check specific type limits
 	return m.validateValue(result)
 }
@@ -166,7 +166,7 @@ func (m *SizeLimitMiddleware) validateValue(value interface{}) error {
 			}
 		}
 	}
-	
+
 	return nil
 }
 
@@ -188,12 +188,12 @@ func ValidateWorkflowSize(nodes []types.Node, edges []types.Edge, config SizeLim
 	if config.MaxNodeCount > 0 && len(nodes) > config.MaxNodeCount {
 		return fmt.Errorf("workflow has %d nodes, exceeds limit of %d", len(nodes), config.MaxNodeCount)
 	}
-	
+
 	// Check edge count
 	if config.MaxEdgeCount > 0 && len(edges) > config.MaxEdgeCount {
 		return fmt.Errorf("workflow has %d edges, exceeds limit of %d", len(edges), config.MaxEdgeCount)
 	}
-	
+
 	// Check total workflow size
 	if config.MaxWorkflowSize > 0 {
 		// Estimate total size by marshaling
@@ -201,18 +201,18 @@ func ValidateWorkflowSize(nodes []types.Node, edges []types.Edge, config SizeLim
 			Nodes []types.Node `json:"nodes"`
 			Edges []types.Edge `json:"edges"`
 		}
-		
+
 		wf := workflow{Nodes: nodes, Edges: edges}
 		data, err := json.Marshal(wf)
 		if err != nil {
 			return fmt.Errorf("failed to marshal workflow for size check: %w", err)
 		}
-		
+
 		size := int64(len(data))
 		if size > config.MaxWorkflowSize {
 			return fmt.Errorf("workflow size %d bytes exceeds limit %d bytes", size, config.MaxWorkflowSize)
 		}
 	}
-	
+
 	return nil
 }

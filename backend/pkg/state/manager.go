@@ -12,15 +12,15 @@ import (
 
 // Manager manages workflow execution state
 type Manager struct {
-	variables map[string]interface{}
+	variables   map[string]interface{}
 	accumulator interface{}
 	counter     float64
 	cache       map[string]*types.CacheEntry
-	
+
 	// Context for template interpolation
 	contextVariables map[string]interface{}
 	contextConstants map[string]interface{}
-	
+
 	mu sync.RWMutex
 }
 
@@ -261,17 +261,17 @@ func (m *Manager) GetAllContext() map[string]interface{} {
 	defer m.mu.RUnlock()
 
 	result := make(map[string]interface{})
-	
+
 	// Add constants first
 	for k, v := range m.contextConstants {
 		result[k] = v
 	}
-	
+
 	// Add variables (which can override constants)
 	for k, v := range m.contextVariables {
 		result[k] = v
 	}
-	
+
 	return result
 }
 

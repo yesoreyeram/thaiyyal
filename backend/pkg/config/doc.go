@@ -30,42 +30,44 @@
 //
 // # Basic Usage
 //
-//import "github.com/yesoreyeram/thaiyyal/backend/pkg/config"
+// import "github.com/yesoreyeram/thaiyyal/backend/pkg/config"
 //
-//// Create default configuration
-//cfg := config.Default()
+// // Create default configuration
+// cfg := config.Default()
 //
-//// Use in engine
-//engine := engine.New(engine.WithConfig(cfg))
+// // Use in engine
+// engine := engine.New(engine.WithConfig(cfg))
 //
 // # Custom Configuration
 //
-//cfg := config.New(
-//    config.WithMaxExecutionTime(10 * time.Minute),
-//    config.WithHTTPTimeout(30 * time.Second),
-//    config.WithMaxNodes(1000),
-//)
+// cfg := config.New(
+//
+//	config.WithMaxExecutionTime(10 * time.Minute),
+//	config.WithHTTPTimeout(30 * time.Second),
+//	config.WithMaxNodes(1000),
+//
+// )
 //
 // # Default Configuration
 //
 // The default configuration provides secure, production-ready defaults:
 //
-//MaxExecutionTime: 5 minutes
-//MaxNodeExecutionTime: 30 seconds
-//MaxIterations: 10000
-//HTTPTimeout: 30 seconds
-//MaxHTTPRedirects: 10
-//MaxResponseSize: 10MB
-//AllowHTTP: false (HTTPS only)
-//BlockPrivateIPs: true
-//BlockLocalhost: true
-//BlockCloudMetadata: true
-//DefaultCacheTTL: 1 hour
-//MaxCacheSize: 1000
-//MaxNodes: 1000
-//MaxEdges: 5000
-//DefaultMaxAttempts: 3
-//DefaultBackoff: 1 second
+// MaxExecutionTime: 5 minutes
+// MaxNodeExecutionTime: 30 seconds
+// MaxIterations: 10000
+// HTTPTimeout: 30 seconds
+// MaxHTTPRedirects: 10
+// MaxResponseSize: 10MB
+// AllowHTTP: false (HTTPS only)
+// BlockPrivateIPs: true
+// BlockLocalhost: true
+// BlockCloudMetadata: true
+// DefaultCacheTTL: 1 hour
+// MaxCacheSize: 1000
+// MaxNodes: 1000
+// MaxEdges: 5000
+// DefaultMaxAttempts: 3
+// DefaultBackoff: 1 second
 //
 // # Thread Safety
 //

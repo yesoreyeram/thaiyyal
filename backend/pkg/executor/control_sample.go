@@ -84,10 +84,10 @@ func (e *SampleExecutor) Execute(ctx ExecutionContext, node types.Node) (interfa
 			for i := range indices {
 				indices[i] = i
 			}
-			
+
 			// Initialize random seed
 			rng := rand.New(rand.NewSource(time.Now().UnixNano()))
-			
+
 			// Partial shuffle - only shuffle first 'count' elements
 			for i := 0; i < count; i++ {
 				j := i + rng.Intn(len(indices)-i)

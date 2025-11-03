@@ -48,12 +48,12 @@ func (e *ConditionExecutor) Execute(ctx ExecutionContext, node types.Node) (inte
 
 	// Return the input value along with metadata about which path was taken
 	return map[string]interface{}{
-		"value":          input,
-		"condition_met":  conditionMet,
-		"condition":      *node.Data.Condition,
-		"path":           pathTaken,
-		"true_path":      conditionMet,
-		"false_path":     !conditionMet,
+		"value":         input,
+		"condition_met": conditionMet,
+		"condition":     *node.Data.Condition,
+		"path":          pathTaken,
+		"true_path":     conditionMet,
+		"false_path":    !conditionMet,
 	}, nil
 }
 

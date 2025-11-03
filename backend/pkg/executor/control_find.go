@@ -77,13 +77,13 @@ func (e *FindExecutor) Execute(ctx ExecutionContext, node types.Node) (interface
 			// Found match
 			if returnIndex {
 				return map[string]interface{}{
-					"found": item,
-					"index": i,
+					"found":     item,
+					"index":     i,
 					"condition": condition,
 				}, nil
 			}
 			return map[string]interface{}{
-				"found": item,
+				"found":     item,
 				"condition": condition,
 			}, nil
 		}
@@ -91,9 +91,9 @@ func (e *FindExecutor) Execute(ctx ExecutionContext, node types.Node) (interface
 
 	// No match found
 	return map[string]interface{}{
-		"found":      nil,
-		"not_found":  true,
-		"condition":  condition,
+		"found":       nil,
+		"not_found":   true,
+		"condition":   condition,
 		"input_count": len(arr),
 	}, nil
 }

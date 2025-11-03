@@ -9,13 +9,19 @@ interface ToastProps {
   duration?: number;
 }
 
-export function Toast({ message, type = "info", isVisible, onClose, duration = 3000 }: ToastProps) {
+export function Toast({
+  message,
+  type = "info",
+  isVisible,
+  onClose,
+  duration = 3000,
+}: ToastProps) {
   useEffect(() => {
     if (isVisible && duration > 0) {
       const timer = setTimeout(() => {
         onClose();
       }, duration);
-      
+
       return () => clearTimeout(timer);
     }
   }, [isVisible, duration, onClose]);
@@ -51,8 +57,10 @@ export function Toast({ message, type = "info", isVisible, onClose, duration = 3
   };
 
   return (
-    <div className="fixed top-20 right-6 z-[60] animate-slide-in">
-      <div className={`${getTypeStyles()} px-6 py-4 rounded-xl border-2 shadow-2xl flex items-center gap-3 min-w-[300px] max-w-md backdrop-blur-sm`}>
+    <div className="fixed top-20 right-6 z-60 animate-slide-in">
+      <div
+        className={`${getTypeStyles()} px-6 py-4 rounded-xl border-2 shadow-2xl flex items-center gap-3 min-w-[300px] max-w-md backdrop-blur-sm`}
+      >
         <span className="text-2xl">{getIcon()}</span>
         <span className="flex-1 font-medium">{message}</span>
         <button

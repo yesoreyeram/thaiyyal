@@ -176,7 +176,7 @@ func TestParseNode_Integration(t *testing.T) {
 			if checkNodeID == "" {
 				checkNodeID = "2" // Default to parse node
 			}
-			
+
 			var parseNodeID string
 			for nodeID := range result.NodeResults {
 				if nodeID == checkNodeID {

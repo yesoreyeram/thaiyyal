@@ -45,9 +45,9 @@ func (e *TransposeExecutor) Execute(ctx ExecutionContext, node types.Node) (inte
 	firstRow, ok := arr[0].([]interface{})
 	if !ok {
 		return map[string]interface{}{
-			"error":          "input is not a 2D array (array of arrays)",
-			"first_element":  arr[0],
-			"expected":       "array of arrays",
+			"error":         "input is not a 2D array (array of arrays)",
+			"first_element": arr[0],
+			"expected":      "array of arrays",
 		}, nil
 	}
 
@@ -59,9 +59,9 @@ func (e *TransposeExecutor) Execute(ctx ExecutionContext, node types.Node) (inte
 		rowArr, ok := row.([]interface{})
 		if !ok {
 			return map[string]interface{}{
-				"error":      fmt.Sprintf("row %d is not an array", i),
-				"row_index":  i,
-				"row_value":  row,
+				"error":     fmt.Sprintf("row %d is not an array", i),
+				"row_index": i,
+				"row_value": row,
 			}, nil
 		}
 		if len(rowArr) != cols {
@@ -86,9 +86,9 @@ func (e *TransposeExecutor) Execute(ctx ExecutionContext, node types.Node) (inte
 	}
 
 	return map[string]interface{}{
-		"transposed": transposed,
-		"rows":       rows,
-		"cols":       cols,
+		"transposed":      transposed,
+		"rows":            rows,
+		"cols":            cols,
 		"transposed_rows": cols,
 		"transposed_cols": rows,
 	}, nil

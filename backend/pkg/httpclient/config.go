@@ -40,18 +40,18 @@ type Config struct {
 	Token    string   `json:"token,omitempty" yaml:"token,omitempty"`         // For bearer token
 
 	// Network configuration
-	Timeout             time.Duration `json:"timeout,omitempty" yaml:"timeout,omitempty"`                             // Request timeout (default: 30s)
-	MaxIdleConns        int           `json:"max_idle_conns,omitempty" yaml:"max_idle_conns,omitempty"`               // Max idle connections (default: 100)
+	Timeout             time.Duration `json:"timeout,omitempty" yaml:"timeout,omitempty"`                                 // Request timeout (default: 30s)
+	MaxIdleConns        int           `json:"max_idle_conns,omitempty" yaml:"max_idle_conns,omitempty"`                   // Max idle connections (default: 100)
 	MaxIdleConnsPerHost int           `json:"max_idle_conns_per_host,omitempty" yaml:"max_idle_conns_per_host,omitempty"` // Max idle conns per host (default: 10)
-	MaxConnsPerHost     int           `json:"max_conns_per_host,omitempty" yaml:"max_conns_per_host,omitempty"`       // Max conns per host (default: 100)
-	IdleConnTimeout     time.Duration `json:"idle_conn_timeout,omitempty" yaml:"idle_conn_timeout,omitempty"`         // Idle conn timeout (default: 90s)
-	TLSHandshakeTimeout time.Duration `json:"tls_handshake_timeout,omitempty" yaml:"tls_handshake_timeout,omitempty"` // TLS timeout (default: 10s)
-	DisableKeepAlives   bool          `json:"disable_keep_alives,omitempty" yaml:"disable_keep_alives,omitempty"`     // Disable keep-alives (default: false)
+	MaxConnsPerHost     int           `json:"max_conns_per_host,omitempty" yaml:"max_conns_per_host,omitempty"`           // Max conns per host (default: 100)
+	IdleConnTimeout     time.Duration `json:"idle_conn_timeout,omitempty" yaml:"idle_conn_timeout,omitempty"`             // Idle conn timeout (default: 90s)
+	TLSHandshakeTimeout time.Duration `json:"tls_handshake_timeout,omitempty" yaml:"tls_handshake_timeout,omitempty"`     // TLS timeout (default: 10s)
+	DisableKeepAlives   bool          `json:"disable_keep_alives,omitempty" yaml:"disable_keep_alives,omitempty"`         // Disable keep-alives (default: false)
 
 	// Security configuration
-	MaxRedirects    int   `json:"max_redirects,omitempty" yaml:"max_redirects,omitempty"`       // Max redirects (default: 10)
+	MaxRedirects    int   `json:"max_redirects,omitempty" yaml:"max_redirects,omitempty"`         // Max redirects (default: 10)
 	MaxResponseSize int64 `json:"max_response_size,omitempty" yaml:"max_response_size,omitempty"` // Max response size in bytes (default: 10MB)
-	FollowRedirects bool  `json:"follow_redirects,omitempty" yaml:"follow_redirects,omitempty"` // Follow redirects (default: true)
+	FollowRedirects bool  `json:"follow_redirects,omitempty" yaml:"follow_redirects,omitempty"`   // Follow redirects (default: true)
 
 	// SSRF Protection
 	BlockPrivateIPs    bool     `json:"block_private_ips,omitempty" yaml:"block_private_ips,omitempty"`       // Block private IP ranges

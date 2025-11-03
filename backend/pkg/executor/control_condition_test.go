@@ -9,11 +9,11 @@ import (
 // TestConditionExecutor_Basic tests basic condition evaluation
 func TestConditionExecutor_Basic(t *testing.T) {
 	tests := []struct {
-		name          string
-		condition     string
-		input         interface{}
-		expectedMet   bool
-		description   string
+		name        string
+		condition   string
+		input       interface{}
+		expectedMet bool
+		description string
 	}{
 		{
 			name:        "Greater than - true",
@@ -333,7 +333,7 @@ func TestConditionExecutor_Validation(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			exec := &ConditionExecutor{}
 			err := exec.Validate(tt.node)
-			
+
 			if tt.expectError && err == nil {
 				t.Error("Expected validation error, got nil")
 			}
@@ -373,4 +373,3 @@ func TestConditionExecutor_NodeType(t *testing.T) {
 		t.Errorf("Expected NodeType to be %s, got %s", types.NodeTypeCondition, exec.NodeType())
 	}
 }
-

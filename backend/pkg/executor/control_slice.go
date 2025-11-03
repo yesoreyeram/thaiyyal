@@ -57,7 +57,7 @@ func (e *SliceExecutor) Execute(ctx ExecutionContext, node types.Node) (interfac
 	// Get end index or length
 	var end int
 	hasEnd := false
-	
+
 	if endVal, ok := node.Data.End.(float64); ok {
 		end = int(endVal)
 		hasEnd = true

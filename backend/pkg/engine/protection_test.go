@@ -15,39 +15,39 @@ import (
 // TestMaxNodeExecutions tests that the maximum node execution limit is enforced
 func TestMaxNodeExecutions(t *testing.T) {
 	tests := []struct {
-		name            string
-		maxExecutions   int
-		nodeCount       int
-		shouldFail      bool
-		expectedCount   int
+		name          string
+		maxExecutions int
+		nodeCount     int
+		shouldFail    bool
+		expectedCount int
 	}{
 		{
-			name:            "under limit",
-			maxExecutions:   10,
-			nodeCount:       5,
-			shouldFail:      false,
-			expectedCount:   5,
+			name:          "under limit",
+			maxExecutions: 10,
+			nodeCount:     5,
+			shouldFail:    false,
+			expectedCount: 5,
 		},
 		{
-			name:            "at limit",
-			maxExecutions:   5,
-			nodeCount:       5,
-			shouldFail:      false,
-			expectedCount:   5,
+			name:          "at limit",
+			maxExecutions: 5,
+			nodeCount:     5,
+			shouldFail:    false,
+			expectedCount: 5,
 		},
 		{
-			name:            "exceed limit",
-			maxExecutions:   3,
-			nodeCount:       5,
-			shouldFail:      true,
-			expectedCount:   4, // Should fail after 4th execution
+			name:          "exceed limit",
+			maxExecutions: 3,
+			nodeCount:     5,
+			shouldFail:    true,
+			expectedCount: 4, // Should fail after 4th execution
 		},
 		{
-			name:            "unlimited executions",
-			maxExecutions:   0, // 0 means unlimited
-			nodeCount:       10,
-			shouldFail:      false,
-			expectedCount:   10,
+			name:          "unlimited executions",
+			maxExecutions: 0, // 0 means unlimited
+			nodeCount:     10,
+			shouldFail:    false,
+			expectedCount: 10,
 		},
 	}
 
@@ -147,8 +147,8 @@ func TestMaxHTTPCallsPerExecution(t *testing.T) {
 
 			// Create engine with custom config
 			config := types.DefaultConfig()
-			config.AllowHTTP = true          // Enable HTTP for this test
-			config.BlockLocalhost = false    // Allow localhost for test server
+			config.AllowHTTP = true       // Enable HTTP for this test
+			config.BlockLocalhost = false // Allow localhost for test server
 			config.MaxHTTPCallsPerExec = tt.maxHTTPCalls
 
 			engine, err := NewWithConfig([]byte(payload), config)
@@ -197,32 +197,32 @@ func TestHTTPCallsInChain(t *testing.T) {
 	defer server.Close()
 
 	tests := []struct {
-		name           string
-		maxHTTPCalls   int
-		httpCallCount  int
-		shouldFail     bool
-		expectedCalls  int
+		name          string
+		maxHTTPCalls  int
+		httpCallCount int
+		shouldFail    bool
+		expectedCalls int
 	}{
 		{
-			name:           "HTTP chain under limit",
-			maxHTTPCalls:   10,
-			httpCallCount:  3,
-			shouldFail:     false,
-			expectedCalls:  3,
+			name:          "HTTP chain under limit",
+			maxHTTPCalls:  10,
+			httpCallCount: 3,
+			shouldFail:    false,
+			expectedCalls: 3,
 		},
 		{
-			name:           "HTTP chain exceed limit",
-			maxHTTPCalls:   5,
-			httpCallCount:  10,
-			shouldFail:     true,
-			expectedCalls:  6, // Should fail after 6th call
+			name:          "HTTP chain exceed limit",
+			maxHTTPCalls:  5,
+			httpCallCount: 10,
+			shouldFail:    true,
+			expectedCalls: 6, // Should fail after 6th call
 		},
 		{
-			name:           "HTTP chain unlimited",
-			maxHTTPCalls:   0,
-			httpCallCount:  20,
-			shouldFail:     false,
-			expectedCalls:  20,
+			name:          "HTTP chain unlimited",
+			maxHTTPCalls:  0,
+			httpCallCount: 20,
+			shouldFail:    false,
+			expectedCalls: 20,
 		},
 	}
 
@@ -233,8 +233,8 @@ func TestHTTPCallsInChain(t *testing.T) {
 
 			// Create engine with custom config - ENABLE HTTP explicitly
 			config := types.DefaultConfig()
-			config.AllowHTTP = true                  // Enable HTTP for this test
-			config.BlockLocalhost = false            // Allow localhost for test server
+			config.AllowHTTP = true       // Enable HTTP for this test
+			config.BlockLocalhost = false // Allow localhost for test server
 			config.MaxHTTPCallsPerExec = tt.maxHTTPCalls
 
 			engine, err := NewWithConfig([]byte(payload), config)
@@ -279,8 +279,8 @@ func TestMultipleProtectionLimits(t *testing.T) {
 	payload := createHTTPWorkflow(server.URL, 10)
 
 	config := types.DefaultConfig()
-	config.AllowHTTP = true          // Enable HTTP for this test
-	config.BlockLocalhost = false    // Allow localhost for test server
+	config.AllowHTTP = true       // Enable HTTP for this test
+	config.BlockLocalhost = false // Allow localhost for test server
 	config.MaxNodeExecutions = 50
 	config.MaxHTTPCallsPerExec = 5
 

@@ -3,21 +3,21 @@
 package engine
 
 import (
-"context"
-"crypto/rand"
-"encoding/hex"
-"encoding/json"
-"fmt"
-"regexp"
-"sync"
-"time"
+	"context"
+	"crypto/rand"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"regexp"
+	"sync"
+	"time"
 
-"github.com/yesoreyeram/thaiyyal/backend/pkg/executor"
-"github.com/yesoreyeram/thaiyyal/backend/pkg/graph"
-"github.com/yesoreyeram/thaiyyal/backend/pkg/logging"
-"github.com/yesoreyeram/thaiyyal/backend/pkg/observer"
-"github.com/yesoreyeram/thaiyyal/backend/pkg/state"
-"github.com/yesoreyeram/thaiyyal/backend/pkg/types"
+	"github.com/yesoreyeram/thaiyyal/backend/pkg/executor"
+	"github.com/yesoreyeram/thaiyyal/backend/pkg/graph"
+	"github.com/yesoreyeram/thaiyyal/backend/pkg/logging"
+	"github.com/yesoreyeram/thaiyyal/backend/pkg/observer"
+	"github.com/yesoreyeram/thaiyyal/backend/pkg/state"
+	"github.com/yesoreyeram/thaiyyal/backend/pkg/types"
 )
 
 // ============================================================================
@@ -33,12 +33,12 @@ import (
 //   - Template Method: Execute() defines the workflow execution algorithm
 //   - Observer Pattern: Notifies observers of execution events (optional)
 type Engine struct {
-	graph      *graph.Graph
-	state      *state.Manager
-	registry   *executor.Registry
-	config     types.Config
-	results    map[string]interface{}
-	resultsMu  sync.RWMutex
+	graph       *graph.Graph
+	state       *state.Manager
+	registry    *executor.Registry
+	config      types.Config
+	results     map[string]interface{}
+	resultsMu   sync.RWMutex
 	executionID string
 	workflowID  string
 
@@ -54,10 +54,10 @@ type Engine struct {
 	// Observer support
 	observerMgr *observer.Manager
 	logger      observer.Logger
-	
+
 	// Structured logging
 	structuredLogger *logging.Logger
-	
+
 	// HTTP client registry for named HTTP clients (uses standalone httpclient.Registry)
 	httpClientRegistry interface{}
 }
@@ -79,7 +79,7 @@ type Engine struct {
 //   - *Engine: Initialized engine ready for execution
 //   - error: If JSON parsing fails
 func New(payloadJSON []byte) (*Engine, error) {
-return NewWithConfig(payloadJSON, types.DefaultConfig())
+	return NewWithConfig(payloadJSON, types.DefaultConfig())
 }
 
 // NewWithConfig creates a new workflow engine with custom configuration.
@@ -194,20 +194,20 @@ func DefaultRegistry() *executor.Registry {
 	reg.MustRegister(&executor.ReduceExecutor{})
 
 	// Array processing nodes (14 new nodes)
-	reg.MustRegister(&executor.SliceExecutor{})      // Pagination, windowing
-	reg.MustRegister(&executor.SortExecutor{})       // Sort by field
-	reg.MustRegister(&executor.FindExecutor{})       // Find first match
-	reg.MustRegister(&executor.FlatMapExecutor{})    // Transform and flatten
-	reg.MustRegister(&executor.GroupByExecutor{})    // Group and aggregate
-	reg.MustRegister(&executor.UniqueExecutor{})     // Remove duplicates
-	reg.MustRegister(&executor.ChunkExecutor{})      // Split into chunks
-	reg.MustRegister(&executor.ReverseExecutor{})    // Reverse array
-	reg.MustRegister(&executor.PartitionExecutor{})  // Split by condition
-	reg.MustRegister(&executor.ZipExecutor{})        // Combine arrays
-	reg.MustRegister(&executor.SampleExecutor{})     // Random sampling
-	reg.MustRegister(&executor.RangeExecutor{})      // Generate sequences
-	reg.MustRegister(&executor.CompactExecutor{})    // Remove null/empty
-	reg.MustRegister(&executor.TransposeExecutor{})  // Transpose matrix
+	reg.MustRegister(&executor.SliceExecutor{})     // Pagination, windowing
+	reg.MustRegister(&executor.SortExecutor{})      // Sort by field
+	reg.MustRegister(&executor.FindExecutor{})      // Find first match
+	reg.MustRegister(&executor.FlatMapExecutor{})   // Transform and flatten
+	reg.MustRegister(&executor.GroupByExecutor{})   // Group and aggregate
+	reg.MustRegister(&executor.UniqueExecutor{})    // Remove duplicates
+	reg.MustRegister(&executor.ChunkExecutor{})     // Split into chunks
+	reg.MustRegister(&executor.ReverseExecutor{})   // Reverse array
+	reg.MustRegister(&executor.PartitionExecutor{}) // Split by condition
+	reg.MustRegister(&executor.ZipExecutor{})       // Combine arrays
+	reg.MustRegister(&executor.SampleExecutor{})    // Random sampling
+	reg.MustRegister(&executor.RangeExecutor{})     // Generate sequences
+	reg.MustRegister(&executor.CompactExecutor{})   // Remove null/empty
+	reg.MustRegister(&executor.TransposeExecutor{}) // Transpose matrix
 
 	// State & memory nodes
 	reg.MustRegister(&executor.VariableExecutor{})
@@ -242,12 +242,12 @@ func DefaultRegistry() *executor.Registry {
 // Format: 16 hex characters (8 bytes) for balance between uniqueness and readability.
 // Example: "a1b2c3d4e5f6g7h8"
 func generateExecutionID() string {
-bytes := make([]byte, 8)
-if _, err := rand.Read(bytes); err != nil {
-// Fallback to timestamp-based ID if random generation fails
-return fmt.Sprintf("exec_%d", time.Now().UnixNano())
-}
-return hex.EncodeToString(bytes)
+	bytes := make([]byte, 8)
+	if _, err := rand.Read(bytes); err != nil {
+		// Fallback to timestamp-based ID if random generation fails
+		return fmt.Sprintf("exec_%d", time.Now().UnixNano())
+	}
+	return hex.EncodeToString(bytes)
 }
 
 // ============================================================================
@@ -305,10 +305,10 @@ func (e *Engine) GetObserverCount() int {
 //   - error: If execution fails, times out, or encounters an error
 func (e *Engine) Execute() (*types.Result, error) {
 	workflowStartTime := time.Now()
-	
+
 	// Log workflow execution start
 	e.structuredLogger.Info("workflow execution started")
-	
+
 	result := &types.Result{
 		ExecutionID: e.executionID,
 		WorkflowID:  e.workflowID,
@@ -325,7 +325,7 @@ func (e *Engine) Execute() (*types.Result, error) {
 		e.structuredLogger.WithError(err).Error("topological sort failed")
 		return result, err
 	}
-	
+
 	e.structuredLogger.
 		WithField("execution_order", executionOrder).
 		WithField("node_count", len(executionOrder)).
@@ -391,7 +391,7 @@ func (e *Engine) Execute() (*types.Result, error) {
 	// Step 4: Copy results and set final output
 	result.NodeResults = e.results
 	result.FinalOutput = e.getFinalOutput()
-	
+
 	e.structuredLogger.
 		WithField("duration_ms", time.Since(workflowStartTime).Milliseconds()).
 		WithField("nodes_executed", len(executionOrder)).
@@ -420,14 +420,14 @@ func (e *Engine) Execute() (*types.Result, error) {
 //   - error: If node execution fails
 func (e *Engine) executeNode(ctx context.Context, node types.Node) (interface{}, error) {
 	nodeStartTime := time.Now()
-	
+
 	// Create node-specific logger
 	nodeLogger := e.structuredLogger.
 		WithNodeID(node.ID).
 		WithNodeType(node.Type)
-	
+
 	nodeLogger.Debug("node execution started")
-	
+
 	// Notify observers: Node start
 	e.notifyNodeStart(ctx, node, nodeStartTime)
 
@@ -447,21 +447,21 @@ func (e *Engine) executeNode(ctx context.Context, node types.Node) (interface{},
 
 	// Dispatch to appropriate executor via registry
 	result, err := e.registry.Execute(e, node)
-	
+
 	if err != nil {
 		nodeLogger.WithError(err).Error("node execution failed")
 		// Notify observers: Node execution failure
 		e.notifyNodeFailure(ctx, node, nodeStartTime, result, err)
 		return nil, err
 	}
-	
+
 	nodeLogger.
 		WithField("duration_ms", time.Since(nodeStartTime).Milliseconds()).
 		Info("node execution completed successfully")
-	
+
 	// Notify observers: Node success
 	e.notifyNodeSuccess(ctx, node, nodeStartTime, result)
-	
+
 	return result, nil
 }
 
@@ -476,15 +476,15 @@ func (e *Engine) executeNode(ctx context.Context, node types.Node) (interface{},
 // Some nodes (for_each, while_loop, parallel) require explicit types as they
 // have ambiguous fields.
 func (e *Engine) inferNodeTypes() {
-for i := range e.nodes {
-if e.nodes[i].Type != "" {
-// Type already set, skip inference
-continue
-}
+	for i := range e.nodes {
+		if e.nodes[i].Type != "" {
+			// Type already set, skip inference
+			continue
+		}
 
-// Infer type from data fields
-e.nodes[i].Type = inferNodeTypeFromData(e.nodes[i].Data)
-}
+		// Infer type from data fields
+		e.nodes[i].Type = inferNodeTypeFromData(e.nodes[i].Data)
+	}
 }
 
 // inferNodeTypeFromData infers a node's type from its data fields.
@@ -493,89 +493,89 @@ e.nodes[i].Type = inferNodeTypeFromData(e.nodes[i].Data)
 // Returns:
 //   - types.NodeType: Inferred type, or empty string if cannot infer
 func inferNodeTypeFromData(data types.NodeData) types.NodeType {
-// Basic I/O nodes (checked first as they're most common)
-if data.Value != nil {
-return types.NodeTypeNumber
-}
-if data.Text != nil {
-return types.NodeTypeTextInput
-}
-if data.Mode != nil {
-return types.NodeTypeVisualization
-}
+	// Basic I/O nodes (checked first as they're most common)
+	if data.Value != nil {
+		return types.NodeTypeNumber
+	}
+	if data.Text != nil {
+		return types.NodeTypeTextInput
+	}
+	if data.Mode != nil {
+		return types.NodeTypeVisualization
+	}
 
-// Operation nodes
-if data.Op != nil {
-return types.NodeTypeOperation
-}
-if data.TextOp != nil {
-return types.NodeTypeTextOperation
-}
-if data.URL != nil {
-return types.NodeTypeHTTP
-}
+	// Operation nodes
+	if data.Op != nil {
+		return types.NodeTypeOperation
+	}
+	if data.TextOp != nil {
+		return types.NodeTypeTextOperation
+	}
+	if data.URL != nil {
+		return types.NodeTypeHTTP
+	}
 
-// Control flow nodes
-if data.Condition != nil {
-return types.NodeTypeCondition
-}
+	// Control flow nodes
+	if data.Condition != nil {
+		return types.NodeTypeCondition
+	}
 
-// State & memory nodes
-if data.VarName != nil && data.VarOp != nil {
-return types.NodeTypeVariable
-}
-if data.Field != nil || len(data.Fields) > 0 {
-return types.NodeTypeExtract
-}
-if data.TransformType != nil {
-return types.NodeTypeTransform
-}
-if data.AccumOp != nil {
-return types.NodeTypeAccumulator
-}
-if data.CounterOp != nil {
-return types.NodeTypeCounter
-}
+	// State & memory nodes
+	if data.VarName != nil && data.VarOp != nil {
+		return types.NodeTypeVariable
+	}
+	if data.Field != nil || len(data.Fields) > 0 {
+		return types.NodeTypeExtract
+	}
+	if data.TransformType != nil {
+		return types.NodeTypeTransform
+	}
+	if data.AccumOp != nil {
+		return types.NodeTypeAccumulator
+	}
+	if data.CounterOp != nil {
+		return types.NodeTypeCounter
+	}
 
-// Advanced control flow nodes
-if len(data.Cases) > 0 {
-return types.NodeTypeSwitch
-}
-if data.JoinStrategy != nil {
-return types.NodeTypeJoin
-}
-if len(data.Paths) > 0 {
-return types.NodeTypeSplit
-}
-if data.Duration != nil {
-return types.NodeTypeDelay
-}
-if data.CacheOp != nil && data.CacheKey != nil {
-return types.NodeTypeCache
-}
+	// Advanced control flow nodes
+	if len(data.Cases) > 0 {
+		return types.NodeTypeSwitch
+	}
+	if data.JoinStrategy != nil {
+		return types.NodeTypeJoin
+	}
+	if len(data.Paths) > 0 {
+		return types.NodeTypeSplit
+	}
+	if data.Duration != nil {
+		return types.NodeTypeDelay
+	}
+	if data.CacheOp != nil && data.CacheKey != nil {
+		return types.NodeTypeCache
+	}
 
-// Context nodes
-if data.ContextName != nil && data.ContextValue != nil {
-// Default to variable, frontend should specify explicitly
-// This is a best-effort inference
-return types.NodeTypeContextVariable
-}
+	// Context nodes
+	if data.ContextName != nil && data.ContextValue != nil {
+		// Default to variable, frontend should specify explicitly
+		// This is a best-effort inference
+		return types.NodeTypeContextVariable
+	}
 
-// Error handling & resilience nodes
-if data.MaxAttempts != nil || data.BackoffStrategy != nil {
-return types.NodeTypeRetry
-}
-if data.FallbackValue != nil || data.ContinueOnError != nil {
-return types.NodeTypeTryCatch
-}
-if data.Timeout != nil && data.TimeoutAction != nil {
-return types.NodeTypeTimeout
-}
+	// Error handling & resilience nodes
+	if data.MaxAttempts != nil || data.BackoffStrategy != nil {
+		return types.NodeTypeRetry
+	}
+	if data.FallbackValue != nil || data.ContinueOnError != nil {
+		return types.NodeTypeTryCatch
+	}
+	if data.Timeout != nil && data.TimeoutAction != nil {
+		return types.NodeTypeTimeout
+	}
 
-// Cannot infer type
-// Note: for_each, while_loop, and parallel require explicit type
-// as they have ambiguous fields
-return ""
+	// Cannot infer type
+	// Note: for_each, while_loop, and parallel require explicit type
+	// as they have ambiguous fields
+	return ""
 }
 
 // ============================================================================
@@ -584,28 +584,28 @@ return ""
 
 // GetNodeInputs retrieves all input values for a node from its predecessor nodes.
 func (e *Engine) GetNodeInputs(nodeID string) []interface{} {
-inputs := []interface{}{}
-e.resultsMu.RLock()
-defer e.resultsMu.RUnlock()
+	inputs := []interface{}{}
+	e.resultsMu.RLock()
+	defer e.resultsMu.RUnlock()
 
-for _, edge := range e.edges {
-if edge.Target == nodeID {
-if result, ok := e.results[edge.Source]; ok {
-inputs = append(inputs, result)
-}
-}
-}
-return inputs
+	for _, edge := range e.edges {
+		if edge.Target == nodeID {
+			if result, ok := e.results[edge.Source]; ok {
+				inputs = append(inputs, result)
+			}
+		}
+	}
+	return inputs
 }
 
 // GetNode retrieves a node by its ID
 func (e *Engine) GetNode(nodeID string) *types.Node {
-for i := range e.nodes {
-if e.nodes[i].ID == nodeID {
-return &e.nodes[i]
-}
-}
-return nil
+	for i := range e.nodes {
+		if e.nodes[i].ID == nodeID {
+			return &e.nodes[i]
+		}
+	}
+	return nil
 }
 
 // GetVariable retrieves a variable value
@@ -637,38 +637,38 @@ func (e *Engine) SetVariable(name string, value interface{}) error {
 
 // GetAccumulator returns the current accumulator value
 func (e *Engine) GetAccumulator() interface{} {
-return e.state.GetAccumulator()
+	return e.state.GetAccumulator()
 }
 
 // SetAccumulator sets the accumulator value
 func (e *Engine) SetAccumulator(value interface{}) {
-e.state.SetAccumulator(value)
+	e.state.SetAccumulator(value)
 }
 
 // GetCounter returns the current counter value
 func (e *Engine) GetCounter() float64 {
-return e.state.GetCounter()
+	return e.state.GetCounter()
 }
 
 // SetCounter sets the counter value
 func (e *Engine) SetCounter(value float64) {
-e.state.SetCounter(value)
+	e.state.SetCounter(value)
 }
 
 // GetCache retrieves a cached value
 func (e *Engine) GetCache(key string) (interface{}, bool) {
-val, found, _ := e.state.GetCache(key)
-return val, found
+	val, found, _ := e.state.GetCache(key)
+	return val, found
 }
 
 // SetCache sets a cached value with TTL
 func (e *Engine) SetCache(key string, value interface{}, ttl time.Duration) {
-e.state.SetCache(key, value, ttl)
+	e.state.SetCache(key, value, ttl)
 }
 
 // GetWorkflowContext returns all context variables and constants
 func (e *Engine) GetWorkflowContext() map[string]interface{} {
-return e.state.GetAllContext()
+	return e.state.GetAllContext()
 }
 
 // GetContextVariable retrieves a context variable
@@ -717,16 +717,16 @@ func (e *Engine) SetContextConstant(name string, value interface{}) {
 
 // InterpolateTemplate replaces template placeholders in a string with actual values from context
 func (e *Engine) InterpolateTemplate(template string) string {
-return e.interpolateTemplate(template)
+	return e.interpolateTemplate(template)
 }
 
 // GetNodeResult retrieves a node's execution result
 func (e *Engine) GetNodeResult(nodeID string) (interface{}, bool) {
-e.resultsMu.RLock()
-defer e.resultsMu.RUnlock()
+	e.resultsMu.RLock()
+	defer e.resultsMu.RUnlock()
 
-result, ok := e.results[nodeID]
-return result, ok
+	result, ok := e.results[nodeID]
+	return result, ok
 }
 
 // SetNodeResult stores a node's execution result
@@ -753,25 +753,25 @@ func (e *Engine) SetNodeResult(nodeID string, result interface{}) {
 
 // GetAllNodeResults returns all node execution results
 func (e *Engine) GetAllNodeResults() map[string]interface{} {
-e.resultsMu.RLock()
-defer e.resultsMu.RUnlock()
+	e.resultsMu.RLock()
+	defer e.resultsMu.RUnlock()
 
-// Return a copy to avoid concurrent modification
-resultsCopy := make(map[string]interface{}, len(e.results))
-for k, v := range e.results {
-resultsCopy[k] = v
-}
-return resultsCopy
+	// Return a copy to avoid concurrent modification
+	resultsCopy := make(map[string]interface{}, len(e.results))
+	for k, v := range e.results {
+		resultsCopy[k] = v
+	}
+	return resultsCopy
 }
 
 // GetVariables returns all workflow variables
 func (e *Engine) GetVariables() map[string]interface{} {
-return e.state.GetAllVariables()
+	return e.state.GetAllVariables()
 }
 
 // GetContextVariables returns all context variables and constants
 func (e *Engine) GetContextVariables() map[string]interface{} {
-return e.state.GetAllContext()
+	return e.state.GetAllContext()
 }
 
 // GetConfig returns the engine configuration
@@ -791,14 +791,14 @@ func (e *Engine) GetHTTPClientRegistry() interface{} {
 func (e *Engine) IncrementNodeExecution() error {
 	e.countersMu.Lock()
 	defer e.countersMu.Unlock()
-	
+
 	e.nodeExecutionCount++
-	
+
 	// Check if limit is configured and enforced (0 means unlimited)
 	if e.config.MaxNodeExecutions > 0 && e.nodeExecutionCount > e.config.MaxNodeExecutions {
 		return fmt.Errorf("maximum node executions exceeded: %d (limit: %d)", e.nodeExecutionCount, e.config.MaxNodeExecutions)
 	}
-	
+
 	return nil
 }
 
@@ -807,14 +807,14 @@ func (e *Engine) IncrementNodeExecution() error {
 func (e *Engine) IncrementHTTPCall() error {
 	e.countersMu.Lock()
 	defer e.countersMu.Unlock()
-	
+
 	e.httpCallCount++
-	
+
 	// Check if limit is configured and enforced (0 means unlimited)
 	if e.config.MaxHTTPCallsPerExec > 0 && e.httpCallCount > e.config.MaxHTTPCallsPerExec {
 		return fmt.Errorf("maximum HTTP calls per execution exceeded: %d (limit: %d)", e.httpCallCount, e.config.MaxHTTPCallsPerExec)
 	}
-	
+
 	return nil
 }
 
@@ -841,119 +841,119 @@ var templateRegex = regexp.MustCompile(`\{\{\s*(variable|const)\.(\w+)\s*\}\}`)
 
 // interpolateTemplate replaces template placeholders in a string with actual values from context
 func (e *Engine) interpolateTemplate(text string) string {
-// Check if we have any context to interpolate
-contextVars := e.state.GetAllContext()
-if len(contextVars) == 0 {
-return text
-}
+	// Check if we have any context to interpolate
+	contextVars := e.state.GetAllContext()
+	if len(contextVars) == 0 {
+		return text
+	}
 
-// Replace all template placeholders
-result := templateRegex.ReplaceAllStringFunc(text, func(match string) string {
-// Extract the type and name from the match
-parts := templateRegex.FindStringSubmatch(match)
-if len(parts) != 3 {
-return match // Return original if parsing fails
-}
+	// Replace all template placeholders
+	result := templateRegex.ReplaceAllStringFunc(text, func(match string) string {
+		// Extract the type and name from the match
+		parts := templateRegex.FindStringSubmatch(match)
+		if len(parts) != 3 {
+			return match // Return original if parsing fails
+		}
 
-contextType := parts[1]
-varName := parts[2]
+		contextType := parts[1]
+		varName := parts[2]
 
-// Look up the value in the appropriate context map
-var value interface{}
-var exists bool
+		// Look up the value in the appropriate context map
+		var value interface{}
+		var exists bool
 
-if contextType == "variable" {
-value, exists = e.state.GetContextVariable(varName)
-} else if contextType == "const" {
-value, exists = e.state.GetContextConstant(varName)
-}
+		if contextType == "variable" {
+			value, exists = e.state.GetContextVariable(varName)
+		} else if contextType == "const" {
+			value, exists = e.state.GetContextConstant(varName)
+		}
 
-if exists {
-return fmt.Sprintf("%v", value)
-}
+		if exists {
+			return fmt.Sprintf("%v", value)
+		}
 
-// Return original if not found
-return match
-})
+		// Return original if not found
+		return match
+	})
 
-return result
+	return result
 }
 
 // interpolateValue recursively interpolates templates in various data types
 func (e *Engine) interpolateValue(value interface{}) interface{} {
-switch v := value.(type) {
-case string:
-return e.interpolateTemplate(v)
-case map[string]interface{}:
-result := make(map[string]interface{})
-for key, val := range v {
-result[key] = e.interpolateValue(val)
-}
-return result
-case []interface{}:
-result := make([]interface{}, len(v))
-for i, val := range v {
-result[i] = e.interpolateValue(val)
-}
-return result
-default:
-return value
-}
+	switch v := value.(type) {
+	case string:
+		return e.interpolateTemplate(v)
+	case map[string]interface{}:
+		result := make(map[string]interface{})
+		for key, val := range v {
+			result[key] = e.interpolateValue(val)
+		}
+		return result
+	case []interface{}:
+		result := make([]interface{}, len(v))
+		for i, val := range v {
+			result[i] = e.interpolateValue(val)
+		}
+		return result
+	default:
+		return value
+	}
 }
 
 // interpolateNodeData interpolates all string fields in NodeData
 func (e *Engine) interpolateNodeData(data *types.NodeData) {
-// Check if we have any context to interpolate
-contextVars := e.state.GetAllContext()
-if len(contextVars) == 0 {
-return
-}
+	// Check if we have any context to interpolate
+	contextVars := e.state.GetAllContext()
+	if len(contextVars) == 0 {
+		return
+	}
 
-// Interpolate string pointer fields
-if data.Text != nil {
-interpolated := e.interpolateTemplate(*data.Text)
-data.Text = &interpolated
-}
-if data.URL != nil {
-interpolated := e.interpolateTemplate(*data.URL)
-data.URL = &interpolated
-}
-if data.Label != nil {
-interpolated := e.interpolateTemplate(*data.Label)
-data.Label = &interpolated
-}
-if data.VarName != nil {
-interpolated := e.interpolateTemplate(*data.VarName)
-data.VarName = &interpolated
-}
-if data.Field != nil {
-interpolated := e.interpolateTemplate(*data.Field)
-data.Field = &interpolated
-}
-if data.CacheKey != nil {
-interpolated := e.interpolateTemplate(*data.CacheKey)
-data.CacheKey = &interpolated
-}
+	// Interpolate string pointer fields
+	if data.Text != nil {
+		interpolated := e.interpolateTemplate(*data.Text)
+		data.Text = &interpolated
+	}
+	if data.URL != nil {
+		interpolated := e.interpolateTemplate(*data.URL)
+		data.URL = &interpolated
+	}
+	if data.Label != nil {
+		interpolated := e.interpolateTemplate(*data.Label)
+		data.Label = &interpolated
+	}
+	if data.VarName != nil {
+		interpolated := e.interpolateTemplate(*data.VarName)
+		data.VarName = &interpolated
+	}
+	if data.Field != nil {
+		interpolated := e.interpolateTemplate(*data.Field)
+		data.Field = &interpolated
+	}
+	if data.CacheKey != nil {
+		interpolated := e.interpolateTemplate(*data.CacheKey)
+		data.CacheKey = &interpolated
+	}
 
-// Interpolate string arrays
-if len(data.Fields) > 0 {
-for i, field := range data.Fields {
-data.Fields[i] = e.interpolateTemplate(field)
-}
-}
-if len(data.Paths) > 0 {
-for i, path := range data.Paths {
-data.Paths[i] = e.interpolateTemplate(path)
-}
-}
+	// Interpolate string arrays
+	if len(data.Fields) > 0 {
+		for i, field := range data.Fields {
+			data.Fields[i] = e.interpolateTemplate(field)
+		}
+	}
+	if len(data.Paths) > 0 {
+		for i, path := range data.Paths {
+			data.Paths[i] = e.interpolateTemplate(path)
+		}
+	}
 
-// Interpolate interface{} fields that might contain strings
-if data.InitialValue != nil {
-data.InitialValue = e.interpolateValue(data.InitialValue)
-}
-if data.FallbackValue != nil {
-data.FallbackValue = e.interpolateValue(data.FallbackValue)
-}
+	// Interpolate interface{} fields that might contain strings
+	if data.InitialValue != nil {
+		data.InitialValue = e.interpolateValue(data.InitialValue)
+	}
+	if data.FallbackValue != nil {
+		data.FallbackValue = e.interpolateValue(data.FallbackValue)
+	}
 }
 
 // ============================================================================
@@ -962,12 +962,12 @@ data.FallbackValue = e.interpolateValue(data.FallbackValue)
 
 // getNode retrieves a node by its ID (internal helper)
 func (e *Engine) getNode(nodeID string) types.Node {
-for _, node := range e.nodes {
-if node.ID == nodeID {
-return node
-}
-}
-return types.Node{}
+	for _, node := range e.nodes {
+		if node.ID == nodeID {
+			return node
+		}
+	}
+	return types.Node{}
 }
 
 // getFinalOutput determines the final output of the workflow.
@@ -981,46 +981,46 @@ return types.Node{}
 // Returns:
 //   - interface{}: The result value from a terminal node, or nil if none found
 func (e *Engine) getFinalOutput() interface{} {
-// Build a set of all terminal nodes (nodes with no outgoing edges)
-terminalNodes := make(map[string]bool)
+	// Build a set of all terminal nodes (nodes with no outgoing edges)
+	terminalNodes := make(map[string]bool)
 
-// Initially, all nodes are considered terminal
-for _, node := range e.nodes {
-terminalNodes[node.ID] = true
-}
+	// Initially, all nodes are considered terminal
+	for _, node := range e.nodes {
+		terminalNodes[node.ID] = true
+	}
 
-// Remove nodes that have outgoing edges
-for _, edge := range e.edges {
-terminalNodes[edge.Source] = false
-}
+	// Remove nodes that have outgoing edges
+	for _, edge := range e.edges {
+		terminalNodes[edge.Source] = false
+	}
 
-e.resultsMu.RLock()
-defer e.resultsMu.RUnlock()
+	e.resultsMu.RLock()
+	defer e.resultsMu.RUnlock()
 
-// First pass: Try to find a non-context terminal node
-for nodeID, isTerminal := range terminalNodes {
-if isTerminal {
-node := e.getNode(nodeID)
-if node.Type != types.NodeTypeContextVariable && node.Type != types.NodeTypeContextConstant {
-if result, ok := e.results[nodeID]; ok {
-return result
-}
-}
-}
-}
+	// First pass: Try to find a non-context terminal node
+	for nodeID, isTerminal := range terminalNodes {
+		if isTerminal {
+			node := e.getNode(nodeID)
+			if node.Type != types.NodeTypeContextVariable && node.Type != types.NodeTypeContextConstant {
+				if result, ok := e.results[nodeID]; ok {
+					return result
+				}
+			}
+		}
+	}
 
-// Second pass: If no non-context terminal found, return any terminal (including context)
-// This handles the case where workflow contains only context nodes
-for nodeID, isTerminal := range terminalNodes {
-if isTerminal {
-if result, ok := e.results[nodeID]; ok {
-return result
-}
-}
-}
+	// Second pass: If no non-context terminal found, return any terminal (including context)
+	// This handles the case where workflow contains only context nodes
+	for nodeID, isTerminal := range terminalNodes {
+		if isTerminal {
+			if result, ok := e.results[nodeID]; ok {
+				return result
+			}
+		}
+	}
 
-// No terminal node found
-return nil
+	// No terminal node found
+	return nil
 }
 
 // ============================================================================

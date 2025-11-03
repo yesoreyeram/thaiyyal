@@ -63,20 +63,20 @@ const (
 	NodeTypeMap           NodeType = "map"    // Transform array elements
 	NodeTypeReduce        NodeType = "reduce" // Reduce array to single value
 	// Array Processing nodes
-	NodeTypeSlice     NodeType = "slice"      // Extract portion of array (pagination)
-	NodeTypeSort      NodeType = "sort"       // Sort array by field
-	NodeTypeFind      NodeType = "find"       // Find first matching element
-	NodeTypeFlatMap   NodeType = "flat_map"   // Transform and flatten arrays
-	NodeTypeGroupBy   NodeType = "group_by"   // Group and aggregate array elements
-	NodeTypeUnique    NodeType = "unique"     // Remove duplicate elements
-	NodeTypeChunk     NodeType = "chunk"      // Split array into chunks
-	NodeTypeReverse   NodeType = "reverse"    // Reverse array order
-	NodeTypePartition NodeType = "partition"  // Split array into two groups by condition
-	NodeTypeZip       NodeType = "zip"        // Combine arrays element-wise
-	NodeTypeSample    NodeType = "sample"     // Get random sample from array
-	NodeTypeRange     NodeType = "range"      // Generate array of numbers
-	NodeTypeCompact   NodeType = "compact"    // Remove null/empty values
-	NodeTypeTranspose NodeType = "transpose"  // Transpose 2D array (matrix)
+	NodeTypeSlice     NodeType = "slice"     // Extract portion of array (pagination)
+	NodeTypeSort      NodeType = "sort"      // Sort array by field
+	NodeTypeFind      NodeType = "find"      // Find first matching element
+	NodeTypeFlatMap   NodeType = "flat_map"  // Transform and flatten arrays
+	NodeTypeGroupBy   NodeType = "group_by"  // Group and aggregate array elements
+	NodeTypeUnique    NodeType = "unique"    // Remove duplicate elements
+	NodeTypeChunk     NodeType = "chunk"     // Split array into chunks
+	NodeTypeReverse   NodeType = "reverse"   // Reverse array order
+	NodeTypePartition NodeType = "partition" // Split array into two groups by condition
+	NodeTypeZip       NodeType = "zip"       // Combine arrays element-wise
+	NodeTypeSample    NodeType = "sample"    // Get random sample from array
+	NodeTypeRange     NodeType = "range"     // Generate array of numbers
+	NodeTypeCompact   NodeType = "compact"   // Remove null/empty values
+	NodeTypeTranspose NodeType = "transpose" // Transpose 2D array (matrix)
 	// State & Memory nodes
 	NodeTypeVariable    NodeType = "variable"    // Store/retrieve variables
 	NodeTypeExtract     NodeType = "extract"     // Extract fields from objects
@@ -120,36 +120,36 @@ type Node struct {
 
 // NodeData contains the node-specific configuration
 type NodeData struct {
-	Value         *float64 `json:"value,omitempty"`          // for number nodes
-	Op            *string  `json:"op,omitempty"`             // for operation nodes
-	Mode          *string  `json:"mode,omitempty"`           // for visualization nodes
-	Label         *string  `json:"label,omitempty"`          // optional label
-	Text          *string  `json:"text,omitempty"`           // for text input nodes
-	TextOp        *string  `json:"text_op,omitempty"`        // for text operation nodes
-	URL           *string  `json:"url,omitempty"`            // for HTTP nodes
+	Value         *float64 `json:"value,omitempty"`           // for number nodes
+	Op            *string  `json:"op,omitempty"`              // for operation nodes
+	Mode          *string  `json:"mode,omitempty"`            // for visualization nodes
+	Label         *string  `json:"label,omitempty"`           // optional label
+	Text          *string  `json:"text,omitempty"`            // for text input nodes
+	TextOp        *string  `json:"text_op,omitempty"`         // for text operation nodes
+	URL           *string  `json:"url,omitempty"`             // for HTTP nodes
 	HTTPClientUID *string  `json:"http_client_uid,omitempty"` // for HTTP nodes - immutable UID of HTTP client from registry
-	Separator     *string  `json:"separator,omitempty"`      // for concat text operation
-	RepeatN       *int     `json:"repeat_n,omitempty"`       // for repeat text operation
-	Condition     *string `json:"condition,omitempty"`      // for condition, filter, partition, find nodes
-	Expression    *string `json:"expression,omitempty"`     // for map, reduce nodes (transformation expression)
-	TruePath      *string     `json:"true_path,omitempty"`      // for condition nodes (output port name)
-	FalsePath     *string     `json:"false_path,omitempty"`     // for condition nodes (output port name)
-	MaxIterations *int        `json:"max_iterations,omitempty"` // for for_each and while_loop nodes
+	Separator     *string  `json:"separator,omitempty"`       // for concat text operation
+	RepeatN       *int     `json:"repeat_n,omitempty"`        // for repeat text operation
+	Condition     *string  `json:"condition,omitempty"`       // for condition, filter, partition, find nodes
+	Expression    *string  `json:"expression,omitempty"`      // for map, reduce nodes (transformation expression)
+	TruePath      *string  `json:"true_path,omitempty"`       // for condition nodes (output port name)
+	FalsePath     *string  `json:"false_path,omitempty"`      // for condition nodes (output port name)
+	MaxIterations *int     `json:"max_iterations,omitempty"`  // for for_each and while_loop nodes
 	// Array Processing fields
-	Start        interface{}   `json:"start,omitempty"`         // for slice, range nodes (start index/value)
-	End          interface{}   `json:"end,omitempty"`           // for slice, range nodes (end index/value)
-	Length       interface{}   `json:"length,omitempty"`        // for slice node (length instead of end)
-	Step         interface{}   `json:"step,omitempty"`          // for range node (step value)
-	Order        *string       `json:"order,omitempty"`         // for sort node (asc/desc)
-	ReturnIndex  *bool         `json:"return_index,omitempty"`  // for find node
-	Size         interface{}   `json:"size,omitempty"`          // for chunk node
-	Count        interface{}   `json:"count,omitempty"`         // for sample node
-	Method       *string       `json:"method,omitempty"`        // for sample node (random/first/last)
-	Aggregate    *string       `json:"aggregate,omitempty"`     // for group_by node (count/sum/avg/min/max/values)
-	ValueField   *string       `json:"value_field,omitempty"`   // for group_by node (field to aggregate)
-	Arrays       interface{}   `json:"arrays,omitempty"`        // for zip node (array references)
-	FillMissing  interface{}   `json:"fill_missing,omitempty"`  // for zip node (value for shorter arrays)
-	RemoveEmpty  *bool         `json:"remove_empty,omitempty"`  // for compact node
+	Start       interface{} `json:"start,omitempty"`        // for slice, range nodes (start index/value)
+	End         interface{} `json:"end,omitempty"`          // for slice, range nodes (end index/value)
+	Length      interface{} `json:"length,omitempty"`       // for slice node (length instead of end)
+	Step        interface{} `json:"step,omitempty"`         // for range node (step value)
+	Order       *string     `json:"order,omitempty"`        // for sort node (asc/desc)
+	ReturnIndex *bool       `json:"return_index,omitempty"` // for find node
+	Size        interface{} `json:"size,omitempty"`         // for chunk node
+	Count       interface{} `json:"count,omitempty"`        // for sample node
+	Method      *string     `json:"method,omitempty"`       // for sample node (random/first/last)
+	Aggregate   *string     `json:"aggregate,omitempty"`    // for group_by node (count/sum/avg/min/max/values)
+	ValueField  *string     `json:"value_field,omitempty"`  // for group_by node (field to aggregate)
+	Arrays      interface{} `json:"arrays,omitempty"`       // for zip node (array references)
+	FillMissing interface{} `json:"fill_missing,omitempty"` // for zip node (value for shorter arrays)
+	RemoveEmpty *bool       `json:"remove_empty,omitempty"` // for compact node
 	// State & Memory fields
 	VarName       *string     `json:"var_name,omitempty"`       // for variable nodes (variable name)
 	VarOp         *string     `json:"var_op,omitempty"`         // for variable nodes (get/set)
@@ -173,16 +173,16 @@ type NodeData struct {
 	CacheKey       *string      `json:"cache_key,omitempty"`       // for cache node
 	TTL            *string      `json:"ttl,omitempty"`             // for cache node
 	// Error Handling & Resilience fields
-	MaxAttempts      *int        `json:"max_attempts,omitempty"`      // for retry node
-	BackoffStrategy  *string     `json:"backoff_strategy,omitempty"`  // for retry node (exponential/linear/constant)
-	InitialDelay     *string     `json:"initial_delay,omitempty"`     // for retry node
-	MaxDelay         *string     `json:"max_delay,omitempty"`         // for retry node
-	Multiplier       *float64    `json:"multiplier,omitempty"`        // for retry node (backoff multiplier)
-	RetryOnErrors    []string    `json:"retry_on_errors,omitempty"`   // for retry node (error patterns to retry on)
-	FallbackValue    interface{} `json:"fallback_value,omitempty"`    // for try-catch node
-	ContinueOnError  *bool       `json:"continue_on_error,omitempty"` // for try-catch node
-	ErrorOutputPath  *string     `json:"error_output_path,omitempty"` // for try-catch node
-	TimeoutAction    *string     `json:"timeout_action,omitempty"`    // for timeout node (error/continue_with_partial)
+	MaxAttempts     *int        `json:"max_attempts,omitempty"`      // for retry node
+	BackoffStrategy *string     `json:"backoff_strategy,omitempty"`  // for retry node (exponential/linear/constant)
+	InitialDelay    *string     `json:"initial_delay,omitempty"`     // for retry node
+	MaxDelay        *string     `json:"max_delay,omitempty"`         // for retry node
+	Multiplier      *float64    `json:"multiplier,omitempty"`        // for retry node (backoff multiplier)
+	RetryOnErrors   []string    `json:"retry_on_errors,omitempty"`   // for retry node (error patterns to retry on)
+	FallbackValue   interface{} `json:"fallback_value,omitempty"`    // for try-catch node
+	ContinueOnError *bool       `json:"continue_on_error,omitempty"` // for try-catch node
+	ErrorOutputPath *string     `json:"error_output_path,omitempty"` // for try-catch node
+	TimeoutAction   *string     `json:"timeout_action,omitempty"`    // for timeout node (error/continue_with_partial)
 	// Context node fields
 	ContextName   *string                `json:"context_name,omitempty"`   // DEPRECATED: Use ContextValues for multiple values
 	ContextValue  interface{}            `json:"context_value,omitempty"`  // DEPRECATED: Use ContextValues for multiple values

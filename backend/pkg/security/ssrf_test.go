@@ -8,14 +8,14 @@ import (
 // TestSSRFProtection_ValidateURL_AllowedURLs tests valid URLs
 func TestSSRFProtection_ValidateURL_AllowedURLs(t *testing.T) {
 	p := NewSSRFProtection()
-	
+
 	validURLs := []string{
 		"https://example.com",
 		"http://example.com",
 		"https://api.example.com/data",
 		"https://example.com:8080/path",
 	}
-	
+
 	for _, urlStr := range validURLs {
 		err := p.ValidateURL(urlStr)
 		if err != nil {
@@ -27,14 +27,14 @@ func TestSSRFProtection_ValidateURL_AllowedURLs(t *testing.T) {
 // TestSSRFProtection_ValidateURL_BlockedSchemes tests blocked URL schemes
 func TestSSRFProtection_ValidateURL_BlockedSchemes(t *testing.T) {
 	p := NewSSRFProtection()
-	
+
 	blockedURLs := []string{
 		"ftp://example.com",
 		"file:///etc/passwd",
 		"gopher://example.com",
 		"dict://example.com",
 	}
-	
+
 	for _, urlStr := range blockedURLs {
 		err := p.ValidateURL(urlStr)
 		if err == nil {
@@ -46,7 +46,7 @@ func TestSSRFProtection_ValidateURL_BlockedSchemes(t *testing.T) {
 // TestSSRFProtection_ValidateURL_BlockedLocalhost tests localhost blocking
 func TestSSRFProtection_ValidateURL_BlockedLocalhost(t *testing.T) {
 	p := NewSSRFProtection()
-	
+
 	localhostURLs := []string{
 		"http://localhost",
 		"http://127.0.0.1",
@@ -54,7 +54,7 @@ func TestSSRFProtection_ValidateURL_BlockedLocalhost(t *testing.T) {
 		"http://[::1]",
 		"http://0.0.0.0",
 	}
-	
+
 	for _, urlStr := range localhostURLs {
 		err := p.ValidateURL(urlStr)
 		if err == nil {
@@ -66,7 +66,7 @@ func TestSSRFProtection_ValidateURL_BlockedLocalhost(t *testing.T) {
 // TestSSRFProtection_ValidateURL_BlockedPrivateIPs tests private IP blocking
 func TestSSRFProtection_ValidateURL_BlockedPrivateIPs(t *testing.T) {
 	p := NewSSRFProtection()
-	
+
 	privateIPURLs := []string{
 		"http://10.0.0.1",
 		"http://10.255.255.255",
@@ -75,7 +75,7 @@ func TestSSRFProtection_ValidateURL_BlockedPrivateIPs(t *testing.T) {
 		"http://192.168.0.1",
 		"http://192.168.255.255",
 	}
-	
+
 	for _, urlStr := range privateIPURLs {
 		err := p.ValidateURL(urlStr)
 		if err == nil {
@@ -87,12 +87,12 @@ func TestSSRFProtection_ValidateURL_BlockedPrivateIPs(t *testing.T) {
 // TestSSRFProtection_ValidateURL_BlockedLinkLocal tests link-local blocking
 func TestSSRFProtection_ValidateURL_BlockedLinkLocal(t *testing.T) {
 	p := NewSSRFProtection()
-	
+
 	linkLocalURLs := []string{
 		"http://169.254.0.1",
 		"http://169.254.255.255",
 	}
-	
+
 	for _, urlStr := range linkLocalURLs {
 		err := p.ValidateURL(urlStr)
 		if err == nil {
@@ -104,12 +104,12 @@ func TestSSRFProtection_ValidateURL_BlockedLinkLocal(t *testing.T) {
 // TestSSRFProtection_ValidateURL_BlockedCloudMetadata tests cloud metadata blocking
 func TestSSRFProtection_ValidateURL_BlockedCloudMetadata(t *testing.T) {
 	p := NewSSRFProtection()
-	
+
 	metadataURLs := []string{
 		"http://169.254.169.254",
 		"http://169.254.169.254/latest/meta-data",
 	}
-	
+
 	for _, urlStr := range metadataURLs {
 		err := p.ValidateURL(urlStr)
 		if err == nil {
@@ -130,15 +130,15 @@ func TestSSRFProtection_CustomConfig(t *testing.T) {
 		AllowedDomains:     []string{},
 		BlockedDomains:     []string{},
 	}
-	
+
 	p := NewSSRFProtectionWithConfig(config)
-	
+
 	// Localhost should be allowed
 	err := p.ValidateURL("http://localhost")
 	if err != nil {
 		t.Errorf("localhost should be allowed with custom config: %v", err)
 	}
-	
+
 	// Private IPs should still be blocked
 	err = p.ValidateURL("http://192.168.1.1")
 	if err == nil {
@@ -157,15 +157,15 @@ func TestSSRFProtection_DomainWhitelist(t *testing.T) {
 		AllowedDomains:     []string{"example.com", "api.example.com"},
 		BlockedDomains:     []string{},
 	}
-	
+
 	p := NewSSRFProtectionWithConfig(config)
-	
+
 	// Whitelisted domain should be allowed
 	err := p.ValidateURL("https://example.com")
 	if err != nil {
 		t.Errorf("whitelisted domain should be allowed: %v", err)
 	}
-	
+
 	// Non-whitelisted domain should be blocked
 	err = p.ValidateURL("https://other.com")
 	if err == nil {
@@ -184,15 +184,15 @@ func TestSSRFProtection_DomainBlacklist(t *testing.T) {
 		AllowedDomains:     []string{},
 		BlockedDomains:     []string{"evil.com", "malicious.com"},
 	}
-	
+
 	p := NewSSRFProtectionWithConfig(config)
-	
+
 	// Blacklisted domain should be blocked
 	err := p.ValidateURL("https://evil.com")
 	if err == nil {
 		t.Error("blacklisted domain should be blocked")
 	}
-	
+
 	// Non-blacklisted domain should be allowed
 	err = p.ValidateURL("https://example.com")
 	if err != nil {
@@ -203,14 +203,14 @@ func TestSSRFProtection_DomainBlacklist(t *testing.T) {
 // TestSSRFProtection_InvalidURL tests invalid URLs
 func TestSSRFProtection_InvalidURL(t *testing.T) {
 	p := NewSSRFProtection()
-	
+
 	invalidURLs := []string{
 		"",
 		"not-a-url",
 		"://missing-scheme",
 		"http://",
 	}
-	
+
 	for _, urlStr := range invalidURLs {
 		err := p.ValidateURL(urlStr)
 		if err == nil {
@@ -231,7 +231,7 @@ func TestIsLocalhost(t *testing.T) {
 		{"8.8.8.8", false},
 		{"192.168.1.1", false},
 	}
-	
+
 	for _, tt := range tests {
 		ip := parseIP(t, tt.ip)
 		result := isLocalhost(ip)
@@ -257,7 +257,7 @@ func TestIsPrivateIP(t *testing.T) {
 		{"1.1.1.1", false},
 		{"127.0.0.1", false}, // Loopback, not private
 	}
-	
+
 	for _, tt := range tests {
 		ip := parseIP(t, tt.ip)
 		result := isPrivateIP(ip)
@@ -279,7 +279,7 @@ func TestIsLinkLocal(t *testing.T) {
 		{"170.254.0.1", false},
 		{"8.8.8.8", false},
 	}
-	
+
 	for _, tt := range tests {
 		ip := parseIP(t, tt.ip)
 		result := isLinkLocal(ip)
@@ -300,7 +300,7 @@ func TestIsCloudMetadata(t *testing.T) {
 		{"169.254.170.254", false},
 		{"8.8.8.8", false},
 	}
-	
+
 	for _, tt := range tests {
 		ip := parseIP(t, tt.ip)
 		result := isCloudMetadata(ip)

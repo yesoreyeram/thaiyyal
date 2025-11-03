@@ -55,12 +55,12 @@ func (m *MetricsMiddleware) Name() string {
 
 // InMemoryMetricsCollector is a simple in-memory metrics collector for testing
 type InMemoryMetricsCollector struct {
-	mu               sync.RWMutex
-	executionCount   map[types.NodeType]int64
-	successCount     map[types.NodeType]int64
-	failureCount     map[types.NodeType]int64
-	totalDuration    map[types.NodeType]time.Duration
-	errorCount       map[string]int64
+	mu             sync.RWMutex
+	executionCount map[types.NodeType]int64
+	successCount   map[types.NodeType]int64
+	failureCount   map[types.NodeType]int64
+	totalDuration  map[types.NodeType]time.Duration
+	errorCount     map[string]int64
 }
 
 // NewInMemoryMetricsCollector creates a new in-memory metrics collector
