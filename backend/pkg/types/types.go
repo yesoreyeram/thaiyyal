@@ -126,13 +126,14 @@ type NodeData struct {
 	Text          *string  `json:"text,omitempty"`           // for text input nodes
 	TextOp        *string  `json:"text_op,omitempty"`        // for text operation nodes
 	URL           *string  `json:"url,omitempty"`            // for HTTP nodes
+	ClientName    *string  `json:"client_name,omitempty"`    // for HTTP nodes - named HTTP client from config
 	Separator     *string  `json:"separator,omitempty"`      // for concat text operation
 	RepeatN       *int     `json:"repeat_n,omitempty"`       // for repeat text operation
-	Condition     *string `json:"condition,omitempty"`      // for condition, filter, partition, find nodes
-	Expression    *string `json:"expression,omitempty"`     // for map, reduce nodes (transformation expression)
-	TruePath      *string     `json:"true_path,omitempty"`      // for condition nodes (output port name)
-	FalsePath     *string     `json:"false_path,omitempty"`     // for condition nodes (output port name)
-	MaxIterations *int        `json:"max_iterations,omitempty"` // for for_each and while_loop nodes
+	Condition     *string  `json:"condition,omitempty"`      // for condition, filter, partition, find nodes
+	Expression    *string  `json:"expression,omitempty"`     // for map, reduce nodes (transformation expression)
+	TruePath      *string  `json:"true_path,omitempty"`      // for condition nodes (output port name)
+	FalsePath     *string  `json:"false_path,omitempty"`     // for condition nodes (output port name)
+	MaxIterations *int     `json:"max_iterations,omitempty"` // for for_each and while_loop nodes
 	// Array Processing fields
 	Start        interface{}   `json:"start,omitempty"`         // for slice, range nodes (start index/value)
 	End          interface{}   `json:"end,omitempty"`           // for slice, range nodes (end index/value)
