@@ -130,6 +130,10 @@ func (m *MockExecutionContext) GetConfig() types.Config {
 	return types.DefaultConfig()
 }
 
+func (m *MockExecutionContext) GetHTTPClientRegistry() interface{} {
+	return nil
+}
+
 func (m *MockExecutionContext) IncrementNodeExecution() error {
 	return nil
 }

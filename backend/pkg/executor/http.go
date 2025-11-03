@@ -26,6 +26,11 @@ func NewHTTPExecutor() *HTTPExecutor {
 // Performs an HTTP GET request and returns the response body.
 // Uses a shared connection pool for better performance.
 //
+// Named HTTP Clients:
+//   - If node.Data.ClientName is specified, uses the named client from the registry
+//   - Named clients have pre-configured authentication, headers, and settings
+//   - Falls back to default client if ClientName is not specified
+//
 // Security features:
 //   - Zero trust by default: HTTP must be explicitly enabled via config.AllowHTTP
 //   - URL validation (blocks internal IPs based on config)
@@ -56,8 +61,11 @@ func (e *HTTPExecutor) Execute(ctx ExecutionContext, node types.Node) (interface
 		return nil, fmt.Errorf("URL validation failed: %w", err)
 	}
 
-	// Get or create shared HTTP client with connection pooling
-	client := e.getOrCreateClient(config)
+	// Get HTTP client - either named client from registry or default client
+	client, maxResponseSize, err := e.getHTTPClient(ctx, node, config)
+	if err != nil {
+		return nil, err
+	}
 
 	// Make HTTP GET request
 	resp, err := client.Get(*node.Data.URL)
@@ -72,22 +80,53 @@ func (e *HTTPExecutor) Execute(ctx ExecutionContext, node types.Node) (interface
 	}
 
 	// Read response body with size limit
-	limitedReader := io.LimitReader(resp.Body, config.MaxResponseSize)
+	limitedReader := io.LimitReader(resp.Body, maxResponseSize)
 	body, err := io.ReadAll(limitedReader)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
 	// Check if response was truncated due to size limit
-	if int64(len(body)) == config.MaxResponseSize {
+	if int64(len(body)) == maxResponseSize {
 		// Try to read one more byte to see if there's more data
 		oneByte := make([]byte, 1)
 		if n, _ := resp.Body.Read(oneByte); n > 0 {
-			return nil, fmt.Errorf("response too large (exceeds %d bytes limit)", config.MaxResponseSize)
+			return nil, fmt.Errorf("response too large (exceeds %d bytes limit)", maxResponseSize)
 		}
 	}
 
 	return string(body), nil
+}
+
+// getHTTPClient returns the appropriate HTTP client for the request.
+// If a named client is specified, it retrieves it from the registry.
+// Otherwise, it uses the default shared client.
+// Returns the client, max response size, and any error.
+func (e *HTTPExecutor) getHTTPClient(ctx ExecutionContext, node types.Node, config types.Config) (*http.Client, int64, error) {
+	// Check if a named client is specified
+	if node.Data.ClientName != nil && *node.Data.ClientName != "" {
+		// Try to get the named client from the registry
+		registryInterface := ctx.GetHTTPClientRegistry()
+		if registryInterface == nil {
+			return nil, 0, fmt.Errorf("HTTP client %q requested but no client registry configured", *node.Data.ClientName)
+		}
+
+		// Type assert to get the registry with GetHTTPClient method
+		type httpClientGetter interface {
+			GetHTTPClient(name string) (*http.Client, int64, error)
+		}
+
+		registry, ok := registryInterface.(httpClientGetter)
+		if !ok {
+			return nil, 0, fmt.Errorf("HTTP client registry does not implement GetHTTPClient method")
+		}
+
+		return registry.GetHTTPClient(*node.Data.ClientName)
+	}
+
+	// Use default client
+	defaultClient := e.getOrCreateClient(config)
+	return defaultClient, config.MaxResponseSize, nil
 }
 
 // getOrCreateClient returns the shared HTTP client, creating it if necessary

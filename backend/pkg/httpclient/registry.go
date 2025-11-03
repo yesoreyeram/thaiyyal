@@ -2,6 +2,7 @@ package httpclient
 
 import (
 	"fmt"
+	"net/http"
 	"sync"
 )
 
@@ -46,6 +47,20 @@ func (r *Registry) Get(name string) (*Client, error) {
 	}
 
 	return client, nil
+}
+
+// GetHTTPClient retrieves the underlying HTTP client and max response size by name.
+// This is a convenience method for executors that need direct access to *http.Client.
+func (r *Registry) GetHTTPClient(name string) (*http.Client, int64, error) {
+	client, err := r.Get(name)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	httpClient := client.GetHTTPClient()
+	maxResponseSize := client.GetConfig().MaxResponseSize
+
+	return httpClient, maxResponseSize, nil
 }
 
 // Has checks if a client exists

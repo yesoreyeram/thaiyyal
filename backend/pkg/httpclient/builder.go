@@ -19,6 +19,11 @@ func (c *Client) GetConfig() *ClientConfig {
 	return c.config
 }
 
+// GetHTTPClient returns the underlying http.Client
+func (c *Client) GetHTTPClient() *http.Client {
+	return c.Client
+}
+
 // Builder creates configured HTTP clients
 type Builder struct {
 	engineConfig types.Config // Main engine config for security settings
