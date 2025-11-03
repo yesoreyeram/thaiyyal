@@ -27,9 +27,11 @@ func NewHTTPExecutor() *HTTPExecutor {
 // Uses a shared connection pool for better performance.
 //
 // Security features:
-//   - URL validation (blocks internal IPs by default)
-//   - Request timeout (30s default, configurable)
-//   - Response size limit (10MB default, configurable)
+//   - Zero trust by default: HTTP must be explicitly enabled via config.AllowHTTP
+//   - URL validation (blocks internal IPs based on config)
+//   - Domain whitelisting (if config.AllowedDomains is set)
+//   - Request timeout (configurable)
+//   - Response size limit (configurable)
 //   - SSRF protection against cloud metadata endpoints
 //   - HTTP call count limit per execution
 func (e *HTTPExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
@@ -37,12 +39,17 @@ func (e *HTTPExecutor) Execute(ctx ExecutionContext, node types.Node) (interface
 		return nil, fmt.Errorf("HTTP node missing url")
 	}
 
+	config := ctx.GetConfig()
+	
+	// Zero Trust: Check if HTTP is allowed at all
+	if !config.AllowHTTP {
+		return nil, fmt.Errorf("HTTP requests are not allowed (AllowHTTP=false). Enable AllowHTTP in config to make HTTP requests")
+	}
+
 	// Check and increment HTTP call counter before making the request
 	if err := ctx.IncrementHTTPCall(); err != nil {
 		return nil, err
 	}
-
-	config := ctx.GetConfig()
 
 	// Validate URL for security (SSRF protection)
 	if err := isAllowedURL(*node.Data.URL, config); err != nil {
@@ -149,16 +156,16 @@ func (e *HTTPExecutor) Validate(node types.Node) error {
 }
 
 // isAllowedURL validates URLs to prevent SSRF attacks using the security package
+// Respects the zero-trust configuration from the workflow engine config
 func isAllowedURL(url string, config types.Config) error {
-	// For now, we'll use a permissive config that allows localhost for testing
-	// In production, config should control this behavior
+	// Build SSRF protection config from workflow engine config
 	ssrfConfig := security.SSRFConfig{
 		AllowedSchemes:     []string{"http", "https"},
-		BlockPrivateIPs:    false, // Allow for now - should be true in production
-		BlockLocalhost:     false, // Allow for now - should be true in production
-		BlockLinkLocal:     true,
-		BlockCloudMetadata: true,
-		AllowedDomains:     []string{},
+		BlockPrivateIPs:    config.BlockPrivateIPs,
+		BlockLocalhost:     config.BlockLocalhost,
+		BlockLinkLocal:     config.BlockLinkLocal,
+		BlockCloudMetadata: config.BlockCloudMetadata,
+		AllowedDomains:     config.AllowedDomains,
 		BlockedDomains:     []string{},
 	}
 	

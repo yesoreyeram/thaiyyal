@@ -31,6 +31,7 @@ func TestHTTPExecutor_ConnectionPooling(t *testing.T) {
 		HTTPTimeout:       30 * time.Second,
 		MaxHTTPRedirects:  10,
 		MaxResponseSize:   10 * 1024 * 1024,
+		AllowHTTP:         true, // Enable HTTP for this test
 	}
 	ctx := &mockExecutionContext{config: config}
 
@@ -88,6 +89,7 @@ func TestHTTPExecutor_ConcurrentRequests(t *testing.T) {
 		HTTPTimeout:       30 * time.Second,
 		MaxHTTPRedirects:  10,
 		MaxResponseSize:   10 * 1024 * 1024,
+		AllowHTTP:         true, // Enable HTTP for this test
 	}
 	ctx := &mockExecutionContext{config: config}
 
@@ -149,6 +151,7 @@ func TestHTTPExecutor_ClientReuse(t *testing.T) {
 		HTTPTimeout:       30 * time.Second,
 		MaxHTTPRedirects:  10,
 		MaxResponseSize:   10 * 1024 * 1024,
+		AllowHTTP:         true, // Enable HTTP for this test
 	}
 	ctx := &mockExecutionContext{config: config}
 
@@ -204,6 +207,7 @@ func TestHTTPExecutor_MultipleHosts(t *testing.T) {
 		HTTPTimeout:       30 * time.Second,
 		MaxHTTPRedirects:  10,
 		MaxResponseSize:   10 * 1024 * 1024,
+		AllowHTTP:         true, // Enable HTTP for this test
 	}
 	ctx := &mockExecutionContext{config: config}
 

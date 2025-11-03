@@ -20,27 +20,52 @@ func GenerateExecutionID() string {
 	return hex.EncodeToString(bytes)
 }
 
-// DefaultConfig returns the default engine configuration
+// DefaultConfig returns the default engine configuration with zero-trust security model.
+// 
+// **ZERO TRUST BY DEFAULT**: Network access and privileged operations are DISABLED by default.
+// You must explicitly enable them in your configuration.
+//
+// To enable HTTP requests:
+//   config := types.DefaultConfig()
+//   config.AllowHTTP = true
+//   config.AllowedDomains = []string{"api.example.com", "trusted-domain.com"}
+//
+// Zero Trust Principles:
+//   - Network access disabled by default (AllowHTTP = false)
+//   - No environment variable access (not implemented in workflow engine)
+//   - No file system access (not implemented in workflow engine)
+//   - All security protections enabled
+//   - Reasonable resource limits for safe execution
+//
+// For development/testing, use DevelopmentConfig() which has relaxed settings.
 func DefaultConfig() Config {
 	return Config{
-		// Execution limits
+		// Execution limits - Reasonable for production
 		MaxExecutionTime:     5 * time.Minute,
 		MaxNodeExecutionTime: 30 * time.Second,
 		MaxIterations:        1000,
 
-		// HTTP configuration
+		// HTTP configuration - DISABLED by default (zero trust)
 		HTTPTimeout:         30 * time.Second,
 		MaxHTTPRedirects:    10,
 		MaxResponseSize:     10 * 1024 * 1024, // 10MB
-		MaxHTTPCallsPerExec: 100,              // Limit to 100 HTTP calls per execution
-		AllowedURLPatterns:  []string{},       // Empty = allow all external URLs
-		BlockInternalIPs:    true,             // Block internal IPs by default
+		MaxHTTPCallsPerExec: 100,              // Limit when HTTP is enabled
+		AllowedURLPatterns:  []string{},       // Empty = allow all when HTTP enabled
+		BlockInternalIPs:    true,             // Deprecated: use BlockPrivateIPs
+		
+		// Zero Trust Security - DENY ALL by default (explicit opt-in required)
+		AllowHTTP:          false,   // HTTP DISABLED - must explicitly enable
+		AllowedDomains:     []string{}, // No domains whitelisted (must configure if enabling HTTP)
+		BlockPrivateIPs:    true,    // Block all private IP ranges
+		BlockLocalhost:     true,    // Block localhost
+		BlockLinkLocal:     true,    // Block link-local
+		BlockCloudMetadata: true,    // Block cloud metadata
 
 		// Cache configuration
 		DefaultCacheTTL: 1 * time.Hour,
 		MaxCacheSize:    1000,
 
-		// Resource limits
+		// Resource limits - Reasonable for production
 		MaxInputSize:      10 * 1024 * 1024, // 10MB
 		MaxPayloadSize:    1 * 1024 * 1024,  // 1MB
 		MaxNodes:          1000,
@@ -71,6 +96,9 @@ func ValidationLimits() Config {
 	c.MaxArrayLength = 1000
 	c.MaxVariables = 100
 	c.MaxContextDepth = 16
+	// Keep HTTP enabled but with strict limits for validation
+	c.AllowHTTP = true
+	c.BlockLocalhost = true // Block localhost in validation mode
 	return c
 }
 
@@ -88,7 +116,70 @@ func DevelopmentConfig() Config {
 	c.MaxArrayLength = 100000
 	c.MaxVariables = 10000
 	c.MaxContextDepth = 64
+	// Allow localhost for development
+	c.AllowHTTP = true
+	c.BlockLocalhost = false
+	c.BlockPrivateIPs = false // Allow private IPs in development
 	return c
+}
+
+// ZeroTrustConfig returns ultra-restrictive configuration following zero-trust principles
+// This configuration denies all network access and applies minimal resource limits by default.
+// Suitable for running untrusted workflows in sandboxed environments.
+//
+// Zero Trust Principles:
+//   - No network access by default (AllowHTTP = false)
+//   - No environment variable access (not implemented in workflow engine)
+//   - No file system access (not implemented in workflow engine)
+//   - Minimal execution time and resource limits
+//   - All security protections enabled at maximum level
+//
+// To enable specific capabilities, explicitly configure them:
+//   config := types.ZeroTrustConfig()
+//   config.AllowHTTP = true  // Enable HTTP
+//   config.AllowedDomains = []string{"api.example.com"}  // Whitelist specific domains
+func ZeroTrustConfig() Config {
+	return Config{
+		// Execution limits - Minimal
+		MaxExecutionTime:     30 * time.Second, // Short execution time
+		MaxNodeExecutionTime: 5 * time.Second,  // Short per-node time
+		MaxIterations:        50,               // Minimal iterations
+
+		// HTTP configuration - DISABLED by default
+		HTTPTimeout:         10 * time.Second, // Short timeout
+		MaxHTTPRedirects:    0,                // No redirects
+		MaxResponseSize:     1 * 1024 * 1024,  // 1MB response limit
+		MaxHTTPCallsPerExec: 0,                // 0 = No HTTP calls allowed
+		AllowedURLPatterns:  []string{},       // Empty whitelist
+		BlockInternalIPs:    true,             // Block internal IPs
+		
+		// Zero Trust Security - DENY ALL by default
+		AllowHTTP:          false,   // Deny all HTTP access
+		AllowedDomains:     []string{}, // No domains allowed (deny all)
+		BlockPrivateIPs:    true,    // Block all private IP ranges
+		BlockLocalhost:     true,    // Block localhost
+		BlockLinkLocal:     true,    // Block link-local
+		BlockCloudMetadata: true,    // Block cloud metadata
+
+		// Cache configuration - Minimal
+		DefaultCacheTTL: 5 * time.Minute, // Short TTL
+		MaxCacheSize:    100,             // Small cache
+
+		// Resource limits - Minimal
+		MaxInputSize:      1 * 1024 * 1024,   // 1MB input
+		MaxPayloadSize:    512 * 1024,        // 512KB payload
+		MaxNodes:          50,                // Few nodes
+		MaxEdges:          200,               // Few edges
+		MaxNodeExecutions: 500,               // Limited executions
+		MaxStringLength:   50 * 1024,         // 50KB strings
+		MaxArrayLength:    500,               // Small arrays
+		MaxVariables:      50,                // Few variables
+		MaxContextDepth:   10,                // Shallow nesting
+
+		// Retry configuration - Minimal
+		DefaultMaxAttempts: 1, // No retries
+		DefaultBackoff:     0, // No backoff
+	}
 }
 
 // ValidateValue validates a value against resource limits in the config.

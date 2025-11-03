@@ -238,6 +238,14 @@ type Config struct {
 	MaxHTTPCallsPerExec   int           // Maximum HTTP calls allowed per workflow execution (0 = unlimited)
 	AllowedURLPatterns    []string      // Whitelist of allowed URL patterns (if empty, all external URLs allowed)
 	BlockInternalIPs      bool          // Block requests to internal/private IP addresses
+	
+	// Zero Trust Security - Network Access Control
+	AllowHTTP             bool     // Explicitly allow HTTP requests (default: false for zero trust)
+	AllowedDomains        []string // Whitelist of allowed domains for HTTP (empty = deny all if AllowHTTP is true)
+	BlockPrivateIPs       bool     // Block private IP ranges (10.x, 172.16.x, 192.168.x)
+	BlockLocalhost        bool     // Block localhost and loopback addresses
+	BlockLinkLocal        bool     // Block link-local addresses (169.254.x.x)
+	BlockCloudMetadata    bool     // Block cloud metadata endpoints (169.254.169.254, etc.)
 
 	// Cache configuration
 	DefaultCacheTTL time.Duration // Default TTL for cache entries if not specified

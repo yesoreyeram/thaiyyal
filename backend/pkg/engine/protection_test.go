@@ -147,6 +147,8 @@ func TestMaxHTTPCallsPerExecution(t *testing.T) {
 
 			// Create engine with custom config
 			config := types.DefaultConfig()
+			config.AllowHTTP = true          // Enable HTTP for this test
+			config.BlockLocalhost = false    // Allow localhost for test server
 			config.MaxHTTPCallsPerExec = tt.maxHTTPCalls
 
 			engine, err := NewWithConfig([]byte(payload), config)
@@ -229,8 +231,10 @@ func TestHTTPCallsInChain(t *testing.T) {
 			// Create workflow with chained HTTP nodes
 			payload := createHTTPWorkflow(server.URL, tt.httpCallCount)
 
-			// Create engine with custom config
+			// Create engine with custom config - ENABLE HTTP explicitly
 			config := types.DefaultConfig()
+			config.AllowHTTP = true                  // Enable HTTP for this test
+			config.BlockLocalhost = false            // Allow localhost for test server
 			config.MaxHTTPCallsPerExec = tt.maxHTTPCalls
 
 			engine, err := NewWithConfig([]byte(payload), config)
@@ -275,6 +279,8 @@ func TestMultipleProtectionLimits(t *testing.T) {
 	payload := createHTTPWorkflow(server.URL, 10)
 
 	config := types.DefaultConfig()
+	config.AllowHTTP = true          // Enable HTTP for this test
+	config.BlockLocalhost = false    // Allow localhost for test server
 	config.MaxNodeExecutions = 50
 	config.MaxHTTPCallsPerExec = 5
 
