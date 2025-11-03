@@ -10,32 +10,39 @@ import (
 )
 
 // SSRFProtection provides protection against Server-Side Request Forgery attacks
+// DENY BY DEFAULT - all private IPs, localhost, link-local, and cloud metadata are blocked
+// unless explicitly allowed
 type SSRFProtection struct {
 	allowedSchemes     map[string]bool
-	blockPrivateIPs    bool
-	blockLocalhost     bool
-	blockLinkLocal     bool
-	blockCloudMetadata bool
+	allowPrivateIPs    bool
+	allowLocalhost     bool
+	allowLinkLocal     bool
+	allowCloudMetadata bool
 	allowedDomains     map[string]bool
 	blockedDomains     map[string]bool
 }
 
 // SSRFConfig configures SSRF protection
+// DENY BY DEFAULT (zero trust security model)
 type SSRFConfig struct {
 	// AllowedSchemes lists allowed URL schemes (default: http, https)
 	AllowedSchemes []string
 
-	// BlockPrivateIPs blocks private IP ranges (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16)
-	BlockPrivateIPs bool
+	// AllowPrivateIPs allows private IP ranges (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16)
+	// Default: false (BLOCKED for security)
+	AllowPrivateIPs bool
 
-	// BlockLocalhost blocks localhost and loopback addresses
-	BlockLocalhost bool
+	// AllowLocalhost allows localhost and loopback addresses
+	// Default: false (BLOCKED for security)
+	AllowLocalhost bool
 
-	// BlockLinkLocal blocks link-local addresses (169.254.0.0/16)
-	BlockLinkLocal bool
+	// AllowLinkLocal allows link-local addresses (169.254.0.0/16)
+	// Default: false (BLOCKED for security)
+	AllowLinkLocal bool
 
-	// BlockCloudMetadata blocks cloud metadata endpoints (169.254.169.254, fd00:ec2::254)
-	BlockCloudMetadata bool
+	// AllowCloudMetadata allows cloud metadata endpoints (169.254.169.254, fd00:ec2::254)
+	// Default: false (BLOCKED for security)
+	AllowCloudMetadata bool
 
 	// AllowedDomains is a whitelist of allowed domains (empty = all allowed)
 	AllowedDomains []string
@@ -45,13 +52,14 @@ type SSRFConfig struct {
 }
 
 // DefaultSSRFConfig returns default SSRF protection configuration
+// DENY BY DEFAULT - blocks all private IPs, localhost, link-local, and cloud metadata
 func DefaultSSRFConfig() SSRFConfig {
 	return SSRFConfig{
 		AllowedSchemes:     []string{"http", "https"},
-		BlockPrivateIPs:    true,
-		BlockLocalhost:     true,
-		BlockLinkLocal:     true,
-		BlockCloudMetadata: true,
+		AllowPrivateIPs:    false, // DENY by default
+		AllowLocalhost:     false, // DENY by default
+		AllowLinkLocal:     false, // DENY by default
+		AllowCloudMetadata: false, // DENY by default
 		AllowedDomains:     []string{},
 		BlockedDomains:     []string{},
 	}
@@ -66,10 +74,10 @@ func NewSSRFProtection() *SSRFProtection {
 func NewSSRFProtectionWithConfig(config SSRFConfig) *SSRFProtection {
 	p := &SSRFProtection{
 		allowedSchemes:     make(map[string]bool),
-		blockPrivateIPs:    config.BlockPrivateIPs,
-		blockLocalhost:     config.BlockLocalhost,
-		blockLinkLocal:     config.BlockLinkLocal,
-		blockCloudMetadata: config.BlockCloudMetadata,
+		allowPrivateIPs:    config.AllowPrivateIPs,
+		allowLocalhost:     config.AllowLocalhost,
+		allowLinkLocal:     config.AllowLinkLocal,
+		allowCloudMetadata: config.AllowCloudMetadata,
 		allowedDomains:     make(map[string]bool),
 		blockedDomains:     make(map[string]bool),
 	}
@@ -159,25 +167,27 @@ func (p *SSRFProtection) ValidateURL(urlStr string) error {
 }
 
 // validateIP validates an IP address
+// DENY BY DEFAULT - blocks localhost, private IPs, link-local, and cloud metadata
+// unless explicitly allowed
 func (p *SSRFProtection) validateIP(ip net.IP) error {
-	// Check localhost
-	if p.blockLocalhost && isLocalhost(ip) {
-		return fmt.Errorf("localhost addresses are blocked")
+	// Check localhost - BLOCKED by default
+	if !p.allowLocalhost && isLocalhost(ip) {
+		return fmt.Errorf("localhost addresses are blocked (set allow_localhost=true to permit)")
 	}
 
-	// Check private IPs
-	if p.blockPrivateIPs && isPrivateIP(ip) {
-		return fmt.Errorf("private IP addresses are blocked")
+	// Check private IPs - BLOCKED by default
+	if !p.allowPrivateIPs && isPrivateIP(ip) {
+		return fmt.Errorf("private IP addresses are blocked (set allow_private_ips=true to permit)")
 	}
 
-	// Check link-local
-	if p.blockLinkLocal && isLinkLocal(ip) {
-		return fmt.Errorf("link-local addresses are blocked")
+	// Check link-local - BLOCKED by default
+	if !p.allowLinkLocal && isLinkLocal(ip) {
+		return fmt.Errorf("link-local addresses are blocked (set allow_link_local=true to permit)")
 	}
 
-	// Check cloud metadata
-	if p.blockCloudMetadata && isCloudMetadata(ip) {
-		return fmt.Errorf("cloud metadata endpoints are blocked")
+	// Check cloud metadata - BLOCKED by default
+	if !p.allowCloudMetadata && isCloudMetadata(ip) {
+		return fmt.Errorf("cloud metadata endpoints are blocked (set allow_cloud_metadata=true to permit)")
 	}
 
 	return nil
@@ -187,8 +197,8 @@ func (p *SSRFProtection) validateIP(ip net.IP) error {
 func (p *SSRFProtection) validateHostname(hostname string) error {
 	hostname = strings.ToLower(hostname)
 
-	// Check for localhost variations
-	if p.blockLocalhost {
+	// Check for localhost variations - BLOCKED by default
+	if !p.allowLocalhost {
 		localhostNames := []string{"localhost", "127.0.0.1", "::1", "0.0.0.0"}
 		for _, localName := range localhostNames {
 			if hostname == localName {
@@ -197,8 +207,8 @@ func (p *SSRFProtection) validateHostname(hostname string) error {
 		}
 	}
 
-	// Check for cloud metadata hostnames
-	if p.blockCloudMetadata {
+	// Check for cloud metadata hostnames - BLOCKED by default
+	if !p.allowCloudMetadata {
 		metadataHosts := []string{
 			"169.254.169.254",
 			"metadata.google.internal",
@@ -206,7 +216,7 @@ func (p *SSRFProtection) validateHostname(hostname string) error {
 		}
 		for _, metadataHost := range metadataHosts {
 			if hostname == metadataHost {
-				return fmt.Errorf("cloud metadata endpoints are blocked")
+				return fmt.Errorf("cloud metadata endpoints are blocked (set allow_cloud_metadata=true to permit)")
 			}
 		}
 	}

@@ -38,11 +38,25 @@ func (t *authRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) 
 	clonedReq := req.Clone(req.Context())
 
 	// Add authentication based on type
-	switch t.config.AuthType {
+	switch t.config.Auth.Type {
 	case AuthTypeBasic:
-		clonedReq.SetBasicAuth(t.config.Username, t.config.Password)
+		if t.config.Auth.BasicAuth != nil {
+			clonedReq.SetBasicAuth(t.config.Auth.BasicAuth.Username, t.config.Auth.BasicAuth.Password.Value())
+		}
 	case AuthTypeBearer:
-		clonedReq.Header.Set("Authorization", "Bearer "+t.config.Token)
+		if t.config.Auth.Token != nil {
+			clonedReq.Header.Set("Authorization", "Bearer "+t.config.Auth.Token.Token.Value())
+		}
+	case AuthTypeAPIKey:
+		if t.config.Auth.APIKey != nil {
+			if t.config.Auth.APIKey.Location == "header" {
+				clonedReq.Header.Set(t.config.Auth.APIKey.Key, t.config.Auth.APIKey.Value.Value())
+			} else if t.config.Auth.APIKey.Location == "query" {
+				q := clonedReq.URL.Query()
+				q.Set(t.config.Auth.APIKey.Key, t.config.Auth.APIKey.Value.Value())
+				clonedReq.URL.RawQuery = q.Encode()
+			}
+		}
 	}
 
 	return t.next.RoundTrip(clonedReq)

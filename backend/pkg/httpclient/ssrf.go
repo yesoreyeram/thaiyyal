@@ -27,9 +27,9 @@ func validateURL(urlStr string, config *Config) error {
 	}
 
 	// Check domain whitelist
-	if len(config.AllowedDomains) > 0 {
+	if len(config.Security.AllowedDomains) > 0 {
 		allowed := false
-		for _, domain := range config.AllowedDomains {
+		for _, domain := range config.Security.AllowedDomains {
 			if hostname == domain || strings.HasSuffix(hostname, "."+domain) {
 				allowed = true
 				break
@@ -59,32 +59,33 @@ func validateURL(urlStr string, config *Config) error {
 }
 
 // validateIP validates an IP address for SSRF protection
+// DENY BY DEFAULT - only allow if explicitly permitted
 func validateIP(ip net.IP, config *Config) error {
-	// Block localhost
-	if config.BlockLocalhost {
+	// Check localhost - BLOCKED by default unless explicitly allowed
+	if !config.Security.AllowLocalhost {
 		if ip.IsLoopback() {
-			return fmt.Errorf("localhost/loopback addresses are blocked")
+			return fmt.Errorf("localhost/loopback addresses are blocked (set allow_localhost=true to permit)")
 		}
 	}
 
-	// Block link-local addresses (169.254.0.0/16)
-	if config.BlockLinkLocal {
+	// Check link-local addresses (169.254.0.0/16) - BLOCKED by default unless explicitly allowed
+	if !config.Security.AllowLinkLocal {
 		if ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() {
-			return fmt.Errorf("link-local addresses are blocked")
+			return fmt.Errorf("link-local addresses are blocked (set allow_link_local=true to permit)")
 		}
 	}
 
-	// Block private IP ranges
-	if config.BlockPrivateIPs {
+	// Check private IP ranges - BLOCKED by default unless explicitly allowed
+	if !config.Security.AllowPrivateIPs {
 		if isPrivateIP(ip) {
-			return fmt.Errorf("private IP addresses are blocked")
+			return fmt.Errorf("private IP addresses are blocked (set allow_private_ips=true to permit)")
 		}
 	}
 
-	// Block cloud metadata endpoints
-	if config.BlockCloudMetadata {
+	// Check cloud metadata endpoints - BLOCKED by default unless explicitly allowed
+	if !config.Security.AllowCloudMetadata {
 		if isCloudMetadataIP(ip) {
-			return fmt.Errorf("cloud metadata endpoints are blocked")
+			return fmt.Errorf("cloud metadata endpoints are blocked (set allow_cloud_metadata=true to permit)")
 		}
 	}
 
