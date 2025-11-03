@@ -28,6 +28,7 @@ This document provides a comprehensive reference of all node types in the Thaiyy
 | **Variable** | Store/retrieve values across workflow | 1 `any` (for set) / None (for get) | `object` with var_name, operation, value | `{"data": {"var_name": "x", "var_op": "set"}}` | ✅ |
 | **Extract** | Extract fields from objects | 1 `object` | `object` with extracted fields | `{"type": "extract", "data": {"field": "name"}}` | ✅ |
 | **Transform** | Transform data structures | 1 `any` | Varies by transform type | `{"type": "transform", "data": {"transform_type": "to_array"}}` | ✅ |
+| **Parse** | Parse string data to structured formats | 1 `string` | Parsed data (varies by format) | `{"type": "parse", "data": {"input_type": "JSON"}}` | ✅ |
 | **Accumulator** | Accumulate values over time | 1 `any` | `object` with operation and accumulated value | `{"type": "accumulator", "data": {"accum_op": "sum"}}` | ✅ |
 | **Counter** | Increment/decrement/reset counter | None | `object` with operation and counter value | `{"type": "counter", "data": {"counter_op": "increment"}}` | ✅ |
 | **Switch** | Multi-way branching based on value/condition | 1 `any` | `object` with matched case info | `{"type": "switch", "data": {"cases": [{"when": ">100"}]}}` | ✅ |
@@ -294,6 +295,121 @@ This document provides a comprehensive reference of all node types in the Thaiyy
     "edges": [{"source": "1", "target": "2"}]
   }
   ```
+
+#### Parse Node
+- **Purpose**: Parse string data into structured formats (JSON, CSV, TSV, YAML, XML)
+- **Input Types**:
+  - `AUTO`: Automatically detect format (default)
+  - `JSON`: Parse JSON objects, arrays, primitives
+  - `CSV`: Parse comma-separated values to array of objects
+  - `TSV`: Parse tab-separated values to array of objects
+  - `YAML`: Parse YAML key-value pairs to object
+  - `XML`: Parse XML to structured data
+- **Configuration**: `input_type` (optional, defaults to "AUTO")
+- **Output**: Parsed structured data (type varies by input)
+- **AUTO Detection Algorithm**:
+  - JSON: Detects `{...}`, `[...]`, validates with parser
+  - XML: Detects `<tag>...</tag>` patterns
+  - YAML: Detects multi-line `key: value` patterns
+  - CSV: Detects comma-separated multi-line data
+  - TSV: Detects tab-separated multi-line data
+  - Primitives: Numbers, booleans, null handled as JSON
+- **Use Cases**:
+  - Parse API response strings to objects
+  - Convert CSV data to structured records
+  - Parse configuration files (YAML, JSON)
+  - Transform text data to queryable structures
+  - Data import and ETL workflows
+- **Examples**:
+  ```json
+  // Parse JSON object from HTTP response
+  {
+    "nodes": [
+      {"id": "1", "type": "http", "data": {"url": "https://api.example.com/data"}},
+      {"id": "2", "type": "parse", "data": {"input_type": "JSON"}},
+      {"id": "3", "type": "extract", "data": {"field": "users"}}
+    ],
+    "edges": [
+      {"source": "1", "target": "2"},
+      {"source": "2", "target": "3"}
+    ]
+  }
+  
+  // Parse CSV data with AUTO detection
+  {
+    "nodes": [
+      {"id": "1", "type": "text_input", "data": {"text": "name,age,city\nAlice,30,NYC\nBob,25,LA"}},
+      {"id": "2", "type": "parse", "data": {"input_type": "AUTO"}},
+      {"id": "3", "type": "filter", "data": {"condition": "item.age >= 30"}}
+    ],
+    "edges": [
+      {"source": "1", "target": "2"},
+      {"source": "2", "target": "3"}
+    ]
+  }
+  
+  // Parse YAML configuration
+  {
+    "nodes": [
+      {"id": "1", "type": "text_input", "data": {"text": "host: localhost\nport: 8080\nenabled: true"}},
+      {"id": "2", "type": "parse", "data": {"input_type": "YAML"}},
+      {"id": "3", "type": "visualization", "data": {"mode": "text"}}
+    ],
+    "edges": [
+      {"source": "1", "target": "2"},
+      {"source": "2", "target": "3"}
+    ]
+  }
+  
+  // Parse number string to numeric type
+  {
+    "nodes": [
+      {"id": "1", "type": "text_input", "data": {"text": "42.5"}},
+      {"id": "2", "type": "parse", "data": {"input_type": "JSON"}},
+      {"id": "3", "type": "operation", "data": {"op": "multiply"}}
+    ],
+    "edges": [
+      {"source": "1", "target": "2"},
+      {"source": "2", "target": "3"}
+    ]
+  }
+  
+  // Parse TSV data
+  {
+    "nodes": [
+      {"id": "1", "type": "text_input", "data": {"text": "product\tprice\tin_stock\niPhone\t999\ttrue\niPad\t799\tfalse"}},
+      {"id": "2", "type": "parse", "data": {"input_type": "TSV"}},
+      {"id": "3", "type": "filter", "data": {"condition": "item.in_stock == true"}}
+    ],
+    "edges": [
+      {"source": "1", "target": "2"},
+      {"source": "2", "target": "3"}
+    ]
+  }
+  ```
+- **Data Type Conversion**:
+  - Numbers: Automatically converted to `float64`
+  - Booleans: `true`/`false` strings → boolean
+  - Null: `null` string → nil
+  - Strings: Preserved as-is
+  - Objects: Converted to `map[string]interface{}`
+  - Arrays: Converted to `[]interface{}`
+- **CSV/TSV Parsing**:
+  - First row treated as headers
+  - Each subsequent row becomes an object
+  - Values automatically typed (numbers, booleans, strings)
+  - Empty cells become nil
+- **Error Handling**:
+  - Invalid JSON: Returns parsing error
+  - Invalid CSV: Returns error if malformed
+  - Invalid XML: Returns error for unclosed tags
+  - Empty input: Returns appropriate empty structure
+- **Best Practices**:
+  - Use AUTO for flexible input handling
+  - Specify format explicitly when known for better performance
+  - Chain with Extract/Transform for data processing
+  - Use Filter after parsing CSV/TSV for data selection
+  - Validate input before parsing for production workflows
 
 #### Accumulator Node
 - **Purpose**: Accumulate values across multiple node executions

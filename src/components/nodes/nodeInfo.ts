@@ -97,6 +97,11 @@ export const nodeInfoMap: Record<string, NodeInfo> = {
     inputs: ["Data to transform"],
     outputs: ["Transformed data"],
   },
+  parseNode: {
+    description: "Parse string data into structured formats. Supports AUTO detection, JSON, CSV, TSV, YAML, and XML. AUTO mode intelligently detects the input format.",
+    inputs: ["String data to parse"],
+    outputs: ["Parsed structured data (object, array, primitive, etc.)"],
+  },
   accumulatorNode: {
     description: "Accumulate values using operations: sum, product, concatenation, array building, or counting.",
     inputs: ["Values to accumulate"],

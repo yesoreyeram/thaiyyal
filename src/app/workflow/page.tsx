@@ -28,6 +28,7 @@ import {
   VariableNode,
   ExtractNode,
   TransformNode,
+  ParseNode,
   AccumulatorNode,
   CounterNode,
   SwitchNode,
@@ -318,6 +319,12 @@ const nodeCategories = [
         defaultData: { transform_type: "to_array" },
       },
       {
+        type: "parseNode",
+        label: "Parse",
+        color: "bg-purple-600",
+        defaultData: { input_type: "AUTO" },
+      },
+      {
         type: "extractNode",
         label: "Extract",
         color: "bg-teal-600",
@@ -595,6 +602,7 @@ function Canvas() {
       variableNode: withContextMenu(VariableNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
       extractNode: withContextMenu(ExtractNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
       transformNode: withContextMenu(TransformNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
+      parseNode: withContextMenu(ParseNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
       accumulatorNode: withContextMenu(AccumulatorNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
       counterNode: withContextMenu(CounterNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),
       switchNode: withContextMenu(SwitchNode, handleNodeContextMenu, () => setIsPaletteOpen(false)),

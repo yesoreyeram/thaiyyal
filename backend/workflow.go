@@ -182,6 +182,7 @@ const (
 	NodeTypeTransform   = types.NodeTypeTransform
 	NodeTypeAccumulator = types.NodeTypeAccumulator
 	NodeTypeCounter     = types.NodeTypeCounter
+	NodeTypeParse       = types.NodeTypeParse
 )
 
 // Node type constants - Advanced Control Flow

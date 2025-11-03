@@ -83,6 +83,7 @@ const (
 	NodeTypeTransform   NodeType = "transform"   // Transform data structures
 	NodeTypeAccumulator NodeType = "accumulator" // Accumulate values over time
 	NodeTypeCounter     NodeType = "counter"     // Increment/decrement counter
+	NodeTypeParse       NodeType = "parse"       // Parse string data to structured formats
 	// Advanced Control Flow nodes
 	NodeTypeSwitch   NodeType = "switch"   // Multi-way branching
 	NodeTypeParallel NodeType = "parallel" // Parallel execution
@@ -159,6 +160,7 @@ type NodeData struct {
 	AccumOp       *string     `json:"accum_op,omitempty"`       // for accumulator operation (sum, product, concat, etc.)
 	CounterOp     *string     `json:"counter_op,omitempty"`     // for counter operation (increment, decrement, reset)
 	Delta         *float64    `json:"delta,omitempty"`          // for counter delta value
+	InputType     *string     `json:"input_type,omitempty"`     // for parse node (AUTO, JSON, CSV, TSV, YAML, XML)
 	// Advanced Control Flow fields
 	Cases          []SwitchCase `json:"cases,omitempty"`           // for switch node (case definitions)
 	DefaultPath    *string      `json:"default_path,omitempty"`    // for switch node (default case)
