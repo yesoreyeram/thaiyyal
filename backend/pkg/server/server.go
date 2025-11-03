@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	_ "net/http/pprof" // Import pprof for profiling endpoints
 	"time"
 
 	"github.com/prometheus/client_golang/prometheus/promhttp"
