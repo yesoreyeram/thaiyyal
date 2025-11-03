@@ -2,9 +2,17 @@
 
 This document describes the comprehensive protection measures implemented in the Thaiyyal workflow engine to prevent resource exhaustion and security vulnerabilities.
 
+> **🔒 Zero Trust Security Model**: Thaiyyal implements a zero trust / zero permission security model where all privileged operations are DENIED by default. See [ZERO_TRUST.md](ZERO_TRUST.md) for complete security documentation.
+
 ## Overview
 
 The workflow engine implements multiple layers of protection to ensure safe execution of workflows, even when processing untrusted or malicious workflows. These protections are configurable and have safe defaults suitable for production use.
+
+**Key Security Principles**:
+- ✅ **Deny all by default** - Network access disabled, no environment/filesystem access
+- ✅ **Explicit opt-in** - Must explicitly enable privileged operations
+- ✅ **Defense in depth** - Multiple layers of security controls
+- ✅ **Resource limits** - Prevent DoS and resource exhaustion
 
 ## Protection Categories
 
@@ -41,6 +49,38 @@ The workflow engine implements multiple layers of protection to ensure safe exec
 - **Error**: "maximum node executions exceeded: X (limit: Y)"
 
 ### 3. HTTP Protection
+
+#### AllowHTTP (Zero Trust)
+- **Default**: false (DISABLED)
+- **Description**: Master switch for all HTTP access. Must be explicitly enabled.
+- **Enforcement**: Checked in `HTTPExecutor.Execute()` before making any request
+- **Error**: "HTTP requests are not allowed (AllowHTTP=false). Enable AllowHTTP in config to make HTTP requests"
+
+#### AllowedDomains (Domain Whitelist)
+- **Default**: [] (empty = allow all when HTTP enabled)
+- **Description**: Whitelist of allowed domains. If set, only these domains can be accessed.
+- **Enforcement**: Enforced in SSRF protection
+- **Error**: "domain not in allowlist: example.com"
+
+#### BlockPrivateIPs
+- **Default**: true
+- **Description**: Block private IP ranges (10.x, 172.16.x, 192.168.x, IPv6 ULA)
+- **Enforcement**: Enforced in SSRF protection
+
+#### BlockLocalhost
+- **Default**: true
+- **Description**: Block localhost and loopback addresses (127.0.0.1, ::1, localhost)
+- **Enforcement**: Enforced in SSRF protection
+
+#### BlockLinkLocal
+- **Default**: true
+- **Description**: Block link-local addresses (169.254.x.x)
+- **Enforcement**: Enforced in SSRF protection
+
+#### BlockCloudMetadata
+- **Default**: true
+- **Description**: Block cloud metadata endpoints (169.254.169.254, metadata.google.internal, etc.)
+- **Enforcement**: Enforced in SSRF protection
 
 #### HTTPTimeout
 - **Default**: 30 seconds
@@ -151,23 +191,58 @@ The workflow engine implements multiple layers of protection to ensure safe exec
 
 ## Configuration Presets
 
-### Default Configuration
+### Default Configuration - Zero Trust by Default
 ```go
 config := types.DefaultConfig()
 ```
-Balanced settings suitable for production use with reasonable resource limits.
+
+**Zero trust security model** - all privileged operations denied by default:
+- ❌ **HTTP disabled** (AllowHTTP = false)
+- ❌ **Localhost blocked** (BlockLocalhost = true)
+- ❌ **Private IPs blocked** (BlockPrivateIPs = true)
+- ✅ Reasonable resource limits for production
+
+**To enable HTTP**:
+```go
+config := types.DefaultConfig()
+config.AllowHTTP = true  // Explicit opt-in
+config.AllowedDomains = []string{"api.trusted.com"}  // Recommended
+```
+
+### Zero Trust Configuration
+```go
+config := types.ZeroTrustConfig()
+```
+
+**Maximum security** - ultra-restrictive limits for untrusted workflows:
+- ❌ **HTTP disabled**
+- ❌ **All security blocks enabled**
+- ⚡ Minimal execution time (30s)
+- ⚡ Minimal resource limits
+- ⚡ No retries
 
 ### Validation Limits
 ```go
 config := types.ValidationLimits()
 ```
+
 Strict limits suitable for validating untrusted workflows before execution.
+- ✅ **HTTP enabled** (for testing workflows)
+- ❌ **Localhost blocked**
+- ⚡ Restrictive resource limits
 
 ### Development Configuration
 ```go
 config := types.DevelopmentConfig()
 ```
-Relaxed limits for development and testing environments.
+
+**Relaxed limits** for development and testing environments:
+- ✅ **HTTP enabled**
+- ✅ **Localhost allowed**
+- ✅ **Private IPs allowed**
+- ⚡ Relaxed resource limits for complex workflows
+
+**⚠️ WARNING**: Do not use in production with untrusted workflows!
 
 ## Runtime Counters
 
@@ -200,9 +275,29 @@ Internal function that calculates nesting depth of maps, slices, and arrays recu
 ## Best Practices
 
 ### 1. Choose Appropriate Configuration
-- **Production**: Use `DefaultConfig()` as starting point
-- **User-provided workflows**: Use `ValidationLimits()` first
-- **Testing**: Use `DevelopmentConfig()` for convenience
+- **Production with untrusted workflows**: Use `DefaultConfig()` and enable HTTP only if needed
+  ```go
+  config := types.DefaultConfig()
+  config.AllowHTTP = true  // Only if needed
+  config.AllowedDomains = []string{"api.trusted.com"}  // Whitelist
+  ```
+- **Maximum security sandbox**: Use `ZeroTrustConfig()`
+- **User-provided workflows**: Validate with `ValidationLimits()` first
+- **Development/testing**: Use `DevelopmentConfig()` (localhost allowed)
+
+### 2. Enable HTTP Securely
+```go
+// ✅ GOOD: Explicit opt-in with whitelist
+config := types.DefaultConfig()
+config.AllowHTTP = true
+config.AllowedDomains = []string{"api.github.com", "api.stripe.com"}
+config.MaxHTTPCallsPerExec = 20
+
+// ❌ BAD: Too permissive
+config.AllowHTTP = true
+config.AllowedDomains = []string{}  // Allows all domains!
+config.MaxHTTPCallsPerExec = 0      // Unlimited!
+```
 
 ### 2. Monitor Counters
 After execution, check counters to understand resource usage:
@@ -228,19 +323,44 @@ config.MaxNodeExecutions = 0     // Unlimited node executions (not recommended)
 ```
 
 ### 5. Validate Early
-For untrusted workflows, use ValidationLimits first to fail fast:
+For untrusted workflows, use ZeroTrustConfig or ValidationLimits first to fail fast:
 ```go
 // Quick validation with strict limits
-validationEngine, _ := NewWithConfig(payload, types.ValidationLimits())
+validationEngine, _ := NewWithConfig(payload, types.ZeroTrustConfig())
 _, err := validationEngine.Execute()
 if err != nil {
     return fmt.Errorf("workflow validation failed: %w", err)
 }
 
-// Execute with production limits
-productionEngine, _ := NewWithConfig(payload, types.DefaultConfig())
+// Execute with production limits (with HTTP if needed)
+productionConfig := types.DefaultConfig()
+productionConfig.AllowHTTP = true
+productionConfig.AllowedDomains = []string{"api.trusted.com"}
+productionEngine, _ := NewWithConfig(payload, productionConfig)
 result, err := productionEngine.Execute()
 ```
+
+## Zero Trust Features
+
+### No Environment Variable Access
+The workflow engine has **zero access** to environment variables:
+- ✅ Cannot read `os.Getenv()`
+- ✅ No `$ENV_VAR` substitution
+- ✅ Complete environment isolation
+
+### No File System Access
+The workflow engine has **zero access** to the file system:
+- ✅ Cannot read files
+- ✅ Cannot write files  
+- ✅ Cannot list directories
+- ✅ Cannot execute binaries
+
+### No Arbitrary Code Execution
+- ✅ Only predefined node types can execute
+- ✅ No `eval()` or code injection
+- ✅ No system command execution
+
+See [ZERO_TRUST.md](ZERO_TRUST.md) for complete zero trust documentation.
 
 ## Error Messages
 
@@ -248,6 +368,11 @@ All protection violations return descriptive errors:
 
 | Protection | Error Pattern |
 |------------|---------------|
+| HTTP disabled | `HTTP requests are not allowed (AllowHTTP=false). Enable AllowHTTP in config to make HTTP requests` |
+| Domain not whitelisted | `domain not in allowlist: example.com` |
+| Private IP blocked | `private IP addresses are blocked` |
+| Localhost blocked | `localhost addresses are blocked` |
+| Cloud metadata blocked | `cloud metadata endpoints are blocked` |
 | Node executions | `maximum node executions exceeded: X (limit: Y)` |
 | HTTP calls | `maximum HTTP calls per execution exceeded: X (limit: Y)` |
 | String length | `string too long: X bytes (limit: Y)` |
@@ -259,12 +384,24 @@ All protection violations return descriptive errors:
 
 ## Security Considerations
 
+### Zero Trust Architecture
+Thaiyyal implements a **zero trust / zero permission security model**:
+
+1. **Network Isolation**: HTTP disabled by default, explicit opt-in required
+2. **No Environment Access**: Cannot read environment variables
+3. **No File System Access**: Cannot read/write files
+4. **No Code Execution**: Only predefined node types allowed
+5. **No System Commands**: Cannot execute binaries or shell commands
+
+See [ZERO_TRUST.md](ZERO_TRUST.md) for complete documentation.
+
 ### SSRF Protection
-The HTTP executor includes SSRF (Server-Side Request Forgery) protection:
+The HTTP executor includes comprehensive SSRF (Server-Side Request Forgery) protection:
 - Blocks internal IP addresses (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16)
-- Blocks localhost and loopback addresses
-- Blocks link-local addresses
+- Blocks localhost and loopback addresses (default)
+- Blocks link-local addresses (169.254.0.0/16)
 - Blocks cloud metadata endpoints (AWS, GCP, Azure)
+- Domain whitelisting support
 
 ### DoS Prevention
 Multiple layers prevent denial-of-service attacks:
@@ -321,9 +458,11 @@ Potential future improvements:
 
 ## References
 
-- Implementation: `backend/pkg/types/types.go` (Config definition)
-- Defaults: `backend/pkg/types/helpers.go` (Config presets)
-- Enforcement: `backend/pkg/engine/engine.go` (Engine implementation)
-- Validation: `backend/pkg/types/helpers.go` (ValidateValue)
-- HTTP Protection: `backend/pkg/executor/http.go` (HTTPExecutor)
-- Tests: `backend/pkg/engine/protection_test.go`, `backend/pkg/engine/validation_test.go`
+- **[ZERO_TRUST.md](ZERO_TRUST.md)** - Complete zero trust security documentation
+- **Implementation**: `backend/pkg/types/types.go` (Config definition)
+- **Defaults**: `backend/pkg/types/helpers.go` (Config presets)
+- **Enforcement**: `backend/pkg/engine/engine.go` (Engine implementation)
+- **Validation**: `backend/pkg/types/helpers.go` (ValidateValue)
+- **HTTP Protection**: `backend/pkg/executor/http.go` (HTTPExecutor)
+- **SSRF Protection**: `backend/pkg/security/ssrf.go` (SSRFProtection)
+- **Tests**: `backend/pkg/engine/protection_test.go`, `backend/pkg/engine/zerotrust_test.go`
