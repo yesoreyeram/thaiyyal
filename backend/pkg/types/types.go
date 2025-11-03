@@ -5,6 +5,8 @@ package types
 import (
 	"context"
 	"time"
+
+	"github.com/yesoreyeram/thaiyyal/backend/pkg/config"
 )
 
 // ============================================================================
@@ -224,45 +226,7 @@ type CacheEntry struct {
 	Expiration time.Time
 }
 
-// Config holds workflow engine configuration
-type Config struct {
-	// Execution limits
-	MaxExecutionTime     time.Duration // Maximum time for entire workflow execution
-	MaxNodeExecutionTime time.Duration // Maximum time for single node execution
-	MaxIterations        int           // Default max iterations for loops (if not specified)
-
-	// HTTP node configuration
-	HTTPTimeout           time.Duration // Timeout for HTTP requests
-	MaxHTTPRedirects      int           // Maximum number of HTTP redirects to follow
-	MaxResponseSize       int64         // Maximum size of HTTP response body (bytes)
-	MaxHTTPCallsPerExec   int           // Maximum HTTP calls allowed per workflow execution (0 = unlimited)
-	AllowedURLPatterns    []string      // Whitelist of allowed URL patterns (if empty, all external URLs allowed)
-	BlockInternalIPs      bool          // DEPRECATED: Use BlockPrivateIPs instead
-	
-	// Zero Trust Security - Network Access Control
-	AllowHTTP             bool     // Explicitly allow HTTP requests (default: false for zero trust)
-	AllowedDomains        []string // Whitelist of allowed domains for HTTP (empty = allow all domains when AllowHTTP is true)
-	BlockPrivateIPs       bool     // Block private IP ranges (10.x, 172.16.x, 192.168.x)
-	BlockLocalhost        bool     // Block localhost and loopback addresses
-	BlockLinkLocal        bool     // Block link-local addresses (169.254.x.x)
-	BlockCloudMetadata    bool     // Block cloud metadata endpoints (169.254.169.254, etc.)
-
-	// Cache configuration
-	DefaultCacheTTL time.Duration // Default TTL for cache entries if not specified
-	MaxCacheSize    int           // Maximum number of cache entries (LRU eviction)
-
-	// Resource limits
-	MaxInputSize      int // Maximum size of input data (bytes)
-	MaxPayloadSize    int // Maximum size of workflow payload (bytes)
-	MaxNodes          int // Maximum number of nodes in workflow
-	MaxEdges          int // Maximum number of edges in workflow
-	MaxNodeExecutions int // Maximum total node executions (including loop iterations, 0 = unlimited)
-	MaxStringLength   int // Maximum length of string values (0 = unlimited)
-	MaxArrayLength    int // Maximum length of array values (0 = unlimited)
-	MaxVariables      int // Maximum number of variables in workflow state (0 = unlimited)
-	MaxContextDepth   int // Maximum depth of nested objects/arrays (0 = unlimited)
-
-	// Retry configuration
-	DefaultMaxAttempts int           // Default max retry attempts
-	DefaultBackoff     time.Duration // Default initial backoff delay
-}
+// Config is a type alias for backward compatibility.
+// The actual configuration is now in the config package.
+// Deprecated: Use github.com/yesoreyeram/thaiyyal/backend/pkg/config.Config instead.
+type Config = config.Config
