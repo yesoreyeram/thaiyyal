@@ -14,6 +14,7 @@ export {
   VariableNode,
   ExtractNode,
   TransformNode,
+  ParseNode,
   AccumulatorNode,
   CounterNode,
   SwitchNode,
