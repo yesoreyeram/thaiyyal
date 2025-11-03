@@ -1,6 +1,7 @@
 package httpclient
 
 import (
+	"strconv"
 	"testing"
 
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/config"
@@ -170,7 +171,7 @@ func TestRegistry_Count(t *testing.T) {
 	// Add clients
 	for i := 1; i <= 3; i++ {
 		clientConfig := &ClientConfig{
-			Name:     "client" + string(rune('0'+i)),
+			Name:     "client" + strconv.Itoa(i),
 			AuthType: AuthTypeNone,
 		}
 		client, err := builder.Build(clientConfig)
@@ -233,7 +234,7 @@ func TestRegistry_Concurrent(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		go func(id int) {
 			clientConfig := &ClientConfig{
-				Name:     "client" + string(rune('0'+id)),
+				Name:     "client" + strconv.Itoa(id),
 				AuthType: AuthTypeNone,
 			}
 			client, err := builder.Build(clientConfig)
@@ -259,7 +260,7 @@ func TestRegistry_Concurrent(t *testing.T) {
 	// Concurrent reads
 	for i := 0; i < 10; i++ {
 		go func(id int) {
-			name := "client" + string(rune('0'+id))
+			name := "client" + strconv.Itoa(id)
 			if !registry.Has(name) {
 				t.Errorf("Has(%v) returned false", name)
 			}
