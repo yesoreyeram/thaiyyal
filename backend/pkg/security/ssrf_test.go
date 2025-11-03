@@ -123,10 +123,10 @@ func TestSSRFProtection_CustomConfig(t *testing.T) {
 	// Allow localhost but block everything else
 	config := SSRFConfig{
 		AllowedSchemes:     []string{"http", "https"},
-		BlockPrivateIPs:    true,
-		BlockLocalhost:     false, // Allow localhost
-		BlockLinkLocal:     true,
-		BlockCloudMetadata: true,
+		AllowPrivateIPs:    false,
+		AllowLocalhost:     true, // Allow localhost
+		AllowLinkLocal:     false,
+		AllowCloudMetadata: false,
 		AllowedDomains:     []string{},
 		BlockedDomains:     []string{},
 	}
@@ -150,10 +150,10 @@ func TestSSRFProtection_CustomConfig(t *testing.T) {
 func TestSSRFProtection_DomainWhitelist(t *testing.T) {
 	config := SSRFConfig{
 		AllowedSchemes:     []string{"http", "https"},
-		BlockPrivateIPs:    true,
-		BlockLocalhost:     true,
-		BlockLinkLocal:     true,
-		BlockCloudMetadata: true,
+		AllowPrivateIPs:    false,
+		AllowLocalhost:     false,
+		AllowLinkLocal:     false,
+		AllowCloudMetadata: false,
 		AllowedDomains:     []string{"example.com", "api.example.com"},
 		BlockedDomains:     []string{},
 	}
@@ -177,10 +177,10 @@ func TestSSRFProtection_DomainWhitelist(t *testing.T) {
 func TestSSRFProtection_DomainBlacklist(t *testing.T) {
 	config := SSRFConfig{
 		AllowedSchemes:     []string{"http", "https"},
-		BlockPrivateIPs:    false,
-		BlockLocalhost:     false,
-		BlockLinkLocal:     false,
-		BlockCloudMetadata: false,
+		AllowPrivateIPs:    true,
+		AllowLocalhost:     true,
+		AllowLinkLocal:     true,
+		AllowCloudMetadata: true,
 		AllowedDomains:     []string{},
 		BlockedDomains:     []string{"evil.com", "malicious.com"},
 	}

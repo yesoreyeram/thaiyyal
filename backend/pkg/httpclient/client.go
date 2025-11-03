@@ -26,20 +26,22 @@ func New(ctx context.Context, config *Config) (*http.Client, error) {
 
 	// Create base transport with connection pooling
 	transport := &http.Transport{
-		MaxIdleConns:        config.MaxIdleConns,
-		MaxIdleConnsPerHost: config.MaxIdleConnsPerHost,
-		MaxConnsPerHost:     config.MaxConnsPerHost,
-		IdleConnTimeout:     config.IdleConnTimeout,
-		TLSHandshakeTimeout: config.TLSHandshakeTimeout,
-		DisableKeepAlives:   config.DisableKeepAlives,
+		MaxIdleConns:        config.Network.MaxIdleConns,
+		MaxIdleConnsPerHost: config.Network.MaxIdleConnsPerHost,
+		MaxConnsPerHost:     config.Network.MaxConnsPerHost,
+		IdleConnTimeout:     config.Network.IdleConnTimeout,
+		TLSHandshakeTimeout: config.Network.TLSHandshakeTimeout,
+		DisableKeepAlives:   config.Network.DisableKeepAlives,
 	}
 
 	// Build middleware chain
 	var middlewares []Middleware
 
 	// Add SSRF protection middleware if any protection is enabled
-	if config.BlockPrivateIPs || config.BlockLocalhost || config.BlockLinkLocal ||
-		config.BlockCloudMetadata || len(config.AllowedDomains) > 0 {
+	// Note: Protection is DENY BY DEFAULT, so we check if any restrictions apply
+	if !config.Security.AllowPrivateIPs || !config.Security.AllowLocalhost || 
+		!config.Security.AllowLinkLocal || !config.Security.AllowCloudMetadata || 
+		len(config.Security.AllowedDomains) > 0 {
 		middlewares = append(middlewares, ssrfProtectionMiddleware(config))
 	}
 
@@ -54,7 +56,7 @@ func New(ctx context.Context, config *Config) (*http.Client, error) {
 	}
 
 	// Add authentication middleware if configured
-	if config.AuthType != AuthTypeNone {
+	if config.Auth.Type != AuthTypeNone {
 		middlewares = append(middlewares, authMiddleware(config))
 	}
 
@@ -67,19 +69,19 @@ func New(ctx context.Context, config *Config) (*http.Client, error) {
 
 	// Create HTTP client
 	client := &http.Client{
-		Timeout:   config.Timeout,
+		Timeout:   config.Network.Timeout,
 		Transport: finalTransport,
 	}
 
 	// Configure redirect behavior
-	if !config.FollowRedirects {
+	if !config.Security.FollowRedirects {
 		client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
 		}
 	} else {
 		client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
-			if len(via) >= config.MaxRedirects {
-				return fmt.Errorf("too many redirects (max %d)", config.MaxRedirects)
+			if len(via) >= config.Security.MaxRedirects {
+				return fmt.Errorf("too many redirects (max %d)", config.Security.MaxRedirects)
 			}
 			// Validate redirect URL for SSRF protection
 			if err := validateURL(req.URL.String(), config); err != nil {

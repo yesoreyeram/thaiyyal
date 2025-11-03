@@ -57,10 +57,10 @@ func DefaultConfig() Config {
 		// Zero Trust Security - DENY ALL by default (explicit opt-in required)
 		AllowHTTP:          false,      // HTTP DISABLED - must explicitly enable
 		AllowedDomains:     []string{}, // No domains whitelisted (must configure if enabling HTTP)
-		BlockPrivateIPs:    true,       // Block all private IP ranges
-		BlockLocalhost:     true,       // Block localhost
-		BlockLinkLocal:     true,       // Block link-local
-		BlockCloudMetadata: true,       // Block cloud metadata
+		AllowPrivateIPs:    false,       // Block all private IP ranges
+		AllowLocalhost:     false,       // Block localhost
+		AllowLinkLocal:     false,       // Block link-local
+		AllowCloudMetadata: false,       // Block cloud metadata
 
 		// Cache configuration
 		DefaultCacheTTL: 1 * time.Hour,
@@ -99,7 +99,7 @@ func ValidationLimits() Config {
 	c.MaxContextDepth = 16
 	// Keep HTTP enabled but with strict limits for validation
 	c.AllowHTTP = true
-	c.BlockLocalhost = true // Block localhost in validation mode
+	c.AllowLocalhost = false // Block localhost in validation mode
 	return c
 }
 
@@ -119,8 +119,8 @@ func DevelopmentConfig() Config {
 	c.MaxContextDepth = 64
 	// Allow localhost for development
 	c.AllowHTTP = true
-	c.BlockLocalhost = false
-	c.BlockPrivateIPs = false // Allow private IPs in development
+	c.AllowLocalhost = true
+	c.AllowPrivateIPs = true // Allow private IPs in development
 	return c
 }
 
@@ -158,10 +158,10 @@ func ZeroTrustConfig() Config {
 		// Zero Trust Security - DENY ALL by default
 		AllowHTTP:          false,      // Deny all HTTP access
 		AllowedDomains:     []string{}, // No domains allowed (deny all)
-		BlockPrivateIPs:    true,       // Block all private IP ranges
-		BlockLocalhost:     true,       // Block localhost
-		BlockLinkLocal:     true,       // Block link-local
-		BlockCloudMetadata: true,       // Block cloud metadata
+		AllowPrivateIPs:    false,       // Block all private IP ranges
+		AllowLocalhost:     false,       // Block localhost
+		AllowLinkLocal:     false,       // Block link-local
+		AllowCloudMetadata: false,       // Block cloud metadata
 
 		// Cache configuration - Minimal
 		DefaultCacheTTL: 5 * time.Minute, // Short TTL

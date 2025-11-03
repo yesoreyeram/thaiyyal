@@ -261,18 +261,19 @@ func TestZeroTrustConfig_ResourceLimits(t *testing.T) {
 		t.Error("Expected AllowHTTP=false in zero trust config")
 	}
 
-	// Verify all security protections are enabled
-	if !config.BlockPrivateIPs {
-		t.Error("Expected BlockPrivateIPs=true in zero trust config")
+	// Verify all security protections are enabled (DENY BY DEFAULT)
+	// In zero trust mode, all Allow* should be false (meaning blocked)
+	if config.AllowPrivateIPs {
+		t.Error("Expected AllowPrivateIPs=false in zero trust config (blocked by default)")
 	}
-	if !config.BlockLocalhost {
-		t.Error("Expected BlockLocalhost=true in zero trust config")
+	if config.AllowLocalhost {
+		t.Error("Expected AllowLocalhost=false in zero trust config (blocked by default)")
 	}
-	if !config.BlockLinkLocal {
-		t.Error("Expected BlockLinkLocal=true in zero trust config")
+	if config.AllowLinkLocal {
+		t.Error("Expected AllowLinkLocal=false in zero trust config (blocked by default)")
 	}
-	if !config.BlockCloudMetadata {
-		t.Error("Expected BlockCloudMetadata=true in zero trust config")
+	if config.AllowCloudMetadata {
+		t.Error("Expected AllowCloudMetadata=false in zero trust config (blocked by default)")
 	}
 }
 
@@ -329,24 +330,24 @@ func TestDefaultConfig_ZeroTrustByDefault(t *testing.T) {
 		t.Error("Expected AllowHTTP=false in default config (zero trust by default)")
 	}
 
-	// Verify localhost is BLOCKED by default
-	if !config.BlockLocalhost {
-		t.Error("Expected BlockLocalhost=true in default config (zero trust by default)")
+	// Verify localhost is BLOCKED by default (AllowLocalhost=false means BLOCKED)
+	if config.AllowLocalhost {
+		t.Error("Expected AllowLocalhost=false in default config (zero trust by default - blocked)")
 	}
 
-	// Verify private IPs are BLOCKED by default
-	if !config.BlockPrivateIPs {
-		t.Error("Expected BlockPrivateIPs=true in default config (zero trust by default)")
+	// Verify private IPs are BLOCKED by default (AllowPrivateIPs=false means BLOCKED)
+	if config.AllowPrivateIPs {
+		t.Error("Expected AllowPrivateIPs=false in default config (zero trust by default - blocked)")
 	}
 
 	// Verify cloud metadata is blocked
-	if !config.BlockCloudMetadata {
-		t.Error("Expected BlockCloudMetadata=true in default config")
+	if config.AllowCloudMetadata {
+		t.Error("Expected AllowCloudMetadata=false in default config (blocked)")
 	}
 
 	// Verify link-local is blocked
-	if !config.BlockLinkLocal {
-		t.Error("Expected BlockLinkLocal=true in default config")
+	if config.AllowLinkLocal {
+		t.Error("Expected AllowLinkLocal=false in default config (blocked)")
 	}
 }
 
@@ -359,9 +360,9 @@ func TestValidationLimits_HTTPEnabled(t *testing.T) {
 		t.Error("Expected AllowHTTP=true in validation config")
 	}
 
-	// But verify localhost is blocked in validation mode
-	if !config.BlockLocalhost {
-		t.Error("Expected BlockLocalhost=true in validation config for security")
+	// But verify localhost is blocked in validation mode (AllowLocalhost=false means BLOCKED)
+	if config.AllowLocalhost {
+		t.Error("Expected AllowLocalhost=false in validation config for security (blocked)")
 	}
 
 	// Verify limits are restrictive
@@ -379,14 +380,14 @@ func TestDevelopmentConfig_Permissive(t *testing.T) {
 		t.Error("Expected AllowHTTP=true in development config")
 	}
 
-	// Verify localhost is allowed
-	if config.BlockLocalhost {
-		t.Error("Expected BlockLocalhost=false in development config")
+	// Verify localhost is allowed (AllowLocalhost=true means ALLOWED)
+	if !config.AllowLocalhost {
+		t.Error("Expected AllowLocalhost=true in development config (allowed)")
 	}
 
-	// Verify private IPs are allowed
-	if config.BlockPrivateIPs {
-		t.Error("Expected BlockPrivateIPs=false in development config")
+	// Verify private IPs are allowed (AllowPrivateIPs=true means ALLOWED)
+	if !config.AllowPrivateIPs {
+		t.Error("Expected AllowPrivateIPs=true in development config (allowed)")
 	}
 
 	// Verify limits are relaxed

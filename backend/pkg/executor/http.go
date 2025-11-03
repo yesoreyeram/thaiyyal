@@ -195,12 +195,13 @@ func (e *HTTPExecutor) Validate(node types.Node) error {
 // Respects the zero-trust configuration from the workflow engine config
 func isAllowedURL(url string, config types.Config) error {
 	// Build SSRF protection config from workflow engine config
+	// DENY BY DEFAULT - all protection enabled unless explicitly allowed
 	ssrfConfig := security.SSRFConfig{
 		AllowedSchemes:     []string{"http", "https"},
-		BlockPrivateIPs:    config.BlockPrivateIPs,
-		BlockLocalhost:     config.BlockLocalhost,
-		BlockLinkLocal:     config.BlockLinkLocal,
-		BlockCloudMetadata: config.BlockCloudMetadata,
+		AllowPrivateIPs:    config.AllowPrivateIPs,
+		AllowLocalhost:     config.AllowLocalhost,
+		AllowLinkLocal:     config.AllowLinkLocal,
+		AllowCloudMetadata: config.AllowCloudMetadata,
 		AllowedDomains:     config.AllowedDomains,
 		BlockedDomains:     []string{},
 	}

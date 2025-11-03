@@ -12,7 +12,7 @@ func TestRegistry_Register(t *testing.T) {
 
 	config := &Config{
 		UID:      "test-client",
-		AuthType: AuthTypeNone,
+		Auth: AuthConfig{Type: AuthTypeNone},
 	}
 
 	client, err := New(context.Background(), config)
@@ -50,7 +50,7 @@ func TestRegistry_Get(t *testing.T) {
 
 	config := &Config{
 		UID:      "test-client",
-		AuthType: AuthTypeNone,
+		Auth: AuthConfig{Type: AuthTypeNone},
 	}
 
 	client, err := New(context.Background(), config)
@@ -85,7 +85,7 @@ func TestRegistry_Has(t *testing.T) {
 
 	config := &Config{
 		UID:      "test-client",
-		AuthType: AuthTypeNone,
+		Auth: AuthConfig{Type: AuthTypeNone},
 	}
 
 	client, err := New(context.Background(), config)
@@ -124,7 +124,7 @@ func TestRegistry_List(t *testing.T) {
 	for i, uid := range []string{"client1", "client2", "client3"} {
 		config := &Config{
 			UID:      uid,
-			AuthType: AuthTypeNone,
+			Auth: AuthConfig{Type: AuthTypeNone},
 		}
 		client, err := New(context.Background(), config)
 		if err != nil {
@@ -168,7 +168,7 @@ func TestRegistry_Count(t *testing.T) {
 	for i := 1; i <= 3; i++ {
 		config := &Config{
 			UID:      "client" + strconv.Itoa(i),
-			AuthType: AuthTypeNone,
+			Auth: AuthConfig{Type: AuthTypeNone},
 		}
 		client, err := New(context.Background(), config)
 		if err != nil {
@@ -189,7 +189,7 @@ func TestRegistry_Clear(t *testing.T) {
 	for _, uid := range []string{"client1", "client2", "client3"} {
 		config := &Config{
 			UID:      uid,
-			AuthType: AuthTypeNone,
+			Auth: AuthConfig{Type: AuthTypeNone},
 		}
 		client, err := New(context.Background(), config)
 		if err != nil {
@@ -222,7 +222,7 @@ func TestRegistry_Unregister(t *testing.T) {
 
 	config := &Config{
 		UID:      "test-client",
-		AuthType: AuthTypeNone,
+		Auth: AuthConfig{Type: AuthTypeNone},
 	}
 
 	client, err := New(context.Background(), config)
@@ -266,7 +266,7 @@ func TestRegistry_Concurrent(t *testing.T) {
 		go func(id int) {
 			config := &Config{
 				UID:      "client" + strconv.Itoa(id),
-				AuthType: AuthTypeNone,
+				Auth: AuthConfig{Type: AuthTypeNone},
 			}
 			client, err := New(context.Background(), config)
 			if err != nil {
@@ -317,7 +317,7 @@ func BenchmarkRegistry_Register(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		config := &Config{
 			UID:      "client" + strconv.Itoa(i),
-			AuthType: AuthTypeNone,
+			Auth: AuthConfig{Type: AuthTypeNone},
 		}
 		clients[i], _ = New(context.Background(), config)
 	}
@@ -335,7 +335,7 @@ func BenchmarkRegistry_Get(b *testing.B) {
 	for i := 0; i < 100; i++ {
 		config := &Config{
 			UID:      "client" + strconv.Itoa(i),
-			AuthType: AuthTypeNone,
+			Auth: AuthConfig{Type: AuthTypeNone},
 		}
 		client, _ := New(context.Background(), config)
 		registry.Register(config.UID, client)

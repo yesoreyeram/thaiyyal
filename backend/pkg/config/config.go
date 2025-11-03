@@ -23,12 +23,14 @@ type Config struct {
 	BlockInternalIPs bool // DEPRECATED: Use BlockPrivateIPs instead
 
 	// Zero Trust Security - Network Access Control
+	// ALL NETWORK ACCESS IS DENIED BY DEFAULT (zero trust)
+	// Use Allow* fields to explicitly permit access
 	AllowHTTP          bool     // Explicitly allow HTTP requests (default: false for zero trust)
 	AllowedDomains     []string // Whitelist of allowed domains for HTTP (empty = allow all domains when AllowHTTP is true)
-	BlockPrivateIPs    bool     // Block private IP ranges (10.x, 172.16.x, 192.168.x)
-	BlockLocalhost     bool     // Block localhost and loopback addresses
-	BlockLinkLocal     bool     // Block link-local addresses (169.254.x.x)
-	BlockCloudMetadata bool     // Block cloud metadata endpoints (169.254.169.254, etc.)
+	AllowPrivateIPs    bool     // Allow private IP ranges (10.x, 172.16.x, 192.168.x) - default: false (BLOCKED)
+	AllowLocalhost     bool     // Allow localhost and loopback addresses - default: false (BLOCKED)
+	AllowLinkLocal     bool     // Allow link-local addresses (169.254.x.x) - default: false (BLOCKED)
+	AllowCloudMetadata bool     // Allow cloud metadata endpoints (169.254.169.254, etc.) - default: false (BLOCKED)
 
 	// Cache configuration
 	DefaultCacheTTL time.Duration // Default TTL for cache entries if not specified
@@ -66,13 +68,13 @@ func Default() *Config {
 		AllowedURLPatterns:  nil,              // allow all when AllowHTTP is true
 		BlockInternalIPs:    true,             // DEPRECATED: kept for backward compatibility
 
-		// Zero Trust Security
+		// Zero Trust Security - DENY BY DEFAULT
 		AllowHTTP:          false, // Require HTTPS by default
 		AllowedDomains:     nil,   // allow all domains when AllowHTTP is true
-		BlockPrivateIPs:    true,  // Block private IPs by default
-		BlockLocalhost:     true,  // Block localhost by default
-		BlockLinkLocal:     true,  // Block link-local by default
-		BlockCloudMetadata: true,  // Block cloud metadata by default
+		AllowPrivateIPs:    false, // Block private IPs by default (DENY)
+		AllowLocalhost:     false, // Block localhost by default (DENY)
+		AllowLinkLocal:     false, // Block link-local by default (DENY)
+		AllowCloudMetadata: false, // Block cloud metadata by default (DENY)
 
 		// Cache configuration
 		DefaultCacheTTL: 1 * time.Hour,
@@ -99,10 +101,10 @@ func Default() *Config {
 func Development() *Config {
 	cfg := Default()
 	cfg.AllowHTTP = true           // Allow HTTP in development
-	cfg.BlockPrivateIPs = false    // Allow private IPs
+	cfg.AllowPrivateIPs = true     // Allow private IPs
 	cfg.BlockInternalIPs = false   // DEPRECATED: kept for backward compatibility
-	cfg.BlockLocalhost = false     // Allow localhost
-	cfg.BlockCloudMetadata = false // Allow cloud metadata
+	cfg.AllowLocalhost = true      // Allow localhost
+	cfg.AllowCloudMetadata = false // Still block cloud metadata (security best practice)
 	cfg.MaxExecutionTime = 10 * time.Minute
 	return cfg
 }
@@ -111,11 +113,11 @@ func Development() *Config {
 func Production() *Config {
 	cfg := Default()
 	cfg.AllowHTTP = false         // Require HTTPS
-	cfg.BlockPrivateIPs = true    // Block private IPs
+	cfg.AllowPrivateIPs = false   // Block private IPs (DENY)
 	cfg.BlockInternalIPs = true   // DEPRECATED: kept for backward compatibility
-	cfg.BlockLocalhost = true     // Block localhost
-	cfg.BlockLinkLocal = true     // Block link-local
-	cfg.BlockCloudMetadata = true // Block cloud metadata
+	cfg.AllowLocalhost = false    // Block localhost (DENY)
+	cfg.AllowLinkLocal = false    // Block link-local (DENY)
+	cfg.AllowCloudMetadata = false // Block cloud metadata (DENY)
 	cfg.MaxExecutionTime = 5 * time.Minute
 	return cfg
 }
@@ -124,10 +126,10 @@ func Production() *Config {
 func Testing() *Config {
 	cfg := Default()
 	cfg.AllowHTTP = true           // Allow HTTP for test servers
-	cfg.BlockPrivateIPs = false    // Allow private IPs
+	cfg.AllowPrivateIPs = true     // Allow private IPs
 	cfg.BlockInternalIPs = false   // DEPRECATED: kept for backward compatibility
-	cfg.BlockLocalhost = false     // Allow localhost
-	cfg.BlockCloudMetadata = false // Allow cloud metadata
+	cfg.AllowLocalhost = true      // Allow localhost
+	cfg.AllowCloudMetadata = false // Still block cloud metadata (security best practice)
 	cfg.MaxExecutionTime = 1 * time.Minute
 	cfg.HTTPTimeout = 5 * time.Second
 	return cfg
