@@ -1,0 +1,81 @@
+{
+  "workflow_id": "metrics-collection",
+  "nodes": [
+    {
+      "id": "service1",
+      "type": "http",
+      "data": {
+        "url": "https://api.example.com/service1/metrics",
+        "method": "GET"
+      }
+    },
+    {
+      "id": "service2",
+      "type": "http",
+      "data": {
+        "url": "https://api.example.com/service2/metrics",
+        "method": "GET"
+      }
+    },
+    {
+      "id": "service3",
+      "type": "http",
+      "data": {
+        "url": "https://api.example.com/service3/metrics",
+        "method": "GET"
+      }
+    },
+    {
+      "id": "extract_metrics_1",
+      "type": "extract",
+      "data": {
+        "field": "metrics"
+      }
+    },
+    {
+      "id": "extract_metrics_2",
+      "type": "extract",
+      "data": {
+        "field": "metrics"
+      }
+    },
+    {
+      "id": "extract_metrics_3",
+      "type": "extract",
+      "data": {
+        "field": "metrics"
+      }
+    },
+    {
+      "id": "combine",
+      "type": "join",
+      "data": {
+        "mode": "merge"
+      }
+    },
+    {
+      "id": "aggregate",
+      "type": "reduce",
+      "data": {
+        "op": "merge"
+      }
+    },
+    {
+      "id": "visualize",
+      "type": "visualization",
+      "data": {
+        "mode": "json"
+      }
+    }
+  ],
+  "edges": [
+    {"source": "service1", "target": "extract_metrics_1"},
+    {"source": "service2", "target": "extract_metrics_2"},
+    {"source": "service3", "target": "extract_metrics_3"},
+    {"source": "extract_metrics_1", "target": "combine"},
+    {"source": "extract_metrics_2", "target": "combine"},
+    {"source": "extract_metrics_3", "target": "combine"},
+    {"source": "combine", "target": "aggregate"},
+    {"source": "aggregate", "target": "visualize"}
+  ]
+}

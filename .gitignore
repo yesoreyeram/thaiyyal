@@ -43,6 +43,7 @@ next-env.d.ts
 
 # Go
 /backend/examples/examples
+/backend/bin/
 *.exe
 *.exe~
 *.dll

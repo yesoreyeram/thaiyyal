@@ -1,0 +1,104 @@
+{
+  "workflow_id": "health-check",
+  "nodes": [
+    {
+      "id": "check_api",
+      "type": "try_catch",
+      "data": {
+        "fallbackValue": {
+          "service": "api",
+          "status": "down",
+          "healthy": false
+        }
+      }
+    },
+    {
+      "id": "api_request",
+      "type": "http",
+      "data": {
+        "url": "https://api.example.com/health",
+        "method": "GET",
+        "timeout": 5000
+      }
+    },
+    {
+      "id": "check_database",
+      "type": "try_catch",
+      "data": {
+        "fallbackValue": {
+          "service": "database",
+          "status": "down",
+          "healthy": false
+        }
+      }
+    },
+    {
+      "id": "db_request",
+      "type": "http",
+      "data": {
+        "url": "https://db.example.com/health",
+        "method": "GET",
+        "timeout": 5000
+      }
+    },
+    {
+      "id": "check_cache",
+      "type": "try_catch",
+      "data": {
+        "fallbackValue": {
+          "service": "cache",
+          "status": "down",
+          "healthy": false
+        }
+      }
+    },
+    {
+      "id": "cache_request",
+      "type": "http",
+      "data": {
+        "url": "https://cache.example.com/health",
+        "method": "GET",
+        "timeout": 5000
+      }
+    },
+    {
+      "id": "aggregate_health",
+      "type": "join",
+      "data": {
+        "mode": "array"
+      }
+    },
+    {
+      "id": "check_all_healthy",
+      "type": "filter",
+      "data": {
+        "expression": "healthy == true"
+      }
+    },
+    {
+      "id": "count_healthy",
+      "type": "reduce",
+      "data": {
+        "op": "count"
+      }
+    },
+    {
+      "id": "visualize",
+      "type": "visualization",
+      "data": {
+        "mode": "json"
+      }
+    }
+  ],
+  "edges": [
+    {"source": "api_request", "target": "check_api"},
+    {"source": "db_request", "target": "check_database"},
+    {"source": "cache_request", "target": "check_cache"},
+    {"source": "check_api", "target": "aggregate_health"},
+    {"source": "check_database", "target": "aggregate_health"},
+    {"source": "check_cache", "target": "aggregate_health"},
+    {"source": "aggregate_health", "target": "check_all_healthy"},
+    {"source": "check_all_healthy", "target": "count_healthy"},
+    {"source": "count_healthy", "target": "visualize"}
+  ]
+}

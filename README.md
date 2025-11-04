@@ -388,6 +388,151 @@ engine.RegisterObserver(&MyObserver{})
 }
 ```
 
+## 🚀 Running the Server
+
+### HTTP API Server
+
+Start the standalone HTTP server for programmatic workflow execution:
+
+```bash
+# Build the server
+cd backend/cmd/server
+go build -o ../../bin/thaiyyal-server .
+
+# Run with default settings
+../../bin/thaiyyal-server
+
+# Run with custom configuration
+../../bin/thaiyyal-server \
+  -addr :9090 \
+  -max-execution-time 2m \
+  -max-node-executions 5000
+```
+
+The server exposes:
+- `POST /api/v1/workflow/execute` - Execute workflows
+- `POST /api/v1/workflow/validate` - Validate workflows
+- `GET /health` - Health check
+- `GET /health/live` - Liveness probe (K8s)
+- `GET /health/ready` - Readiness probe (K8s)
+- `GET /metrics` - Prometheus metrics
+
+### Docker Deployment
+
+```bash
+# Build Docker image
+docker build -t thaiyyal/workflow-engine:latest .
+
+# Run container
+docker run -d -p 8080:8080 thaiyyal/workflow-engine:latest
+
+# Or use Docker Compose (includes Prometheus & Grafana)
+docker-compose up -d
+```
+
+Access:
+- Workflow API: http://localhost:8080
+- Prometheus: http://localhost:9090
+- Grafana: http://localhost:3001 (admin/admin)
+
+### Kubernetes Deployment
+
+```bash
+# Deploy to Kubernetes
+kubectl apply -f deployments/kubernetes/deployment.yaml
+
+# Verify deployment
+kubectl get pods -n thaiyyal
+
+# Port forward for local access
+kubectl port-forward -n thaiyyal svc/thaiyyal-server 8080:8080
+```
+
+See [Operations Guide](docs/OPERATIONS_GUIDE.md) for detailed deployment and scaling information.
+
+## 📊 Observability & Monitoring
+
+### Metrics
+
+The server exports Prometheus metrics including:
+
+```promql
+# Workflow execution metrics
+workflow_executions_total          # Total workflow executions
+workflow_execution_duration        # Execution duration histogram
+workflow_executions_success_total  # Successful executions
+workflow_executions_failure_total  # Failed executions
+
+# Node execution metrics
+node_executions_total              # Total node executions
+node_execution_duration            # Node execution duration
+node_executions_success_total      # Successful node executions
+node_executions_failure_total      # Failed node executions
+
+# HTTP call metrics
+http_calls_total                   # Total HTTP calls
+http_call_duration                 # HTTP call duration
+```
+
+### Distributed Tracing
+
+Integrated with OpenTelemetry for distributed tracing:
+- Workflow-level spans
+- Node-level spans
+- Automatic trace ID generation
+- Context propagation
+
+### Health Checks
+
+Multiple health check endpoints for monitoring:
+- **Liveness**: Server is running
+- **Readiness**: Server can handle requests
+- **Health**: Comprehensive checks with dependency status
+
+## 📚 Documentation
+
+### Getting Started
+- [Quick Start Guide](#quick-start)
+- [Installation](#installation)
+- [Basic Concepts](#basic-concepts)
+
+### Core Documentation
+- [Architecture Overview](docs/ARCHITECTURE.md)
+- [Design Patterns](docs/ARCHITECTURE_DESIGN_PATTERNS.md)
+- [Developer Guide](DEV_GUIDE.md)
+- [Contributing Guidelines](CONTRIBUTING.md)
+- [Agent System](AGENTS.md)
+
+### Operations
+- [Operations Guide](docs/OPERATIONS_GUIDE.md) - **NEW**
+- [API Reference](docs/api/openapi.yaml) - **NEW**
+- [Performance Tuning](docs/PERFORMANCE_TUNING.md)
+- [Security Best Practices](docs/SECURITY_BEST_PRACTICES.md)
+
+### Principles & Best Practices
+- [Zero-Trust Security](docs/PRINCIPLES_ZERO_TRUST.md)
+- [Workload Protection](docs/PRINCIPLES_WORKLOAD_PROTECTION.md)
+- [No Runtime Errors](docs/PRINCIPLES_NO_RUNTIME_ERRORS.md)
+- [Pluggable Architecture](docs/PRINCIPLES_PLUGGABLE_ARCHITECTURE.md)
+- [Modular Design](docs/PRINCIPLES_MODULAR_DESIGN.md)
+- [Single Responsibility](docs/PRINCIPLES_SINGLE_RESPONSIBILITY.md)
+
+### Requirements
+- [Functional Requirements](docs/REQUIREMENTS_FUNCTIONAL.md)
+- [Non-Functional Requirements](docs/REQUIREMENTS_NON_FUNCTIONAL.md)
+  - [Security](docs/REQUIREMENTS_NON_FUNCTIONAL_SECURITY.md)
+  - [Observability](docs/REQUIREMENTS_NON_FUNCTIONAL_OBSERVABILITY.md)
+  - [Code Quality](docs/REQUIREMENTS_NON_FUNCTIONAL_CODE_QUALITY.md)
+  - [Logging](docs/REQUIREMENTS_NON_FUNCTIONAL_LOGGING.md)
+  - [Testing](docs/REQUIREMENTS_NON_FUNCTIONAL_TESTING.md)
+  - [Governance](docs/REQUIREMENTS_NON_FUNCTIONAL_GOVERNANCE.md)
+  - [Deployment](docs/REQUIREMENTS_NON_FUNCTIONAL_DEPLOYMENT.md)
+
+### Additional Resources
+- [Node Types Reference](docs/NODE_TYPES.md)
+- [Troubleshooting Guide](docs/TROUBLESHOOTING.md)
+- [Examples & Tutorials](docs/EXAMPLES.md)
+
 ## 🧪 Testing
 
 ```bash
@@ -438,14 +583,30 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🗺️ Roadmap
 
+### Completed ✅
+- [x] OpenTelemetry integration
+- [x] Prometheus metrics
+- [x] HTTP API server
+- [x] Health checks and probes
+- [x] Docker deployment
+- [x] Kubernetes deployment templates
+- [x] Distributed tracing
+
+### In Progress 🚧
+- [ ] Workflow persistence layer
+- [ ] Execution history API
+- [ ] Workflow versioning
+
+### Planned 📋
 - [ ] GraphQL API support
 - [ ] WebSocket-based real-time execution
-- [ ] Cloud deployment templates
 - [ ] More built-in node types
 - [ ] Visual debugging tools
 - [ ] Workflow templates marketplace
 - [ ] Multi-language expression support
-- [ ] Advanced analytics and monitoring
+- [ ] Circuit breaker pattern
+- [ ] Rate limiting
+- [ ] API authentication/authorization
 
 ---
 
