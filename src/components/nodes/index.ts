@@ -57,3 +57,4 @@ export { DeleteConfirmDialog } from './DeleteConfirmDialog';
 export { NodeWrapper } from './NodeWrapper';
 export { getNodeInfo, nodeInfoMap } from './nodeInfo';
 export type { NodeInfo } from './nodeInfo';
+export type { NodePropsWithOptions } from './nodeTypes';

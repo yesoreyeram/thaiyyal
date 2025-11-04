@@ -1,13 +1,10 @@
+import { NodePropsWithOptions } from "./nodeTypes";
 // This file contains all the remaining node implementations
 import { NodeProps, Handle, Position, useReactFlow } from "reactflow";
 import React from "react";
 import { NodeWrapper } from "./NodeWrapper";
 import { getNodeInfo } from "./nodeInfo";
 
-// Extended props to include onShowOptions
-type NodePropsWithOptions<T = Record<string, unknown>> = NodeProps<T> & {
-  onShowOptions?: (x: number, y: number) => void;
-};
 
 // ===== CONTROL FLOW NODES =====
 

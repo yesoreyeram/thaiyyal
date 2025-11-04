@@ -58,6 +58,7 @@ import {
   DeleteConfirmDialog,
   NodeWrapper,
   getNodeInfo,
+  NodePropsWithOptions,
 } from "../../components/nodes";
 import { AppNavBar } from "../../components/AppNavBar";
 import { WorkflowNavBar } from "../../components/WorkflowNavBar";
@@ -67,12 +68,6 @@ import { JSONPayloadModal } from "../../components/JSONPayloadModal";
 import { useRouter } from "next/navigation";
 
 type NodeData = Record<string, unknown>;
-
-// Extended props to include onShowOptions and onOpenInfo
-type NodePropsWithOptions = NodeProps<NodeData> & {
-  onShowOptions?: (x: number, y: number) => void;
-  onOpenInfo?: () => void;
-};
 
 // Higher-order component to add context menu and palette close to nodes
 const withContextMenu = (
