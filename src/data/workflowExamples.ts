@@ -7,7 +7,7 @@ export interface WorkflowExample {
   edges: unknown[];
 }
 
-export const workflowExamples: WorkflowExample[] = 
+export const workflowExamples: WorkflowExample[] =
 [
   {
     "id": "example-1",
@@ -22,13 +22,15 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "httpNode",
         "position": {
           "x": 100,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "url": "https://api.example.com/data",
+          "method": "GET",
+          "label": "API Request"
         }
       },
       {
@@ -39,7 +41,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Display Result"
         }
       }
     ],
@@ -64,24 +67,41 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "retryNode",
         "position": {
           "x": 100,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "max_attempts": 3,
+          "backoff_strategy": "exponential",
+          "initial_delay": "1s",
+          "label": "Retry Handler"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "httpNode",
         "position": {
-          "x": 400,
+          "x": 300,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "url": "https://api.example.com/data",
+          "method": "GET",
+          "label": "API Request"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 500,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -90,6 +110,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -106,24 +131,40 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "timeoutNode",
         "position": {
           "x": 100,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "timeout": "30s",
+          "timeout_action": "error",
+          "label": "Timeout Protection"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "httpNode",
         "position": {
-          "x": 400,
+          "x": 300,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "url": "https://api.example.com/data",
+          "method": "GET",
+          "label": "API Request"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 500,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -132,6 +173,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -150,22 +196,49 @@ export const workflowExamples: WorkflowExample[] =
         "id": "1",
         "type": "textInputNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "{\"name\": \"John\"}",
+          "label": "JSON Payload"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "parseNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "input_type": "JSON",
+          "label": "Parse JSON"
+        }
+      },
+      {
+        "id": "3",
+        "type": "httpNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "url": "https://api.example.com/users",
+          "method": "POST",
+          "label": "POST Request"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 650,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Response"
         }
       }
     ],
@@ -174,6 +247,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e3-4",
+        "source": "3",
+        "target": "4"
       }
     ]
   },
@@ -190,24 +273,52 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "httpNode",
         "position": {
           "x": 100,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "url": "https://auth.example.com/token",
+          "method": "POST",
+          "label": "Get Token"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "extractNode",
         "position": {
-          "x": 400,
+          "x": 300,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "field": "access_token",
+          "label": "Extract Token"
+        }
+      },
+      {
+        "id": "3",
+        "type": "variableNode",
+        "position": {
+          "x": 500,
+          "y": 100
+        },
+        "data": {
+          "var_name": "auth_token",
+          "var_op": "set",
+          "label": "Store Token"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 700,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Success"
         }
       }
     ],
@@ -216,6 +327,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e3-4",
+        "source": "3",
+        "target": "4"
       }
     ]
   },
@@ -232,24 +353,77 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "parallelNode",
         "position": {
           "x": 100,
-          "y": 100
+          "y": 150
         },
         "data": {
-          "text": "Input"
+          "max_concurrency": 3,
+          "label": "Parallel Execute"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "httpNode",
         "position": {
-          "x": 400,
-          "y": 100
+          "x": 300,
+          "y": 50
         },
         "data": {
-          "mode": "text"
+          "url": "https://api.example.com/endpoint1",
+          "method": "GET",
+          "label": "API 1"
+        }
+      },
+      {
+        "id": "3",
+        "type": "httpNode",
+        "position": {
+          "x": 300,
+          "y": 150
+        },
+        "data": {
+          "url": "https://api.example.com/endpoint2",
+          "method": "GET",
+          "label": "API 2"
+        }
+      },
+      {
+        "id": "4",
+        "type": "httpNode",
+        "position": {
+          "x": 300,
+          "y": 250
+        },
+        "data": {
+          "url": "https://api.example.com/endpoint3",
+          "method": "GET",
+          "label": "API 3"
+        }
+      },
+      {
+        "id": "5",
+        "type": "joinNode",
+        "position": {
+          "x": 500,
+          "y": 150
+        },
+        "data": {
+          "join_strategy": "all",
+          "label": "Join Results"
+        }
+      },
+      {
+        "id": "6",
+        "type": "vizNode",
+        "position": {
+          "x": 700,
+          "y": 150
+        },
+        "data": {
+          "mode": "text",
+          "label": "Display"
         }
       }
     ],
@@ -258,6 +432,36 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e1-3",
+        "source": "1",
+        "target": "3"
+      },
+      {
+        "id": "e1-4",
+        "source": "1",
+        "target": "4"
+      },
+      {
+        "id": "e2-5",
+        "source": "2",
+        "target": "5"
+      },
+      {
+        "id": "e3-5",
+        "source": "3",
+        "target": "5"
+      },
+      {
+        "id": "e4-5",
+        "source": "4",
+        "target": "5"
+      },
+      {
+        "id": "e5-6",
+        "source": "5",
+        "target": "6"
       }
     ]
   },
@@ -274,24 +478,53 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "retryNode",
         "position": {
           "x": 100,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "max_attempts": 5,
+          "backoff_strategy": "exponential",
+          "initial_delay": "2s",
+          "label": "Retry Logic"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "delayNode",
         "position": {
-          "x": 400,
+          "x": 300,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "duration": "1s",
+          "label": "Delay"
+        }
+      },
+      {
+        "id": "3",
+        "type": "httpNode",
+        "position": {
+          "x": 500,
+          "y": 100
+        },
+        "data": {
+          "url": "https://api.example.com/data",
+          "method": "GET",
+          "label": "API Request"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 700,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -300,6 +533,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e3-4",
+        "source": "3",
+        "target": "4"
       }
     ]
   },
@@ -316,13 +559,15 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "httpNode",
         "position": {
           "x": 100,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "url": "https://api.example.com/data",
+          "method": "GET",
+          "label": "API Request"
         }
       },
       {
@@ -333,7 +578,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Display Result"
         }
       }
     ],
@@ -358,13 +604,15 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "httpNode",
         "position": {
           "x": 100,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "url": "https://api.example.com/data",
+          "method": "GET",
+          "label": "API Request"
         }
       },
       {
@@ -375,7 +623,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Display Result"
         }
       }
     ],
@@ -400,24 +649,65 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "cacheNode",
         "position": {
           "x": 100,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "cache_op": "get",
+          "cache_key": "api_data",
+          "label": "Check Cache"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "conditionNode",
         "position": {
-          "x": 400,
+          "x": 300,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "condition": "== null",
+          "label": "Cache Miss?"
+        }
+      },
+      {
+        "id": "3",
+        "type": "httpNode",
+        "position": {
+          "x": 500,
+          "y": 50
+        },
+        "data": {
+          "url": "https://api.example.com/data",
+          "method": "GET",
+          "label": "Fetch from API"
+        }
+      },
+      {
+        "id": "4",
+        "type": "cacheNode",
+        "position": {
+          "x": 700,
+          "y": 50
+        },
+        "data": {
+          "cache_op": "set",
+          "cache_key": "api_data",
+          "label": "Store in Cache"
+        }
+      },
+      {
+        "id": "5",
+        "type": "vizNode",
+        "position": {
+          "x": 900,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -426,6 +716,26 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e3-4",
+        "source": "3",
+        "target": "4"
+      },
+      {
+        "id": "e4-5",
+        "source": "4",
+        "target": "5"
+      },
+      {
+        "id": "e2-5",
+        "source": "2",
+        "target": "5"
       }
     ]
   },
@@ -442,13 +752,15 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "httpNode",
         "position": {
           "x": 100,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "url": "https://api.example.com/data",
+          "method": "GET",
+          "label": "API Request"
         }
       },
       {
@@ -459,7 +771,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Display Result"
         }
       }
     ],
@@ -484,13 +797,15 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "httpNode",
         "position": {
           "x": 100,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "url": "https://api.example.com/data",
+          "method": "GET",
+          "label": "API Request"
         }
       },
       {
@@ -501,7 +816,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Display Result"
         }
       }
     ],
@@ -526,13 +842,15 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "httpNode",
         "position": {
           "x": 100,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "url": "https://api.example.com/data",
+          "method": "GET",
+          "label": "API Request"
         }
       },
       {
@@ -543,7 +861,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Display Result"
         }
       }
     ],
@@ -568,24 +887,39 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "tryCatchNode",
         "position": {
           "x": 100,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "continue_on_error": true,
+          "label": "Try-Catch"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "httpNode",
         "position": {
-          "x": 400,
+          "x": 300,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "url": "https://api.example.com/data",
+          "method": "GET",
+          "label": "API Request"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 500,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -594,6 +928,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -610,13 +949,15 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "httpNode",
         "position": {
           "x": 100,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "url": "https://api.example.com/data",
+          "method": "GET",
+          "label": "API Request"
         }
       },
       {
@@ -627,7 +968,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Display Result"
         }
       }
     ],
@@ -652,13 +994,15 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "httpNode",
         "position": {
           "x": 100,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "url": "https://api.example.com/data",
+          "method": "GET",
+          "label": "API Request"
         }
       },
       {
@@ -669,7 +1013,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Display Result"
         }
       }
     ],
@@ -694,13 +1039,15 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "httpNode",
         "position": {
           "x": 100,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "url": "https://api.example.com/data",
+          "method": "GET",
+          "label": "API Request"
         }
       },
       {
@@ -711,7 +1058,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Display Result"
         }
       }
     ],
@@ -736,13 +1084,15 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "httpNode",
         "position": {
           "x": 100,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "url": "https://api.example.com/data",
+          "method": "GET",
+          "label": "API Request"
         }
       },
       {
@@ -753,7 +1103,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Display Result"
         }
       }
     ],
@@ -778,13 +1129,15 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "httpNode",
         "position": {
           "x": 100,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "url": "https://api.example.com/data",
+          "method": "GET",
+          "label": "API Request"
         }
       },
       {
@@ -795,7 +1148,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Display Result"
         }
       }
     ],
@@ -820,13 +1174,15 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "httpNode",
         "position": {
           "x": 100,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "url": "https://api.example.com/data",
+          "method": "GET",
+          "label": "API Request"
         }
       },
       {
@@ -837,7 +1193,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Display Result"
         }
       }
     ],
@@ -862,24 +1219,40 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "rangeNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "start": 1,
+          "end": 10,
+          "step": 1,
+          "label": "Data Input"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "mapNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "expression": "item * 2",
+          "label": "Transform"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -888,6 +1261,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -904,24 +1282,40 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "rangeNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "start": 1,
+          "end": 10,
+          "step": 1,
+          "label": "Data Input"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "mapNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "expression": "item * 2",
+          "label": "Transform"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -930,6 +1324,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -946,24 +1345,40 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "rangeNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "start": 1,
+          "end": 10,
+          "step": 1,
+          "label": "Data Input"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "mapNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "expression": "item * 2",
+          "label": "Transform"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -972,6 +1387,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -988,24 +1408,40 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "rangeNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "start": 1,
+          "end": 10,
+          "step": 1,
+          "label": "Data Input"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "mapNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "expression": "item * 2",
+          "label": "Transform"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -1014,6 +1450,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -1030,24 +1471,40 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "rangeNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "start": 1,
+          "end": 10,
+          "step": 1,
+          "label": "Data Input"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "mapNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "expression": "item * 2",
+          "label": "Transform"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -1056,6 +1513,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -1072,24 +1534,40 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "rangeNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "start": 1,
+          "end": 10,
+          "step": 1,
+          "label": "Data Input"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "mapNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "expression": "item * 2",
+          "label": "Transform"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -1098,6 +1576,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -1114,24 +1597,40 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "rangeNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "start": 1,
+          "end": 10,
+          "step": 1,
+          "label": "Data Input"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "mapNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "expression": "item * 2",
+          "label": "Transform"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -1140,6 +1639,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -1156,24 +1660,40 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "rangeNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "start": 1,
+          "end": 10,
+          "step": 1,
+          "label": "Data Input"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "mapNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "expression": "item * 2",
+          "label": "Transform"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -1182,6 +1702,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -1198,24 +1723,40 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "rangeNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "start": 1,
+          "end": 10,
+          "step": 1,
+          "label": "Data Input"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "mapNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "expression": "item * 2",
+          "label": "Transform"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -1224,6 +1765,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -1240,24 +1786,40 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "rangeNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "start": 1,
+          "end": 10,
+          "step": 1,
+          "label": "Data Input"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "mapNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "expression": "item * 2",
+          "label": "Transform"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -1266,6 +1828,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -1282,24 +1849,40 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "rangeNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "start": 1,
+          "end": 10,
+          "step": 1,
+          "label": "Data Input"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "mapNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "expression": "item * 2",
+          "label": "Transform"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -1308,6 +1891,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -1324,24 +1912,40 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "rangeNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "start": 1,
+          "end": 10,
+          "step": 1,
+          "label": "Data Input"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "mapNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "expression": "item * 2",
+          "label": "Transform"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -1350,6 +1954,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -1366,24 +1975,40 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "rangeNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "start": 1,
+          "end": 10,
+          "step": 1,
+          "label": "Data Input"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "mapNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "expression": "item * 2",
+          "label": "Transform"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -1392,6 +2017,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -1408,24 +2038,40 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "rangeNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "start": 1,
+          "end": 10,
+          "step": 1,
+          "label": "Data Input"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "mapNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "expression": "item * 2",
+          "label": "Transform"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -1434,6 +2080,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -1450,24 +2101,40 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "rangeNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "start": 1,
+          "end": 10,
+          "step": 1,
+          "label": "Data Input"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "mapNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "expression": "item * 2",
+          "label": "Transform"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -1476,6 +2143,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -1492,24 +2164,40 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "rangeNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "start": 1,
+          "end": 10,
+          "step": 1,
+          "label": "Data Input"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "mapNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "expression": "item * 2",
+          "label": "Transform"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -1518,6 +2206,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -1534,24 +2227,40 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "rangeNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "start": 1,
+          "end": 10,
+          "step": 1,
+          "label": "Data Input"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "mapNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "expression": "item * 2",
+          "label": "Transform"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -1560,6 +2269,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -1576,24 +2290,40 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "rangeNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "start": 1,
+          "end": 10,
+          "step": 1,
+          "label": "Data Input"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "mapNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "expression": "item * 2",
+          "label": "Transform"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -1602,6 +2332,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -1618,24 +2353,40 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "rangeNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "start": 1,
+          "end": 10,
+          "step": 1,
+          "label": "Data Input"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "mapNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "expression": "item * 2",
+          "label": "Transform"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -1644,6 +2395,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -1660,24 +2416,40 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "rangeNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "start": 1,
+          "end": 10,
+          "step": 1,
+          "label": "Data Input"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "mapNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "expression": "item * 2",
+          "label": "Transform"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -1686,6 +2458,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -1702,24 +2479,50 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "numberNode",
         "position": {
-          "x": 100,
-          "y": 100
+          "x": 50,
+          "y": 150
         },
         "data": {
-          "text": "Input"
+          "value": 10,
+          "label": "Input"
         }
       },
       {
         "id": "2",
+        "type": "conditionNode",
+        "position": {
+          "x": 200,
+          "y": 150
+        },
+        "data": {
+          "condition": "> 5",
+          "label": "Check Condition"
+        }
+      },
+      {
+        "id": "3",
         "type": "vizNode",
         "position": {
           "x": 400,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "True Path"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 400,
+          "y": 200
+        },
+        "data": {
+          "mode": "text",
+          "label": "False Path"
         }
       }
     ],
@@ -1728,6 +2531,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e2-4",
+        "source": "2",
+        "target": "4"
       }
     ]
   },
@@ -1744,24 +2557,50 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "numberNode",
         "position": {
-          "x": 100,
-          "y": 100
+          "x": 50,
+          "y": 150
         },
         "data": {
-          "text": "Input"
+          "value": 10,
+          "label": "Input"
         }
       },
       {
         "id": "2",
+        "type": "conditionNode",
+        "position": {
+          "x": 200,
+          "y": 150
+        },
+        "data": {
+          "condition": "> 5",
+          "label": "Check Condition"
+        }
+      },
+      {
+        "id": "3",
         "type": "vizNode",
         "position": {
           "x": 400,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "True Path"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 400,
+          "y": 200
+        },
+        "data": {
+          "mode": "text",
+          "label": "False Path"
         }
       }
     ],
@@ -1770,6 +2609,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e2-4",
+        "source": "2",
+        "target": "4"
       }
     ]
   },
@@ -1786,24 +2635,50 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "numberNode",
         "position": {
-          "x": 100,
-          "y": 100
+          "x": 50,
+          "y": 150
         },
         "data": {
-          "text": "Input"
+          "value": 10,
+          "label": "Input"
         }
       },
       {
         "id": "2",
+        "type": "conditionNode",
+        "position": {
+          "x": 200,
+          "y": 150
+        },
+        "data": {
+          "condition": "> 5",
+          "label": "Check Condition"
+        }
+      },
+      {
+        "id": "3",
         "type": "vizNode",
         "position": {
           "x": 400,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "True Path"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 400,
+          "y": 200
+        },
+        "data": {
+          "mode": "text",
+          "label": "False Path"
         }
       }
     ],
@@ -1812,6 +2687,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e2-4",
+        "source": "2",
+        "target": "4"
       }
     ]
   },
@@ -1828,24 +2713,50 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "numberNode",
         "position": {
-          "x": 100,
-          "y": 100
+          "x": 50,
+          "y": 150
         },
         "data": {
-          "text": "Input"
+          "value": 10,
+          "label": "Input"
         }
       },
       {
         "id": "2",
+        "type": "conditionNode",
+        "position": {
+          "x": 200,
+          "y": 150
+        },
+        "data": {
+          "condition": "> 5",
+          "label": "Check Condition"
+        }
+      },
+      {
+        "id": "3",
         "type": "vizNode",
         "position": {
           "x": 400,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "True Path"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 400,
+          "y": 200
+        },
+        "data": {
+          "mode": "text",
+          "label": "False Path"
         }
       }
     ],
@@ -1854,6 +2765,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e2-4",
+        "source": "2",
+        "target": "4"
       }
     ]
   },
@@ -1870,24 +2791,50 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "numberNode",
         "position": {
-          "x": 100,
-          "y": 100
+          "x": 50,
+          "y": 150
         },
         "data": {
-          "text": "Input"
+          "value": 10,
+          "label": "Input"
         }
       },
       {
         "id": "2",
+        "type": "conditionNode",
+        "position": {
+          "x": 200,
+          "y": 150
+        },
+        "data": {
+          "condition": "> 5",
+          "label": "Check Condition"
+        }
+      },
+      {
+        "id": "3",
         "type": "vizNode",
         "position": {
           "x": 400,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "True Path"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 400,
+          "y": 200
+        },
+        "data": {
+          "mode": "text",
+          "label": "False Path"
         }
       }
     ],
@@ -1896,6 +2843,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e2-4",
+        "source": "2",
+        "target": "4"
       }
     ]
   },
@@ -1912,24 +2869,50 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "numberNode",
         "position": {
-          "x": 100,
-          "y": 100
+          "x": 50,
+          "y": 150
         },
         "data": {
-          "text": "Input"
+          "value": 10,
+          "label": "Input"
         }
       },
       {
         "id": "2",
+        "type": "conditionNode",
+        "position": {
+          "x": 200,
+          "y": 150
+        },
+        "data": {
+          "condition": "> 5",
+          "label": "Check Condition"
+        }
+      },
+      {
+        "id": "3",
         "type": "vizNode",
         "position": {
           "x": 400,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "True Path"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 400,
+          "y": 200
+        },
+        "data": {
+          "mode": "text",
+          "label": "False Path"
         }
       }
     ],
@@ -1938,6 +2921,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e2-4",
+        "source": "2",
+        "target": "4"
       }
     ]
   },
@@ -1954,24 +2947,50 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "numberNode",
         "position": {
-          "x": 100,
-          "y": 100
+          "x": 50,
+          "y": 150
         },
         "data": {
-          "text": "Input"
+          "value": 10,
+          "label": "Input"
         }
       },
       {
         "id": "2",
+        "type": "conditionNode",
+        "position": {
+          "x": 200,
+          "y": 150
+        },
+        "data": {
+          "condition": "> 5",
+          "label": "Check Condition"
+        }
+      },
+      {
+        "id": "3",
         "type": "vizNode",
         "position": {
           "x": 400,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "True Path"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 400,
+          "y": 200
+        },
+        "data": {
+          "mode": "text",
+          "label": "False Path"
         }
       }
     ],
@@ -1980,6 +2999,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e2-4",
+        "source": "2",
+        "target": "4"
       }
     ]
   },
@@ -1996,24 +3025,50 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "numberNode",
         "position": {
-          "x": 100,
-          "y": 100
+          "x": 50,
+          "y": 150
         },
         "data": {
-          "text": "Input"
+          "value": 10,
+          "label": "Input"
         }
       },
       {
         "id": "2",
+        "type": "conditionNode",
+        "position": {
+          "x": 200,
+          "y": 150
+        },
+        "data": {
+          "condition": "> 5",
+          "label": "Check Condition"
+        }
+      },
+      {
+        "id": "3",
         "type": "vizNode",
         "position": {
           "x": 400,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "True Path"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 400,
+          "y": 200
+        },
+        "data": {
+          "mode": "text",
+          "label": "False Path"
         }
       }
     ],
@@ -2022,6 +3077,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e2-4",
+        "source": "2",
+        "target": "4"
       }
     ]
   },
@@ -2038,24 +3103,50 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "numberNode",
         "position": {
-          "x": 100,
-          "y": 100
+          "x": 50,
+          "y": 150
         },
         "data": {
-          "text": "Input"
+          "value": 10,
+          "label": "Input"
         }
       },
       {
         "id": "2",
+        "type": "conditionNode",
+        "position": {
+          "x": 200,
+          "y": 150
+        },
+        "data": {
+          "condition": "> 5",
+          "label": "Check Condition"
+        }
+      },
+      {
+        "id": "3",
         "type": "vizNode",
         "position": {
           "x": 400,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "True Path"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 400,
+          "y": 200
+        },
+        "data": {
+          "mode": "text",
+          "label": "False Path"
         }
       }
     ],
@@ -2064,6 +3155,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e2-4",
+        "source": "2",
+        "target": "4"
       }
     ]
   },
@@ -2080,24 +3181,50 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "numberNode",
         "position": {
-          "x": 100,
-          "y": 100
+          "x": 50,
+          "y": 150
         },
         "data": {
-          "text": "Input"
+          "value": 10,
+          "label": "Input"
         }
       },
       {
         "id": "2",
+        "type": "conditionNode",
+        "position": {
+          "x": 200,
+          "y": 150
+        },
+        "data": {
+          "condition": "> 5",
+          "label": "Check Condition"
+        }
+      },
+      {
+        "id": "3",
         "type": "vizNode",
         "position": {
           "x": 400,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "True Path"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 400,
+          "y": 200
+        },
+        "data": {
+          "mode": "text",
+          "label": "False Path"
         }
       }
     ],
@@ -2106,6 +3233,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e2-4",
+        "source": "2",
+        "target": "4"
       }
     ]
   },
@@ -2122,24 +3259,50 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "numberNode",
         "position": {
-          "x": 100,
-          "y": 100
+          "x": 50,
+          "y": 150
         },
         "data": {
-          "text": "Input"
+          "value": 10,
+          "label": "Input"
         }
       },
       {
         "id": "2",
+        "type": "conditionNode",
+        "position": {
+          "x": 200,
+          "y": 150
+        },
+        "data": {
+          "condition": "> 5",
+          "label": "Check Condition"
+        }
+      },
+      {
+        "id": "3",
         "type": "vizNode",
         "position": {
           "x": 400,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "True Path"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 400,
+          "y": 200
+        },
+        "data": {
+          "mode": "text",
+          "label": "False Path"
         }
       }
     ],
@@ -2148,6 +3311,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e2-4",
+        "source": "2",
+        "target": "4"
       }
     ]
   },
@@ -2164,24 +3337,50 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "numberNode",
         "position": {
-          "x": 100,
-          "y": 100
+          "x": 50,
+          "y": 150
         },
         "data": {
-          "text": "Input"
+          "value": 10,
+          "label": "Input"
         }
       },
       {
         "id": "2",
+        "type": "conditionNode",
+        "position": {
+          "x": 200,
+          "y": 150
+        },
+        "data": {
+          "condition": "> 5",
+          "label": "Check Condition"
+        }
+      },
+      {
+        "id": "3",
         "type": "vizNode",
         "position": {
           "x": 400,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "True Path"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 400,
+          "y": 200
+        },
+        "data": {
+          "mode": "text",
+          "label": "False Path"
         }
       }
     ],
@@ -2190,6 +3389,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e2-4",
+        "source": "2",
+        "target": "4"
       }
     ]
   },
@@ -2206,24 +3415,50 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "numberNode",
         "position": {
-          "x": 100,
-          "y": 100
+          "x": 50,
+          "y": 150
         },
         "data": {
-          "text": "Input"
+          "value": 10,
+          "label": "Input"
         }
       },
       {
         "id": "2",
+        "type": "conditionNode",
+        "position": {
+          "x": 200,
+          "y": 150
+        },
+        "data": {
+          "condition": "> 5",
+          "label": "Check Condition"
+        }
+      },
+      {
+        "id": "3",
         "type": "vizNode",
         "position": {
           "x": 400,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "True Path"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 400,
+          "y": 200
+        },
+        "data": {
+          "mode": "text",
+          "label": "False Path"
         }
       }
     ],
@@ -2232,6 +3467,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e2-4",
+        "source": "2",
+        "target": "4"
       }
     ]
   },
@@ -2248,24 +3493,50 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "numberNode",
         "position": {
-          "x": 100,
-          "y": 100
+          "x": 50,
+          "y": 150
         },
         "data": {
-          "text": "Input"
+          "value": 10,
+          "label": "Input"
         }
       },
       {
         "id": "2",
+        "type": "conditionNode",
+        "position": {
+          "x": 200,
+          "y": 150
+        },
+        "data": {
+          "condition": "> 5",
+          "label": "Check Condition"
+        }
+      },
+      {
+        "id": "3",
         "type": "vizNode",
         "position": {
           "x": 400,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "True Path"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 400,
+          "y": 200
+        },
+        "data": {
+          "mode": "text",
+          "label": "False Path"
         }
       }
     ],
@@ -2274,6 +3545,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e2-4",
+        "source": "2",
+        "target": "4"
       }
     ]
   },
@@ -2290,24 +3571,50 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "numberNode",
         "position": {
-          "x": 100,
-          "y": 100
+          "x": 50,
+          "y": 150
         },
         "data": {
-          "text": "Input"
+          "value": 10,
+          "label": "Input"
         }
       },
       {
         "id": "2",
+        "type": "conditionNode",
+        "position": {
+          "x": 200,
+          "y": 150
+        },
+        "data": {
+          "condition": "> 5",
+          "label": "Check Condition"
+        }
+      },
+      {
+        "id": "3",
         "type": "vizNode",
         "position": {
           "x": 400,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "True Path"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 400,
+          "y": 200
+        },
+        "data": {
+          "mode": "text",
+          "label": "False Path"
         }
       }
     ],
@@ -2316,6 +3623,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e2-4",
+        "source": "2",
+        "target": "4"
       }
     ]
   },
@@ -2332,24 +3649,50 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "numberNode",
         "position": {
-          "x": 100,
-          "y": 100
+          "x": 50,
+          "y": 150
         },
         "data": {
-          "text": "Input"
+          "value": 10,
+          "label": "Input"
         }
       },
       {
         "id": "2",
+        "type": "conditionNode",
+        "position": {
+          "x": 200,
+          "y": 150
+        },
+        "data": {
+          "condition": "> 5",
+          "label": "Check Condition"
+        }
+      },
+      {
+        "id": "3",
         "type": "vizNode",
         "position": {
           "x": 400,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "True Path"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 400,
+          "y": 200
+        },
+        "data": {
+          "mode": "text",
+          "label": "False Path"
         }
       }
     ],
@@ -2358,6 +3701,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e2-4",
+        "source": "2",
+        "target": "4"
       }
     ]
   },
@@ -2374,24 +3727,50 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "numberNode",
         "position": {
-          "x": 100,
-          "y": 100
+          "x": 50,
+          "y": 150
         },
         "data": {
-          "text": "Input"
+          "value": 10,
+          "label": "Input"
         }
       },
       {
         "id": "2",
+        "type": "conditionNode",
+        "position": {
+          "x": 200,
+          "y": 150
+        },
+        "data": {
+          "condition": "> 5",
+          "label": "Check Condition"
+        }
+      },
+      {
+        "id": "3",
         "type": "vizNode",
         "position": {
           "x": 400,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "True Path"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 400,
+          "y": 200
+        },
+        "data": {
+          "mode": "text",
+          "label": "False Path"
         }
       }
     ],
@@ -2400,6 +3779,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e2-4",
+        "source": "2",
+        "target": "4"
       }
     ]
   },
@@ -2416,24 +3805,50 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "numberNode",
         "position": {
-          "x": 100,
-          "y": 100
+          "x": 50,
+          "y": 150
         },
         "data": {
-          "text": "Input"
+          "value": 10,
+          "label": "Input"
         }
       },
       {
         "id": "2",
+        "type": "conditionNode",
+        "position": {
+          "x": 200,
+          "y": 150
+        },
+        "data": {
+          "condition": "> 5",
+          "label": "Check Condition"
+        }
+      },
+      {
+        "id": "3",
         "type": "vizNode",
         "position": {
           "x": 400,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "True Path"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 400,
+          "y": 200
+        },
+        "data": {
+          "mode": "text",
+          "label": "False Path"
         }
       }
     ],
@@ -2442,6 +3857,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e2-4",
+        "source": "2",
+        "target": "4"
       }
     ]
   },
@@ -2458,24 +3883,50 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "numberNode",
         "position": {
-          "x": 100,
-          "y": 100
+          "x": 50,
+          "y": 150
         },
         "data": {
-          "text": "Input"
+          "value": 10,
+          "label": "Input"
         }
       },
       {
         "id": "2",
+        "type": "conditionNode",
+        "position": {
+          "x": 200,
+          "y": 150
+        },
+        "data": {
+          "condition": "> 5",
+          "label": "Check Condition"
+        }
+      },
+      {
+        "id": "3",
         "type": "vizNode",
         "position": {
           "x": 400,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "True Path"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 400,
+          "y": 200
+        },
+        "data": {
+          "mode": "text",
+          "label": "False Path"
         }
       }
     ],
@@ -2484,6 +3935,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e2-4",
+        "source": "2",
+        "target": "4"
       }
     ]
   },
@@ -2500,24 +3961,50 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "numberNode",
         "position": {
-          "x": 100,
-          "y": 100
+          "x": 50,
+          "y": 150
         },
         "data": {
-          "text": "Input"
+          "value": 10,
+          "label": "Input"
         }
       },
       {
         "id": "2",
+        "type": "conditionNode",
+        "position": {
+          "x": 200,
+          "y": 150
+        },
+        "data": {
+          "condition": "> 5",
+          "label": "Check Condition"
+        }
+      },
+      {
+        "id": "3",
         "type": "vizNode",
         "position": {
           "x": 400,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "True Path"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 400,
+          "y": 200
+        },
+        "data": {
+          "mode": "text",
+          "label": "False Path"
         }
       }
     ],
@@ -2526,6 +4013,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e2-4",
+        "source": "2",
+        "target": "4"
       }
     ]
   },
@@ -2542,24 +4039,52 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "numberNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "value": 42,
+          "label": "Value"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "variableNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "var_name": "myVar",
+          "var_op": "set",
+          "label": "Store"
+        }
+      },
+      {
+        "id": "3",
+        "type": "variableNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "var_name": "myVar",
+          "var_op": "get",
+          "label": "Retrieve"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 650,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Display"
         }
       }
     ],
@@ -2568,6 +4093,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e3-4",
+        "source": "3",
+        "target": "4"
       }
     ]
   },
@@ -2584,24 +4119,52 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "numberNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "value": 42,
+          "label": "Value"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "variableNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "var_name": "myVar",
+          "var_op": "set",
+          "label": "Store"
+        }
+      },
+      {
+        "id": "3",
+        "type": "variableNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "var_name": "myVar",
+          "var_op": "get",
+          "label": "Retrieve"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 650,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Display"
         }
       }
     ],
@@ -2610,6 +4173,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e3-4",
+        "source": "3",
+        "target": "4"
       }
     ]
   },
@@ -2626,24 +4199,52 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "numberNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "value": 42,
+          "label": "Value"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "variableNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "var_name": "myVar",
+          "var_op": "set",
+          "label": "Store"
+        }
+      },
+      {
+        "id": "3",
+        "type": "variableNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "var_name": "myVar",
+          "var_op": "get",
+          "label": "Retrieve"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 650,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Display"
         }
       }
     ],
@@ -2652,6 +4253,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e3-4",
+        "source": "3",
+        "target": "4"
       }
     ]
   },
@@ -2668,24 +4279,52 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "numberNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "value": 42,
+          "label": "Value"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "variableNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "var_name": "myVar",
+          "var_op": "set",
+          "label": "Store"
+        }
+      },
+      {
+        "id": "3",
+        "type": "variableNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "var_name": "myVar",
+          "var_op": "get",
+          "label": "Retrieve"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 650,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Display"
         }
       }
     ],
@@ -2694,6 +4333,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e3-4",
+        "source": "3",
+        "target": "4"
       }
     ]
   },
@@ -2710,24 +4359,52 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "numberNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "value": 42,
+          "label": "Value"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "variableNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "var_name": "myVar",
+          "var_op": "set",
+          "label": "Store"
+        }
+      },
+      {
+        "id": "3",
+        "type": "variableNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "var_name": "myVar",
+          "var_op": "get",
+          "label": "Retrieve"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 650,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Display"
         }
       }
     ],
@@ -2736,6 +4413,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e3-4",
+        "source": "3",
+        "target": "4"
       }
     ]
   },
@@ -2752,24 +4439,52 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "numberNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "value": 42,
+          "label": "Value"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "variableNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "var_name": "myVar",
+          "var_op": "set",
+          "label": "Store"
+        }
+      },
+      {
+        "id": "3",
+        "type": "variableNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "var_name": "myVar",
+          "var_op": "get",
+          "label": "Retrieve"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 650,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Display"
         }
       }
     ],
@@ -2778,6 +4493,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e3-4",
+        "source": "3",
+        "target": "4"
       }
     ]
   },
@@ -2794,24 +4519,52 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "numberNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "value": 42,
+          "label": "Value"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "variableNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "var_name": "myVar",
+          "var_op": "set",
+          "label": "Store"
+        }
+      },
+      {
+        "id": "3",
+        "type": "variableNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "var_name": "myVar",
+          "var_op": "get",
+          "label": "Retrieve"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 650,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Display"
         }
       }
     ],
@@ -2820,6 +4573,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e3-4",
+        "source": "3",
+        "target": "4"
       }
     ]
   },
@@ -2836,24 +4599,52 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "numberNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "value": 42,
+          "label": "Value"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "variableNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "var_name": "myVar",
+          "var_op": "set",
+          "label": "Store"
+        }
+      },
+      {
+        "id": "3",
+        "type": "variableNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "var_name": "myVar",
+          "var_op": "get",
+          "label": "Retrieve"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 650,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Display"
         }
       }
     ],
@@ -2862,6 +4653,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e3-4",
+        "source": "3",
+        "target": "4"
       }
     ]
   },
@@ -2878,24 +4679,52 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "numberNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "value": 42,
+          "label": "Value"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "variableNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "var_name": "myVar",
+          "var_op": "set",
+          "label": "Store"
+        }
+      },
+      {
+        "id": "3",
+        "type": "variableNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "var_name": "myVar",
+          "var_op": "get",
+          "label": "Retrieve"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 650,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Display"
         }
       }
     ],
@@ -2904,6 +4733,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e3-4",
+        "source": "3",
+        "target": "4"
       }
     ]
   },
@@ -2920,24 +4759,52 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "numberNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "value": 42,
+          "label": "Value"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "variableNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "var_name": "myVar",
+          "var_op": "set",
+          "label": "Store"
+        }
+      },
+      {
+        "id": "3",
+        "type": "variableNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "var_name": "myVar",
+          "var_op": "get",
+          "label": "Retrieve"
+        }
+      },
+      {
+        "id": "4",
+        "type": "vizNode",
+        "position": {
+          "x": 650,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Display"
         }
       }
     ],
@@ -2946,6 +4813,16 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
+      },
+      {
+        "id": "e3-4",
+        "source": "3",
+        "target": "4"
       }
     ]
   },
@@ -2964,22 +4841,36 @@ export const workflowExamples: WorkflowExample[] =
         "id": "1",
         "type": "textInputNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "hello world",
+          "label": "Input Text"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "textOpNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "text_op": "uppercase",
+          "label": "Transform"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -2988,6 +4879,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -3006,22 +4902,36 @@ export const workflowExamples: WorkflowExample[] =
         "id": "1",
         "type": "textInputNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "hello world",
+          "label": "Input Text"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "textOpNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "text_op": "uppercase",
+          "label": "Transform"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -3030,6 +4940,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -3048,22 +4963,36 @@ export const workflowExamples: WorkflowExample[] =
         "id": "1",
         "type": "textInputNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "hello world",
+          "label": "Input Text"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "textOpNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "text_op": "uppercase",
+          "label": "Transform"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -3072,6 +5001,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -3090,22 +5024,36 @@ export const workflowExamples: WorkflowExample[] =
         "id": "1",
         "type": "textInputNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "hello world",
+          "label": "Input Text"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "textOpNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "text_op": "uppercase",
+          "label": "Transform"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -3114,6 +5062,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -3132,22 +5085,36 @@ export const workflowExamples: WorkflowExample[] =
         "id": "1",
         "type": "textInputNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "hello world",
+          "label": "Input Text"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "textOpNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "text_op": "uppercase",
+          "label": "Transform"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -3156,6 +5123,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -3174,22 +5146,36 @@ export const workflowExamples: WorkflowExample[] =
         "id": "1",
         "type": "textInputNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "hello world",
+          "label": "Input Text"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "textOpNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "text_op": "uppercase",
+          "label": "Transform"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -3198,6 +5184,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -3216,22 +5207,36 @@ export const workflowExamples: WorkflowExample[] =
         "id": "1",
         "type": "textInputNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "hello world",
+          "label": "Input Text"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "textOpNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "text_op": "uppercase",
+          "label": "Transform"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -3240,6 +5245,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -3258,22 +5268,36 @@ export const workflowExamples: WorkflowExample[] =
         "id": "1",
         "type": "textInputNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "hello world",
+          "label": "Input Text"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "textOpNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "text_op": "uppercase",
+          "label": "Transform"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -3282,6 +5306,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -3300,22 +5329,36 @@ export const workflowExamples: WorkflowExample[] =
         "id": "1",
         "type": "textInputNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "hello world",
+          "label": "Input Text"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "textOpNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "text_op": "uppercase",
+          "label": "Transform"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -3324,6 +5367,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -3342,22 +5390,36 @@ export const workflowExamples: WorkflowExample[] =
         "id": "1",
         "type": "textInputNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "hello world",
+          "label": "Input Text"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "textOpNode",
         "position": {
-          "x": 400,
+          "x": 250,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "text_op": "uppercase",
+          "label": "Transform"
+        }
+      },
+      {
+        "id": "3",
+        "type": "vizNode",
+        "position": {
+          "x": 450,
+          "y": 100
+        },
+        "data": {
+          "mode": "text",
+          "label": "Result"
         }
       }
     ],
@@ -3366,6 +5428,11 @@ export const workflowExamples: WorkflowExample[] =
         "id": "e1-2",
         "source": "1",
         "target": "2"
+      },
+      {
+        "id": "e2-3",
+        "source": "2",
+        "target": "3"
       }
     ]
   },
@@ -3382,24 +5449,30 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "rangeNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "start": 1,
+          "end": 10,
+          "step": 1,
+          "label": "Data"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "barChartNode",
         "position": {
-          "x": 400,
+          "x": 300,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "orientation": "vertical",
+          "bar_color": "#3b82f6",
+          "show_values": true,
+          "label": "Chart"
         }
       }
     ],
@@ -3424,24 +5497,30 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "rangeNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "start": 1,
+          "end": 10,
+          "step": 1,
+          "label": "Data"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "barChartNode",
         "position": {
-          "x": 400,
+          "x": 300,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "orientation": "vertical",
+          "bar_color": "#3b82f6",
+          "show_values": true,
+          "label": "Chart"
         }
       }
     ],
@@ -3466,24 +5545,30 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "rangeNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "start": 1,
+          "end": 10,
+          "step": 1,
+          "label": "Data"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "barChartNode",
         "position": {
-          "x": 400,
+          "x": 300,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "orientation": "vertical",
+          "bar_color": "#3b82f6",
+          "show_values": true,
+          "label": "Chart"
         }
       }
     ],
@@ -3508,24 +5593,30 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "rangeNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "start": 1,
+          "end": 10,
+          "step": 1,
+          "label": "Data"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "barChartNode",
         "position": {
-          "x": 400,
+          "x": 300,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "orientation": "vertical",
+          "bar_color": "#3b82f6",
+          "show_values": true,
+          "label": "Chart"
         }
       }
     ],
@@ -3550,24 +5641,30 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "rangeNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "start": 1,
+          "end": 10,
+          "step": 1,
+          "label": "Data"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "barChartNode",
         "position": {
-          "x": 400,
+          "x": 300,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "orientation": "vertical",
+          "bar_color": "#3b82f6",
+          "show_values": true,
+          "label": "Chart"
         }
       }
     ],
@@ -3592,24 +5689,30 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "rangeNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "start": 1,
+          "end": 10,
+          "step": 1,
+          "label": "Data"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "barChartNode",
         "position": {
-          "x": 400,
+          "x": 300,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "orientation": "vertical",
+          "bar_color": "#3b82f6",
+          "show_values": true,
+          "label": "Chart"
         }
       }
     ],
@@ -3634,24 +5737,30 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "rangeNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "start": 1,
+          "end": 10,
+          "step": 1,
+          "label": "Data"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "barChartNode",
         "position": {
-          "x": 400,
+          "x": 300,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "orientation": "vertical",
+          "bar_color": "#3b82f6",
+          "show_values": true,
+          "label": "Chart"
         }
       }
     ],
@@ -3676,24 +5785,30 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "rangeNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "start": 1,
+          "end": 10,
+          "step": 1,
+          "label": "Data"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "barChartNode",
         "position": {
-          "x": 400,
+          "x": 300,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "orientation": "vertical",
+          "bar_color": "#3b82f6",
+          "show_values": true,
+          "label": "Chart"
         }
       }
     ],
@@ -3718,24 +5833,30 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "rangeNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "start": 1,
+          "end": 10,
+          "step": 1,
+          "label": "Data"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "barChartNode",
         "position": {
-          "x": 400,
+          "x": 300,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "orientation": "vertical",
+          "bar_color": "#3b82f6",
+          "show_values": true,
+          "label": "Chart"
         }
       }
     ],
@@ -3760,24 +5881,30 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "rangeNode",
         "position": {
-          "x": 100,
+          "x": 50,
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "start": 1,
+          "end": 10,
+          "step": 1,
+          "label": "Data"
         }
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "barChartNode",
         "position": {
-          "x": 400,
+          "x": 300,
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "orientation": "vertical",
+          "bar_color": "#3b82f6",
+          "show_values": true,
+          "label": "Chart"
         }
       }
     ],
@@ -3808,7 +5935,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -3819,7 +5947,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -3850,7 +5979,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -3861,7 +5991,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -3892,7 +6023,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -3903,7 +6035,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -3934,7 +6067,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -3945,7 +6079,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -3976,7 +6111,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -3987,7 +6123,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -4018,7 +6155,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -4029,7 +6167,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -4060,7 +6199,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -4071,7 +6211,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -4102,7 +6243,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -4113,7 +6255,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -4144,7 +6287,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -4155,7 +6299,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -4186,7 +6331,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -4197,7 +6343,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -4228,7 +6375,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -4239,7 +6387,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -4270,7 +6419,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -4281,7 +6431,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -4312,7 +6463,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -4323,7 +6475,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -4354,7 +6507,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -4365,7 +6519,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -4396,7 +6551,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -4407,7 +6563,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -4438,7 +6595,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -4449,7 +6607,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -4480,7 +6639,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -4491,7 +6651,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -4522,7 +6683,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -4533,7 +6695,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -4564,7 +6727,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -4575,7 +6739,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -4606,7 +6771,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -4617,7 +6783,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -4648,7 +6815,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -4659,7 +6827,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -4690,7 +6859,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -4701,7 +6871,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -4732,7 +6903,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -4743,7 +6915,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -4774,7 +6947,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -4785,7 +6959,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -4816,7 +6991,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -4827,7 +7003,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -4858,7 +7035,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -4869,7 +7047,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -4900,7 +7079,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -4911,7 +7091,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -4942,7 +7123,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -4953,7 +7135,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -4984,7 +7167,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -4995,7 +7179,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -5026,7 +7211,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -5037,7 +7223,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -5068,7 +7255,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -5079,7 +7267,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -5110,7 +7299,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -5121,7 +7311,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -5152,7 +7343,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -5163,7 +7355,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -5194,7 +7387,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -5205,7 +7399,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -5236,7 +7431,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -5247,7 +7443,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -5278,7 +7475,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -5289,7 +7487,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -5320,7 +7519,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -5331,7 +7531,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -5362,7 +7563,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -5373,7 +7575,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -5404,7 +7607,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -5415,7 +7619,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -5446,7 +7651,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -5457,7 +7663,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -5488,7 +7695,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -5499,7 +7707,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -5530,7 +7739,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -5541,7 +7751,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -5572,7 +7783,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -5583,7 +7795,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -5614,7 +7827,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -5625,7 +7839,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -5656,7 +7871,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -5667,7 +7883,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -5698,7 +7915,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -5709,7 +7927,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -5740,7 +7959,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -5751,7 +7971,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -5782,7 +8003,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -5793,7 +8015,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -5824,7 +8047,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -5835,7 +8059,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -5866,7 +8091,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -5877,7 +8103,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -5908,7 +8135,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -5919,7 +8147,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -5950,7 +8179,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -5961,7 +8191,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -5992,7 +8223,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -6003,7 +8235,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -6034,7 +8267,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -6045,7 +8279,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -6076,7 +8311,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -6087,7 +8323,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -6118,7 +8355,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -6129,7 +8367,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -6160,7 +8399,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -6171,7 +8411,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -6202,7 +8443,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -6213,7 +8455,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -6244,7 +8487,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -6255,7 +8499,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -6286,7 +8531,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "text": "Input"
+          "text": "Input",
+          "label": "Input"
         }
       },
       {
@@ -6297,7 +8543,8 @@ export const workflowExamples: WorkflowExample[] =
           "y": 100
         },
         "data": {
-          "mode": "text"
+          "mode": "text",
+          "label": "Output"
         }
       }
     ],
@@ -6309,5 +8556,5 @@ export const workflowExamples: WorkflowExample[] =
       }
     ]
   }
-]
-;
+];
+
