@@ -3,12 +3,17 @@ import React from "react";
 import { NodeWrapper } from "./NodeWrapper";
 import { getNodeInfo } from "./nodeInfo";
 
+// Extended props to include onShowOptions
+type NodePropsWithOptions<T = Record<string, unknown>> = NodeProps<T> & {
+  onShowOptions?: (x: number, y: number) => void;
+};
+
 type FilterNodeData = {
   condition?: string;
   label?: string;
 };
 
-export function FilterNode({ id, data, ...props }: NodeProps<FilterNodeData>) {
+export function FilterNode({ id, data, onShowOptions }: NodePropsWithOptions<FilterNodeData>) {
   const { setNodes } = useReactFlow();
   
   const onConditionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,7 +34,6 @@ export function FilterNode({ id, data, ...props }: NodeProps<FilterNodeData>) {
   };
 
   const nodeInfo = getNodeInfo("filterNode");
-  const onShowOptions = (props as any).onShowOptions;
 
   return (
     <NodeWrapper

@@ -3,6 +3,11 @@ import React from "react";
 import { NodeWrapper } from "./NodeWrapper";
 import { getNodeInfo } from "./nodeInfo";
 
+// Extended props to include onShowOptions
+type NodePropsWithOptions<T = Record<string, unknown>> = NodeProps<T> & {
+  onShowOptions?: (x: number, y: number) => void;
+};
+
 // ===== ARRAY OPERATION NODES =====
 
 type MapNodeData = {
@@ -10,7 +15,7 @@ type MapNodeData = {
   label?: string;
 };
 
-export function MapNode({ id, data, ...props }: NodeProps<MapNodeData>) {
+export function MapNode({ id, data, onShowOptions }: NodePropsWithOptions<MapNodeData>) {
   const { setNodes } = useReactFlow();
   
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,7 +36,7 @@ export function MapNode({ id, data, ...props }: NodeProps<MapNodeData>) {
   };
 
   const nodeInfo = getNodeInfo("mapNode");
-  const onShowOptions = (props as any).onShowOptions;
+  
 
   return (
     <NodeWrapper
@@ -61,7 +66,7 @@ type ReduceNodeData = {
   label?: string;
 };
 
-export function ReduceNode({ id, data, ...props }: NodeProps<ReduceNodeData>) {
+export function ReduceNode({ id, data, onShowOptions }: NodePropsWithOptions<ReduceNodeData>) {
   const { setNodes } = useReactFlow();
   
   const onExpressionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -91,7 +96,7 @@ export function ReduceNode({ id, data, ...props }: NodeProps<ReduceNodeData>) {
   };
 
   const nodeInfo = getNodeInfo("reduceNode");
-  const onShowOptions = (props as any).onShowOptions;
+  
 
   return (
     <NodeWrapper
@@ -131,7 +136,7 @@ type SliceNodeData = {
   label?: string;
 };
 
-export function SliceNode({ id, data, ...props }: NodeProps<SliceNodeData>) {
+export function SliceNode({ id, data, onShowOptions }: NodePropsWithOptions<SliceNodeData>) {
   const { setNodes } = useReactFlow();
   
   const onStartChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -161,7 +166,7 @@ export function SliceNode({ id, data, ...props }: NodeProps<SliceNodeData>) {
   };
 
   const nodeInfo = getNodeInfo("sliceNode");
-  const onShowOptions = (props as any).onShowOptions;
+  
 
   return (
     <NodeWrapper
@@ -202,7 +207,7 @@ type SortNodeData = {
   label?: string;
 };
 
-export function SortNode({ id, data, ...props }: NodeProps<SortNodeData>) {
+export function SortNode({ id, data, onShowOptions }: NodePropsWithOptions<SortNodeData>) {
   const { setNodes } = useReactFlow();
   
   const onFieldChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -232,7 +237,7 @@ export function SortNode({ id, data, ...props }: NodeProps<SortNodeData>) {
   };
 
   const nodeInfo = getNodeInfo("sortNode");
-  const onShowOptions = (props as any).onShowOptions;
+  
 
   return (
     <NodeWrapper
@@ -271,7 +276,7 @@ type FindNodeData = {
   label?: string;
 };
 
-export function FindNode({ id, data, ...props }: NodeProps<FindNodeData>) {
+export function FindNode({ id, data, onShowOptions }: NodePropsWithOptions<FindNodeData>) {
   const { setNodes } = useReactFlow();
   
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -292,7 +297,7 @@ export function FindNode({ id, data, ...props }: NodeProps<FindNodeData>) {
   };
 
   const nodeInfo = getNodeInfo("findNode");
-  const onShowOptions = (props as any).onShowOptions;
+  
 
   return (
     <NodeWrapper
@@ -321,7 +326,7 @@ type FlatMapNodeData = {
   label?: string;
 };
 
-export function FlatMapNode({ id, data, ...props }: NodeProps<FlatMapNodeData>) {
+export function FlatMapNode({ id, data, onShowOptions }: NodePropsWithOptions<FlatMapNodeData>) {
   const { setNodes } = useReactFlow();
   
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -342,7 +347,7 @@ export function FlatMapNode({ id, data, ...props }: NodeProps<FlatMapNodeData>) 
   };
 
   const nodeInfo = getNodeInfo("flatMapNode");
-  const onShowOptions = (props as any).onShowOptions;
+  
 
   return (
     <NodeWrapper
@@ -371,7 +376,7 @@ type GroupByNodeData = {
   label?: string;
 };
 
-export function GroupByNode({ id, data, ...props }: NodeProps<GroupByNodeData>) {
+export function GroupByNode({ id, data, onShowOptions }: NodePropsWithOptions<GroupByNodeData>) {
   const { setNodes } = useReactFlow();
   
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -392,7 +397,7 @@ export function GroupByNode({ id, data, ...props }: NodeProps<GroupByNodeData>) 
   };
 
   const nodeInfo = getNodeInfo("groupByNode");
-  const onShowOptions = (props as any).onShowOptions;
+  
 
   return (
     <NodeWrapper
@@ -421,7 +426,7 @@ type UniqueNodeData = {
   label?: string;
 };
 
-export function UniqueNode({ id, data, ...props }: NodeProps<UniqueNodeData>) {
+export function UniqueNode({ id, data, onShowOptions }: NodePropsWithOptions<UniqueNodeData>) {
   const { setNodes } = useReactFlow();
   
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -442,7 +447,7 @@ export function UniqueNode({ id, data, ...props }: NodeProps<UniqueNodeData>) {
   };
 
   const nodeInfo = getNodeInfo("uniqueNode");
-  const onShowOptions = (props as any).onShowOptions;
+  
 
   return (
     <NodeWrapper
@@ -471,7 +476,7 @@ type ChunkNodeData = {
   label?: string;
 };
 
-export function ChunkNode({ id, data, ...props }: NodeProps<ChunkNodeData>) {
+export function ChunkNode({ id, data, onShowOptions }: NodePropsWithOptions<ChunkNodeData>) {
   const { setNodes } = useReactFlow();
   
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -492,7 +497,7 @@ export function ChunkNode({ id, data, ...props }: NodeProps<ChunkNodeData>) {
   };
 
   const nodeInfo = getNodeInfo("chunkNode");
-  const onShowOptions = (props as any).onShowOptions;
+  
 
   return (
     <NodeWrapper
@@ -520,7 +525,7 @@ type ReverseNodeData = {
   label?: string;
 };
 
-export function ReverseNode({ id, data, ...props }: NodeProps<ReverseNodeData>) {
+export function ReverseNode({ id, data, onShowOptions }: NodePropsWithOptions<ReverseNodeData>) {
   const { setNodes } = useReactFlow();
 
   const handleTitleChange = (newTitle: string) => {
@@ -532,7 +537,7 @@ export function ReverseNode({ id, data, ...props }: NodeProps<ReverseNodeData>) 
   };
 
   const nodeInfo = getNodeInfo("reverseNode");
-  const onShowOptions = (props as any).onShowOptions;
+  
 
   return (
     <NodeWrapper
@@ -554,7 +559,7 @@ type PartitionNodeData = {
   label?: string;
 };
 
-export function PartitionNode({ id, data, ...props }: NodeProps<PartitionNodeData>) {
+export function PartitionNode({ id, data, onShowOptions }: NodePropsWithOptions<PartitionNodeData>) {
   const { setNodes } = useReactFlow();
   
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -575,7 +580,7 @@ export function PartitionNode({ id, data, ...props }: NodeProps<PartitionNodeDat
   };
 
   const nodeInfo = getNodeInfo("partitionNode");
-  const onShowOptions = (props as any).onShowOptions;
+  
 
   return (
     <NodeWrapper
@@ -618,7 +623,7 @@ type ZipNodeData = {
   label?: string;
 };
 
-export function ZipNode({ id, data, ...props }: NodeProps<ZipNodeData>) {
+export function ZipNode({ id, data, onShowOptions }: NodePropsWithOptions<ZipNodeData>) {
   const { setNodes } = useReactFlow();
 
   const handleTitleChange = (newTitle: string) => {
@@ -630,7 +635,7 @@ export function ZipNode({ id, data, ...props }: NodeProps<ZipNodeData>) {
   };
 
   const nodeInfo = getNodeInfo("zipNode");
-  const onShowOptions = (props as any).onShowOptions;
+  
 
   return (
     <NodeWrapper
@@ -667,7 +672,7 @@ type SampleNodeData = {
   label?: string;
 };
 
-export function SampleNode({ id, data, ...props }: NodeProps<SampleNodeData>) {
+export function SampleNode({ id, data, onShowOptions }: NodePropsWithOptions<SampleNodeData>) {
   const { setNodes } = useReactFlow();
   
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -688,7 +693,7 @@ export function SampleNode({ id, data, ...props }: NodeProps<SampleNodeData>) {
   };
 
   const nodeInfo = getNodeInfo("sampleNode");
-  const onShowOptions = (props as any).onShowOptions;
+  
 
   return (
     <NodeWrapper
@@ -719,7 +724,7 @@ type RangeNodeData = {
   label?: string;
 };
 
-export function RangeNode({ id, data, ...props }: NodeProps<RangeNodeData>) {
+export function RangeNode({ id, data, onShowOptions }: NodePropsWithOptions<RangeNodeData>) {
   const { setNodes } = useReactFlow();
   
   const onStartChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -758,7 +763,7 @@ export function RangeNode({ id, data, ...props }: NodeProps<RangeNodeData>) {
   };
 
   const nodeInfo = getNodeInfo("rangeNode");
-  const onShowOptions = (props as any).onShowOptions;
+  
 
   return (
     <NodeWrapper
@@ -807,7 +812,7 @@ type TransposeNodeData = {
   label?: string;
 };
 
-export function TransposeNode({ id, data, ...props }: NodeProps<TransposeNodeData>) {
+export function TransposeNode({ id, data, onShowOptions }: NodePropsWithOptions<TransposeNodeData>) {
   const { setNodes } = useReactFlow();
 
   const handleTitleChange = (newTitle: string) => {
@@ -819,7 +824,7 @@ export function TransposeNode({ id, data, ...props }: NodeProps<TransposeNodeDat
   };
 
   const nodeInfo = getNodeInfo("transposeNode");
-  const onShowOptions = (props as any).onShowOptions;
+  
 
   return (
     <NodeWrapper

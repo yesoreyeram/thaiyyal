@@ -4,6 +4,11 @@ import React from "react";
 import { NodeWrapper } from "./NodeWrapper";
 import { getNodeInfo } from "./nodeInfo";
 
+// Extended props to include onShowOptions
+type NodePropsWithOptions<T = Record<string, unknown>> = NodeProps<T> & {
+  onShowOptions?: (x: number, y: number) => void;
+};
+
 // ===== CONTROL FLOW NODES =====
 
 type ForEachNodeData = {
@@ -14,8 +19,8 @@ type ForEachNodeData = {
 export function ForEachNode({
   id,
   data,
-  ...props
-}: NodeProps<ForEachNodeData>) {
+  onShowOptions,
+}: NodePropsWithOptions<ForEachNodeData>) {
   const { setNodes } = useReactFlow();
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -36,7 +41,6 @@ export function ForEachNode({
   };
 
   const nodeInfo = getNodeInfo("forEachNode");
-  const onShowOptions = (props as any).onShowOptions;
 
   return (
     <NodeWrapper
@@ -76,8 +80,8 @@ type WhileLoopNodeData = {
 export function WhileLoopNode({
   id,
   data,
-  ...props
-}: NodeProps<WhileLoopNodeData>) {
+  onShowOptions,
+}: NodePropsWithOptions<WhileLoopNodeData>) {
   const { setNodes } = useReactFlow();
 
   const onConditionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -107,7 +111,6 @@ export function WhileLoopNode({
   };
 
   const nodeInfo = getNodeInfo("whileLoopNode");
-  const onShowOptions = (props as any).onShowOptions;
 
   return (
     <NodeWrapper
@@ -159,8 +162,8 @@ type VariableNodeData = {
 export function VariableNode({
   id,
   data,
-  ...props
-}: NodeProps<VariableNodeData>) {
+  onShowOptions,
+}: NodePropsWithOptions<VariableNodeData>) {
   const { setNodes } = useReactFlow();
 
   const onNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -188,7 +191,6 @@ export function VariableNode({
   };
 
   const nodeInfo = getNodeInfo("variableNode");
-  const onShowOptions = (props as any).onShowOptions;
 
   return (
     <NodeWrapper

@@ -3,6 +3,11 @@ import React from "react";
 import { NodeWrapper } from "./NodeWrapper";
 import { getNodeInfo } from "./nodeInfo";
 
+// Extended props to include onShowOptions
+type NodePropsWithOptions<T = Record<string, unknown>> = NodeProps<T> & {
+  onShowOptions?: (x: number, y: number) => void;
+};
+
 type ContextNodeData = {
   context_name?: string;
   context_value?: string | number;
@@ -56,8 +61,8 @@ export function BaseContextNode({
   id, 
   data,
   config,
-  ...props
-}: NodeProps<ContextNodeData> & { config: ContextNodeConfig }) {
+  onShowOptions,
+}: NodePropsWithOptions<ContextNodeData> & { config: ContextNodeConfig }) {
   const { setNodes } = useReactFlow();
   
   const onNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,7 +90,6 @@ export function BaseContextNode({
   const contextName = data?.context_name || "...";
 
   const nodeInfo = getNodeInfo(config.type === "variable" ? "contextVariableNode" : "contextConstantNode");
-  const onShowOptions = (props as any).onShowOptions;
 
   return (
     <NodeWrapper

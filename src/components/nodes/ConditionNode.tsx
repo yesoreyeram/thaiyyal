@@ -3,6 +3,11 @@ import React from "react";
 import { NodeWrapper } from "./NodeWrapper";
 import { getNodeInfo } from "./nodeInfo";
 
+// Extended props to include onShowOptions
+type NodePropsWithOptions<T = Record<string, unknown>> = NodeProps<T> & {
+  onShowOptions?: (x: number, y: number) => void;
+};
+
 type ConditionNodeData = {
   condition?: string;
   true_path?: string;
@@ -10,7 +15,7 @@ type ConditionNodeData = {
   label?: string;
 };
 
-export function ConditionNode({ id, data, ...props }: NodeProps<ConditionNodeData>) {
+export function ConditionNode({ id, data, onShowOptions }: NodePropsWithOptions<ConditionNodeData>) {
   const { setNodes } = useReactFlow();
   
   const onConditionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,7 +36,6 @@ export function ConditionNode({ id, data, ...props }: NodeProps<ConditionNodeDat
   };
 
   const nodeInfo = getNodeInfo("conditionNode");
-  const onShowOptions = (props as any).onShowOptions;
 
   return (
     <NodeWrapper

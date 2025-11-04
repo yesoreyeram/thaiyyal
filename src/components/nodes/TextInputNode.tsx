@@ -3,12 +3,17 @@ import React from "react";
 import { NodeWrapper } from "./NodeWrapper";
 import { getNodeInfo } from "./nodeInfo";
 
+// Extended props to include onShowOptions
+type NodePropsWithOptions<T = Record<string, unknown>> = NodeProps<T> & {
+  onShowOptions?: (x: number, y: number) => void;
+};
+
 type TextInputNodeData = {
   text?: string;
   label?: string;
 };
 
-export function TextInputNode({ id, data, ...props }: NodeProps<TextInputNodeData>) {
+export function TextInputNode({ id, data, onShowOptions }: NodePropsWithOptions<TextInputNodeData>) {
   const { setNodes } = useReactFlow();
   
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -21,7 +26,6 @@ export function TextInputNode({ id, data, ...props }: NodeProps<TextInputNodeDat
   };
 
   const nodeInfo = getNodeInfo("textInputNode");
-  const onShowOptions = (props as any).onShowOptions;
 
   return (
     <NodeWrapper

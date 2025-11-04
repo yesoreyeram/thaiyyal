@@ -3,6 +3,11 @@ import React from "react";
 import { NodeWrapper } from "./NodeWrapper";
 import { getNodeInfo } from "./nodeInfo";
 
+// Extended props to include onShowOptions
+type NodePropsWithOptions<T = Record<string, unknown>> = NodeProps<T> & {
+  onShowOptions?: (x: number, y: number) => void;
+};
+
 type TextOperationNodeData = {
   text_op?: string;
   separator?: string;
@@ -10,7 +15,7 @@ type TextOperationNodeData = {
   label?: string;
 };
 
-export function TextOperationNode({ id, data, ...props }: NodeProps<TextOperationNodeData>) {
+export function TextOperationNode({ id, data, onShowOptions }: NodePropsWithOptions<TextOperationNodeData>) {
   const { setNodes } = useReactFlow();
   
   const onOpChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -35,7 +40,6 @@ export function TextOperationNode({ id, data, ...props }: NodeProps<TextOperatio
   };
 
   const nodeInfo = getNodeInfo("textOpNode");
-  const onShowOptions = (props as any).onShowOptions;
 
   return (
     <NodeWrapper

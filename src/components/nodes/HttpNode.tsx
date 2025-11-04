@@ -3,12 +3,17 @@ import React from "react";
 import { NodeWrapper } from "./NodeWrapper";
 import { getNodeInfo } from "./nodeInfo";
 
+// Extended props to include onShowOptions
+type NodePropsWithOptions<T = Record<string, unknown>> = NodeProps<T> & {
+  onShowOptions?: (x: number, y: number) => void;
+};
+
 type HttpNodeData = {
   url?: string;
   label?: string;
 };
 
-export function HttpNode({ id, data, ...props }: NodeProps<HttpNodeData>) {
+export function HttpNode({ id, data, onShowOptions }: NodePropsWithOptions<HttpNodeData>) {
   const { setNodes } = useReactFlow();
   
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -21,7 +26,6 @@ export function HttpNode({ id, data, ...props }: NodeProps<HttpNodeData>) {
   };
 
   const nodeInfo = getNodeInfo("httpNode");
-  const onShowOptions = (props as any).onShowOptions;
 
   return (
     <NodeWrapper

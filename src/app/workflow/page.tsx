@@ -56,6 +56,8 @@ import {
   TransposeNode,
   NodeContextMenu,
   DeleteConfirmDialog,
+  NodeWrapper,
+  getNodeInfo,
 } from "../../components/nodes";
 import { AppNavBar } from "../../components/AppNavBar";
 import { WorkflowNavBar } from "../../components/WorkflowNavBar";
@@ -78,7 +80,7 @@ const withContextMenu = (
   handleContextMenu: (nodeId: string, x: number, y: number) => void,
   closePalette: () => void
 ) => {
-  return (props: NodeProps<NodeData>) => {
+  const WrappedComponent = (props: NodeProps<NodeData>) => {
     const onShowOptions = (x: number, y: number) => {
       handleContextMenu(props.id, x, y);
     };
@@ -93,6 +95,8 @@ const withContextMenu = (
       />
     );
   };
+  WrappedComponent.displayName = `withContextMenu(${Component.displayName || Component.name || 'Component'})`;
+  return WrappedComponent;
 };
 
 // Original three node components - Updated to use NodeWrapper
@@ -101,7 +105,6 @@ function NumberNode({
   data,
   onShowOptions,
   onOpenInfo,
-  ...props
 }: NodePropsWithOptions) {
   const { setNodes } = useReactFlow();
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -121,8 +124,6 @@ function NumberNode({
     );
   };
 
-  // Import NodeWrapper at top
-  const { NodeWrapper, getNodeInfo } = require("../../components/nodes");
   const nodeInfo = getNodeInfo("numberNode");
 
   return (
@@ -157,7 +158,6 @@ function OperationNode({
   id,
   data,
   onShowOptions,
-  ...props
 }: NodePropsWithOptions) {
   const { setNodes } = useReactFlow();
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -175,7 +175,6 @@ function OperationNode({
     );
   };
 
-  const { NodeWrapper, getNodeInfo } = require("../../components/nodes");
   const nodeInfo = getNodeInfo("opNode");
 
   return (
@@ -209,7 +208,7 @@ function OperationNode({
   );
 }
 
-function VizNode({ id, data, onShowOptions, ...props }: NodePropsWithOptions) {
+function VizNode({ id, data, onShowOptions }: NodePropsWithOptions) {
   const { setNodes } = useReactFlow();
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const mode = e.target.value;
@@ -226,7 +225,6 @@ function VizNode({ id, data, onShowOptions, ...props }: NodePropsWithOptions) {
     );
   };
 
-  const { NodeWrapper, getNodeInfo } = require("../../components/nodes");
   const nodeInfo = getNodeInfo("vizNode");
 
   return (
