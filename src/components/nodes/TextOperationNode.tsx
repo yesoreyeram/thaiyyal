@@ -1,7 +1,9 @@
-import { NodeProps, Handle, Position, useReactFlow } from "reactflow";
+import { NodePropsWithOptions } from "./nodeTypes";
+import { Handle, Position, useReactFlow } from "reactflow";
 import React from "react";
 import { NodeWrapper } from "./NodeWrapper";
 import { getNodeInfo } from "./nodeInfo";
+
 
 type TextOperationNodeData = {
   text_op?: string;
@@ -10,7 +12,7 @@ type TextOperationNodeData = {
   label?: string;
 };
 
-export function TextOperationNode({ id, data, ...props }: NodeProps<TextOperationNodeData>) {
+export function TextOperationNode({ id, data, onShowOptions }: NodePropsWithOptions<TextOperationNodeData>) {
   const { setNodes } = useReactFlow();
   
   const onOpChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -35,7 +37,6 @@ export function TextOperationNode({ id, data, ...props }: NodeProps<TextOperatio
   };
 
   const nodeInfo = getNodeInfo("textOpNode");
-  const onShowOptions = (props as any).onShowOptions;
 
   return (
     <NodeWrapper

@@ -1,7 +1,9 @@
+import { NodePropsWithOptions } from "./nodeTypes";
 import { NodeProps, useReactFlow } from "reactflow";
 import React from "react";
 import { NodeWrapper } from "./NodeWrapper";
 import { getNodeInfo } from "./nodeInfo";
+
 
 type ContextNodeData = {
   context_name?: string;
@@ -56,8 +58,8 @@ export function BaseContextNode({
   id, 
   data,
   config,
-  ...props
-}: NodeProps<ContextNodeData> & { config: ContextNodeConfig }) {
+  onShowOptions,
+}: NodePropsWithOptions<ContextNodeData> & { config: ContextNodeConfig }) {
   const { setNodes } = useReactFlow();
   
   const onNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,7 +87,6 @@ export function BaseContextNode({
   const contextName = data?.context_name || "...";
 
   const nodeInfo = getNodeInfo(config.type === "variable" ? "contextVariableNode" : "contextConstantNode");
-  const onShowOptions = (props as any).onShowOptions;
 
   return (
     <NodeWrapper

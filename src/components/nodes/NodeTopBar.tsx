@@ -8,7 +8,7 @@ interface NodeTopBarProps {
   compact?: boolean;
 }
 
-export function NodeTopBar({ title, onInfo, onOptions, onTitleChange, compact = true }: NodeTopBarProps) {
+export function NodeTopBar({ title, onInfo, onOptions, onTitleChange }: NodeTopBarProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(title);
   const optionsRef = useRef<HTMLButtonElement>(null);

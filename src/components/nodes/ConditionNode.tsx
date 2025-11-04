@@ -1,7 +1,9 @@
-import { NodeProps, Handle, Position, useReactFlow } from "reactflow";
+import { NodePropsWithOptions } from "./nodeTypes";
+import { Handle, Position, useReactFlow } from "reactflow";
 import React from "react";
 import { NodeWrapper } from "./NodeWrapper";
 import { getNodeInfo } from "./nodeInfo";
+
 
 type ConditionNodeData = {
   condition?: string;
@@ -10,7 +12,7 @@ type ConditionNodeData = {
   label?: string;
 };
 
-export function ConditionNode({ id, data, ...props }: NodeProps<ConditionNodeData>) {
+export function ConditionNode({ id, data, onShowOptions }: NodePropsWithOptions<ConditionNodeData>) {
   const { setNodes } = useReactFlow();
   
   const onConditionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -31,7 +33,6 @@ export function ConditionNode({ id, data, ...props }: NodeProps<ConditionNodeDat
   };
 
   const nodeInfo = getNodeInfo("conditionNode");
-  const onShowOptions = (props as any).onShowOptions;
 
   return (
     <NodeWrapper

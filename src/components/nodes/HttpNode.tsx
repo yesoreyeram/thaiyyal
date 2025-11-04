@@ -1,14 +1,16 @@
-import { NodeProps, Handle, Position, useReactFlow } from "reactflow";
+import { NodePropsWithOptions } from "./nodeTypes";
+import { Handle, Position, useReactFlow } from "reactflow";
 import React from "react";
 import { NodeWrapper } from "./NodeWrapper";
 import { getNodeInfo } from "./nodeInfo";
+
 
 type HttpNodeData = {
   url?: string;
   label?: string;
 };
 
-export function HttpNode({ id, data, ...props }: NodeProps<HttpNodeData>) {
+export function HttpNode({ id, data, onShowOptions }: NodePropsWithOptions<HttpNodeData>) {
   const { setNodes } = useReactFlow();
   
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -21,7 +23,6 @@ export function HttpNode({ id, data, ...props }: NodeProps<HttpNodeData>) {
   };
 
   const nodeInfo = getNodeInfo("httpNode");
-  const onShowOptions = (props as any).onShowOptions;
 
   return (
     <NodeWrapper
