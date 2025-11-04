@@ -65,6 +65,8 @@ import { WorkflowNavBar } from "../../components/WorkflowNavBar";
 import { WorkflowStatusBar } from "../../components/WorkflowStatusBar";
 import { NodePalette } from "../../components/NodePalette";
 import { JSONPayloadModal } from "../../components/JSONPayloadModal";
+import { WorkflowExamplesModal } from "../../components/WorkflowExamplesModal";
+import { WorkflowExample } from "../../data/workflowExamples";
 import { useRouter } from "next/navigation";
 
 type NodeData = Record<string, unknown>;
@@ -590,6 +592,7 @@ function Canvas() {
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [showPayload, setShowPayload] = useState(false);
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+  const [showExamplesModal, setShowExamplesModal] = useState(false);
   const [workflowTitle, setWorkflowTitle] = useState("Untitled Workflow");
   const [contextMenu, setContextMenu] = useState<{
     x: number;
@@ -826,7 +829,33 @@ function Canvas() {
   };
 
   const handleOpenWorkflow = () => {
-    // TODO: Open workflow modal
+    setShowExamplesModal(true);
+  };
+
+  const handleSelectExample = (example: WorkflowExample) => {
+    // Load the example workflow
+    const exampleNodes = example.nodes as RFNode<NodeData>[];
+    const exampleEdges = example.edges as RFEdge[];
+
+    // Ensure all nodes have position data
+    const nodesWithPositions = exampleNodes.map((node, index) => ({
+      ...node,
+      position: node.position || { x: 50 + index * 200, y: 50 + index * 100 },
+    }));
+
+    // Set the nodes and edges
+    setNodes(nodesWithPositions);
+    setEdges(exampleEdges);
+
+    // Update workflow title
+    setWorkflowTitle(example.title);
+
+    // Update next ID
+    const maxId = exampleNodes.reduce((max, node) => {
+      const nodeId = parseInt(String(node.id), 10);
+      return isNaN(nodeId) ? max : Math.max(max, nodeId);
+    }, 0);
+    setNextId(maxId + 1);
   };
 
   const handleSave = () => {
@@ -968,6 +997,11 @@ function Canvas() {
           onClose={() => setShowPayload(false)}
           payload={payload}
           workflowTitle={workflowTitle}
+        />
+        <WorkflowExamplesModal
+          isOpen={showExamplesModal}
+          onClose={() => setShowExamplesModal(false)}
+          onSelect={handleSelectExample}
         />
       </div>
       {contextMenu && (
