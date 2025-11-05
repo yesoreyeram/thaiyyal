@@ -13,6 +13,7 @@ export interface NodeWrapperProps {
   };
   onShowOptions?: (x: number, y: number) => void;
   onTitleChange?: (newTitle: string) => void;
+  onDelete?: () => void;
   className?: string;
   enableResize?: boolean;
   onOpenInfo?: () => void;
@@ -24,6 +25,7 @@ export function NodeWrapper({
   nodeInfo,
   onShowOptions,
   onTitleChange,
+  onDelete,
   className = "",
   enableResize = true,
   onOpenInfo,
@@ -61,6 +63,7 @@ export function NodeWrapper({
           onInfo={nodeInfo ? handleShowInfo : undefined}
           onOptions={handleShowOptions}
           onTitleChange={onTitleChange}
+          onDelete={onDelete}
         />
         {children}
       </div>

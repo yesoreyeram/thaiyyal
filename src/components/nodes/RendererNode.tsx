@@ -113,8 +113,8 @@ export function RendererNode({
         return "table";
       }
 
-      // Array of primitives or mixed - use JSON
-      return "json";
+      // Array of primitives - use table with "values" column
+      return "table";
     }
 
     // If it's an object
@@ -246,6 +246,8 @@ export function RendererNode({
         case "table": {
           if (Array.isArray(executionData) && executionData.length > 0) {
             const firstItem = executionData[0];
+            
+            // Handle array of objects
             if (typeof firstItem === "object" && firstItem !== null) {
               const headers = Object.keys(firstItem);
 
@@ -297,6 +299,42 @@ export function RendererNode({
                 </div>
               );
             }
+            
+            // Handle array of primitives (numbers, strings, etc.)
+            return (
+              <div>
+                <div className="text-[8px] text-gray-500 mb-1 px-1">
+                  Format: Table
+                </div>
+                <div className="text-[9px] overflow-auto max-h-48">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="bg-gray-800">
+                        <th className="border border-gray-700 px-1 py-0.5 text-left">
+                          values
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {executionData.slice(0, 20).map((item, rowIdx) => (
+                        <tr key={rowIdx} className="hover:bg-gray-800">
+                          <td className="border border-gray-700 px-1 py-0.5">
+                            {item !== undefined && item !== null
+                              ? String(item)
+                              : ""}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {executionData.length > 20 && (
+                    <div className="text-gray-500 text-center py-1">
+                      ... and {executionData.length - 20} more rows
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
           }
           return (
             <div>
