@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useMemo, useState, useRef } from "react";
+import React, { useCallback, useMemo, useState, useRef, useEffect } from "react";
 import ReactFlow, {
   addEdge,
   ReactFlowProvider,
@@ -1009,6 +1009,32 @@ function Canvas() {
     }
     setDeleteConfirm(null);
   };
+
+  // Update renderer nodes with execution data when execution completes
+  useEffect(() => {
+    if (executionResult?.success && executionResult.results?.node_results) {
+      const nodeResults = executionResult.results.node_results;
+      
+      setNodes((nds) =>
+        nds.map((node) => {
+          // Only update renderer nodes
+          if (node.type === "rendererNode") {
+            // Get the execution data for this node
+            const executionData = nodeResults[node.id];
+            
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                _executionData: executionData,
+              },
+            };
+          }
+          return node;
+        })
+      );
+    }
+  }, [executionResult, setNodes]);
 
   return (
     <div className="h-screen flex flex-col bg-gray-950">
