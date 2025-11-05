@@ -83,26 +83,58 @@ backend/
 ├── cmd/
 │   └── server/
 │       └── main.go              # Server entry point
-├── pkg/
-│   ├── server/
-│   │   ├── server.go            # Server core
-│   │   ├── routes_httpclient.go # HTTP client routes
-│   │   ├── routes_workflow.go   # Workflow routes
-│   │   ├── routes_static.go     # Static file serving
-│   │   ├── routes_httpclient_test.go
-│   │   └── doc.go
-│   ├── storage/
-│   │   ├── storage.go           # Workflow storage
-│   │   ├── storage_test.go
-│   │   └── doc.go
-│   ├── frontend/
-│   │   ├── embed.go             # Embedded files
-│   │   └── static/              # Frontend assets
-│   ├── engine/                  # Workflow engine
-│   ├── executor/                # Node executors
-│   ├── httpclient/              # HTTP client registry
-│   └── ...
+├── workflow_registry.go         # Workflow storage registry
+├── workflow_registry_test.go    # Workflow registry tests
+└── pkg/
+    ├── server/
+    │   ├── server.go            # Server core
+    │   ├── embed.go             # Frontend file embedding
+    │   ├── static/              # Frontend build files (gitignored)
+    │   │   └── README.md        # Placeholder
+    │   ├── routes_httpclient.go # HTTP client routes
+    │   ├── routes_workflow.go   # Workflow routes
+    │   ├── routes_static.go     # Static file serving
+    │   └── routes_httpclient_test.go
+    ├── engine/                  # Workflow engine
+    ├── executor/                # Node executors
+    ├── httpclient/              # HTTP client registry
+    └── ...
 ```
+
+## Building
+
+### Local Development Build
+
+Use the provided build script:
+
+```bash
+# Build frontend and backend together
+./build.sh
+
+# Then run the server
+./server
+```
+
+The build script:
+1. Builds the Next.js frontend
+2. Copies static files to `backend/pkg/server/static/`
+3. Builds the Go backend with embedded files
+
+### Docker Build
+
+```bash
+# Build with Docker (multi-stage build)
+docker build -t thaiyyal .
+
+# Or use docker-compose
+docker-compose up --build
+```
+
+The Dockerfile uses a 3-stage multi-stage build:
+1. **Frontend stage**: Builds Next.js application
+2. **Backend stage**: Builds Go binary and embeds frontend files  
+3. **Runtime stage**: Minimal Alpine image with just the binary
+
 
 ## Configuration
 
@@ -176,8 +208,8 @@ See [API_EXAMPLES.md](./API_EXAMPLES.md) for comprehensive API usage examples.
 
 ### Unit Tests
 ```bash
-# Test storage package
-go test ./backend/pkg/storage -v
+# Test workflow registry
+go test ./backend/workflow_registry_test.go ./backend/workflow_registry.go -v
 
 # Test server package
 go test ./backend/pkg/server -v
@@ -227,6 +259,8 @@ services:
 - Implement workflow versioning
 - Add workflow sharing/permissions
 - Support workflow templates
+
+**Note**: Workflow storage now follows the same registry pattern as HTTP clients, located in `backend/workflow_registry.go`
 
 ### HTTP Client Management
 - Add client update/delete endpoints

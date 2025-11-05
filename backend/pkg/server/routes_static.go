@@ -8,6 +8,7 @@ import (
 )
 
 // handleStaticFiles serves static frontend files from the embedded filesystem
+// It automatically handles .html extension for routes and falls back to index.html for SPA routing
 func (s *Server) handleStaticFiles(w http.ResponseWriter, r *http.Request) {
 	// Get the embedded filesystem
 	staticFS, err := getStaticFS()
@@ -32,58 +33,53 @@ func (s *Server) handleStaticFiles(w http.ResponseWriter, r *http.Request) {
 		filePath = "index.html"
 	}
 
-	// Try to open the file
-	file, err := staticFS.Open(filePath)
+	// Try to serve the file as requested
+	content, stat, err := tryServeFile(staticFS, filePath)
 	if err != nil {
-		// If file not found, try with .html extension
-		if filePath == "workflow" {
-			filePath = "workflow.html"
-			file, err = staticFS.Open(filePath)
+		// If not found and doesn't have an extension, try with .html
+		if !strings.Contains(filePath, ".") {
+			htmlPath := filePath + ".html"
+			content, stat, err = tryServeFile(staticFS, htmlPath)
 		}
 		
-		// If still not found, serve index.html for client-side routing
+		// If still not found, fall back to index.html for SPA routing
 		if err != nil {
-			filePath = "index.html"
-			file, err = staticFS.Open(filePath)
+			content, stat, err = tryServeFile(staticFS, "index.html")
 			if err != nil {
 				http.NotFound(w, r)
 				return
 			}
 		}
 	}
+
+	// Serve the content
+	http.ServeContent(w, r, stat.Name(), stat.ModTime(), strings.NewReader(string(content)))
+}
+
+// tryServeFile attempts to read a file from the filesystem and returns its content and stat
+func tryServeFile(fsys fs.FS, filePath string) ([]byte, fs.FileInfo, error) {
+	file, err := fsys.Open(filePath)
+	if err != nil {
+		return nil, nil, err
+	}
 	defer file.Close()
 
-	// Get file info for proper content type detection
 	stat, err := file.Stat()
 	if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+		return nil, nil, err
 	}
 
-	// If it's a directory, serve index.html from that directory
+	// If it's a directory, try index.html in that directory
 	if stat.IsDir() {
 		indexPath := path.Join(filePath, "index.html")
-		file.Close()
-		file, err = staticFS.Open(indexPath)
-		if err != nil {
-			http.NotFound(w, r)
-			return
-		}
-		defer file.Close()
-		stat, err = file.Stat()
-		if err != nil {
-			http.Error(w, "Internal server error", http.StatusInternalServerError)
-			return
-		}
+		return tryServeFile(fsys, indexPath)
 	}
 
-	// Serve the file
-	// Create a ReadSeeker from the file
-	content, err := fs.ReadFile(staticFS, filePath)
+	// Read the file content
+	content, err := fs.ReadFile(fsys, filePath)
 	if err != nil {
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		return
+		return nil, nil, err
 	}
-	
-	http.ServeContent(w, r, stat.Name(), stat.ModTime(), strings.NewReader(string(content)))
+
+	return content, stat, nil
 }
