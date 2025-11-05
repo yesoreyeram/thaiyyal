@@ -139,9 +139,10 @@ func TestWorkflowExamples_ControlFlow(t *testing.T) {
 
 // TestWorkflowExamples_GapSummary documents all identified gaps
 func TestWorkflowExamples_GapSummary(t *testing.T) {
-	t.Log("=" + string(make([]byte, 78)))
+	separator := "==============================================================================="
+	t.Log(separator)
 	t.Log("WORKFLOW EXAMPLES TESTING - GAP ANALYSIS SUMMARY")
-	t.Log("=" + string(make([]byte, 78)))
+	t.Log(separator)
 	t.Log("")
 	t.Log("Total Workflow Examples: 150")
 	t.Log("Backend Node Types Implemented: 41")
@@ -194,7 +195,7 @@ func TestWorkflowExamples_GapSummary(t *testing.T) {
 	t.Log("9. External Service Integrations (~5 workflows)")
 	t.Log("10. Advanced Resilience Patterns (~10 workflows)")
 	t.Log("")
-	t.Log("=" + string(make([]byte, 78)))
+	t.Log(separator)
 	t.Log("")
 	t.Log("For complete analysis, see: docs/WORKFLOW_EXAMPLES_ANALYSIS.md")
 	t.Log("")
