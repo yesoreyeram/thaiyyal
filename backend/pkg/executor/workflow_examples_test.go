@@ -889,4 +889,136 @@ func TestWorkflowExamples_Phase4_AdvancedNodes(t *testing.T) {
 		
 		t.Log("✓ Throttling workflow completed successfully")
 	})
+	
+	t.Run("Example30_SchemaValidation", func(t *testing.T) {
+		// Example 30: Validate API request data against JSON schema
+		// Node types: schema_validator
+		// Description: Ensures data quality and type safety
+		// Use case: API request validation, data quality checks
+		
+		schemaExec := &SchemaValidatorExecutor{}
+		
+		ctx := &MockExecutionContext{
+			inputs: map[string][]interface{}{},
+		}
+		
+		// Define user profile schema
+		schema := map[string]interface{}{
+			"type": "object",
+			"properties": map[string]interface{}{
+				"name": map[string]interface{}{
+					"type":      "string",
+					"minLength": float64(1),
+				},
+				"age": map[string]interface{}{
+					"type":    "number",
+					"minimum": float64(0),
+					"maximum": float64(150),
+				},
+				"email": map[string]interface{}{
+					"type":    "string",
+					"pattern": "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
+				},
+				"role": map[string]interface{}{
+					"type": "string",
+					"enum": []interface{}{"admin", "user", "guest"},
+				},
+			},
+			"required": []interface{}{"name", "email"},
+		}
+		
+		strictFalse := false
+		validatorNode := types.Node{
+			ID:   "validator1",
+			Type: types.NodeTypeSchemaValidator,
+			Data: types.NodeData{
+				Schema: schema,
+				Strict: &strictFalse, // Lenient mode - return errors instead of failing
+			},
+		}
+		
+		// Test 1: Valid user data
+		validUser := map[string]interface{}{
+			"name":  "John Doe",
+			"age":   float64(30),
+			"email": "john@example.com",
+			"role":  "admin",
+		}
+		
+		ctx.inputs["validator1"] = []interface{}{validUser}
+		result, err := schemaExec.Execute(ctx, validatorNode)
+		if err != nil {
+			t.Fatalf("Schema validation failed: %v", err)
+		}
+		
+		resultMap := result.(map[string]interface{})
+		if resultMap["valid"] != true {
+			t.Errorf("Expected valid=true for valid user, got errors: %v", resultMap["errors"])
+		}
+		
+		// Test 2: Invalid user data (missing email)
+		invalidUser := map[string]interface{}{
+			"name": "Jane Doe",
+			"age":  float64(25),
+			// Missing required email
+		}
+		
+		ctx.inputs["validator1"] = []interface{}{invalidUser}
+		result, err = schemaExec.Execute(ctx, validatorNode)
+		if err != nil {
+			t.Fatalf("Schema validation failed: %v", err)
+		}
+		
+		resultMap = result.(map[string]interface{})
+		if resultMap["valid"] != false {
+			t.Errorf("Expected valid=false for invalid user")
+		}
+		
+		errors, ok := resultMap["errors"].([]map[string]interface{})
+		if !ok || len(errors) == 0 {
+			t.Errorf("Expected validation errors for invalid user")
+		}
+		
+		// Test 3: Invalid age range
+		invalidAge := map[string]interface{}{
+			"name":  "Test User",
+			"email": "test@example.com",
+			"age":   float64(200), // Exceeds maximum
+		}
+		
+		ctx.inputs["validator1"] = []interface{}{invalidAge}
+		result, err = schemaExec.Execute(ctx, validatorNode)
+		if err != nil {
+			t.Fatalf("Schema validation failed: %v", err)
+		}
+		
+		resultMap = result.(map[string]interface{})
+		if resultMap["valid"] != false {
+			t.Errorf("Expected valid=false for invalid age")
+		}
+		
+		// Test 4: Invalid enum value
+		invalidRole := map[string]interface{}{
+			"name":  "Test User",
+			"email": "test@example.com",
+			"role":  "invalid_role", // Not in enum
+		}
+		
+		ctx.inputs["validator1"] = []interface{}{invalidRole}
+		result, err = schemaExec.Execute(ctx, validatorNode)
+		if err != nil {
+			t.Fatalf("Schema validation failed: %v", err)
+		}
+		
+		resultMap = result.(map[string]interface{})
+		if resultMap["valid"] != false {
+			t.Errorf("Expected valid=false for invalid role")
+		}
+		
+		t.Log("✓ Schema validation workflow completed successfully")
+		t.Log("  - Validated user profiles against JSON schema")
+		t.Log("  - Detected missing required fields")
+		t.Log("  - Detected out-of-range values")
+		t.Log("  - Detected invalid enum values")
+	})
 }
