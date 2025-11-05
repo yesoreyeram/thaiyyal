@@ -26,6 +26,7 @@ A powerful, secure, and extensible visual workflow engine that combines a Next.j
 - **SSRF Protection**: Comprehensive protection against Server-Side Request Forgery
 - **Resource Limits**: Configurable limits for execution time, memory, and iterations
 - **Input Sanitization**: Automatic validation and sanitization of all inputs
+- **API Protection**: Per-execution HTTP call limits, rate limiting, and circuit breakers (planned)
 
 ### Extensibility
 - **Custom Node Executors**: Plugin architecture for custom node types
@@ -70,6 +71,8 @@ A powerful, secure, and extensible visual workflow engine that combines a Next.j
 - [Node Types Reference](docs/NODE_TYPES.md)
 - [API Reference](docs/API_REFERENCE.md)
 - [Security Best Practices](docs/SECURITY_BEST_PRACTICES.md)
+- [API Protection Analysis](docs/API_PROTECTION_SECURITY_ANALYSIS.md) - **NEW**
+- [API Protection Quick Reference](docs/API_PROTECTION_QUICK_REFERENCE.md) - **NEW**
 - [Performance Tuning](docs/PERFORMANCE_TUNING.md)
 - [Troubleshooting Guide](docs/TROUBLESHOOTING.md)
 - [Examples & Tutorials](docs/EXAMPLES.md)
@@ -268,7 +271,7 @@ backend/
 ### Resource Protection
 - Maximum execution time
 - Maximum node executions per workflow
-- Maximum HTTP calls per execution
+- **Maximum HTTP calls per execution (default: 100)** - **NEW**
 - Maximum loop iterations
 - Maximum recursion depth
 - Maximum variables count
