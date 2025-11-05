@@ -22,6 +22,7 @@ import {
   ConditionNode,
   FilterNode,
   BarChartNode,
+  RendererNode,
   ForEachNode,
   WhileLoopNode,
   VariableNode,
@@ -327,6 +328,12 @@ const nodeCategories = [
           show_values: true,
           max_bars: 20,
         },
+      },
+      {
+        type: "rendererNode",
+        label: "Renderer",
+        color: "bg-pink-600",
+        defaultData: {},
       },
     ],
   },
@@ -656,6 +663,9 @@ function Canvas() {
         setIsPaletteOpen(false)
       ),
       barChartNode: withContextMenu(BarChartNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      rendererNode: withContextMenu(RendererNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
       textInputNode: withContextMenu(TextInputNode, handleNodeContextMenu, () =>

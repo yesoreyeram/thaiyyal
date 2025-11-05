@@ -1,14 +1,12 @@
 package executor
 
 import (
-	"fmt"
-
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/types"
 )
 
 // RendererExecutor executes Renderer nodes
 // This node acts as a pass-through in the backend - it just forwards the input data
-// The actual rendering happens in the frontend
+// The actual rendering happens in the frontend, which auto-detects the appropriate format
 type RendererExecutor struct{}
 
 // Execute passes through the input data unchanged
@@ -29,22 +27,8 @@ func (e *RendererExecutor) NodeType() types.NodeType {
 }
 
 // Validate checks if node configuration is valid
+// Renderer nodes don't require any specific configuration - they auto-detect format
 func (e *RendererExecutor) Validate(node types.Node) error {
-	// Validate render_mode if provided
-	if node.Data.RenderMode != nil {
-		mode := *node.Data.RenderMode
-		validModes := map[string]bool{
-			"text":      true,
-			"json":      true,
-			"csv":       true,
-			"tsv":       true,
-			"xml":       true,
-			"table":     true,
-			"bar_chart": true,
-		}
-		if !validModes[mode] {
-			return fmt.Errorf("invalid render_mode: %s. Valid modes: text, json, csv, tsv, xml, table, bar_chart", mode)
-		}
-	}
+	// No validation needed - renderer auto-detects format from data
 	return nil
 }

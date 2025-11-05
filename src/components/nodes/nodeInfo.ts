@@ -222,6 +222,11 @@ export const nodeInfoMap: Record<string, NodeInfo> = {
     inputs: ["2D array to transpose"],
     outputs: ["Transposed array"],
   },
+  rendererNode: {
+    description: "Automatically render data in the most appropriate format based on data type and structure. Supports plain text, JSON, CSV, TSV, XML, table, and bar charts. The node displays 'No data' by default and automatically detects the best format after workflow execution. Can be used as an end node or intermediate node.",
+    inputs: ["Data to render"],
+    outputs: ["Rendered data (pass-through)"],
+  },
 };
 
 export function getNodeInfo(nodeType: string): NodeInfo | undefined {

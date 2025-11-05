@@ -131,7 +131,6 @@ type NodeData struct {
 	Value         *float64 `json:"value,omitempty"`           // for number nodes
 	Op            *string  `json:"op,omitempty"`              // for operation nodes
 	Mode          *string  `json:"mode,omitempty"`            // for visualization nodes
-	RenderMode    *string  `json:"render_mode,omitempty"`     // for renderer nodes (text, json, csv, tsv, xml, table, bar_chart)
 	Label         *string  `json:"label,omitempty"`           // optional label
 	Text          *string  `json:"text,omitempty"`            // for text input nodes
 	TextOp        *string  `json:"text_op,omitempty"`         // for text operation nodes

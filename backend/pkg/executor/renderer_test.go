@@ -15,54 +15,12 @@ func TestRendererExecutor_NodeType(t *testing.T) {
 
 func TestRendererExecutor_Validate(t *testing.T) {
 	tests := []struct {
-		name       string
-		renderMode *string
-		wantErr    bool
+		name    string
+		wantErr bool
 	}{
 		{
-			name:       "Valid render_mode: text",
-			renderMode: stringPtr("text"),
-			wantErr:    false,
-		},
-		{
-			name:       "Valid render_mode: json",
-			renderMode: stringPtr("json"),
-			wantErr:    false,
-		},
-		{
-			name:       "Valid render_mode: csv",
-			renderMode: stringPtr("csv"),
-			wantErr:    false,
-		},
-		{
-			name:       "Valid render_mode: tsv",
-			renderMode: stringPtr("tsv"),
-			wantErr:    false,
-		},
-		{
-			name:       "Valid render_mode: xml",
-			renderMode: stringPtr("xml"),
-			wantErr:    false,
-		},
-		{
-			name:       "Valid render_mode: table",
-			renderMode: stringPtr("table"),
-			wantErr:    false,
-		},
-		{
-			name:       "Valid render_mode: bar_chart",
-			renderMode: stringPtr("bar_chart"),
-			wantErr:    false,
-		},
-		{
-			name:       "No render_mode specified (defaults to text)",
-			renderMode: nil,
-			wantErr:    false,
-		},
-		{
-			name:       "Invalid render_mode",
-			renderMode: stringPtr("invalid_mode"),
-			wantErr:    true,
+			name:    "Valid node - no configuration needed",
+			wantErr: false,
 		},
 	}
 
@@ -70,9 +28,7 @@ func TestRendererExecutor_Validate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			executor := &RendererExecutor{}
 			node := types.Node{
-				Data: types.NodeData{
-					RenderMode: tt.renderMode,
-				},
+				Data: types.NodeData{},
 			}
 			err := executor.Validate(node)
 			if (err != nil) != tt.wantErr {
@@ -84,25 +40,22 @@ func TestRendererExecutor_Validate(t *testing.T) {
 
 func TestRendererExecutor_Execute(t *testing.T) {
 	tests := []struct {
-		name       string
-		inputs     []interface{}
-		renderMode *string
-		want       interface{}
-		wantErr    bool
+		name    string
+		inputs  []interface{}
+		want    interface{}
+		wantErr bool
 	}{
 		{
-			name:       "Pass through string data",
-			inputs:     []interface{}{"Hello World"},
-			renderMode: stringPtr("text"),
-			want:       "Hello World",
-			wantErr:    false,
+			name:    "Pass through string data",
+			inputs:  []interface{}{"Hello World"},
+			want:    "Hello World",
+			wantErr: false,
 		},
 		{
-			name:   "Pass through object data",
-			inputs: []interface{}{map[string]interface{}{"name": "John", "age": 30}},
-			renderMode: stringPtr("json"),
-			want:       map[string]interface{}{"name": "John", "age": 30},
-			wantErr:    false,
+			name:    "Pass through object data",
+			inputs:  []interface{}{map[string]interface{}{"name": "John", "age": 30}},
+			want:    map[string]interface{}{"name": "John", "age": 30},
+			wantErr: false,
 		},
 		{
 			name: "Pass through array data",
@@ -110,7 +63,6 @@ func TestRendererExecutor_Execute(t *testing.T) {
 				map[string]interface{}{"label": "A", "value": 10},
 				map[string]interface{}{"label": "B", "value": 20},
 			}},
-			renderMode: stringPtr("bar_chart"),
 			want: []interface{}{
 				map[string]interface{}{"label": "A", "value": 10},
 				map[string]interface{}{"label": "B", "value": 20},
@@ -118,25 +70,22 @@ func TestRendererExecutor_Execute(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:       "Pass through number data",
-			inputs:     []interface{}{42},
-			renderMode: stringPtr("text"),
-			want:       42,
-			wantErr:    false,
+			name:    "Pass through number data",
+			inputs:  []interface{}{42},
+			want:    42,
+			wantErr: false,
 		},
 		{
-			name:       "No input returns nil",
-			inputs:     []interface{}{},
-			renderMode: stringPtr("text"),
-			want:       nil,
-			wantErr:    false,
+			name:    "No input returns nil",
+			inputs:  []interface{}{},
+			want:    nil,
+			wantErr: false,
 		},
 		{
-			name:       "Multiple inputs - uses first",
-			inputs:     []interface{}{"first", "second", "third"},
-			renderMode: stringPtr("text"),
-			want:       "first",
-			wantErr:    false,
+			name:    "Multiple inputs - uses first",
+			inputs:  []interface{}{"first", "second", "third"},
+			want:    "first",
+			wantErr: false,
 		},
 	}
 
@@ -144,10 +93,8 @@ func TestRendererExecutor_Execute(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			executor := &RendererExecutor{}
 			node := types.Node{
-				ID: "renderer1",
-				Data: types.NodeData{
-					RenderMode: tt.renderMode,
-				},
+				ID:   "renderer1",
+				Data: types.NodeData{},
 			}
 
 			ctx := &MockExecutionContext{
