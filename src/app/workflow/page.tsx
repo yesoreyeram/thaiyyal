@@ -24,6 +24,9 @@ import ReactFlow, {
 import "reactflow/dist/style.css";
 import {
   TextInputNode,
+  BooleanInputNode,
+  DateInputNode,
+  DateTimeInputNode,
   TextOperationNode,
   HttpNode,
   ConditionNode,
@@ -411,6 +414,24 @@ const nodeCategories = [
         defaultData: { text: "" },
       },
       {
+        type: "boolean_input",
+        label: "Boolean",
+        color: "bg-indigo-600",
+        defaultData: { value: false },
+      },
+      {
+        type: "date_input",
+        label: "Date",
+        color: "bg-cyan-600",
+        defaultData: { value: "" },
+      },
+      {
+        type: "datetime_input",
+        label: "DateTime",
+        color: "bg-teal-600",
+        defaultData: { value: "" },
+      },
+      {
         type: "http",
         label: "HTTP",
         color: "bg-purple-600",
@@ -762,6 +783,15 @@ function Canvas() {
     []
   );
 
+  const handleDeleteNodeDirect = useCallback((nodeId: string) => {
+    setNodes((nds) => nds.filter((n) => n.id !== nodeId));
+    setEdges((eds) =>
+      eds.filter(
+        (e) => e.source !== nodeId && e.target !== nodeId
+      )
+    );
+  }, [setNodes, setEdges]);
+
   const payload = useMemo(
     () => ({
       nodes: nodes.map((n) => ({
@@ -794,6 +824,15 @@ function Canvas() {
         setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       text_input: withContextMenu(TextInputNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false), handleDeleteNodeDirect
+      ),
+      boolean_input: withContextMenu(BooleanInputNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false), handleDeleteNodeDirect
+      ),
+      date_input: withContextMenu(DateInputNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false), handleDeleteNodeDirect
+      ),
+      datetime_input: withContextMenu(DateTimeInputNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       text_operation: withContextMenu(
@@ -1182,15 +1221,6 @@ function Canvas() {
     }
     setContextMenu(null);
   };
-
-  const handleDeleteNodeDirect = useCallback((nodeId: string) => {
-    setNodes((nds) => nds.filter((n) => n.id !== nodeId));
-    setEdges((eds) =>
-      eds.filter(
-        (e) => e.source !== nodeId && e.target !== nodeId
-      )
-    );
-  }, [setNodes, setEdges]);
 
   const confirmDelete = () => {
     if (deleteConfirm) {
