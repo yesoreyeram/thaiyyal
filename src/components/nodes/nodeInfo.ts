@@ -17,6 +17,21 @@ export const nodeInfoMap: Record<string, NodeInfo> = {
     inputs: [],
     outputs: ["Text string"],
   },
+  booleanInputNode: {
+    description: "Input a boolean value (true/false) that can be used in conditions and logic operations.",
+    inputs: [],
+    outputs: ["Boolean value"],
+  },
+  dateInputNode: {
+    description: "Input a date value that can be used in date operations and comparisons.",
+    inputs: [],
+    outputs: ["Date string (YYYY-MM-DD)"],
+  },
+  datetimeInputNode: {
+    description: "Input a datetime value that can be used in datetime operations and comparisons.",
+    inputs: [],
+    outputs: ["DateTime string (ISO 8601 format)"],
+  },
   opNode: {
     description: "Perform arithmetic operations on two numeric inputs. Supports addition, subtraction, multiplication, and division.",
     inputs: ["First number", "Second number"],

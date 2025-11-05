@@ -6,4 +6,5 @@ import { NodeProps } from "reactflow";
 export type NodePropsWithOptions<T = Record<string, unknown>> = NodeProps<T> & {
   onShowOptions?: (x: number, y: number) => void;
   onOpenInfo?: () => void;
+  onDelete?: () => void;
 };

@@ -178,6 +178,9 @@ func DefaultRegistry() *executor.Registry {
 	// Basic I/O nodes
 	reg.MustRegister(&executor.NumberExecutor{})
 	reg.MustRegister(&executor.TextInputExecutor{})
+	reg.MustRegister(&executor.BooleanInputExecutor{})
+	reg.MustRegister(&executor.DateInputExecutor{})
+	reg.MustRegister(&executor.DateTimeInputExecutor{})
 	reg.MustRegister(&executor.VisualizationExecutor{})
 
 	// Operation nodes
@@ -509,6 +512,15 @@ func inferNodeTypeFromData(data types.NodeData) types.NodeType {
 	}
 	if data.Text != nil {
 		return types.NodeTypeTextInput
+	}
+	if data.BooleanValue != nil {
+		return types.NodeTypeBooleanInput
+	}
+	if data.DateValue != nil {
+		return types.NodeTypeDateInput
+	}
+	if data.DateTimeValue != nil {
+		return types.NodeTypeDateTimeInput
 	}
 	if data.Mode != nil {
 		return types.NodeTypeVisualization

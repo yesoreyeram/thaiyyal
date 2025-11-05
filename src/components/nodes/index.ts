@@ -1,5 +1,8 @@
 // Export all node components
 export { TextInputNode } from "./TextInputNode";
+export { BooleanInputNode } from "./BooleanInputNode";
+export { DateInputNode } from "./DateInputNode";
+export { DateTimeInputNode } from "./DateTimeInputNode";
 export { TextOperationNode } from "./TextOperationNode";
 export { HttpNode } from "./HttpNode";
 export { ConditionNode } from "./ConditionNode";

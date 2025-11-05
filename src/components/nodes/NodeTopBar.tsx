@@ -5,10 +5,11 @@ interface NodeTopBarProps {
   onInfo?: () => void;
   onOptions?: (x: number, y: number) => void;
   onTitleChange?: (newTitle: string) => void;
+  onDelete?: () => void;
   compact?: boolean;
 }
 
-export function NodeTopBar({ title, onInfo, onOptions, onTitleChange }: NodeTopBarProps) {
+export function NodeTopBar({ title, onInfo, onOptions, onTitleChange, onDelete }: NodeTopBarProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(title);
   const optionsRef = useRef<HTMLButtonElement>(null);
@@ -123,6 +124,30 @@ export function NodeTopBar({ title, onInfo, onOptions, onTitleChange }: NodeTopB
               className="w-2.5 h-2.5"
             >
               <path d="M2 8a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM6.5 8a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM12.5 6.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z" />
+            </svg>
+          </button>
+        )}
+        {onDelete && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+            className="w-3.5 h-3.5 flex items-center justify-center rounded hover:bg-red-900/20 transition-colors text-gray-300 hover:text-red-400"
+            aria-label="Delete node"
+            title="Delete node"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 16 16"
+              fill="currentColor"
+              className="w-2.5 h-2.5"
+            >
+              <path
+                fillRule="evenodd"
+                d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.713Z"
+                clipRule="evenodd"
+              />
             </svg>
           </button>
         )}

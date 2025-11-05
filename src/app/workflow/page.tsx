@@ -24,6 +24,9 @@ import ReactFlow, {
 import "reactflow/dist/style.css";
 import {
   TextInputNode,
+  BooleanInputNode,
+  DateInputNode,
+  DateTimeInputNode,
   TextOperationNode,
   HttpNode,
   ConditionNode,
@@ -79,7 +82,6 @@ import {
   ExecutionResult,
 } from "../../components/ExecutionPanel";
 import { WorkflowExample } from "../../data/workflowExamples";
-import { useRouter } from "next/navigation";
 
 type NodeData = Record<string, unknown>;
 
@@ -87,7 +89,8 @@ type NodeData = Record<string, unknown>;
 const withContextMenu = (
   Component: React.ComponentType<NodePropsWithOptions>,
   handleContextMenu: (nodeId: string, x: number, y: number) => void,
-  closePalette: () => void
+  closePalette: () => void,
+  handleDelete: (nodeId: string) => void
 ) => {
   const WrappedComponent = (props: NodeProps<NodeData>) => {
     const onShowOptions = (x: number, y: number) => {
@@ -96,11 +99,15 @@ const withContextMenu = (
     const onOpenInfo = () => {
       closePalette();
     };
+    const onDelete = () => {
+      handleDelete(props.id);
+    };
     return (
       <Component
         {...(props as NodePropsWithOptions)}
         onShowOptions={onShowOptions}
         onOpenInfo={onOpenInfo}
+        onDelete={onDelete}
       />
     );
   };
@@ -407,6 +414,24 @@ const nodeCategories = [
         defaultData: { text: "" },
       },
       {
+        type: "boolean_input",
+        label: "Boolean",
+        color: "bg-indigo-600",
+        defaultData: { boolean_value: false },
+      },
+      {
+        type: "date_input",
+        label: "Date",
+        color: "bg-cyan-600",
+        defaultData: { date_value: "" },
+      },
+      {
+        type: "datetime_input",
+        label: "DateTime",
+        color: "bg-teal-600",
+        defaultData: { datetime_value: "" },
+      },
+      {
         type: "http",
         label: "HTTP",
         color: "bg-purple-600",
@@ -702,7 +727,6 @@ const nodeCategories = [
 ];
 
 function Canvas() {
-  const router = useRouter();
   const [nodes, setNodes, onNodesChangeBase] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [showPayload, setShowPayload] = useState(false);
@@ -759,6 +783,15 @@ function Canvas() {
     []
   );
 
+  const handleDeleteNodeDirect = useCallback((nodeId: string) => {
+    setNodes((nds) => nds.filter((n) => n.id !== nodeId));
+    setEdges((eds) =>
+      eds.filter(
+        (e) => e.source !== nodeId && e.target !== nodeId
+      )
+    );
+  }, [setNodes, setEdges]);
+
   const payload = useMemo(
     () => ({
       nodes: nodes.map((n) => ({
@@ -779,135 +812,145 @@ function Canvas() {
   const nodeTypes = useMemo(
     () => ({
       number: withContextMenu(NumberNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       operation: withContextMenu(OperationNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       visualization: withContextMenu(VizNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       renderer: withContextMenu(RendererNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       text_input: withContextMenu(TextInputNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
+      ),
+      boolean_input: withContextMenu(BooleanInputNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false), handleDeleteNodeDirect
+      ),
+      date_input: withContextMenu(DateInputNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false), handleDeleteNodeDirect
+      ),
+      datetime_input: withContextMenu(DateTimeInputNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       text_operation: withContextMenu(
         TextOperationNode,
         handleNodeContextMenu,
-        () => setIsPaletteOpen(false)
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
       http: withContextMenu(HttpNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       condition: withContextMenu(ConditionNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       filter: withContextMenu(FilterNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       for_each: withContextMenu(ForEachNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       while_loop: withContextMenu(WhileLoopNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       variable: withContextMenu(VariableNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       extract: withContextMenu(ExtractNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       transform: withContextMenu(TransformNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       parse: withContextMenu(ParseNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       expression: withContextMenu(ExpressionNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       accumulator: withContextMenu(AccumulatorNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       counter: withContextMenu(CounterNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       switch: withContextMenu(SwitchNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       parallel: withContextMenu(ParallelNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       join: withContextMenu(JoinNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       split: withContextMenu(SplitNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       delay: withContextMenu(DelayNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       cache: withContextMenu(CacheNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       retry: withContextMenu(RetryNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       try_catch: withContextMenu(TryCatchNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       timeout: withContextMenu(TimeoutNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       map: withContextMenu(MapNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       reduce: withContextMenu(ReduceNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       slice: withContextMenu(SliceNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       sort: withContextMenu(SortNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       find: withContextMenu(FindNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       flat_map: withContextMenu(FlatMapNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       group_by: withContextMenu(GroupByNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       unique: withContextMenu(UniqueNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       chunk: withContextMenu(ChunkNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       reverse: withContextMenu(ReverseNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       partition: withContextMenu(PartitionNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       zip: withContextMenu(ZipNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       sample: withContextMenu(SampleNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       range: withContextMenu(RangeNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
       transpose: withContextMenu(TransposeNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
+        setIsPaletteOpen(false), handleDeleteNodeDirect
       ),
     }),
-    [handleNodeContextMenu]
+    [handleNodeContextMenu, handleDeleteNodeDirect]
   );
 
   // Check for overlapping nodes
@@ -1019,7 +1062,10 @@ function Canvas() {
   );
 
   const handleNewWorkflow = () => {
-    router.push("/");
+    // Clear the canvas by resetting nodes and edges
+    setNodes([]);
+    setEdges([]);
+    setWorkflowTitle("Untitled Workflow");
   };
 
   const handleOpenWorkflow = () => {

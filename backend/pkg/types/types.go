@@ -54,6 +54,9 @@ const (
 	NodeTypeOperation     NodeType = "operation"
 	NodeTypeVisualization NodeType = "visualization"
 	NodeTypeTextInput     NodeType = "text_input"
+	NodeTypeBooleanInput  NodeType = "boolean_input"
+	NodeTypeDateInput     NodeType = "date_input"
+	NodeTypeDateTimeInput NodeType = "datetime_input"
 	NodeTypeTextOperation NodeType = "text_operation"
 	NodeTypeHTTP          NodeType = "http"
 	NodeTypeCondition     NodeType = "condition"
@@ -130,6 +133,9 @@ type Node struct {
 // NodeData contains the node-specific configuration
 type NodeData struct {
 	Value         *float64 `json:"value,omitempty"`           // for number nodes
+	BooleanValue  *bool    `json:"boolean_value,omitempty"`   // for boolean input nodes
+	DateValue     *string  `json:"date_value,omitempty"`      // for date input nodes (YYYY-MM-DD format)
+	DateTimeValue *string  `json:"datetime_value,omitempty"`  // for datetime input nodes (ISO 8601 format)
 	Op            *string  `json:"op,omitempty"`              // for operation nodes
 	Mode          *string  `json:"mode,omitempty"`            // for visualization nodes
 	Label         *string  `json:"label,omitempty"`           // optional label
