@@ -116,14 +116,44 @@ cd backend && go build ./...
 
 ### Running the Application
 
-#### Development Mode
+#### Development Mode with Hot Reloading (Recommended)
+
+Run both frontend and backend with automatic hot reloading:
 
 ```bash
-# Start the Next.js development server
-npm run dev
+# Start both Next.js dev server and Go backend
+./dev.sh
 
-# Open your browser to http://localhost:3000
+# Or using npm
+npm run dev:full
+
+# Access the application at http://localhost:8080
+# Frontend changes reload instantly via Next.js Fast Refresh
 ```
+
+**Alternative: Manual Setup**
+
+Terminal 1 - Frontend only:
+```bash
+npm run dev
+# Next.js dev server on http://localhost:3000
+```
+
+Terminal 2 - Backend with dev proxy:
+```bash
+cd backend/cmd/server
+go run -tags dev . -addr :8080
+# Backend on http://localhost:8080 (proxies to Next.js)
+```
+
+**Docker Development**
+
+```bash
+# Start development environment with hot reloading
+docker-compose -f docker-compose.dev.yml up
+```
+
+See [DEV_HOT_RELOAD.md](DEV_HOT_RELOAD.md) for detailed information about hot module reloading.
 
 #### Production Build
 

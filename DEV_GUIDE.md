@@ -205,8 +205,12 @@ thaiyyal/
 ### Frontend Build
 
 ```bash
-# Development build (with hot reload)
+# Development with hot reload (Next.js only)
 npm run dev
+
+# Development with hot reload (Full stack - Frontend + Backend)
+npm run dev:full
+# Or: ./dev.sh
 
 # Production build
 npm run build
@@ -226,8 +230,11 @@ npm run lint -- --fix
 ```bash
 cd backend
 
-# Build all packages
+# Build all packages (production mode)
 go build ./...
+
+# Build with dev mode (for hot reload proxy)
+go build -tags dev ./...
 
 # Build with race detector
 go build -race ./...
@@ -238,6 +245,28 @@ go build -gcflags="all=-N -l" ./...
 # Cross-compilation
 GOOS=linux GOARCH=amd64 go build ./...
 ```
+
+### Development Builds
+
+For development with hot module reloading:
+
+```bash
+# Method 1: Use the dev script (recommended)
+./dev.sh
+
+# Method 2: Manual startup
+# Terminal 1
+npm run dev
+
+# Terminal 2
+cd backend/cmd/server
+go run -tags dev . -addr :8080
+
+# Method 3: Docker development
+docker-compose -f docker-compose.dev.yml up
+```
+
+See [DEV_HOT_RELOAD.md](DEV_HOT_RELOAD.md) for comprehensive hot reloading documentation.
 
 ### Build Artifacts
 
@@ -255,6 +284,8 @@ Build artifacts are gitignored:
 /.next/
 /out/
 /build/
+/server
+/server-dev
 ```
 
 ## Running Tests
