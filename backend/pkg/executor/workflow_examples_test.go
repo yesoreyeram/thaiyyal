@@ -149,10 +149,217 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 	
 	t.Run("Example23_DataTransformationPipeline", func(t *testing.T) {
 		// Example 23: Transform data through multiple stages
-		// Node types: rangeNode, mapNode (multiple), filterNode, reduceNode, vizNode
-		// Gap: Expression-based map/reduce operations need enhancement
+		// Node types: rangeNode, mapNode (multiple), filterNode, reduceNode
+		// ✅ Now fully supported with expression engine enhancements!
 		
-		t.Skip("Multi-stage transformation with expressions not fully implemented - see docs/WORKFLOW_EXAMPLES_ANALYSIS.md Gap #1")
+		// Create executors
+		rangeExec := &RangeExecutor{}
+		mapExec := &MapExecutor{}
+		filterExec := &FilterExecutor{}
+		
+		ctx := &MockExecutionContext{
+			inputs: map[string][]interface{}{},
+		}
+		
+		// Stage 1: Generate numbers 1-10
+		rangeNode := types.Node{
+			ID:   "range1",
+			Type: types.NodeTypeRange,
+			Data: types.NodeData{
+				Start: 1,
+				End:   10,
+				Step:  1,
+			},
+		}
+		
+		rangeResult, err := rangeExec.Execute(ctx, rangeNode)
+		if err != nil {
+			t.Fatalf("Range execution failed: %v", err)
+		}
+		
+		numbers := rangeResult.(map[string]interface{})["range"].([]interface{})
+		
+		// Stage 2: Map - double each number
+		ctx.inputs["map1"] = []interface{}{numbers}
+		doubleExpr := "item * 2"
+		mapNode1 := types.Node{
+			ID:   "map1",
+			Type: types.NodeTypeMap,
+			Data: types.NodeData{
+				Expression: &doubleExpr,
+			},
+		}
+		
+		mapResult1, err := mapExec.Execute(ctx, mapNode1)
+		if err != nil {
+			t.Fatalf("Map execution failed: %v", err)
+		}
+		
+		doubled := mapResult1.(map[string]interface{})["results"].([]interface{})
+		
+		// Verify doubling worked
+		if len(doubled) != 10 {
+			t.Fatalf("Expected 10 doubled items, got %d", len(doubled))
+		}
+		if doubled[0] == nil {
+			t.Fatalf("First doubled item is nil, mapResult1: %+v", mapResult1)
+		}
+		if dval, ok := doubled[0].(float64); !ok {
+			t.Fatalf("Expected float64, got %T: %v", doubled[0], doubled[0])
+		} else if dval != 2.0 {
+			t.Errorf("Expected first doubled item to be 2, got %v", dval)
+		}
+		
+		// Stage 3: Filter - keep only numbers > 10
+		ctx.inputs["filter1"] = []interface{}{doubled}
+		filterCond := "item > 10"
+		filterNode := types.Node{
+			ID:   "filter1",
+			Type: types.NodeTypeFilter,
+			Data: types.NodeData{
+				Condition: &filterCond,
+			},
+		}
+		
+		filterResult, err := filterExec.Execute(ctx, filterNode)
+		if err != nil {
+			t.Fatalf("Filter execution failed: %v", err)
+		}
+		
+		filtered := filterResult.(map[string]interface{})["filtered"].([]interface{})
+		
+		// Verify filtering: doubled values > 10 are: 12, 14, 16, 18, 20 (5 items)
+		if len(filtered) != 5 {
+			t.Errorf("Expected 5 filtered items, got %d", len(filtered))
+		}
+		
+		// Stage 4: Map - square the remaining numbers
+		ctx.inputs["map2"] = []interface{}{filtered}
+		squareExpr := "item * item"
+		mapNode2 := types.Node{
+			ID:   "map2",
+			Type: types.NodeTypeMap,
+			Data: types.NodeData{
+				Expression: &squareExpr,
+			},
+		}
+		
+		mapResult2, err := mapExec.Execute(ctx, mapNode2)
+		if err != nil {
+			t.Fatalf("Second map execution failed: %v", err)
+		}
+		
+		squared := mapResult2.(map[string]interface{})["results"].([]interface{})
+		
+		// Verify squaring: 12²=144, 14²=196, 16²=256, 18²=324, 20²=400
+		if len(squared) != 5 {
+			t.Errorf("Expected 5 squared items, got %d", len(squared))
+		}
+		if squared[0].(float64) != 144.0 {
+			t.Errorf("Expected first squared item to be 144, got %v", squared[0])
+		}
+		
+		t.Log("✅ Multi-stage transformation pipeline working correctly!")
+		t.Logf("   Stage 1 (Range): Generated %d numbers", len(numbers))
+		t.Logf("   Stage 2 (Map): Doubled to %d values", len(doubled))
+		t.Logf("   Stage 3 (Filter): Filtered to %d values > 10", len(filtered))
+		t.Logf("   Stage 4 (Map): Squared to final %d values", len(squared))
+	})
+	
+	t.Run("Example24_StringTransformation", func(t *testing.T) {
+		// Example: Transform user data with string methods
+		// Demonstrates: string methods, field access, method chaining
+		
+		mapExec := &MapExecutor{}
+		filterExec := &FilterExecutor{}
+		
+		ctx := &MockExecutionContext{
+			inputs: map[string][]interface{}{},
+		}
+		
+		// Test data: user records with mixed-case emails and names
+		users := []interface{}{
+			map[string]interface{}{"name": "  Alice Smith  ", "email": "ALICE@EXAMPLE.COM", "role": "admin"},
+			map[string]interface{}{"name": "Bob Jones", "email": "bob@test.com", "role": "user"},
+			map[string]interface{}{"name": " Charlie Brown ", "email": "CHARLIE@EXAMPLE.COM", "role": "moderator"},
+		}
+		
+		// Stage 1: Normalize emails to lowercase
+		ctx.inputs["map1"] = []interface{}{users}
+		normalizeExpr := "item.email.toLowerCase()"
+		mapNode1 := types.Node{
+			ID:   "map1",
+			Type: types.NodeTypeMap,
+			Data: types.NodeData{
+				Expression: &normalizeExpr,
+			},
+		}
+		
+		mapResult1, err := mapExec.Execute(ctx, mapNode1)
+		if err != nil {
+			t.Fatalf("Map execution failed: %v", err)
+		}
+		
+		emails := mapResult1.(map[string]interface{})["results"].([]interface{})
+		
+		// Verify email normalization
+		if emails[0].(string) != "alice@example.com" {
+			t.Errorf("Expected normalized email 'alice@example.com', got %v", emails[0])
+		}
+		
+		// Stage 2: Filter users from example.com domain
+		ctx.inputs["filter1"] = []interface{}{users}
+		filterCond := "item.email.toLowerCase().includes('@example.com')"
+		filterNode := types.Node{
+			ID:   "filter1",
+			Type: types.NodeTypeFilter,
+			Data: types.NodeData{
+				Condition: &filterCond,
+			},
+		}
+		
+		filterResult, err := filterExec.Execute(ctx, filterNode)
+		if err != nil {
+			t.Fatalf("Filter execution failed: %v", err)
+		}
+		
+		exampleUsers := filterResult.(map[string]interface{})["filtered"].([]interface{})
+		
+		// Should have 2 users from example.com
+		if len(exampleUsers) != 2 {
+			t.Errorf("Expected 2 users from example.com, got %d", len(exampleUsers))
+		}
+		
+		// Stage 3: Extract trimmed, uppercase names
+		ctx.inputs["map2"] = []interface{}{exampleUsers}
+		nameExpr := "item.name.trim().toUpperCase()"
+		mapNode2 := types.Node{
+			ID:   "map2",
+			Type: types.NodeTypeMap,
+			Data: types.NodeData{
+				Expression: &nameExpr,
+			},
+		}
+		
+		mapResult2, err := mapExec.Execute(ctx, mapNode2)
+		if err != nil {
+			t.Fatalf("Second map execution failed: %v", err)
+		}
+		
+		names := mapResult2.(map[string]interface{})["results"].([]interface{})
+		
+		// Verify name transformation
+		if names[0].(string) != "ALICE SMITH" {
+			t.Errorf("Expected 'ALICE SMITH', got %v", names[0])
+		}
+		if names[1].(string) != "CHARLIE BROWN" {
+			t.Errorf("Expected 'CHARLIE BROWN', got %v", names[1])
+		}
+		
+		t.Log("✅ String transformation pipeline working correctly!")
+		t.Logf("   Normalized %d emails", len(emails))
+		t.Logf("   Filtered to %d users from example.com", len(exampleUsers))
+		t.Logf("   Transformed %d names to uppercase", len(names))
 	})
 }
 

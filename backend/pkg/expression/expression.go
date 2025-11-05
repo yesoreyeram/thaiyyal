@@ -1387,7 +1387,20 @@ func (p *arithmeticParser) parseIdentifier() (float64, error) {
 		return num, nil
 	}
 
-	return 0, fmt.Errorf("unknown identifier '%s' at position %d", ident, start)
+	// Handle bare identifiers (like "item", "accumulator")
+	// Try to resolve as variables.ident
+	val, err := resolveValue("variables."+ident, nil, p.ctx)
+	if err != nil {
+		return 0, fmt.Errorf("unknown identifier '%s' at position %d (tried as variables.%s but got: %v)", ident, start, ident, err)
+	}
+
+	// Convert to float64
+	num, ok := toFloat64(val)
+	if !ok {
+		return 0, fmt.Errorf("value '%v' at 'variables.%s' cannot be converted to number", val, ident)
+	}
+
+	return num, nil
 }
 
 // parseFunction parses a function call
