@@ -1,14 +1,23 @@
 # HTTP Client Management API Examples
 
-This document provides examples of how to use the HTTP client management APIs.
+This document provides examples of how to use all the server APIs including workflow management, HTTP client management, and frontend serving.
 
 ## Overview
 
 The Thaiyyal server provides APIs for:
-1. Executing workflows (`/api/v1/workflow/execute`)
-2. Validating workflows (`/api/v1/workflow/validate`)
-3. Registering HTTP clients (`/api/v1/httpclient/register`)
-4. Listing registered HTTP clients (`/api/v1/httpclient/list`)
+1. **Workflow Management**
+   - Executing workflows (`/api/v1/workflow/execute`)
+   - Validating workflows (`/api/v1/workflow/validate`)
+   - Saving workflows (`/api/v1/workflow/save`)
+   - Listing workflows (`/api/v1/workflow/list`)
+   - Loading workflows (`/api/v1/workflow/load/{id}`)
+   - Deleting workflows (`/api/v1/workflow/delete/{id}`)
+   - Executing by ID (`/api/v1/workflow/execute/{id}`)
+2. **HTTP Client Management**
+   - Registering HTTP clients (`/api/v1/httpclient/register`)
+   - Listing registered HTTP clients (`/api/v1/httpclient/list`)
+3. **Frontend Serving**
+   - Static files served from root (`/`)
 
 ## Starting the Server
 
@@ -20,7 +29,159 @@ The Thaiyyal server provides APIs for:
 ./server -addr :9090 -max-execution-time 30s -max-node-executions 1000
 ```
 
-## HTTP Client Management
+## Workflow Management
+
+### Save a Workflow
+
+Save a workflow with a name, description, and workflow data.
+
+**Endpoint:** `POST /api/v1/workflow/save`
+
+**Example:**
+```bash
+curl -X POST http://localhost:8080/api/v1/workflow/save \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "My Addition Workflow",
+    "description": "Simple addition of two numbers",
+    "data": {
+      "nodes": [
+        {"id": "1", "data": {"value": 10}},
+        {"id": "2", "data": {"value": 5}},
+        {"id": "3", "data": {"op": "add"}}
+      ],
+      "edges": [
+        {"source": "1", "target": "3"},
+        {"source": "2", "target": "3"}
+      ]
+    }
+  }'
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "id": "3e4e4585-2b18-4db1-9968-ad2d8649c64c",
+  "message": "Workflow saved successfully"
+}
+```
+
+### List All Workflows
+
+List all saved workflows with their metadata.
+
+**Endpoint:** `GET /api/v1/workflow/list`
+
+**Example:**
+```bash
+curl -X GET http://localhost:8080/api/v1/workflow/list
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "workflows": [
+    {
+      "id": "3e4e4585-2b18-4db1-9968-ad2d8649c64c",
+      "name": "My Addition Workflow",
+      "description": "Simple addition of two numbers",
+      "created_at": "2025-11-05T02:08:10.964574825Z",
+      "updated_at": "2025-11-05T02:08:10.964574825Z"
+    }
+  ],
+  "count": 1
+}
+```
+
+### Load a Workflow by ID
+
+Load a complete workflow including its data.
+
+**Endpoint:** `GET /api/v1/workflow/load/{id}`
+
+**Example:**
+```bash
+curl -X GET http://localhost:8080/api/v1/workflow/load/3e4e4585-2b18-4db1-9968-ad2d8649c64c
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "workflow": {
+    "id": "3e4e4585-2b18-4db1-9968-ad2d8649c64c",
+    "name": "My Addition Workflow",
+    "description": "Simple addition of two numbers",
+    "data": {
+      "nodes": [
+        {"id": "1", "data": {"value": 10}},
+        {"id": "2", "data": {"value": 5}},
+        {"id": "3", "data": {"op": "add"}}
+      ],
+      "edges": [
+        {"source": "1", "target": "3"},
+        {"source": "2", "target": "3"}
+      ]
+    },
+    "created_at": "2025-11-05T02:08:10.964574825Z",
+    "updated_at": "2025-11-05T02:08:10.964574825Z"
+  }
+}
+```
+
+### Execute a Workflow by ID
+
+Execute a previously saved workflow by its ID.
+
+**Endpoint:** `POST /api/v1/workflow/execute/{id}`
+
+**Example:**
+```bash
+curl -X POST http://localhost:8080/api/v1/workflow/execute/3e4e4585-2b18-4db1-9968-ad2d8649c64c
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "workflow_id": "3e4e4585-2b18-4db1-9968-ad2d8649c64c",
+  "workflow_name": "My Addition Workflow",
+  "results": {
+    "execution_id": "76537766d2651745",
+    "node_results": {
+      "1": 10,
+      "2": 5,
+      "3": 15
+    },
+    "final_output": 15
+  }
+}
+```
+
+### Delete a Workflow
+
+Delete a saved workflow by its ID.
+
+**Endpoint:** `DELETE /api/v1/workflow/delete/{id}`
+
+**Example:**
+```bash
+curl -X DELETE http://localhost:8080/api/v1/workflow/delete/3e4e4585-2b18-4db1-9968-ad2d8649c64c
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Workflow deleted successfully"
+}
+```
+
+## Workflow Execution
+
+### Execute a Workflow
 
 ### Register an HTTP Client
 
@@ -332,6 +493,21 @@ curl -X POST http://localhost:8080/api/v1/httpclient/register \
   }'
 ```
 
+## Frontend Serving
+
+The server serves the frontend application from the root path (`/`). The frontend and API are served from the same origin, eliminating CORS issues.
+
+**Example:**
+```bash
+# Access the frontend in your browser
+open http://localhost:8080/
+
+# Or use curl to test
+curl http://localhost:8080/
+```
+
+The frontend is served using Go's embedded filesystem, so no separate build step is needed at runtime.
+
 ## Complete Example Workflow
 
 ```bash
@@ -344,7 +520,35 @@ SERVER_PID=$!
 # Wait for server to start
 sleep 2
 
-# 2. Register an HTTP client
+# 2. Save a workflow
+SAVE_RESPONSE=$(curl -s -X POST http://localhost:8080/api/v1/workflow/save \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Production Workflow",
+    "description": "Multiply two numbers",
+    "data": {
+      "nodes": [
+        {"id": "1", "data": {"value": 100}},
+        {"id": "2", "data": {"value": 50}},
+        {"id": "3", "data": {"op": "multiply"}}
+      ],
+      "edges": [
+        {"source": "1", "target": "3"},
+        {"source": "2", "target": "3"}
+      ]
+    }
+  }')
+
+WORKFLOW_ID=$(echo $SAVE_RESPONSE | jq -r '.id')
+echo "Workflow ID: $WORKFLOW_ID"
+
+# 3. List all workflows
+curl -s http://localhost:8080/api/v1/workflow/list
+
+# 4. Execute the workflow by ID
+curl -s -X POST http://localhost:8080/api/v1/workflow/execute/$WORKFLOW_ID
+
+# 5. Register an HTTP client
 curl -X POST http://localhost:8080/api/v1/httpclient/register \
   -H "Content-Type: application/json" \
   -d '{
@@ -361,26 +565,14 @@ curl -X POST http://localhost:8080/api/v1/httpclient/register \
     }
   }'
 
-# 3. List all registered clients
+# 6. List all registered clients
 curl -X GET http://localhost:8080/api/v1/httpclient/list
 
-# 4. Execute a workflow
-curl -X POST http://localhost:8080/api/v1/workflow/execute \
-  -H "Content-Type: application/json" \
-  -d '{
-    "nodes": [
-      {"id": "1", "data": {"value": 100}},
-      {"id": "2", "data": {"value": 50}},
-      {"id": "3", "data": {"op": "multiply"}}
-    ],
-    "edges": [
-      {"source": "1", "target": "3"},
-      {"source": "2", "target": "3"}
-    ]
-  }'
-
-# 5. Check health
+# 7. Check health
 curl http://localhost:8080/health
+
+# 8. Access frontend
+echo "Open http://localhost:8080/ in your browser"
 
 # Stop the server
 kill $SERVER_PID
