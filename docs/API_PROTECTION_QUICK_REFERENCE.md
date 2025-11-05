@@ -28,7 +28,7 @@ config.MaxHTTPCallsPerExec = 500  // Explicitly increase if needed
 ```go
 config := config.Development()
 // Relaxed limits for dev/testing
-// - MaxHTTPCallsPerExec: 100 (still limited for safety)
+// - MaxHTTPCallsPerExec: 100 (same as default, can be increased if needed)
 // - AllowHTTP: true
 // - AllowPrivateIPs: true
 // - AllowLocalhost: true

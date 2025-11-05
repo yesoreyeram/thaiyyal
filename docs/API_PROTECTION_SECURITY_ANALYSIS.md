@@ -113,19 +113,19 @@ MaxNodeExecutions: 10000  // Default: 10k nodes per execution
 
 #### C. HTTP Call Counter
 ```go
-MaxHTTPCallsPerExec: 0  // Default: unlimited
+MaxHTTPCallsPerExec: 100  // Default: 100 calls per execution (CHANGED from unlimited)
 ```
 
 **Purpose:** Limit total HTTP calls per workflow execution
-**Effectiveness:** MEDIUM (when configured)
+**Effectiveness:** HIGH ✅ **ENHANCED**
 **Coverage:** All HTTP nodes
 **Gaps:**
-- ⚠️ Default is unlimited (must be explicitly configured)
+- ✅ Default changed from unlimited to 100 (FIXED in this PR)
 - ⚠️ No per-endpoint limits (can hit single API many times)
 - ⚠️ No time-window based limiting (all calls allowed if under limit)
 - ⚠️ No distinction between different APIs
 
-**Recommendation:** Change default to reasonable limit (e.g., 100)
+**Status:** ✅ **IMPROVED** - Default now set to reasonable limit (100)
 
 ### 2.2 Network-Level Protections ✅
 
@@ -1286,12 +1286,15 @@ roles:
 - ✅ Retry with backoff
 - ✅ Comprehensive resource limits
 - ✅ Good observability foundation
+- ✅ **HTTP call limit now enforced by default (100)**
 
-**Weaknesses:**
+**Gaps Addressed in This PR:**
+- ✅ **GAP-4 FIXED**: MaxHTTPCallsPerExec default changed from unlimited to 100
+
+**Remaining Gaps:**
 - ⚠️ No per-endpoint rate limiting
 - ⚠️ No circuit breaker pattern
 - ⚠️ Limited audit logging
-- ⚠️ Default MaxHTTPCallsPerExec = unlimited
 - ⚠️ No anomaly detection
 
 ### 8.2 Proposed State
