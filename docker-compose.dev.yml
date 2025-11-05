@@ -1,0 +1,44 @@
+
+services:
+  # Thaiyyal Development Server with hot reloading
+  thaiyyal-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"  # Next.js dev server
+      - "8080:8080"  # Go backend
+    volumes:
+      # Mount source code for hot reloading
+      - ./src:/app/src
+      - ./public:/app/public
+      - ./backend:/app/backend
+      - ./package.json:/app/package.json
+      - ./package-lock.json:/app/package-lock.json
+      - ./next.config.ts:/app/next.config.ts
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./postcss.config.mjs:/app/postcss.config.mjs
+      - ./eslint.config.mjs:/app/eslint.config.mjs
+      # Exclude node_modules and build artifacts from volume
+      - /app/node_modules
+      - /app/.next
+      - /app/out
+    environment:
+      # Server configuration
+      - SERVER_ADDR=:8080
+      - MAX_EXECUTION_TIME=1m
+      - MAX_NODE_EXECUTIONS=10000
+      - MAX_HTTP_CALLS=100
+      - MAX_LOOP_ITERATIONS=10000
+      # Development mode
+      - NODE_ENV=development
+    restart: unless-stopped
+    networks:
+      - thaiyyal-dev
+    # Keep container running and show logs
+    stdin_open: true
+    tty: true
+
+networks:
+  thaiyyal-dev:
+    driver: bridge

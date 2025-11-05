@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:full": "./dev.sh",
     "build": "next build && npm run copy:static",
     "build:frontend": "next build",
     "copy:static": "rm -rf backend/pkg/server/static/* && cp -r out/* backend/pkg/server/static/",

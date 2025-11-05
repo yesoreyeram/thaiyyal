@@ -1,0 +1,36 @@
+# Development Dockerfile for Thaiyyal workflow engine
+# This Dockerfile is optimized for development with hot reloading
+FROM golang:alpine
+
+# Install Node.js for frontend development
+RUN apk add --no-cache nodejs npm git make curl
+
+WORKDIR /app
+
+# Copy package files for frontend
+COPY package*.json ./
+COPY next.config.ts ./
+COPY tsconfig.json ./
+COPY postcss.config.mjs ./
+COPY eslint.config.mjs ./
+
+# Install frontend dependencies
+RUN npm install
+
+# Copy Go modules files
+COPY go.mod go.sum ./
+RUN go mod download
+
+# Install air for Go hot reload (optional but nice to have)
+RUN go install github.com/cosmtrek/air@latest
+
+# Copy the rest of the application
+COPY . .
+
+# Expose ports
+# 3000 for Next.js dev server
+# 8080 for Go backend
+EXPOSE 3000 8080
+
+# Default command runs the dev script
+CMD ["./dev.sh"]

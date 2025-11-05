@@ -45,6 +45,7 @@ next-env.d.ts
 /backend/examples/examples
 /backend/bin/
 /server
+/server-dev
 *.exe
 *.exe~
 *.dll
@@ -68,5 +69,8 @@ backend/examples
 /playwright/.cache/
 # Keep E2E screenshots in repo for documentation
 #!/e2e/screenshots/
+
+# Development logs
+/tmp/thaiyyal-*.log
 
 thaiyyal-server

@@ -8,8 +8,15 @@ import (
 )
 
 // handleStaticFiles serves static frontend files from the embedded filesystem
+// or proxies to Next.js dev server in dev mode
 // It automatically handles .html extension for routes and falls back to index.html for SPA routing
 func (s *Server) handleStaticFiles(w http.ResponseWriter, r *http.Request) {
+	// In dev mode, proxy to Next.js dev server
+	if isDevMode() {
+		s.handleDevProxy(w, r)
+		return
+	}
+
 	// Get the embedded filesystem
 	staticFS, err := getStaticFS()
 	if err != nil {
@@ -77,6 +84,23 @@ func (s *Server) handleStaticFiles(w http.ResponseWriter, r *http.Request) {
 
 	// Serve the content
 	http.ServeContent(w, r, stat.Name(), stat.ModTime(), strings.NewReader(string(content)))
+}
+
+// handleDevProxy proxies requests to Next.js dev server in development mode
+func (s *Server) handleDevProxy(w http.ResponseWriter, r *http.Request) {
+	proxy, err := getDevProxy()
+	if err != nil {
+		s.logger.WithError(err).Error("failed to create dev proxy")
+		http.Error(w, "Failed to proxy to dev server", http.StatusInternalServerError)
+		return
+	}
+
+	s.logger.WithFields(map[string]interface{}{
+		"method": r.Method,
+		"path":   r.URL.Path,
+	}).Debug("proxying request to Next.js dev server")
+
+	proxy.ServeHTTP(w, r)
 }
 
 // tryServeFile attempts to read a file from the filesystem and returns its content and stat
