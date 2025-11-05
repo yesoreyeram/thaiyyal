@@ -64,7 +64,7 @@ func Default() *Config {
 		HTTPTimeout:         30 * time.Second,
 		MaxHTTPRedirects:    10,
 		MaxResponseSize:     10 * 1024 * 1024, // 10MB
-		MaxHTTPCallsPerExec: 0,                // unlimited
+		MaxHTTPCallsPerExec: 100,              // Default: 100 calls per execution (changed from unlimited for security)
 		AllowedURLPatterns:  nil,              // allow all when AllowHTTP is true
 		BlockInternalIPs:    true,             // DEPRECATED: kept for backward compatibility
 
