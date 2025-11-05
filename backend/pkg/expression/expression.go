@@ -472,11 +472,43 @@ func resolveValue(ref string, input interface{}, ctx *Context) (interface{}, err
 // resolveFieldPath resolves a field path (e.g., "age" or "profile.verified") from an object
 // Also supports special properties like .length for arrays and strings
 // and array indexing like users[0] or tags[1].name
+// and method calls like .toUpperCase(), .toLowerCase(), .includes(), .startsWith(), .endsWith()
 func resolveFieldPath(path string, obj interface{}) (interface{}, error) {
-	parts := strings.Split(path, ".")
+	// Split by dots, but respect parentheses and brackets
+	parts := splitFieldPath(path)
 	current := obj
 
 	for _, field := range parts {
+		// Handle method calls: fieldName()
+		if strings.HasSuffix(field, ")") && strings.Contains(field, "(") {
+			methodIdx := strings.Index(field, "(")
+			methodName := field[:methodIdx]
+			argsStr := field[methodIdx+1 : len(field)-1]
+			
+			// Parse arguments (simple comma-separated for now)
+			var args []interface{}
+			if argsStr != "" {
+				argParts := splitArguments(argsStr)
+				for _, argStr := range argParts {
+					// Try to parse as literal
+					if val, ok := parseLiteral(argStr); ok {
+						args = append(args, val)
+					} else {
+						// Could be a variable reference, but for now we'll treat as string
+						args = append(args, strings.Trim(argStr, "\"'"))
+					}
+				}
+			}
+			
+			// Call the method
+			result, err := callMethod(current, methodName, args)
+			if err != nil {
+				return nil, err
+			}
+			current = result
+			continue
+		}
+		
 		// Handle array indexing: field[index]
 		if idx := strings.Index(field, "["); idx != -1 && strings.HasSuffix(field, "]") {
 			// Extract field name and index
@@ -538,6 +570,191 @@ func resolveFieldPath(path string, obj interface{}) (interface{}, error) {
 	}
 
 	return current, nil
+}
+
+// splitFieldPath splits a field path by dots, respecting parentheses and brackets
+func splitFieldPath(path string) []string {
+	var parts []string
+	var current strings.Builder
+	parenDepth := 0
+	bracketDepth := 0
+	
+	for i := 0; i < len(path); i++ {
+		ch := path[i]
+		
+		switch ch {
+		case '(':
+			parenDepth++
+			current.WriteByte(ch)
+		case ')':
+			parenDepth--
+			current.WriteByte(ch)
+		case '[':
+			bracketDepth++
+			current.WriteByte(ch)
+		case ']':
+			bracketDepth--
+			current.WriteByte(ch)
+		case '.':
+			if parenDepth == 0 && bracketDepth == 0 {
+				// This is a field separator
+				if current.Len() > 0 {
+					parts = append(parts, current.String())
+					current.Reset()
+				}
+			} else {
+				// Inside parentheses or brackets, keep the dot
+				current.WriteByte(ch)
+			}
+		default:
+			current.WriteByte(ch)
+		}
+	}
+	
+	// Add the last part
+	if current.Len() > 0 {
+		parts = append(parts, current.String())
+	}
+	
+	return parts
+}
+
+// callMethod calls a method on a value (string methods, array methods, etc.)
+func callMethod(obj interface{}, method string, args []interface{}) (interface{}, error) {
+	switch method {
+	// String methods
+	case "toUpperCase":
+		if str, ok := obj.(string); ok {
+			return strings.ToUpper(str), nil
+		}
+		return nil, fmt.Errorf("toUpperCase() can only be called on strings, got %T", obj)
+		
+	case "toLowerCase":
+		if str, ok := obj.(string); ok {
+			return strings.ToLower(str), nil
+		}
+		return nil, fmt.Errorf("toLowerCase() can only be called on strings, got %T", obj)
+		
+	case "trim":
+		if str, ok := obj.(string); ok {
+			return strings.TrimSpace(str), nil
+		}
+		return nil, fmt.Errorf("trim() can only be called on strings, got %T", obj)
+		
+	case "includes":
+		if str, ok := obj.(string); ok {
+			if len(args) != 1 {
+				return nil, fmt.Errorf("includes() requires exactly 1 argument, got %d", len(args))
+			}
+			needle := fmt.Sprintf("%v", args[0])
+			return strings.Contains(str, needle), nil
+		}
+		if arr, ok := obj.([]interface{}); ok {
+			if len(args) != 1 {
+				return nil, fmt.Errorf("includes() requires exactly 1 argument, got %d", len(args))
+			}
+			// Check if array includes the value
+			for _, item := range arr {
+				if item == args[0] || fmt.Sprintf("%v", item) == fmt.Sprintf("%v", args[0]) {
+					return true, nil
+				}
+			}
+			return false, nil
+		}
+		return nil, fmt.Errorf("includes() can only be called on strings or arrays, got %T", obj)
+		
+	case "startsWith":
+		if str, ok := obj.(string); ok {
+			if len(args) != 1 {
+				return nil, fmt.Errorf("startsWith() requires exactly 1 argument, got %d", len(args))
+			}
+			prefix := fmt.Sprintf("%v", args[0])
+			return strings.HasPrefix(str, prefix), nil
+		}
+		return nil, fmt.Errorf("startsWith() can only be called on strings, got %T", obj)
+		
+	case "endsWith":
+		if str, ok := obj.(string); ok {
+			if len(args) != 1 {
+				return nil, fmt.Errorf("endsWith() requires exactly 1 argument, got %d", len(args))
+			}
+			suffix := fmt.Sprintf("%v", args[0])
+			return strings.HasSuffix(str, suffix), nil
+		}
+		return nil, fmt.Errorf("endsWith() can only be called on strings, got %T", obj)
+		
+	case "replace":
+		if str, ok := obj.(string); ok {
+			if len(args) != 2 {
+				return nil, fmt.Errorf("replace() requires exactly 2 arguments, got %d", len(args))
+			}
+			old := fmt.Sprintf("%v", args[0])
+			new := fmt.Sprintf("%v", args[1])
+			return strings.ReplaceAll(str, old, new), nil
+		}
+		return nil, fmt.Errorf("replace() can only be called on strings, got %T", obj)
+		
+	case "split":
+		if str, ok := obj.(string); ok {
+			if len(args) != 1 {
+				return nil, fmt.Errorf("split() requires exactly 1 argument, got %d", len(args))
+			}
+			separator := fmt.Sprintf("%v", args[0])
+			parts := strings.Split(str, separator)
+			result := make([]interface{}, len(parts))
+			for i, part := range parts {
+				result[i] = part
+			}
+			return result, nil
+		}
+		return nil, fmt.Errorf("split() can only be called on strings, got %T", obj)
+		
+	// Array methods
+	case "join":
+		if arr, ok := obj.([]interface{}); ok {
+			if len(args) != 1 {
+				return nil, fmt.Errorf("join() requires exactly 1 argument, got %d", len(args))
+			}
+			separator := fmt.Sprintf("%v", args[0])
+			strParts := make([]string, len(arr))
+			for i, item := range arr {
+				strParts[i] = fmt.Sprintf("%v", item)
+			}
+			return strings.Join(strParts, separator), nil
+		}
+		return nil, fmt.Errorf("join() can only be called on arrays, got %T", obj)
+		
+	case "reverse":
+		if arr, ok := obj.([]interface{}); ok {
+			reversed := make([]interface{}, len(arr))
+			for i, item := range arr {
+				reversed[len(arr)-1-i] = item
+			}
+			return reversed, nil
+		}
+		return nil, fmt.Errorf("reverse() can only be called on arrays, got %T", obj)
+		
+	case "first":
+		if arr, ok := obj.([]interface{}); ok {
+			if len(arr) == 0 {
+				return nil, nil
+			}
+			return arr[0], nil
+		}
+		return nil, fmt.Errorf("first() can only be called on arrays, got %T", obj)
+		
+	case "last":
+		if arr, ok := obj.([]interface{}); ok {
+			if len(arr) == 0 {
+				return nil, nil
+			}
+			return arr[len(arr)-1], nil
+		}
+		return nil, fmt.Errorf("last() can only be called on arrays, got %T", obj)
+		
+	default:
+		return nil, fmt.Errorf("unknown method: %s", method)
+	}
 }
 
 // containsArithmetic checks if an expression contains arithmetic operators or functions
