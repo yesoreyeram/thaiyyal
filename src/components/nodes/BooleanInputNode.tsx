@@ -5,7 +5,7 @@ import { NodeWrapper } from "./NodeWrapper";
 import { getNodeInfo } from "./nodeInfo";
 
 type BooleanInputNodeData = {
-  value?: boolean;
+  boolean_value?: boolean;
   label?: string;
 };
 
@@ -17,9 +17,9 @@ export function BooleanInputNode({
   const { setNodes } = useReactFlow();
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.checked;
+    const boolean_value = e.target.checked;
     setNodes((nds) =>
-      nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, value } } : n))
+      nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, boolean_value } } : n))
     );
   };
 
@@ -48,14 +48,14 @@ export function BooleanInputNode({
       />
       <div className="flex items-center gap-2 px-1">
         <input
-          checked={data?.value ?? false}
+          checked={data?.boolean_value ?? false}
           type="checkbox"
           onChange={onChange}
           className="w-4 h-4 text-indigo-600 bg-gray-900 border-indigo-600 rounded focus:ring-indigo-500 focus:ring-2"
           aria-label="Boolean value"
         />
         <span className="text-xs text-gray-300">
-          {data?.value ? "True" : "False"}
+          {data?.boolean_value ? "True" : "False"}
         </span>
       </div>
       <Handle

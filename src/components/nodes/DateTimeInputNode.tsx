@@ -5,7 +5,7 @@ import { NodeWrapper } from "./NodeWrapper";
 import { getNodeInfo } from "./nodeInfo";
 
 type DateTimeInputNodeData = {
-  value?: string;
+  datetime_value?: string;
   label?: string;
 };
 
@@ -17,9 +17,9 @@ export function DateTimeInputNode({
   const { setNodes } = useReactFlow();
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
+    const datetime_value = e.target.value;
     setNodes((nds) =>
-      nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, value } } : n))
+      nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, datetime_value } } : n))
     );
   };
 
@@ -47,7 +47,7 @@ export function DateTimeInputNode({
         className="w-2 h-2 bg-blue-400"
       />
       <input
-        value={String(data?.value ?? "")}
+        value={String(data?.datetime_value ?? "")}
         type="datetime-local"
         onChange={onChange}
         className="w-36 text-xs border border-teal-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-teal-400 focus:outline-none"

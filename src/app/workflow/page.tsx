@@ -417,19 +417,19 @@ const nodeCategories = [
         type: "boolean_input",
         label: "Boolean",
         color: "bg-indigo-600",
-        defaultData: { value: false },
+        defaultData: { boolean_value: false },
       },
       {
         type: "date_input",
         label: "Date",
         color: "bg-cyan-600",
-        defaultData: { value: "" },
+        defaultData: { date_value: "" },
       },
       {
         type: "datetime_input",
         label: "DateTime",
         color: "bg-teal-600",
-        defaultData: { value: "" },
+        defaultData: { datetime_value: "" },
       },
       {
         type: "http",
