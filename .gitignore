@@ -56,3 +56,7 @@ go.work
 go.work.sum
 examples/parallel_demo
 backend/examples
+
+# Backend static files (generated from frontend build)
+/backend/pkg/server/static/*
+!/backend/pkg/server/static/README.md

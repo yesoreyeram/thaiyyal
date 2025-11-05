@@ -1,4 +1,3 @@
-// Package server provides HTTP API routes for workflow management.
 package server
 
 import (
@@ -7,8 +6,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/yesoreyeram/thaiyyal/backend"
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/engine"
-	"github.com/yesoreyeram/thaiyyal/backend/pkg/storage"
 )
 
 // SaveWorkflowRequest represents the request to save a workflow
@@ -28,15 +27,15 @@ type SaveWorkflowResponse struct {
 
 // LoadWorkflowResponse represents the response from loading a workflow
 type LoadWorkflowResponse struct {
-	Success  bool               `json:"success"`
-	Workflow *storage.Workflow  `json:"workflow,omitempty"`
-	Error    string             `json:"error,omitempty"`
+	Success  bool                `json:"success"`
+	Workflow *workflow.WorkflowMeta `json:"workflow,omitempty"`
+	Error    string              `json:"error,omitempty"`
 }
 
 // ListWorkflowsResponse represents the response from listing workflows
 type ListWorkflowsResponse struct {
 	Success   bool                      `json:"success"`
-	Workflows []storage.WorkflowSummary `json:"workflows"`
+	Workflows []workflow.WorkflowSummary `json:"workflows"`
 	Count     int                       `json:"count"`
 }
 
@@ -72,7 +71,7 @@ func (s *Server) handleSaveWorkflow(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Save workflow
-	id, err := s.workflowStore.Save(req.Name, req.Description, req.Data)
+	id, err := s.workflowRegistry.Register(req.Name, req.Description, req.Data)
 	if err != nil {
 		s.writeJSONResponse(w, http.StatusBadRequest, SaveWorkflowResponse{
 			Success: false,
@@ -112,7 +111,7 @@ func (s *Server) handleLoadWorkflow(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Load workflow
-	workflow, err := s.workflowStore.Load(id)
+	workflow, err := s.workflowRegistry.Get(id)
 	if err != nil {
 		s.writeJSONResponse(w, http.StatusNotFound, LoadWorkflowResponse{
 			Success: false,
@@ -136,7 +135,7 @@ func (s *Server) handleListWorkflows(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get list of workflows
-	workflows := s.workflowStore.List()
+	workflows := s.workflowRegistry.List()
 
 	// Write successful response
 	s.writeJSONResponse(w, http.StatusOK, ListWorkflowsResponse{
@@ -167,7 +166,7 @@ func (s *Server) handleDeleteWorkflow(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Delete workflow
-	err := s.workflowStore.Delete(id)
+	err := s.workflowRegistry.Unregister(id)
 	if err != nil {
 		s.writeJSONResponse(w, http.StatusNotFound, DeleteWorkflowResponse{
 			Success: false,
@@ -203,7 +202,7 @@ func (s *Server) handleExecuteWorkflowByID(w http.ResponseWriter, r *http.Reques
 	}
 
 	// Load workflow
-	workflow, err := s.workflowStore.Load(id)
+	workflow, err := s.workflowRegistry.Get(id)
 	if err != nil {
 		s.writeErrorResponse(w, "Failed to load workflow", http.StatusNotFound, err)
 		return

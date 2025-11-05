@@ -1,4 +1,4 @@
-package storage
+package workflow
 
 import (
 	"encoding/json"
@@ -9,8 +9,8 @@ import (
 	"github.com/google/uuid"
 )
 
-// Workflow represents a stored workflow with metadata
-type Workflow struct {
+// WorkflowMeta represents a stored workflow with metadata
+type WorkflowMeta struct {
 	ID          string          `json:"id"`
 	Name        string          `json:"name"`
 	Description string          `json:"description,omitempty"`
@@ -28,63 +28,42 @@ type WorkflowSummary struct {
 	UpdatedAt   time.Time `json:"updated_at"`
 }
 
-// Store defines the interface for workflow storage operations
-type Store interface {
-	// Save creates or updates a workflow
-	Save(name, description string, data json.RawMessage) (string, error)
-	
-	// Update updates an existing workflow
-	Update(id, name, description string, data json.RawMessage) error
-	
-	// Load retrieves a workflow by ID
-	Load(id string) (*Workflow, error)
-	
-	// Delete removes a workflow by ID
-	Delete(id string) error
-	
-	// List returns all workflow summaries
-	List() []WorkflowSummary
-	
-	// Exists checks if a workflow exists
-	Exists(id string) bool
-}
-
-// InMemoryStore implements Store using in-memory storage
-type InMemoryStore struct {
-	workflows map[string]*Workflow
+// WorkflowRegistry manages stored workflows by their IDs
+type WorkflowRegistry struct {
+	workflows map[string]*WorkflowMeta
 	mu        sync.RWMutex
 }
 
-// NewInMemoryStore creates a new in-memory workflow store
-func NewInMemoryStore() *InMemoryStore {
-	return &InMemoryStore{
-		workflows: make(map[string]*Workflow),
+// NewWorkflowRegistry creates a new workflow registry
+func NewWorkflowRegistry() *WorkflowRegistry {
+	return &WorkflowRegistry{
+		workflows: make(map[string]*WorkflowMeta),
 	}
 }
 
-// Save creates a new workflow and returns its ID
-func (s *InMemoryStore) Save(name, description string, data json.RawMessage) (string, error) {
+// Register adds a workflow to the registry and returns its ID
+func (r *WorkflowRegistry) Register(name, description string, data json.RawMessage) (string, error) {
 	if name == "" {
 		return "", fmt.Errorf("workflow name is required")
 	}
-	
+
 	if len(data) == 0 {
 		return "", fmt.Errorf("workflow data is required")
 	}
-	
+
 	// Validate that data is valid JSON
 	var temp interface{}
 	if err := json.Unmarshal(data, &temp); err != nil {
 		return "", fmt.Errorf("invalid workflow data: %w", err)
 	}
-	
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	id := uuid.New().String()
 	now := time.Now()
-	
-	workflow := &Workflow{
+
+	workflow := &WorkflowMeta{
 		ID:          id,
 		Name:        name,
 		Description: description,
@@ -92,64 +71,64 @@ func (s *InMemoryStore) Save(name, description string, data json.RawMessage) (st
 		CreatedAt:   now,
 		UpdatedAt:   now,
 	}
-	
-	s.workflows[id] = workflow
-	
+
+	r.workflows[id] = workflow
+
 	return id, nil
 }
 
 // Update updates an existing workflow
-func (s *InMemoryStore) Update(id, name, description string, data json.RawMessage) error {
+func (r *WorkflowRegistry) Update(id, name, description string, data json.RawMessage) error {
 	if id == "" {
 		return fmt.Errorf("workflow ID is required")
 	}
-	
+
 	if name == "" {
 		return fmt.Errorf("workflow name is required")
 	}
-	
+
 	if len(data) == 0 {
 		return fmt.Errorf("workflow data is required")
 	}
-	
+
 	// Validate that data is valid JSON
 	var temp interface{}
 	if err := json.Unmarshal(data, &temp); err != nil {
 		return fmt.Errorf("invalid workflow data: %w", err)
 	}
-	
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	
-	workflow, exists := s.workflows[id]
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	workflow, exists := r.workflows[id]
 	if !exists {
 		return fmt.Errorf("workflow with ID %s not found", id)
 	}
-	
+
 	workflow.Name = name
 	workflow.Description = description
 	workflow.Data = data
 	workflow.UpdatedAt = time.Now()
-	
+
 	return nil
 }
 
-// Load retrieves a workflow by ID
-func (s *InMemoryStore) Load(id string) (*Workflow, error) {
+// Get retrieves a workflow by ID
+func (r *WorkflowRegistry) Get(id string) (*WorkflowMeta, error) {
 	if id == "" {
 		return nil, fmt.Errorf("workflow ID is required")
 	}
-	
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-	
-	workflow, exists := s.workflows[id]
+
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	workflow, exists := r.workflows[id]
 	if !exists {
 		return nil, fmt.Errorf("workflow with ID %s not found", id)
 	}
-	
+
 	// Return a copy to prevent external modifications
-	workflowCopy := &Workflow{
+	workflowCopy := &WorkflowMeta{
 		ID:          workflow.ID,
 		Name:        workflow.Name,
 		Description: workflow.Description,
@@ -158,36 +137,36 @@ func (s *InMemoryStore) Load(id string) (*Workflow, error) {
 		UpdatedAt:   workflow.UpdatedAt,
 	}
 	copy(workflowCopy.Data, workflow.Data)
-	
+
 	return workflowCopy, nil
 }
 
-// Delete removes a workflow by ID
-func (s *InMemoryStore) Delete(id string) error {
+// Unregister removes a workflow by ID
+func (r *WorkflowRegistry) Unregister(id string) error {
 	if id == "" {
 		return fmt.Errorf("workflow ID is required")
 	}
-	
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	
-	if _, exists := s.workflows[id]; !exists {
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if _, exists := r.workflows[id]; !exists {
 		return fmt.Errorf("workflow with ID %s not found", id)
 	}
-	
-	delete(s.workflows, id)
-	
+
+	delete(r.workflows, id)
+
 	return nil
 }
 
 // List returns all workflow summaries
-func (s *InMemoryStore) List() []WorkflowSummary {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-	
-	summaries := make([]WorkflowSummary, 0, len(s.workflows))
-	
-	for _, workflow := range s.workflows {
+func (r *WorkflowRegistry) List() []WorkflowSummary {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	summaries := make([]WorkflowSummary, 0, len(r.workflows))
+
+	for _, workflow := range r.workflows {
 		summaries = append(summaries, WorkflowSummary{
 			ID:          workflow.ID,
 			Name:        workflow.Name,
@@ -196,15 +175,31 @@ func (s *InMemoryStore) List() []WorkflowSummary {
 			UpdatedAt:   workflow.UpdatedAt,
 		})
 	}
-	
+
 	return summaries
 }
 
-// Exists checks if a workflow exists
-func (s *InMemoryStore) Exists(id string) bool {
-	s.mu.RLock()
-	defer s.mu.RUnlock()
-	
-	_, exists := s.workflows[id]
+// Has checks if a workflow exists
+func (r *WorkflowRegistry) Has(id string) bool {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	_, exists := r.workflows[id]
 	return exists
+}
+
+// Count returns the number of registered workflows
+func (r *WorkflowRegistry) Count() int {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+
+	return len(r.workflows)
+}
+
+// Clear removes all workflows from the registry
+func (r *WorkflowRegistry) Clear() {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	r.workflows = make(map[string]*WorkflowMeta)
 }

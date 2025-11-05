@@ -19,9 +19,9 @@ import (
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/health"
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/httpclient"
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/logging"
-	"github.com/yesoreyeram/thaiyyal/backend/pkg/storage"
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/telemetry"
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/types"
+	"github.com/yesoreyeram/thaiyyal/backend"
 )
 
 // Config holds server configuration
@@ -66,7 +66,7 @@ type Server struct {
 	logger             *logging.Logger
 	engineConfig       types.Config
 	httpClientRegistry *httpclient.Registry
-	workflowStore      storage.Store
+	workflowRegistry   *workflow.WorkflowRegistry
 }
 
 // New creates a new server instance
@@ -93,8 +93,8 @@ func New(config Config, engineConfig types.Config) (*Server, error) {
 	// Create HTTP client registry
 	httpClientRegistry := httpclient.NewRegistry()
 	
-	// Create workflow store
-	workflowStore := storage.NewInMemoryStore()
+	// Create workflow registry
+	workflowRegistry := workflow.NewWorkflowRegistry()
 	
 	server := &Server{
 		config:             config,
@@ -103,7 +103,7 @@ func New(config Config, engineConfig types.Config) (*Server, error) {
 		logger:             logger,
 		engineConfig:       engineConfig,
 		httpClientRegistry: httpClientRegistry,
-		workflowStore:      workflowStore,
+		workflowRegistry:   workflowRegistry,
 	}
 	
 	// Create HTTP server

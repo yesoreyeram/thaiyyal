@@ -5,14 +5,12 @@ import (
 	"net/http"
 	"path"
 	"strings"
-
-	"github.com/yesoreyeram/thaiyyal/backend/pkg/frontend"
 )
 
 // handleStaticFiles serves static frontend files from the embedded filesystem
 func (s *Server) handleStaticFiles(w http.ResponseWriter, r *http.Request) {
 	// Get the embedded filesystem
-	staticFS, err := frontend.GetFS()
+	staticFS, err := getStaticFS()
 	if err != nil {
 		s.logger.WithError(err).Error("failed to get static filesystem")
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
