@@ -725,6 +725,7 @@ function Canvas() {
   const [executionResult, setExecutionResult] =
     useState<ExecutionResult | null>(null);
   const [executionError, setExecutionError] = useState<string | null>(null);
+  const [executionDetails, setExecutionDetails] = useState<string | null>(null);
   const [executionPanelHeight, setExecutionPanelHeight] = useState(250);
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -1066,6 +1067,7 @@ function Canvas() {
     setIsExecuting(true);
     setExecutionResult(null);
     setExecutionError(null);
+    setExecutionDetails(null);
 
     // Create abort controller for cancellation
     abortControllerRef.current = new AbortController();
@@ -1087,15 +1089,19 @@ function Canvas() {
       }
 
       setExecutionResult(data);
-    } catch (error) {
-      if (error instanceof Error) {
-        if (error.name === "AbortError") {
-          setExecutionError("Execution cancelled by user");
-        } else {
-          setExecutionError(error.message);
-        }
+    } catch (error: unknown) {
+      if (
+        (error as { name: string; message: string; detail: string }).name ===
+        "AbortError"
+      ) {
+        setExecutionError("Execution cancelled by user");
       } else {
-        setExecutionError("An unknown error occurred");
+        setExecutionError(
+          (error as { name: string; message: string; detail: string }).message
+        );
+        setExecutionDetails(
+          (error as { name: string; message: string; detail: string }).detail
+        );
       }
     } finally {
       setIsExecuting(false);
@@ -1114,6 +1120,7 @@ function Canvas() {
     setIsExecutionPanelOpen(false);
     setExecutionResult(null);
     setExecutionError(null);
+    setExecutionDetails(null);
   };
 
   const handleExport = () => {
@@ -1244,49 +1251,35 @@ function Canvas() {
         {/* Canvas Container */}
         <div className="flex-1 relative">
           {/* Toggle Sidebar Button - Top Left of Canvas */}
-          <button
-            onClick={() => setIsPaletteOpen(!isPaletteOpen)}
-            className="absolute left-4 top-4 z-10 bg-gray-800 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg shadow-lg transition-all border border-gray-700 hover:border-gray-600 text-sm font-medium flex items-center gap-1.5"
-            title={isPaletteOpen ? "Hide Nodes Panel" : "Show Nodes Panel"}
-          >
-            {isPaletteOpen ? (
-              <>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                  className="w-4 h-4"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5"
-                  />
-                </svg>
-                <span>Hide Nodes</span>
-              </>
-            ) : (
-              <>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                  className="w-4 h-4"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-                  />
-                </svg>
-                <span>Show Nodes</span>
-              </>
-            )}
-          </button>
+          {isPaletteOpen ? (
+            <> </>
+          ) : (
+            <>
+              <button
+                onClick={() => setIsPaletteOpen(!isPaletteOpen)}
+                className="absolute left-4 top-4 z-10 bg-gray-800 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg shadow-lg transition-all border border-gray-700 hover:border-gray-600 text-sm font-medium flex items-center gap-1.5"
+                title={"Show Nodes Panel"}
+              >
+                <>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                    stroke="currentColor"
+                    className="w-4 h-4"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                    />
+                  </svg>
+                  <span>Show Nodes</span>
+                </>
+              </button>
+            </>
+          )}
 
           {/* React Flow Canvas */}
           <ReactFlow
@@ -1298,6 +1291,7 @@ function Canvas() {
             onDragOver={onDragOver}
             onDrop={onDrop}
             nodeTypes={nodeTypes}
+            proOptions={{ hideAttribution: true }}
             fitView
             className="bg-gray-950"
           />
@@ -1341,6 +1335,7 @@ function Canvas() {
         isLoading={isExecuting}
         result={executionResult}
         error={executionError}
+        details={executionDetails}
         onCancel={handleCancelExecution}
         onClose={handleCloseExecutionPanel}
         height={executionPanelHeight}

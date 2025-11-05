@@ -19,6 +19,7 @@ interface ExecutionPanelProps {
   isLoading: boolean;
   result: ExecutionResult | null;
   error: string | null;
+  details: string | null;
   onCancel: () => void;
   onClose: () => void;
   height: number;
@@ -30,6 +31,7 @@ export function ExecutionPanel({
   isLoading,
   result,
   error,
+  details,
   onCancel,
   onClose,
   height,
@@ -44,7 +46,10 @@ export function ExecutionPanel({
 
     const handleMouseMove = (e: MouseEvent) => {
       const deltaY = dragStartY.current - e.clientY;
-      const newHeight = Math.max(100, Math.min(600, dragStartHeight.current + deltaY));
+      const newHeight = Math.max(
+        100,
+        Math.min(600, dragStartHeight.current + deltaY)
+      );
       onHeightChange(newHeight);
     };
 
@@ -146,7 +151,7 @@ export function ExecutionPanel({
         {!isLoading && error && (
           <div className="bg-red-900/20 border border-red-800 rounded-lg p-4">
             <div className="flex items-start gap-3">
-              <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center shrink-0 mt-0.5">
                 <span className="text-white text-xs font-bold">!</span>
               </div>
               <div className="flex-1">
@@ -154,7 +159,7 @@ export function ExecutionPanel({
                   Execution Error
                 </h3>
                 <pre className="text-xs text-gray-300 bg-gray-950 rounded p-3 overflow-x-auto">
-                  {error}
+                  {details || error}
                 </pre>
               </div>
             </div>
@@ -177,7 +182,9 @@ export function ExecutionPanel({
                 </div>
                 <div>
                   <span className="text-gray-400">Duration:</span>
-                  <span className="ml-2 text-green-400">{result.execution_time}</span>
+                  <span className="ml-2 text-green-400">
+                    {result.execution_time}
+                  </span>
                 </div>
                 {result.workflow_id && (
                   <div>
@@ -190,7 +197,9 @@ export function ExecutionPanel({
                 {result.workflow_name && (
                   <div>
                     <span className="text-gray-400">Workflow:</span>
-                    <span className="ml-2 text-gray-200">{result.workflow_name}</span>
+                    <span className="ml-2 text-gray-200">
+                      {result.workflow_name}
+                    </span>
                   </div>
                 )}
               </div>
@@ -237,7 +246,9 @@ export function ExecutionPanel({
         {!isLoading && !result && !error && (
           <div className="flex flex-col items-center justify-center h-full text-gray-500">
             <div className="text-4xl mb-4">▶️</div>
-            <p className="text-sm">Click "Run" to execute the workflow</p>
+            <p className="text-sm">
+              Click &ldquo;Run&rdquo; to execute the workflow
+            </p>
             <p className="text-xs text-gray-600 mt-2">
               Results will appear here
             </p>
