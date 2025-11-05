@@ -11,15 +11,13 @@ type BooleanInputExecutor struct{}
 
 // Execute returns the boolean value from a boolean input node
 func (e *BooleanInputExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-	// The frontend sends the boolean value in the "value" field as interface{}
-	// We need to handle it appropriately
+	// Get the boolean value from the node data
 	if node.Data.BooleanValue != nil {
 		return *node.Data.BooleanValue, nil
 	}
 	
-	// Fallback: try to get from generic value field (frontend compatibility)
-	// The frontend might send it as a generic value
-	return false, nil // Default to false if no value is set
+	// Default to false if no value is set
+	return false, nil
 }
 
 // NodeType returns the node type this executor handles
