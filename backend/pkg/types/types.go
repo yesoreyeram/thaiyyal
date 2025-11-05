@@ -96,6 +96,11 @@ const (
 	NodeTypeRetry    NodeType = "retry"     // Retry with backoff
 	NodeTypeTryCatch NodeType = "try_catch" // Error handling with fallback
 	NodeTypeTimeout  NodeType = "timeout"   // Enforce time limits
+	// Advanced Nodes (Phase 4)
+	NodeTypeRateLimiter     NodeType = "rate_limiter"     // Control request rates
+	NodeTypeThrottle        NodeType = "throttle"         // Simple request throttling
+	NodeTypeSchemaValidator NodeType = "schema_validator" // Validate against JSON schemas
+	NodeTypePaginator       NodeType = "paginator"        // Auto-handle API pagination
 	// Context nodes (orphan nodes that define workflow-level values)
 	NodeTypeContextVariable NodeType = "context_variable" // Define a mutable variable
 	NodeTypeContextConstant NodeType = "context_constant" // Define an immutable constant
@@ -188,6 +193,29 @@ type NodeData struct {
 	ContinueOnError *bool       `json:"continue_on_error,omitempty"` // for try-catch node
 	ErrorOutputPath *string     `json:"error_output_path,omitempty"` // for try-catch node
 	TimeoutAction   *string     `json:"timeout_action,omitempty"`    // for timeout node (error/continue_with_partial)
+	// Phase 4: Advanced Node fields
+	MaxRequests      *int    `json:"max_requests,omitempty"`       // for rate_limiter node
+	PerDuration      *string `json:"per_duration,omitempty"`       // for rate_limiter node (1s, 1m, 1h)
+	RateLimitStrategy *string `json:"strategy,omitempty"`           // for rate_limiter node (fixed_window, sliding_window, token_bucket)
+	RequestsPerSecond *float64 `json:"requests_per_second,omitempty"` // for throttle node
+	Schema           interface{} `json:"schema,omitempty"`          // for schema_validator node (JSON schema)
+	Strict           *bool       `json:"strict,omitempty"`          // for schema_validator node
+	PaginationStrategy *string    `json:"pagination_strategy,omitempty"` // for paginator node (offset_limit, page_number, cursor, link_header)
+	OffsetParam      *string    `json:"offset_param,omitempty"`    // for paginator node
+	LimitParam       *string    `json:"limit_param,omitempty"`     // for paginator node
+	PageSize         *int       `json:"page_size,omitempty"`       // for paginator node
+	MaxPages         *int       `json:"max_pages,omitempty"`       // for paginator node
+	PageParam        *string    `json:"page_param,omitempty"`      // for paginator node
+	PerPageParam     *string    `json:"per_page_param,omitempty"`  // for paginator node
+	CursorParam      *string    `json:"cursor_param,omitempty"`    // for paginator node
+	NextCursorPath   *string    `json:"next_cursor_path,omitempty"` // for paginator node
+	LinkHeader       *string    `json:"link_header,omitempty"`     // for paginator node
+	TotalCountPath   *string    `json:"total_count_path,omitempty"` // for paginator node
+	ResultsPath      *string    `json:"results_path,omitempty"`    // for paginator node
+	MaxSize          *int       `json:"max_size,omitempty"`        // for enhanced cache node
+	Eviction         *string    `json:"eviction,omitempty"`        // for enhanced cache node (lru, lfu, ttl)
+	Storage          *string    `json:"storage,omitempty"`         // for enhanced cache node (memory, redis)
+	Scope            *string    `json:"scope,omitempty"`           // for variable node (global, workflow, local)
 	// Context node fields
 	ContextName   *string                `json:"context_name,omitempty"`   // DEPRECATED: Use ContextValues for multiple values
 	ContextValue  interface{}            `json:"context_value,omitempty"`  // DEPRECATED: Use ContextValues for multiple values

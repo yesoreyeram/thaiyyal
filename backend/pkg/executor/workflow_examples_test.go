@@ -753,3 +753,140 @@ func TestWorkflowExample_APICalls(t *testing.T) {
 	// Gap: Current MockExecutionContext returns DefaultConfig() which has AllowHTTP=false
 	// Would need TestConfig() helper or config override in mock
 }
+
+// TestWorkflowExamples_Phase4_AdvancedNodes tests Phase 4 advanced nodes
+func TestWorkflowExamples_Phase4_AdvancedNodes(t *testing.T) {
+	t.Run("Example28_RateLimitedAPICall", func(t *testing.T) {
+		// Example 28: Rate-limited API calls
+		// Scenario: Make multiple API calls with rate limiting to avoid overwhelming server
+		// Nodes: rangeNode → rateLimiterNode → (httpNode would go here)
+		
+		rangeExec := &RangeExecutor{}
+		rateLimiterExec := NewRateLimiterExecutor()
+		
+		ctx := &MockExecutionContext{
+			inputs: make(map[string][]interface{}),
+		}
+		
+		// Generate 5 requests
+		rangeNode := types.Node{
+			ID:   "range1",
+			Type: types.NodeTypeRange,
+			Data: types.NodeData{
+				Start: 1,
+				End:   5,
+				Step:  1,
+			},
+		}
+		
+		rangeResult, err := rangeExec.Execute(ctx, rangeNode)
+		if err != nil {
+			t.Fatalf("Range execution failed: %v", err)
+		}
+		
+		resultMap := rangeResult.(map[string]interface{})
+		requests := resultMap["range"].([]interface{})
+		
+		if len(requests) != 5 {
+			t.Fatalf("Expected 5 requests, got %d", len(requests))
+		}
+		
+		// Apply rate limiting - 2 requests per second
+		maxReq := 2
+		rateLimitNode := types.Node{
+			ID:   "ratelimit1",
+			Type: types.NodeTypeRateLimiter,
+			Data: types.NodeData{
+				MaxRequests: &maxReq,
+				PerDuration: strPtr("1s"),
+			},
+		}
+		
+		// Process each request through rate limiter
+		for i, req := range requests {
+			ctx.inputs["ratelimit1"] = []interface{}{req}
+			
+			result, err := rateLimiterExec.Execute(ctx, rateLimitNode)
+			if err != nil {
+				t.Fatalf("Rate limiter failed for request %d: %v", i, err)
+			}
+			
+			// Verify rate limiting metadata
+			limiterResult := result.(map[string]interface{})
+			if limiterResult["rate_limited"] != true {
+				t.Errorf("Expected rate_limited=true")
+			}
+			
+			// Verify value passed through
+			if limiterResult["value"] != req {
+				t.Errorf("Value not passed through correctly")
+			}
+		}
+		
+		t.Log("✓ Rate limiting workflow completed successfully")
+	})
+	
+	t.Run("Example29_ThrottledBatchOperations", func(t *testing.T) {
+		// Example 29: Throttled batch operations
+		// Scenario: Process batch of items with simple throttling
+		// Nodes: rangeNode → throttleNode
+		
+		rangeExec := &RangeExecutor{}
+		throttleExec := NewThrottleExecutor()
+		
+		ctx := &MockExecutionContext{
+			inputs: make(map[string][]interface{}),
+		}
+		
+		// Generate batch of items
+		rangeNode := types.Node{
+			ID:   "range1",
+			Type: types.NodeTypeRange,
+			Data: types.NodeData{
+				Start: 1,
+				End:   3,
+				Step:  1,
+			},
+		}
+		
+		rangeResult, err := rangeExec.Execute(ctx, rangeNode)
+		if err != nil {
+			t.Fatalf("Range execution failed: %v", err)
+		}
+		
+		resultMap := rangeResult.(map[string]interface{})
+		items := resultMap["range"].([]interface{})
+		
+		// Apply throttling - 5 requests per second
+		rps := 5.0
+		throttleNode := types.Node{
+			ID:   "throttle1",
+			Type: types.NodeTypeThrottle,
+			Data: types.NodeData{
+				RequestsPerSecond: &rps,
+			},
+		}
+		
+		// Process each item through throttle
+		for i, item := range items {
+			ctx.inputs["throttle1"] = []interface{}{item}
+			
+			result, err := throttleExec.Execute(ctx, throttleNode)
+			if err != nil {
+				t.Fatalf("Throttle failed for item %d: %v", i, err)
+			}
+			
+			// Verify throttling metadata
+			throttleResult := result.(map[string]interface{})
+			if throttleResult["throttled"] != true {
+				t.Errorf("Expected throttled=true")
+			}
+			
+			if throttleResult["requests_per_second"] != rps {
+				t.Errorf("Expected requests_per_second=%f, got %v", rps, throttleResult["requests_per_second"])
+			}
+		}
+		
+		t.Log("✓ Throttling workflow completed successfully")
+	})
+}

@@ -231,6 +231,10 @@ func DefaultRegistry() *executor.Registry {
 	reg.MustRegister(&executor.TryCatchExecutor{})
 	reg.MustRegister(&executor.TimeoutExecutor{})
 
+	// Phase 4: Advanced nodes
+	reg.MustRegister(executor.NewRateLimiterExecutor())
+	reg.MustRegister(executor.NewThrottleExecutor())
+
 	// Context nodes
 	reg.MustRegister(&executor.ContextVariableExecutor{})
 	reg.MustRegister(&executor.ContextConstantExecutor{})
