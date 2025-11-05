@@ -216,6 +216,7 @@ func DefaultRegistry() *executor.Registry {
 	reg.MustRegister(&executor.AccumulatorExecutor{})
 	reg.MustRegister(&executor.CounterExecutor{})
 	reg.MustRegister(&executor.ParseExecutor{})
+	reg.MustRegister(&executor.FormatExecutor{})
 
 	// Advanced control flow nodes
 	reg.MustRegister(&executor.SwitchExecutor{})
@@ -229,6 +230,11 @@ func DefaultRegistry() *executor.Registry {
 	reg.MustRegister(&executor.RetryExecutor{})
 	reg.MustRegister(&executor.TryCatchExecutor{})
 	reg.MustRegister(&executor.TimeoutExecutor{})
+
+	// Phase 4: Advanced nodes
+	reg.MustRegister(executor.NewRateLimiterExecutor())
+	reg.MustRegister(executor.NewThrottleExecutor())
+	reg.MustRegister(&executor.SchemaValidatorExecutor{})
 
 	// Context nodes
 	reg.MustRegister(&executor.ContextVariableExecutor{})
