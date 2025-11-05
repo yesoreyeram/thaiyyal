@@ -53,6 +53,11 @@ curl -X POST http://localhost:8080/api/v1/httpclient/register \
   }'
 ```
 
+> **Note:** Timeout values are specified in nanoseconds. For example:
+> - 30s = 30000000000 nanoseconds
+> - 1m = 60000000000 nanoseconds
+> - Use the formula: `seconds * 1000000000` to convert
+
 **Response:**
 ```json
 {
@@ -120,6 +125,8 @@ curl -X POST http://localhost:8080/api/v1/httpclient/register \
     }
   }'
 ```
+
+> **Note:** The timeout above is 60s (60000000000 nanoseconds)
 
 ### List Registered HTTP Clients
 
