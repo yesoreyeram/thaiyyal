@@ -35,6 +35,26 @@ func Evaluate(expression string, input interface{}, ctx *Context) (bool, error) 
 		}
 	}
 
+	// If input is provided and not already in variables as 'item', add it
+	// This allows expressions like "item.items.length > 0" to work
+	if input != nil {
+		if _, hasItem := ctx.Variables["item"]; !hasItem {
+			// Create a copy of the context with item added
+			newCtx := &Context{
+				NodeResults: ctx.NodeResults,
+				Variables:   make(map[string]interface{}),
+				ContextVars: ctx.ContextVars,
+			}
+			// Copy existing variables
+			for k, v := range ctx.Variables {
+				newCtx.Variables[k] = v
+			}
+			// Add item
+			newCtx.Variables["item"] = input
+			ctx = newCtx
+		}
+	}
+
 	// Trim whitespace
 	expression = strings.TrimSpace(expression)
 
@@ -105,6 +125,26 @@ func EvaluateExpression(expression string, input interface{}, ctx *Context) (int
 			NodeResults: make(map[string]interface{}),
 			Variables:   make(map[string]interface{}),
 			ContextVars: make(map[string]interface{}),
+		}
+	}
+
+	// If input is provided and not already in variables as 'item', add it
+	// This allows arithmetic expressions to access item.field
+	if input != nil {
+		if _, hasItem := ctx.Variables["item"]; !hasItem {
+			// Create a copy of the context with item added
+			newCtx := &Context{
+				NodeResults: ctx.NodeResults,
+				Variables:   make(map[string]interface{}),
+				ContextVars: ctx.ContextVars,
+			}
+			// Copy existing variables
+			for k, v := range ctx.Variables {
+				newCtx.Variables[k] = v
+			}
+			// Add item
+			newCtx.Variables["item"] = input
+			ctx = newCtx
 		}
 	}
 
@@ -346,41 +386,39 @@ func resolveValue(ref string, input interface{}, ctx *Context) (interface{}, err
 		return resolveNodeReference(ref, ctx)
 	}
 
-	// Check for variable reference: variables.name or variables.name.field
+	// Check for variable reference: variables.name or variables.name.field or variables.name[0]
 	if strings.HasPrefix(ref, "variables.") {
-		// Parse: variables.name.field or just variables.name
-		parts := strings.Split(ref, ".")
-		if len(parts) < 2 {
-			return nil, fmt.Errorf("invalid variable reference: %s", ref)
+		// Parse: variables.name.field or just variables.name or variables.name[0]
+		// First, remove "variables." prefix
+		refWithoutPrefix := ref[10:] // Remove "variables."
+		
+		// Find the variable name (up to first . or [)
+		varEndIdx := len(refWithoutPrefix)
+		if dotIdx := strings.Index(refWithoutPrefix, "."); dotIdx != -1 {
+			varEndIdx = dotIdx
 		}
-
-		varName := parts[1]
+		if bracketIdx := strings.Index(refWithoutPrefix, "["); bracketIdx != -1 && bracketIdx < varEndIdx {
+			varEndIdx = bracketIdx
+		}
+		
+		varName := refWithoutPrefix[:varEndIdx]
 		val, ok := ctx.Variables[varName]
 		if !ok {
 			return nil, fmt.Errorf("variable not found: %s", varName)
 		}
 
 		// If just variables.name, return the whole value
-		if len(parts) == 2 {
+		if varEndIdx == len(refWithoutPrefix) {
 			return val, nil
 		}
 
-		// Navigate to nested field (like node references)
-		current := val
-		for i := 2; i < len(parts); i++ {
-			field := parts[i]
-			if m, ok := current.(map[string]interface{}); ok {
-				if fieldVal, exists := m[field]; exists {
-					current = fieldVal
-				} else {
-					return nil, fmt.Errorf("field not found: %s in variables.%s", field, varName)
-				}
-			} else {
-				return nil, fmt.Errorf("cannot access field %s on non-object", field)
-			}
+		// Navigate to nested field/index using resolveFieldPath
+		fieldPath := refWithoutPrefix[varEndIdx:]
+		// Remove leading . if present
+		if strings.HasPrefix(fieldPath, ".") {
+			fieldPath = fieldPath[1:]
 		}
-
-		return current, nil
+		return resolveFieldPath(fieldPath, val)
 	}
 
 	// Check for context reference: context.name
@@ -432,11 +470,62 @@ func resolveValue(ref string, input interface{}, ctx *Context) (interface{}, err
 }
 
 // resolveFieldPath resolves a field path (e.g., "age" or "profile.verified") from an object
+// Also supports special properties like .length for arrays and strings
+// and array indexing like users[0] or tags[1].name
 func resolveFieldPath(path string, obj interface{}) (interface{}, error) {
 	parts := strings.Split(path, ".")
 	current := obj
 
 	for _, field := range parts {
+		// Handle array indexing: field[index]
+		if idx := strings.Index(field, "["); idx != -1 && strings.HasSuffix(field, "]") {
+			// Extract field name and index
+			fieldName := field[:idx]
+			indexStr := field[idx+1 : len(field)-1]
+			
+			// First navigate to the field if there's a field name
+			if fieldName != "" {
+				if m, ok := current.(map[string]interface{}); ok {
+					if val, exists := m[fieldName]; exists {
+						current = val
+					} else {
+						return nil, fmt.Errorf("field not found: %s", fieldName)
+					}
+				} else {
+					return nil, fmt.Errorf("cannot access field %s on non-object", fieldName)
+				}
+			}
+			
+			// Parse index
+			index, err := strconv.Atoi(indexStr)
+			if err != nil {
+				return nil, fmt.Errorf("invalid array index: %s", indexStr)
+			}
+			
+			// Access array element
+			if arr, ok := current.([]interface{}); ok {
+				if index < 0 || index >= len(arr) {
+					return nil, fmt.Errorf("array index %d out of bounds (length: %d)", index, len(arr))
+				}
+				current = arr[index]
+			} else {
+				return nil, fmt.Errorf("cannot use array indexing on non-array type: %T", current)
+			}
+			continue
+		}
+		
+		// Handle special property: .length
+		if field == "length" {
+			if arr, ok := current.([]interface{}); ok {
+				return float64(len(arr)), nil
+			}
+			if str, ok := current.(string); ok {
+				return float64(len(str)), nil
+			}
+			return nil, fmt.Errorf(".length property only available on arrays and strings, got %T", current)
+		}
+		
+		// Regular field access
 		if m, ok := current.(map[string]interface{}); ok {
 			if val, exists := m[field]; exists {
 				current = val
@@ -475,6 +564,7 @@ func containsArithmetic(expr string) bool {
 }
 
 // resolveNodeReference resolves node.id.field references
+// Supports special properties like .length and array indexing
 func resolveNodeReference(ref string, ctx *Context) (interface{}, error) {
 	// Parse: node.id.field or just node.id
 	parts := strings.Split(ref, ".")
@@ -493,22 +583,9 @@ func resolveNodeReference(ref string, ctx *Context) (interface{}, error) {
 		return result, nil
 	}
 
-	// Navigate to nested field
-	current := result
-	for i := 2; i < len(parts); i++ {
-		field := parts[i]
-		if m, ok := current.(map[string]interface{}); ok {
-			if val, exists := m[field]; exists {
-				current = val
-			} else {
-				return nil, fmt.Errorf("field not found: %s in node.%s", field, nodeID)
-			}
-		} else {
-			return nil, fmt.Errorf("cannot access field %s on non-object", field)
-		}
-	}
-
-	return current, nil
+	// Navigate to nested field using resolveFieldPath (supports .length and array indexing)
+	fieldPath := strings.Join(parts[2:], ".")
+	return resolveFieldPath(fieldPath, result)
 }
 
 // compareValues compares two values using the specified operator
@@ -1036,26 +1113,52 @@ func (p *arithmeticParser) parseIdentifier() (float64, error) {
 		return p.parseFunction(ident)
 	}
 
-	// Check if it's a dotted path (variables.x or node.id.field)
-	if p.pos < len(p.expression) && p.peek() == '.' {
-		// Read the full path
+	// Check if it's a dotted path or array index (variables.x, node.id.field, item[0])
+	if p.pos < len(p.expression) && (p.peek() == '.' || p.peek() == '[') {
+		// Read the full path including array indexing
 		path := ident
-		for p.pos < len(p.expression) && p.peek() == '.' {
-			p.pos++ // skip '.'
-			start := p.pos
-			for p.pos < len(p.expression) && (p.isLetter(p.expression[p.pos]) || p.isDigit(p.expression[p.pos]) || p.expression[p.pos] == '_' || p.expression[p.pos] == '-') {
-				p.pos++
+		for p.pos < len(p.expression) {
+			if p.peek() == '.' {
+				p.pos++ // skip '.'
+				start := p.pos
+				for p.pos < len(p.expression) && (p.isLetter(p.expression[p.pos]) || p.isDigit(p.expression[p.pos]) || p.expression[p.pos] == '_' || p.expression[p.pos] == '-') {
+					p.pos++
+				}
+				if p.pos == start {
+					return 0, fmt.Errorf("expected identifier after '.' at position %d", p.pos)
+				}
+				path += "." + p.expression[start:p.pos]
+			} else if p.peek() == '[' {
+				// Read array index: [number]
+				p.pos++ // skip '['
+				start := p.pos
+				for p.pos < len(p.expression) && p.isDigit(p.expression[p.pos]) {
+					p.pos++
+				}
+				if p.pos == start {
+					return 0, fmt.Errorf("expected number in array index at position %d", p.pos)
+				}
+				if p.pos >= len(p.expression) || p.peek() != ']' {
+					return 0, fmt.Errorf("expected ']' at position %d", p.pos)
+				}
+				path += "[" + p.expression[start:p.pos] + "]"
+				p.pos++ // skip ']'
+			} else {
+				break
 			}
-			if p.pos == start {
-				return 0, fmt.Errorf("expected identifier after '.' at position %d", p.pos)
-			}
-			path += "." + p.expression[start:p.pos]
 		}
 
-		// Resolve the path
+		// Resolve the path - try with variables.ident first for compatibility
 		val, err := resolveValue(path, nil, p.ctx)
 		if err != nil {
-			return 0, err
+			// If path starts with simple identifier, try as variables.ident
+			if !strings.Contains(ident, ".") && !strings.Contains(ident, "[") {
+				varPath := "variables." + path
+				val, err = resolveValue(varPath, nil, p.ctx)
+			}
+			if err != nil {
+				return 0, err
+			}
 		}
 
 		// Convert to float64

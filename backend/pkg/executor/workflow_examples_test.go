@@ -68,14 +68,83 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 	t.Run("Example22_ArrayFiltering", func(t *testing.T) {
 		// Example 22: Filter array elements based on conditions
 		// Node types: rangeNode, filterNode, vizNode
-		// Gap: Expression-based filtering requires expression engine enhancement
+		// ✅ Now supported with expression engine enhancements!
 		
-		t.Skip("Expression-based filtering not fully implemented - see docs/WORKFLOW_EXAMPLES_ANALYSIS.md Gap #1")
+		// Create executors
+		rangeExec := &RangeExecutor{}
+		filterExec := &FilterExecutor{}
 		
-		// This workflow requires:
-		// - Expression evaluator for "item % 2 == 0" or "item > 5"
-		// - Support for item.field access in expressions
-		// - Comparison and logical operators in expressions
+		ctx := &MockExecutionContext{
+			inputs: map[string][]interface{}{},
+		}
+		
+		// Execute range node to generate data (1-10 inclusive)
+		rangeNode := types.Node{
+			ID:   "1",
+			Type: types.NodeTypeRange,
+			Data: types.NodeData{
+				Start: 1,
+				End:   10,
+				Step:  1,
+			},
+		}
+		
+		rangeResult, err := rangeExec.Execute(ctx, rangeNode)
+		if err != nil {
+			t.Fatalf("Range execution failed: %v", err)
+		}
+		
+		resultMap, ok := rangeResult.(map[string]interface{})
+		if !ok {
+			t.Fatalf("Expected map result, got %T", rangeResult)
+		}
+		
+		results, ok := resultMap["range"].([]interface{})
+		if !ok || results == nil {
+			t.Fatalf("Expected range array, got %T", resultMap["range"])
+		}
+		
+		// Add to context for filter node
+		ctx.inputs["2"] = []interface{}{results}
+		
+		// Execute filter node (filter for numbers > 5)
+		condition := "item > 5"
+		filterNode := types.Node{
+			ID:   "2",
+			Type: types.NodeTypeFilter,
+			Data: types.NodeData{
+				Condition: &condition,
+			},
+		}
+		
+		filterResult, err := filterExec.Execute(ctx, filterNode)
+		if err != nil {
+			t.Fatalf("Filter execution failed: %v", err)
+		}
+		
+		// Verify filtered results
+		filterMap, ok := filterResult.(map[string]interface{})
+		if !ok {
+			t.Fatalf("Expected map result from filter, got %T", filterResult)
+		}
+		
+		filtered, ok := filterMap["filtered"].([]interface{})
+		if !ok {
+			t.Fatalf("Expected filtered array, got %T", filterMap["filtered"])
+		}
+		
+		// Should have 5 items: 6, 7, 8, 9, 10
+		if len(filtered) != 5 {
+			t.Errorf("Expected 5 filtered items, got %d", len(filtered))
+		}
+		
+		// Verify first filtered item is 6
+		if len(filtered) > 0 {
+			firstItem, ok := filtered[0].(float64)
+			if !ok || firstItem != 6.0 {
+				t.Errorf("Expected first filtered item to be 6, got %v", filtered[0])
+			}
+		}
 	})
 	
 	t.Run("Example23_DataTransformationPipeline", func(t *testing.T) {
