@@ -64,9 +64,9 @@ func main() {
 	maxNodeExecutions := flag.Int("max-node-executions", 10000, "Maximum node executions per workflow")
 	maxHTTPCalls := flag.Int("max-http-calls", 100, "Maximum HTTP calls per execution")
 	maxLoopIterations := flag.Int("max-loop-iterations", 10000, "Maximum loop iterations")
-	
+
 	flag.Parse()
-	
+
 	// Create server config
 	serverConfig := server.Config{
 		Address:            *addr,
@@ -76,25 +76,26 @@ func main() {
 		MaxRequestBodySize: 10 * 1024 * 1024, // 10MB
 		EnableCORS:         true,
 	}
-	
+
 	// Create engine config
 	engineConfig := types.DefaultConfig()
+	engineConfig.AllowHTTP = true
 	engineConfig.MaxExecutionTime = *maxExecutionTime
 	engineConfig.MaxNodeExecutions = *maxNodeExecutions
 	engineConfig.MaxHTTPCallsPerExec = *maxHTTPCalls
 	engineConfig.MaxIterations = *maxLoopIterations
-	
+
 	// Create server
 	srv, err := server.New(serverConfig, engineConfig)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to create server: %v\n", err)
 		os.Exit(1)
 	}
-	
+
 	// Setup signal handling for graceful shutdown
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
-	
+
 	// Start server in goroutine
 	errChan := make(chan error, 1)
 	go func() {
@@ -105,12 +106,12 @@ func main() {
 		fmt.Printf("Metrics:          http://localhost%s/metrics\n", *addr)
 		fmt.Printf("API endpoint:     http://localhost%s/api/v1/workflow/execute\n", *addr)
 		fmt.Println("\nPress Ctrl+C to shutdown")
-		
+
 		if err := srv.Start(); err != nil {
 			errChan <- err
 		}
 	}()
-	
+
 	// Wait for shutdown signal or error
 	select {
 	case err := <-errChan:
@@ -119,17 +120,17 @@ func main() {
 	case sig := <-sigChan:
 		fmt.Printf("\nReceived signal: %v\n", sig)
 		fmt.Println("Shutting down gracefully...")
-		
+
 		// Create shutdown context with timeout
 		ctx, cancel := context.WithTimeout(context.Background(), serverConfig.ShutdownTimeout)
 		defer cancel()
-		
+
 		// Shutdown server
 		if err := srv.Shutdown(ctx); err != nil {
 			fmt.Fprintf(os.Stderr, "Shutdown error: %v\n", err)
 			os.Exit(1)
 		}
-		
+
 		fmt.Println("Server stopped")
 	}
 }

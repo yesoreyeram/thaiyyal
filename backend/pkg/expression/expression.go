@@ -128,22 +128,28 @@ func EvaluateExpression(expression string, input interface{}, ctx *Context) (int
 		}
 	}
 
-	// If input is provided and not already in variables as 'item', add it
-	// This allows arithmetic expressions to access item.field
+	// If input is provided, ensure it's available as both 'item' and 'input'
+	// in the variables map. This aligns with the docs that allow using either
+	// identifier to reference the current input value.
 	if input != nil {
-		if _, hasItem := ctx.Variables["item"]; !hasItem {
-			// Create a copy of the context with item added
+		_, hasItem := ctx.Variables["item"]
+		_, hasInput := ctx.Variables["input"]
+		if !hasItem || !hasInput {
+			// Create a shallow copy of the context and variables map
 			newCtx := &Context{
 				NodeResults: ctx.NodeResults,
 				Variables:   make(map[string]interface{}),
 				ContextVars: ctx.ContextVars,
 			}
-			// Copy existing variables
 			for k, v := range ctx.Variables {
 				newCtx.Variables[k] = v
 			}
-			// Add item
-			newCtx.Variables["item"] = input
+			if !hasItem {
+				newCtx.Variables["item"] = input
+			}
+			if !hasInput {
+				newCtx.Variables["input"] = input
+			}
 			ctx = newCtx
 		}
 	}
@@ -170,6 +176,14 @@ func EvaluateExpression(expression string, input interface{}, ctx *Context) (int
 				return EvaluateExpression(trueVal, input, ctx)
 			}
 			return EvaluateExpression(falseVal, input, ctx)
+		}
+	}
+
+	// Handle value-returning function calls like map(), avg()
+	if idx := strings.Index(expression, "("); idx > 0 && strings.HasSuffix(expression, ")") {
+		funcName := strings.TrimSpace(expression[:idx])
+		if isValueFunction(funcName) {
+			return evaluateValueFunctionCall(expression, input, ctx)
 		}
 	}
 
@@ -1325,7 +1339,67 @@ func (p *arithmeticParser) parseIdentifier() (float64, error) {
 	// Check if it's a function call
 	p.skipWhitespace()
 	if p.pos < len(p.expression) && p.peek() == '(' {
-		return p.parseFunction(ident)
+		// If it's a known arithmetic function, parse via arithmetic rules
+		switch ident {
+		case "pow", "sqrt", "abs", "floor", "ceil", "round", "min", "max":
+			return p.parseFunction(ident)
+		default:
+			// Otherwise, treat it as a value function (e.g., avg, sum, map, sort, etc.).
+			// Extract the full function call substring with balanced parentheses
+			funcStart := start
+			i := p.pos // current '('
+			depth := 0
+			inQuotes := false
+			var quoteCh byte
+			for i < len(p.expression) {
+				ch := p.expression[i]
+				if inQuotes {
+					if ch == quoteCh {
+						inQuotes = false
+					}
+				} else {
+					if ch == '\'' || ch == '"' {
+						inQuotes = true
+						quoteCh = ch
+					} else if ch == '(' {
+						depth++
+					} else if ch == ')' {
+						depth--
+						if depth == 0 {
+							// include this ')'
+							i++
+							break
+						}
+					}
+				}
+				i++
+			}
+			if depth != 0 {
+				return 0, fmt.Errorf("unmatched parentheses in function call starting at position %d", funcStart)
+			}
+
+			callStr := p.expression[funcStart:i]
+			// Advance parser position to just after the function call
+			p.pos = i
+
+			// Evaluate the value function call using the general evaluator
+			// Pass through the current input value from context if available
+			var currentInput interface{}
+			if v, ok := p.ctx.Variables["input"]; ok {
+				currentInput = v
+			} else if v, ok := p.ctx.Variables["item"]; ok {
+				currentInput = v
+			}
+			val, err := EvaluateExpression(callStr, currentInput, p.ctx)
+			if err != nil {
+				return 0, fmt.Errorf("failed to evaluate function '%s' in arithmetic expression: %w", ident, err)
+			}
+			num, ok := toFloat64(val)
+			if !ok {
+				return 0, fmt.Errorf("function '%s' did not return a numeric value", ident)
+			}
+			return num, nil
+		}
 	}
 
 	// Check if it's a dotted path or array index (variables.x, node.id.field, item[0])
@@ -1537,6 +1611,681 @@ func (p *arithmeticParser) isDigit(ch byte) bool {
 // isLetter checks if a character is a letter
 func (p *arithmeticParser) isLetter(ch byte) bool {
 	return (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z')
+}
+
+// ============================================================================
+// Value-returning functions (arrays, aggregates)
+// ============================================================================
+
+// isValueFunction checks for value-returning top-level functions supported by the evaluator
+func isValueFunction(name string) bool {
+	switch name {
+	// Array transformation functions
+	case "map", "avg":
+		return true
+	// Math functions that can accept arrays
+	case "round", "floor", "ceil", "min", "max", "abs", "sum":
+		return true
+	// Array manipulation functions
+	case "sort", "slice", "sample", "unique", "zip", "reverse", "flatten":
+		return true
+	default:
+		return false
+	}
+}
+
+// splitArgumentsRespectingParens splits function arguments by comma while respecting quotes and nested parentheses
+func splitArgumentsRespectingParens(s string) []string {
+	var args []string
+	var current strings.Builder
+	inQuotes := false
+	quoteChar := byte(0)
+	depth := 0
+
+	for i := 0; i < len(s); i++ {
+		ch := s[i]
+
+		if ch == '"' || ch == '\'' {
+			if !inQuotes {
+				inQuotes = true
+				quoteChar = ch
+			} else if ch == quoteChar {
+				inQuotes = false
+			}
+			current.WriteByte(ch)
+			continue
+		}
+
+		if !inQuotes {
+			if ch == '(' {
+				depth++
+			} else if ch == ')' {
+				if depth > 0 {
+					depth--
+				}
+			}
+			if ch == ',' && depth == 0 {
+				args = append(args, strings.TrimSpace(current.String()))
+				current.Reset()
+				continue
+			}
+		}
+
+		current.WriteByte(ch)
+	}
+
+	if current.Len() > 0 {
+		args = append(args, strings.TrimSpace(current.String()))
+	}
+
+	return args
+}
+
+// evaluateValueFunctionCall evaluates supported value-returning function calls like map() and avg()
+func evaluateValueFunctionCall(expr string, input interface{}, ctx *Context) (interface{}, error) {
+	idx := strings.Index(expr, "(")
+	if idx == -1 || !strings.HasSuffix(expr, ")") {
+		return nil, fmt.Errorf("invalid function call: %s", expr)
+	}
+
+	funcName := strings.TrimSpace(expr[:idx])
+	argsStr := expr[idx+1 : len(expr)-1]
+	argStrs := splitArgumentsRespectingParens(argsStr)
+
+	switch funcName {
+	case "map":
+		// map(arrayExpr, itemExpr)
+		if len(argStrs) != 2 {
+			return nil, fmt.Errorf("map() requires exactly 2 arguments: array expression and item expression")
+		}
+
+		// Evaluate the first argument to get the array
+		arrVal, err := EvaluateExpression(argStrs[0], input, ctx)
+		if err != nil {
+			return nil, fmt.Errorf("map() first argument evaluation failed: %w", err)
+		}
+
+		var arr []interface{}
+		switch v := arrVal.(type) {
+		case []interface{}:
+			arr = v
+		case []map[string]interface{}:
+			arr = make([]interface{}, len(v))
+			for i := range v {
+				arr[i] = v[i]
+			}
+		default:
+			return nil, fmt.Errorf("map() first argument must be an array, got %T", arrVal)
+		}
+
+		// For each element, evaluate the second argument with the element bound as item
+		result := make([]interface{}, 0, len(arr))
+		for _, el := range arr {
+			val, err := EvaluateExpression(strings.TrimSpace(argStrs[1]), el, ctx)
+			if err != nil {
+				return nil, fmt.Errorf("map() item expression failed: %w", err)
+			}
+			result = append(result, val)
+		}
+		return result, nil
+
+	case "avg":
+		// avg(arrayExpr) or avg(v1, v2, ...)
+		if len(argStrs) == 0 {
+			return nil, fmt.Errorf("avg() requires at least 1 argument")
+		}
+
+		// Single-argument form: could be an array expression
+		if len(argStrs) == 1 {
+			val, err := EvaluateExpression(argStrs[0], input, ctx)
+			if err != nil {
+				return nil, fmt.Errorf("avg() argument evaluation failed: %w", err)
+			}
+
+			// If it's an array, compute average over elements
+			switch tv := val.(type) {
+			case []interface{}:
+				if len(tv) == 0 {
+					return nil, fmt.Errorf("avg() on empty array")
+				}
+				sum := 0.0
+				count := 0.0
+				for _, it := range tv {
+					n, ok := toFloat64(it)
+					if !ok {
+						return nil, fmt.Errorf("avg() encountered non-numeric element: %T", it)
+					}
+					sum += n
+					count += 1
+				}
+				return sum / count, nil
+			case []float64:
+				if len(tv) == 0 {
+					return nil, fmt.Errorf("avg() on empty array")
+				}
+				sum := 0.0
+				for _, n := range tv {
+					sum += n
+				}
+				return sum / float64(len(tv)), nil
+			default:
+				// Treat as single numeric value
+				n, ok := toFloat64(val)
+				if !ok {
+					return nil, fmt.Errorf("avg() requires numeric values, got %T", val)
+				}
+				return n, nil
+			}
+		}
+
+		// Multi-argument form: avg(v1, v2, ...)
+		sum := 0.0
+		count := 0.0
+		for _, a := range argStrs {
+			v, err := EvaluateExpression(a, input, ctx)
+			if err != nil {
+				return nil, fmt.Errorf("avg() argument evaluation failed: %w", err)
+			}
+			n, ok := toFloat64(v)
+			if !ok {
+				return nil, fmt.Errorf("avg() requires numeric values, got %T", v)
+			}
+			sum += n
+			count += 1
+		}
+		if count == 0 {
+			return nil, fmt.Errorf("avg() with no numeric values")
+		}
+		return sum / count, nil
+
+	case "sum":
+		// sum(arrayExpr) or sum(v1, v2, ...)
+		if len(argStrs) == 0 {
+			return nil, fmt.Errorf("sum() requires at least 1 argument")
+		}
+
+		// Single-argument form: could be an array expression
+		if len(argStrs) == 1 {
+			val, err := EvaluateExpression(argStrs[0], input, ctx)
+			if err != nil {
+				return nil, fmt.Errorf("sum() argument evaluation failed: %w", err)
+			}
+
+			// If it's an array, sum all elements
+			switch tv := val.(type) {
+			case []interface{}:
+				if len(tv) == 0 {
+					return 0.0, nil
+				}
+				sum := 0.0
+				for _, it := range tv {
+					n, ok := toFloat64(it)
+					if !ok {
+						return nil, fmt.Errorf("sum() encountered non-numeric element: %T", it)
+					}
+					sum += n
+				}
+				return sum, nil
+			case []float64:
+				sum := 0.0
+				for _, n := range tv {
+					sum += n
+				}
+				return sum, nil
+			default:
+				// Treat as single numeric value
+				n, ok := toFloat64(val)
+				if !ok {
+					return nil, fmt.Errorf("sum() requires numeric values, got %T", val)
+				}
+				return n, nil
+			}
+		}
+
+		// Multi-argument form: sum(v1, v2, ...)
+		sum := 0.0
+		for _, a := range argStrs {
+			v, err := EvaluateExpression(a, input, ctx)
+			if err != nil {
+				return nil, fmt.Errorf("sum() argument evaluation failed: %w", err)
+			}
+			n, ok := toFloat64(v)
+			if !ok {
+				return nil, fmt.Errorf("sum() requires numeric values, got %T", v)
+			}
+			sum += n
+		}
+		return sum, nil
+
+	// Math functions that can accept arrays or single values
+	case "round", "floor", "ceil", "abs":
+		if len(argStrs) != 1 {
+			return nil, fmt.Errorf("%s() requires exactly 1 argument, got %d", funcName, len(argStrs))
+		}
+
+		val, err := EvaluateExpression(argStrs[0], input, ctx)
+		if err != nil {
+			return nil, fmt.Errorf("%s() argument evaluation failed: %w", funcName, err)
+		}
+
+		// If it's an array, apply function to each element
+		if arr, ok := val.([]interface{}); ok {
+			result := make([]interface{}, len(arr))
+			for i, it := range arr {
+				n, ok := toFloat64(it)
+				if !ok {
+					return nil, fmt.Errorf("%s() encountered non-numeric element: %T", funcName, it)
+				}
+				switch funcName {
+				case "round":
+					result[i] = math.Round(n)
+				case "floor":
+					result[i] = math.Floor(n)
+				case "ceil":
+					result[i] = math.Ceil(n)
+				case "abs":
+					result[i] = math.Abs(n)
+				}
+			}
+			return result, nil
+		}
+
+		// Single value
+		n, ok := toFloat64(val)
+		if !ok {
+			return nil, fmt.Errorf("%s() requires numeric value, got %T", funcName, val)
+		}
+		switch funcName {
+		case "round":
+			return math.Round(n), nil
+		case "floor":
+			return math.Floor(n), nil
+		case "ceil":
+			return math.Ceil(n), nil
+		case "abs":
+			return math.Abs(n), nil
+		default:
+			return nil, fmt.Errorf("unknown math function: %s", funcName)
+		}
+
+	case "min", "max":
+		if len(argStrs) == 0 {
+			return nil, fmt.Errorf("%s() requires at least 1 argument", funcName)
+		}
+
+		// Single-argument form: could be an array
+		if len(argStrs) == 1 {
+			val, err := EvaluateExpression(argStrs[0], input, ctx)
+			if err != nil {
+				return nil, fmt.Errorf("%s() argument evaluation failed: %w", funcName, err)
+			}
+
+			// If it's an array, find min/max
+			if arr, ok := val.([]interface{}); ok {
+				if len(arr) == 0 {
+					return nil, fmt.Errorf("%s() on empty array", funcName)
+				}
+				n, ok := toFloat64(arr[0])
+				if !ok {
+					return nil, fmt.Errorf("%s() encountered non-numeric element: %T", funcName, arr[0])
+				}
+				result := n
+				for _, it := range arr[1:] {
+					n, ok := toFloat64(it)
+					if !ok {
+						return nil, fmt.Errorf("%s() encountered non-numeric element: %T", funcName, it)
+					}
+					if funcName == "min" {
+						if n < result {
+							result = n
+						}
+					} else {
+						if n > result {
+							result = n
+						}
+					}
+				}
+				return result, nil
+			}
+
+			// Single value - need at least 2 args for min/max
+			return nil, fmt.Errorf("%s() requires at least 2 arguments or an array, got 1 non-array value", funcName)
+		}
+
+		// Multi-argument form
+		var result float64
+		for i, a := range argStrs {
+			v, err := EvaluateExpression(a, input, ctx)
+			if err != nil {
+				return nil, fmt.Errorf("%s() argument evaluation failed: %w", funcName, err)
+			}
+			n, ok := toFloat64(v)
+			if !ok {
+				return nil, fmt.Errorf("%s() requires numeric values, got %T", funcName, v)
+			}
+			if i == 0 {
+				result = n
+			} else {
+				if funcName == "min" {
+					if n < result {
+						result = n
+					}
+				} else {
+					if n > result {
+						result = n
+					}
+				}
+			}
+		}
+		return result, nil
+
+	// Array manipulation functions
+	case "sort":
+		if len(argStrs) != 1 {
+			return nil, fmt.Errorf("sort() requires exactly 1 argument, got %d", len(argStrs))
+		}
+
+		val, err := EvaluateExpression(argStrs[0], input, ctx)
+		if err != nil {
+			return nil, fmt.Errorf("sort() argument evaluation failed: %w", err)
+		}
+
+		arr, ok := val.([]interface{})
+		if !ok {
+			return nil, fmt.Errorf("sort() requires an array, got %T", val)
+		}
+
+		// Create a copy to avoid modifying original
+		sorted := make([]interface{}, len(arr))
+		copy(sorted, arr)
+
+		// Sort using a simple bubble sort for mixed types
+		for i := 0; i < len(sorted); i++ {
+			for j := i + 1; j < len(sorted); j++ {
+				if compareForSort(sorted[i], sorted[j]) > 0 {
+					sorted[i], sorted[j] = sorted[j], sorted[i]
+				}
+			}
+		}
+
+		return sorted, nil
+
+	case "reverse":
+		if len(argStrs) != 1 {
+			return nil, fmt.Errorf("reverse() requires exactly 1 argument, got %d", len(argStrs))
+		}
+
+		val, err := EvaluateExpression(argStrs[0], input, ctx)
+		if err != nil {
+			return nil, fmt.Errorf("reverse() argument evaluation failed: %w", err)
+		}
+
+		arr, ok := val.([]interface{})
+		if !ok {
+			return nil, fmt.Errorf("reverse() requires an array, got %T", val)
+		}
+
+		reversed := make([]interface{}, len(arr))
+		for i, item := range arr {
+			reversed[len(arr)-1-i] = item
+		}
+		return reversed, nil
+
+	case "unique":
+		if len(argStrs) != 1 {
+			return nil, fmt.Errorf("unique() requires exactly 1 argument, got %d", len(argStrs))
+		}
+
+		val, err := EvaluateExpression(argStrs[0], input, ctx)
+		if err != nil {
+			return nil, fmt.Errorf("unique() argument evaluation failed: %w", err)
+		}
+
+		arr, ok := val.([]interface{})
+		if !ok {
+			return nil, fmt.Errorf("unique() requires an array, got %T", val)
+		}
+
+		seen := make(map[interface{}]bool)
+		unique := make([]interface{}, 0)
+		for _, item := range arr {
+			// Use string representation as key for complex types
+			key := fmt.Sprintf("%v", item)
+			if !seen[key] {
+				seen[key] = true
+				unique = append(unique, item)
+			}
+		}
+		return unique, nil
+
+	case "flatten":
+		if len(argStrs) != 1 {
+			return nil, fmt.Errorf("flatten() requires exactly 1 argument, got %d", len(argStrs))
+		}
+
+		val, err := EvaluateExpression(argStrs[0], input, ctx)
+		if err != nil {
+			return nil, fmt.Errorf("flatten() argument evaluation failed: %w", err)
+		}
+
+		arr, ok := val.([]interface{})
+		if !ok {
+			return nil, fmt.Errorf("flatten() requires an array, got %T", val)
+		}
+
+		flattened := make([]interface{}, 0)
+		var flattenRecursive func([]interface{})
+		flattenRecursive = func(items []interface{}) {
+			for _, item := range items {
+				if subArr, ok := item.([]interface{}); ok {
+					flattenRecursive(subArr)
+				} else {
+					flattened = append(flattened, item)
+				}
+			}
+		}
+		flattenRecursive(arr)
+		return flattened, nil
+
+	case "slice":
+		// slice(array, start) or slice(array, start, end)
+		if len(argStrs) < 2 || len(argStrs) > 3 {
+			return nil, fmt.Errorf("slice() requires 2 or 3 arguments (array, start, [end]), got %d", len(argStrs))
+		}
+
+		val, err := EvaluateExpression(argStrs[0], input, ctx)
+		if err != nil {
+			return nil, fmt.Errorf("slice() array argument evaluation failed: %w", err)
+		}
+
+		arr, ok := val.([]interface{})
+		if !ok {
+			return nil, fmt.Errorf("slice() first argument must be an array, got %T", val)
+		}
+
+		startVal, err := EvaluateExpression(argStrs[1], input, ctx)
+		if err != nil {
+			return nil, fmt.Errorf("slice() start argument evaluation failed: %w", err)
+		}
+
+		startNum, ok := toFloat64(startVal)
+		if !ok {
+			return nil, fmt.Errorf("slice() start must be numeric, got %T", startVal)
+		}
+		start := int(startNum)
+
+		// Handle negative indices
+		if start < 0 {
+			start = len(arr) + start
+		}
+		if start < 0 {
+			start = 0
+		}
+		if start > len(arr) {
+			start = len(arr)
+		}
+
+		end := len(arr)
+		if len(argStrs) == 3 {
+			endVal, err := EvaluateExpression(argStrs[2], input, ctx)
+			if err != nil {
+				return nil, fmt.Errorf("slice() end argument evaluation failed: %w", err)
+			}
+			endNum, ok := toFloat64(endVal)
+			if !ok {
+				return nil, fmt.Errorf("slice() end must be numeric, got %T", endVal)
+			}
+			end = int(endNum)
+			if end < 0 {
+				end = len(arr) + end
+			}
+			if end < 0 {
+				end = 0
+			}
+			if end > len(arr) {
+				end = len(arr)
+			}
+		}
+
+		if start > end {
+			return []interface{}{}, nil
+		}
+
+		return arr[start:end], nil
+
+	case "sample":
+		// sample(array, n) - randomly sample n elements from array
+		if len(argStrs) != 2 {
+			return nil, fmt.Errorf("sample() requires exactly 2 arguments (array, n), got %d", len(argStrs))
+		}
+
+		val, err := EvaluateExpression(argStrs[0], input, ctx)
+		if err != nil {
+			return nil, fmt.Errorf("sample() array argument evaluation failed: %w", err)
+		}
+
+		arr, ok := val.([]interface{})
+		if !ok {
+			return nil, fmt.Errorf("sample() first argument must be an array, got %T", val)
+		}
+
+		nVal, err := EvaluateExpression(argStrs[1], input, ctx)
+		if err != nil {
+			return nil, fmt.Errorf("sample() n argument evaluation failed: %w", err)
+		}
+
+		nNum, ok := toFloat64(nVal)
+		if !ok {
+			return nil, fmt.Errorf("sample() n must be numeric, got %T", nVal)
+		}
+		n := int(nNum)
+
+		if n < 0 {
+			return nil, fmt.Errorf("sample() n must be non-negative, got %d", n)
+		}
+		if n == 0 {
+			return []interface{}{}, nil
+		}
+		if n >= len(arr) {
+			// Return shuffled copy of entire array
+			result := make([]interface{}, len(arr))
+			copy(result, arr)
+			// Simple shuffle
+			for i := len(result) - 1; i > 0; i-- {
+				j := int(float64(i+1) * 0.5) // Simplified "random" - in production use math/rand
+				result[i], result[j] = result[j], result[i]
+			}
+			return result, nil
+		}
+
+		// Sample n elements (simplified - in production use proper random sampling)
+		result := make([]interface{}, n)
+		step := len(arr) / n
+		if step < 1 {
+			step = 1
+		}
+		for i := 0; i < n && i*step < len(arr); i++ {
+			result[i] = arr[i*step]
+		}
+		return result, nil
+
+	case "zip":
+		// zip(array1, array2, ...) - combine arrays into array of arrays
+		if len(argStrs) < 2 {
+			return nil, fmt.Errorf("zip() requires at least 2 arrays, got %d", len(argStrs))
+		}
+
+		arrays := make([][]interface{}, len(argStrs))
+		maxLen := 0
+		for i, argStr := range argStrs {
+			val, err := EvaluateExpression(argStr, input, ctx)
+			if err != nil {
+				return nil, fmt.Errorf("zip() array %d evaluation failed: %w", i, err)
+			}
+			arr, ok := val.([]interface{})
+			if !ok {
+				return nil, fmt.Errorf("zip() argument %d must be an array, got %T", i, val)
+			}
+			arrays[i] = arr
+			if len(arr) > maxLen {
+				maxLen = len(arr)
+			}
+		}
+
+		result := make([]interface{}, maxLen)
+		for i := 0; i < maxLen; i++ {
+			tuple := make([]interface{}, len(arrays))
+			for j, arr := range arrays {
+				if i < len(arr) {
+					tuple[j] = arr[i]
+				} else {
+					tuple[j] = nil
+				}
+			}
+			result[i] = tuple
+		}
+		return result, nil
+
+	default:
+		return nil, fmt.Errorf("unknown value function: %s", funcName)
+	}
+}
+
+// compareForSort compares two values for sorting
+func compareForSort(a, b interface{}) int {
+	// Numbers
+	aNum, aIsNum := toFloat64(a)
+	bNum, bIsNum := toFloat64(b)
+	if aIsNum && bIsNum {
+		if aNum < bNum {
+			return -1
+		} else if aNum > bNum {
+			return 1
+		}
+		return 0
+	}
+
+	// Strings
+	aStr, aIsStr := a.(string)
+	bStr, bIsStr := b.(string)
+	if aIsStr && bIsStr {
+		if aStr < bStr {
+			return -1
+		} else if aStr > bStr {
+			return 1
+		}
+		return 0
+	}
+
+	// Mixed types - convert to string
+	aStrRep := fmt.Sprintf("%v", a)
+	bStrRep := fmt.Sprintf("%v", b)
+	if aStrRep < bStrRep {
+		return -1
+	} else if aStrRep > bStrRep {
+		return 1
+	}
+	return 0
 }
 
 // ============================================================================

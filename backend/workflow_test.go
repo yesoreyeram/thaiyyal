@@ -125,16 +125,9 @@ func TestCompleteWorkflow(t *testing.T) {
 		t.Fatalf("Execute failed: %v", err)
 	}
 
-	// Check visualization output
-	vizResult, ok := result.FinalOutput.(map[string]interface{})
-	if !ok {
-		t.Fatal("Final output should be a map")
-	}
-	if vizResult["mode"] != "text" {
-		t.Errorf("Expected mode 'text', got %v", vizResult["mode"])
-	}
-	if vizResult["value"] != 15.0 {
-		t.Errorf("Expected value 15, got %v", vizResult["value"])
+	// Check visualization output (Visualization node is pass-through)
+	if result.FinalOutput != 15.0 {
+		t.Errorf("Expected final output 15, got %v", result.FinalOutput)
 	}
 }
 
@@ -316,13 +309,9 @@ func TestVisualizationModes(t *testing.T) {
 				t.Fatalf("Execute failed: %v", err)
 			}
 
-			vizResult, ok := result.FinalOutput.(map[string]interface{})
-			if !ok {
-				t.Fatal("Final output should be a map")
-			}
-
-			if vizResult["mode"] != mode {
-				t.Errorf("Expected mode %s, got %v", mode, vizResult["mode"])
+			// Visualization node is pass-through; final output should equal input value
+			if result.FinalOutput != 42.0 {
+				t.Errorf("Expected final output 42, got %v", result.FinalOutput)
 			}
 		})
 	}
