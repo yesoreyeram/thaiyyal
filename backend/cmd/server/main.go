@@ -27,12 +27,14 @@
 //
 // The server exposes the following endpoints:
 //
-//	POST   /api/v1/workflow/execute   - Execute a workflow
-//	POST   /api/v1/workflow/validate  - Validate a workflow
-//	GET    /health                    - Health check
-//	GET    /health/live               - Liveness probe
-//	GET    /health/ready              - Readiness probe
-//	GET    /metrics                   - Prometheus metrics
+//	POST   /api/v1/workflow/execute      - Execute a workflow
+//	POST   /api/v1/workflow/validate     - Validate a workflow
+//	POST   /api/v1/httpclient/register   - Register an HTTP client
+//	GET    /api/v1/httpclient/list       - List registered HTTP clients
+//	GET    /health                       - Health check
+//	GET    /health/live                  - Liveness probe
+//	GET    /health/ready                 - Readiness probe
+//	GET    /metrics                      - Prometheus metrics
 package main
 
 import (

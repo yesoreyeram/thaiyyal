@@ -17,6 +17,7 @@ import (
 
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/engine"
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/health"
+	"github.com/yesoreyeram/thaiyyal/backend/pkg/httpclient"
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/logging"
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/telemetry"
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/types"
@@ -57,12 +58,13 @@ func DefaultConfig() Config {
 
 // Server is the HTTP API server
 type Server struct {
-	config           Config
-	httpServer       *http.Server
-	healthChecker    *health.Checker
-	telemetryProvider *telemetry.Provider
-	logger           *logging.Logger
-	engineConfig     types.Config
+	config             Config
+	httpServer         *http.Server
+	healthChecker      *health.Checker
+	telemetryProvider  *telemetry.Provider
+	logger             *logging.Logger
+	engineConfig       types.Config
+	httpClientRegistry *httpclient.Registry
 }
 
 // New creates a new server instance
@@ -86,12 +88,16 @@ func New(config Config, engineConfig types.Config) (*Server, error) {
 		return nil
 	}, 5*time.Second, true)
 	
+	// Create HTTP client registry
+	httpClientRegistry := httpclient.NewRegistry()
+	
 	server := &Server{
-		config:            config,
-		healthChecker:     healthChecker,
-		telemetryProvider: telemetryProvider,
-		logger:            logger,
-		engineConfig:      engineConfig,
+		config:             config,
+		healthChecker:      healthChecker,
+		telemetryProvider:  telemetryProvider,
+		logger:             logger,
+		engineConfig:       engineConfig,
+		httpClientRegistry: httpClientRegistry,
 	}
 	
 	// Create HTTP server
@@ -121,6 +127,10 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 	// API endpoints
 	mux.HandleFunc("/api/v1/workflow/execute", s.handleExecuteWorkflow)
 	mux.HandleFunc("/api/v1/workflow/validate", s.handleValidateWorkflow)
+	
+	// HTTP Client management endpoints
+	mux.HandleFunc("/api/v1/httpclient/register", s.handleRegisterHTTPClient)
+	mux.HandleFunc("/api/v1/httpclient/list", s.handleListHTTPClients)
 }
 
 // middlewareChain applies middleware to the handler
