@@ -26,9 +26,14 @@ export function RendererNode({ id, data, ...props }: NodeProps<RendererNodeData>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onShowOptions = (props as any).onShowOptions;
 
+  // Helper to check if data is empty/null/undefined
+  const isEmptyData = (data: unknown): boolean => {
+    return !data && data !== 0 && data !== false;
+  };
+
   // Auto-detect the best rendering mode based on data type and structure
   const inferRenderMode = (executionData: unknown): string => {
-    if (!executionData && executionData !== 0 && executionData !== false) {
+    if (isEmptyData(executionData)) {
       return "text";
     }
 
@@ -105,7 +110,7 @@ export function RendererNode({ id, data, ...props }: NodeProps<RendererNodeData>
   const renderData = () => {
     const executionData = data?._executionData;
 
-    if (!executionData && executionData !== 0 && executionData !== false) {
+    if (isEmptyData(executionData)) {
       return (
         <div className="text-xs text-gray-500 italic py-2 px-1">
           No data
@@ -270,7 +275,7 @@ export function RendererNode({ id, data, ...props }: NodeProps<RendererNodeData>
           if (Array.isArray(executionData) && executionData.length > 0) {
             // Find max value for scaling
             let maxValue = 0;
-            const chartData = executionData.slice(0, 20).map((item) => {
+            const chartData = executionData.slice(0, 20).map((item, index) => {
               if (typeof item === "object" && item !== null) {
                 const obj = item as Record<string, unknown>;
                 const label = obj.label ? String(obj.label) : String(obj.name || "");
@@ -279,7 +284,7 @@ export function RendererNode({ id, data, ...props }: NodeProps<RendererNodeData>
                 return { label, value };
               } else if (typeof item === "number") {
                 maxValue = Math.max(maxValue, item);
-                return { label: String(executionData.indexOf(item)), value: item };
+                return { label: String(index), value: item };
               }
               return { label: "", value: 0 };
             });

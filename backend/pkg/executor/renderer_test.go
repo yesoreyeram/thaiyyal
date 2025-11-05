@@ -1,6 +1,7 @@
 package executor
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/types"
@@ -110,57 +111,9 @@ func TestRendererExecutor_Execute(t *testing.T) {
 			}
 
 			// Deep comparison for complex types
-			if !compareResults(result, tt.want) {
+			if !reflect.DeepEqual(result, tt.want) {
 				t.Errorf("Execute() result = %v, want %v", result, tt.want)
 			}
 		})
-	}
-}
-
-// Helper function to compare results deeply
-func compareResults(got, want interface{}) bool {
-	if got == nil && want == nil {
-		return true
-	}
-	if got == nil || want == nil {
-		return false
-	}
-
-	// For basic types, use direct comparison
-	switch v := want.(type) {
-	case string, int, float64, bool:
-		return got == v
-	case map[string]interface{}:
-		gotMap, ok := got.(map[string]interface{})
-		if !ok {
-			return false
-		}
-		if len(gotMap) != len(v) {
-			return false
-		}
-		for k, wantV := range v {
-			gotV, exists := gotMap[k]
-			if !exists || !compareResults(gotV, wantV) {
-				return false
-			}
-		}
-		return true
-	case []interface{}:
-		gotSlice, ok := got.([]interface{})
-		if !ok {
-			return false
-		}
-		if len(gotSlice) != len(v) {
-			return false
-		}
-		for i, wantV := range v {
-			if !compareResults(gotSlice[i], wantV) {
-				return false
-			}
-		}
-		return true
-	default:
-		// For other types, fall back to direct comparison
-		return got == want
 	}
 }
