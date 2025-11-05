@@ -39,6 +39,56 @@ This document provides a complete reference for all built-in node types in Thaiy
 {"id": "3", "type": "visualization", "data": {"mode": "json"}}
 ```
 
+#### Renderer
+**Type:** `renderer`  
+**Purpose:** Automatically render data in the most appropriate format based on data type and structure  
+**Configuration:**
+- No configuration required - format is auto-detected from input data
+
+**Auto-Detection Logic:**
+- **Strings**: Automatically detects JSON, XML, CSV, TSV patterns
+- **Arrays of objects with label/value fields**: Renders as bar chart
+- **Arrays of objects**: Renders as table
+- **Arrays**: Renders as formatted JSON
+- **Objects**: Renders as formatted JSON
+- **Primitives**: Renders as plain text
+
+**Supported Formats:**
+- Plain text
+- Formatted JSON
+- CSV (Comma-Separated Values)
+- TSV (Tab-Separated Values)
+- XML
+- Table (for array of objects)
+- Bar Chart (for data with label/value pairs)
+
+**Features:**
+- Displays "No data" before workflow execution
+- Automatically renders data after execution completes
+- Expandable/collapsible view
+- Can be used as end node or intermediate node (has output handle)
+- Format indicator shows detected format
+
+**Example:**
+```json
+{"id": "renderer1", "type": "renderer", "data": {}}
+```
+
+**Example with Input Data:**
+```json
+// Input: [{"name": "Alice", "age": 30}, {"name": "Bob", "age": 25}]
+// Auto-detected format: Table
+// Renders as a formatted table with columns: name, age
+
+// Input: [{"label": "Q1", "value": 100}, {"label": "Q2", "value": 150}]
+// Auto-detected format: Bar Chart
+// Renders as horizontal bar chart with labels and values
+
+// Input: {"status": "success", "count": 42}
+// Auto-detected format: JSON
+// Renders as formatted JSON with syntax highlighting
+```
+
 ### Operations (3 nodes)
 
 #### Operation

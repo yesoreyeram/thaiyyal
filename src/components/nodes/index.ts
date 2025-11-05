@@ -6,6 +6,7 @@ export { ConditionNode } from './ConditionNode';
 export { FilterNode } from './FilterNode';
 export { ContextVariableNode, ContextConstantNode } from './ContextNodes';
 export { BarChartNode } from './BarChartNode';
+export { RendererNode } from './RendererNode';
 
 // Export control flow nodes (previously in AllNodes.tsx)
 export { ForEachNode } from './ForEachNode';

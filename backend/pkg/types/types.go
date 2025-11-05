@@ -104,6 +104,8 @@ const (
 	// Context nodes (orphan nodes that define workflow-level values)
 	NodeTypeContextVariable NodeType = "context_variable" // Define a mutable variable
 	NodeTypeContextConstant NodeType = "context_constant" // Define an immutable constant
+	// Visualization nodes
+	NodeTypeRenderer NodeType = "renderer" // Render data in various formats
 )
 
 // ============================================================================
