@@ -4,21 +4,22 @@ import React from "react";
 import { NodeWrapper } from "./NodeWrapper";
 import { getNodeInfo } from "./nodeInfo";
 
-
 type TextInputNodeData = {
   text?: string;
   label?: string;
 };
 
-export function TextInputNode({ id, data, onShowOptions }: NodePropsWithOptions<TextInputNodeData>) {
+export function TextInputNode({
+  id,
+  data,
+  onShowOptions,
+}: NodePropsWithOptions<TextInputNodeData>) {
   const { setNodes } = useReactFlow();
-  
+
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const text = e.target.value;
     setNodes((nds) =>
-      nds.map((n) =>
-        n.id === id ? { ...n, data: { ...n.data, text } } : n
-      )
+      nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, text } } : n))
     );
   };
 
@@ -29,9 +30,13 @@ export function TextInputNode({ id, data, onShowOptions }: NodePropsWithOptions<
       title={String(data?.label || "Text Input")}
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
-      className="bg-gradient-to-br from-emerald-700 to-emerald-800 text-white shadow-lg rounded-lg border border-emerald-600 hover:border-emerald-500 transition-all"
+      className="bg-linear-to-br from-emerald-700 to-emerald-800 text-white shadow-lg rounded-lg border border-emerald-600 hover:border-emerald-500 transition-all"
     >
-      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-2 h-2 bg-blue-400"
+      />
       <input
         value={String(data?.text ?? "")}
         type="text"
@@ -40,7 +45,11 @@ export function TextInputNode({ id, data, onShowOptions }: NodePropsWithOptions<
         placeholder="Enter text..."
         aria-label="Text input value"
       />
-      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-2 h-2 bg-green-400"
+      />
     </NodeWrapper>
   );
 }

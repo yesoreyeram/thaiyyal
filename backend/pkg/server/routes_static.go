@@ -27,7 +27,7 @@ func (s *Server) handleStaticFiles(w http.ResponseWriter, r *http.Request) {
 
 	// Remove leading slash for fs operations
 	filePath := strings.TrimPrefix(upath, "/")
-	
+
 	// Default to index.html for root path
 	if filePath == "" || filePath == "/" {
 		filePath = "index.html"
@@ -41,15 +41,38 @@ func (s *Server) handleStaticFiles(w http.ResponseWriter, r *http.Request) {
 			htmlPath := filePath + ".html"
 			content, stat, err = tryServeFile(staticFS, htmlPath)
 		}
-		
-		// If still not found, fall back to index.html for SPA routing
+
+		// If still not found, only fall back to index.html for HTML routes (not for static assets)
+		// Static assets like .js, .css, images should return 404 if not found
 		if err != nil {
-			content, stat, err = tryServeFile(staticFS, "index.html")
+			// Check if this is a static asset request (has file extension like .js, .css, .png, etc.)
+			hasExtension := strings.Contains(filePath, ".")
+			isStaticAsset := hasExtension && (strings.HasPrefix(filePath, "_next/") ||
+				strings.HasSuffix(filePath, ".js") ||
+				strings.HasSuffix(filePath, ".css") ||
+				strings.HasSuffix(filePath, ".png") ||
+				strings.HasSuffix(filePath, ".jpg") ||
+				strings.HasSuffix(filePath, ".svg") ||
+				strings.HasSuffix(filePath, ".ico") ||
+				strings.HasSuffix(filePath, ".woff") ||
+				strings.HasSuffix(filePath, ".woff2"))
+
+			// Only fall back to index.html for potential SPA routes (not static assets)
+			if !isStaticAsset {
+				content, stat, err = tryServeFile(staticFS, "index.html")
+			}
+
 			if err != nil {
 				http.NotFound(w, r)
 				return
 			}
 		}
+	}
+
+	// Set appropriate content type
+	contentType := getContentType(filePath)
+	if contentType != "" {
+		w.Header().Set("Content-Type", contentType)
 	}
 
 	// Serve the content
@@ -82,4 +105,34 @@ func tryServeFile(fsys fs.FS, filePath string) ([]byte, fs.FileInfo, error) {
 	}
 
 	return content, stat, nil
+}
+
+// getContentType returns the appropriate Content-Type header for a file
+func getContentType(filePath string) string {
+	// Get file extension
+	ext := path.Ext(filePath)
+
+	// Map common extensions to content types
+	contentTypes := map[string]string{
+		".html":  "text/html; charset=utf-8",
+		".css":   "text/css; charset=utf-8",
+		".js":    "application/javascript; charset=utf-8",
+		".json":  "application/json; charset=utf-8",
+		".png":   "image/png",
+		".jpg":   "image/jpeg",
+		".jpeg":  "image/jpeg",
+		".gif":   "image/gif",
+		".svg":   "image/svg+xml",
+		".ico":   "image/x-icon",
+		".woff":  "font/woff",
+		".woff2": "font/woff2",
+		".ttf":   "font/ttf",
+		".eot":   "application/vnd.ms-fontobject",
+	}
+
+	if contentType, ok := contentTypes[ext]; ok {
+		return contentType
+	}
+
+	return ""
 }

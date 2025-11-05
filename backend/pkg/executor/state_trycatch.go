@@ -15,8 +15,7 @@ type TryCatchExecutor struct{}
 // Catches errors and provides fallback values or continues workflow execution
 func (e *TryCatchExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
 	// Get configuration
-	var fallbackValue interface{}
-	fallbackValue = node.Data.FallbackValue
+	fallbackValue := node.Data.FallbackValue
 
 	continueOnError := true
 	if node.Data.ContinueOnError != nil {

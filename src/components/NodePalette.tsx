@@ -1,14 +1,14 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 
-interface NodeConfig {
+export interface NodeConfig {
   type: string;
   label: string;
   color: string;
   defaultData: Record<string, unknown>;
 }
 
-interface NodeCategory {
+export interface NodeCategory {
   name: string;
   nodes: NodeConfig[];
 }
@@ -34,34 +34,11 @@ export function NodePalette({
   const paletteRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen) {
-        onClose();
-      }
-    };
-
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        isOpen &&
-        paletteRef.current &&
-        !paletteRef.current.contains(e.target as Node)
-      ) {
-        onClose();
-      }
-    };
-
     if (isOpen) {
-      document.addEventListener("keydown", handleEscape);
-      document.addEventListener("mousedown", handleClickOutside);
       // Focus search input when palette opens
       setTimeout(() => searchInputRef.current?.focus(), 100);
     }
-
-    return () => {
-      document.removeEventListener("keydown", handleEscape);
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   const toggleCategory = (categoryName: string) => {
     setExpandedCategories((prev) => {
@@ -92,7 +69,18 @@ export function NodePalette({
   ) => {
     onAddNode(type, defaultData);
     setSearchQuery(""); // Clear search after adding
-    onClose(); // Close palette after adding a node
+  };
+
+  const onDragStart = (
+    event: React.DragEvent,
+    type: string,
+    defaultData: Record<string, unknown>
+  ) => {
+    event.dataTransfer.setData(
+      "application/reactflow",
+      JSON.stringify({ type, defaultData })
+    );
+    event.dataTransfer.effectAllowed = "move";
   };
 
   if (!isOpen) return null;
@@ -100,16 +88,16 @@ export function NodePalette({
   return (
     <div
       ref={paletteRef}
-      className="absolute left-4 bottom-12 z-10 bg-gray-900 border border-gray-700 rounded-lg shadow-2xl max-h-[calc(100vh-200px)] overflow-hidden w-64 flex flex-col"
+      className="h-full bg-gray-900 border-r border-gray-700 w-64 flex flex-col"
     >
       {/* Header with Search */}
-      <div className="sticky top-0 bg-gray-900 border-b border-gray-700 p-3">
+      <div className="bg-gray-900 border-b border-gray-700 p-3">
         <div className="flex items-center justify-between mb-2">
-          <div className="text-sm font-bold text-white">Add Nodes</div>
+          <div className="text-sm font-bold text-white">Nodes</div>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-white transition-colors"
-            title="Close (ESC)"
+            title="Close Sidebar"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -179,16 +167,21 @@ export function NodePalette({
               {expandedCategories.has(category.name) && (
                 <div className="px-3 pb-3 flex flex-col gap-1">
                   {category.nodes.map((config) => (
-                    <button
-                      key={config.type}
+                    <div
+                      key={config.type + config.label}
+                      draggable
+                      onDragStart={(e) =>
+                        onDragStart(e, config.type, config.defaultData)
+                      }
                       onClick={() =>
                         handleAddNode(config.type, config.defaultData)
                       }
-                      className="bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded text-sm transition-all text-left flex items-center gap-2"
+                      className="bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded text-sm transition-all text-left flex items-center gap-2 cursor-move"
+                      title="Click to add or drag to canvas"
                     >
-                      <span className="text-xs">+</span>
+                      <span className="text-xs">⋮⋮</span>
                       <span>{config.label}</span>
-                    </button>
+                    </div>
                   ))}
                 </div>
               )}
@@ -199,8 +192,7 @@ export function NodePalette({
 
       {/* Footer hint */}
       <div className="border-t border-gray-800 px-3 py-2 text-xs text-gray-500">
-        Press <kbd className="px-1 py-0.5 bg-gray-800 rounded">ESC</kbd> to
-        close
+        Click to add • Drag to place
       </div>
     </div>
   );

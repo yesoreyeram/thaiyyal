@@ -1,11 +1,14 @@
 /**
  * ExtractNode Component
- * 
+ *
  * Extracts a field from an object or array.
  */
 
 import React from "react";
-import { Handle, Position, useReactFlow, NodeProps } from "reactflow";
+import { Handle, Position, useReactFlow } from "reactflow";
+import { NodePropsWithOptions } from "./nodeTypes";
+import { NodeWrapper } from "./NodeWrapper";
+import { getNodeInfo } from "./nodeInfo";
 
 type ExtractNodeData = {
   field?: string;
@@ -15,16 +18,20 @@ type ExtractNodeData = {
 
 /**
  * ExtractNode React Component
- * 
+ *
  * This component renders a visual node in the workflow editor that extracts fields from data
- * 
+ *
  * @param {NodePropsWithOptions<ExtractNodeData>} props - Component props
  * @param {string} props.id - Unique identifier for this node instance
  * @param {ExtractNodeData} props.data - Node configuration data
  * @param {function} [props.onShowOptions] - Callback to show the options context menu
  * @returns {JSX.Element} A rendered node component
  */
-export function ExtractNode({ id, data }: NodeProps<ExtractNodeData>) {
+export function ExtractNode({
+  id,
+  data,
+  onShowOptions,
+}: NodePropsWithOptions<ExtractNodeData>) {
   const { setNodes } = useReactFlow();
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -34,16 +41,28 @@ export function ExtractNode({ id, data }: NodeProps<ExtractNodeData>) {
     );
   };
 
+  const handleTitleChange = (newTitle: string) => {
+    setNodes((nds) =>
+      nds.map((n) =>
+        n.id === id ? { ...n, data: { ...n.data, label: newTitle } } : n
+      )
+    );
+  };
+
+  const nodeInfo = getNodeInfo("extractNode");
+
   return (
-    <div className="px-2 py-1 bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all">
+    <NodeWrapper
+      title={String(data?.label || "Extract")}
+      nodeInfo={nodeInfo}
+      onShowOptions={onShowOptions}
+      onTitleChange={handleTitleChange}
+    >
       <Handle
         type="target"
         position={Position.Left}
         className="w-2 h-2 bg-blue-400"
       />
-      <div className="text-xs font-semibold mb-1 text-gray-200">
-        {String(data?.label || "Extract")}
-      </div>
       <input
         value={String(data?.field ?? "")}
         type="text"
@@ -56,6 +75,6 @@ export function ExtractNode({ id, data }: NodeProps<ExtractNodeData>) {
         position={Position.Right}
         className="w-2 h-2 bg-green-400"
       />
-    </div>
+    </NodeWrapper>
   );
 }

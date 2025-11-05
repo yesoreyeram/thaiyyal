@@ -1,5 +1,11 @@
 "use client";
-import React, { useCallback, useMemo, useState, useRef, useEffect } from "react";
+import React, {
+  useCallback,
+  useMemo,
+  useState,
+  useRef,
+  useEffect,
+} from "react";
 import ReactFlow, {
   addEdge,
   ReactFlowProvider,
@@ -13,6 +19,7 @@ import ReactFlow, {
   NodeProps,
   Handle,
   Position,
+  NodeChange,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import {
@@ -21,7 +28,6 @@ import {
   HttpNode,
   ConditionNode,
   FilterNode,
-  BarChartNode,
   RendererNode,
   ForEachNode,
   WhileLoopNode,
@@ -29,6 +35,7 @@ import {
   ExtractNode,
   TransformNode,
   ParseNode,
+  ExpressionNode,
   AccumulatorNode,
   CounterNode,
   SwitchNode,
@@ -67,7 +74,10 @@ import { WorkflowStatusBar } from "../../components/WorkflowStatusBar";
 import { NodePalette } from "../../components/NodePalette";
 import { JSONPayloadModal } from "../../components/JSONPayloadModal";
 import { WorkflowExamplesModal } from "../../components/WorkflowExamplesModal";
-import { ExecutionPanel, ExecutionResult } from "../../components/ExecutionPanel";
+import {
+  ExecutionPanel,
+  ExecutionResult,
+} from "../../components/ExecutionPanel";
 import { WorkflowExample } from "../../data/workflowExamples";
 import { useRouter } from "next/navigation";
 
@@ -94,7 +104,9 @@ const withContextMenu = (
       />
     );
   };
-  WrappedComponent.displayName = `withContextMenu(${Component.displayName || Component.name || 'Component'})`;
+  WrappedComponent.displayName = `withContextMenu(${
+    Component.displayName || Component.name || "Component"
+  })`;
   return WrappedComponent;
 };
 
@@ -153,11 +165,7 @@ function NumberNode({
   );
 }
 
-function OperationNode({
-  id,
-  data,
-  onShowOptions,
-}: NodePropsWithOptions) {
+function OperationNode({ id, data, onShowOptions }: NodePropsWithOptions) {
   const { setNodes } = useReactFlow();
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const op = e.target.value;
@@ -258,34 +266,127 @@ function VizNode({ id, data, onShowOptions }: NodePropsWithOptions) {
 const initialNodes: RFNode<NodeData>[] = [
   {
     id: "1",
-    position: { x: 50, y: 50 },
-    data: { value: 10, label: "Node 1" },
-    type: "numberNode",
+    type: "number",
+    data: {
+      value: 10,
+      label: "Node 1",
+    },
+    position: {
+      x: 64.40527775914373,
+      y: -46.56871386685241,
+    },
   },
   {
     id: "2",
-    position: { x: 50, y: 200 },
-    data: { value: 5, label: "Node 2" },
-    type: "numberNode",
+    type: "number",
+    data: {
+      value: 7,
+      label: "Node 2",
+    },
+    position: {
+      x: 66.00586417682638,
+      y: 41.00841584352477,
+    },
   },
   {
     id: "3",
-    position: { x: 300, y: 120 },
-    data: { op: "add", label: "Node 3 (op)" },
-    type: "opNode",
+    type: "operation",
+    data: {
+      op: "subtract",
+      label: "Node 3 (op)",
+    },
+    position: {
+      x: 289.32942388211575,
+      y: -5.379269385139878,
+    },
   },
   {
-    id: "4",
-    position: { x: 600, y: 120 },
-    data: { mode: "text", label: "Node 4 (viz)" },
-    type: "vizNode",
+    id: "5",
+    type: "expression",
+    data: {
+      expression: "input * 2",
+      label: "expression 5",
+    },
+    position: {
+      x: 544.1813952845607,
+      y: -58.416722398767256,
+    },
+  },
+  {
+    id: "6",
+    type: "renderer",
+    data: {
+      label: "renderer 6",
+      _executionData: 6,
+    },
+    position: {
+      x: 739.4878012390735,
+      y: -72.0625848235367,
+    },
+  },
+  {
+    id: "7",
+    type: "expression",
+    data: {
+      expression: "input > 0",
+      label: "expression 7",
+    },
+    position: {
+      x: 557.8272577093301,
+      y: 55.01450900712885,
+    },
+  },
+  {
+    id: "8",
+    type: "renderer",
+    data: {
+      label: "renderer 8",
+      _executionData: true,
+    },
+    position: {
+      x: 735.5228211229668,
+      y: 49.57819290650292,
+    },
   },
 ];
 
 const initialEdges: RFEdge[] = [
-  { id: "e1-3", source: "1", target: "3" },
-  { id: "e2-3", source: "2", target: "3" },
-  { id: "e3-4", source: "3", target: "4" },
+  {
+    id: "e1-3",
+    source: "1",
+    target: "3",
+    type: "smoothstep",
+  },
+  {
+    id: "e2-3",
+    source: "2",
+    target: "3",
+    type: "smoothstep",
+  },
+  {
+    id: "reactflow__edge-3-5",
+    source: "3",
+    target: "5",
+    type: "smoothstep",
+  },
+  {
+    id: "reactflow__edge-5-6",
+    source: "5",
+    target: "6",
+    type: "smoothstep",
+  },
+  {
+    id: "reactflow__edge-3-7",
+    source: "3",
+    target: "7",
+    type: "smoothstep",
+  },
+  {
+    id: "reactflow__edge-7-8",
+    source: "7",
+    target: "8",
+    type: "smoothstep",
+  },
 ];
 
 // Node categories configuration
@@ -294,31 +395,31 @@ const nodeCategories = [
     name: "Input/Output",
     nodes: [
       {
-        type: "numberNode",
+        type: "number",
         label: "Number",
         color: "bg-blue-600",
         defaultData: { value: 0 },
       },
       {
-        type: "textInputNode",
+        type: "text_input",
         label: "Text Input",
         color: "bg-green-600",
         defaultData: { text: "" },
       },
       {
-        type: "httpNode",
+        type: "http",
         label: "HTTP",
         color: "bg-purple-600",
         defaultData: { url: "" },
       },
       {
-        type: "vizNode",
+        type: "visualization",
         label: "Visualization",
         color: "bg-indigo-600",
         defaultData: { mode: "text" },
       },
       {
-        type: "barChartNode",
+        type: "visualization",
         label: "Bar Chart",
         color: "bg-violet-600",
         defaultData: {
@@ -330,7 +431,7 @@ const nodeCategories = [
         },
       },
       {
-        type: "rendererNode",
+        type: "renderer",
         label: "Renderer",
         color: "bg-pink-600",
         defaultData: {},
@@ -341,33 +442,39 @@ const nodeCategories = [
     name: "Operations",
     nodes: [
       {
-        type: "opNode",
+        type: "operation",
         label: "Math Op",
         color: "bg-yellow-600",
         defaultData: { op: "add" },
       },
       {
-        type: "textOpNode",
+        type: "text_operation",
         label: "Text Op",
         color: "bg-green-600",
         defaultData: { text_op: "uppercase" },
       },
       {
-        type: "transformNode",
-        label: "Transform",
+        type: "expression",
+        label: "Expression",
         color: "bg-cyan-600",
+        defaultData: { expression: "input * 2" },
+      },
+      {
+        type: "transform",
+        label: "Transform",
+        color: "bg-teal-600",
         defaultData: { transform_type: "to_array" },
       },
       {
-        type: "parseNode",
+        type: "parse",
         label: "Parse",
         color: "bg-purple-600",
         defaultData: { input_type: "AUTO" },
       },
       {
-        type: "extractNode",
+        type: "extract",
         label: "Extract",
-        color: "bg-teal-600",
+        color: "bg-sky-600",
         defaultData: { field: "" },
       },
     ],
@@ -376,31 +483,31 @@ const nodeCategories = [
     name: "Control Flow",
     nodes: [
       {
-        type: "conditionNode",
+        type: "condition",
         label: "Condition",
         color: "bg-amber-600",
         defaultData: { condition: ">0" },
       },
       {
-        type: "filterNode",
+        type: "filter",
         label: "Filter",
         color: "bg-purple-600",
         defaultData: { condition: "item.age > 0" },
       },
       {
-        type: "forEachNode",
+        type: "for_each",
         label: "For Each",
         color: "bg-orange-600",
         defaultData: { max_iterations: 1000 },
       },
       {
-        type: "whileLoopNode",
+        type: "while_loop",
         label: "While Loop",
         color: "bg-red-600",
         defaultData: { condition: ">0", max_iterations: 100 },
       },
       {
-        type: "switchNode",
+        type: "switch",
         label: "Switch",
         color: "bg-pink-600",
         defaultData: { cases: [], default_path: "default" },
@@ -411,19 +518,19 @@ const nodeCategories = [
     name: "Parallel & Join",
     nodes: [
       {
-        type: "parallelNode",
+        type: "parallel",
         label: "Parallel",
         color: "bg-violet-600",
         defaultData: { max_concurrency: 10 },
       },
       {
-        type: "joinNode",
+        type: "join",
         label: "Join",
         color: "bg-fuchsia-600",
         defaultData: { join_strategy: "all" },
       },
       {
-        type: "splitNode",
+        type: "split",
         label: "Split",
         color: "bg-rose-600",
         defaultData: { paths: ["path1", "path2"] },
@@ -434,25 +541,25 @@ const nodeCategories = [
     name: "State & Memory",
     nodes: [
       {
-        type: "variableNode",
+        type: "variable",
         label: "Variable",
         color: "bg-sky-600",
         defaultData: { var_name: "", var_op: "get" },
       },
       {
-        type: "accumulatorNode",
+        type: "accumulator",
         label: "Accumulator",
         color: "bg-blue-500",
         defaultData: { accum_op: "sum" },
       },
       {
-        type: "counterNode",
+        type: "counter",
         label: "Counter",
         color: "bg-indigo-500",
         defaultData: { counter_op: "increment", delta: 1 },
       },
       {
-        type: "cacheNode",
+        type: "cache",
         label: "Cache",
         color: "bg-purple-500",
         defaultData: { cache_op: "get", cache_key: "" },
@@ -463,7 +570,7 @@ const nodeCategories = [
     name: "Error Handling",
     nodes: [
       {
-        type: "retryNode",
+        type: "retry",
         label: "Retry",
         color: "bg-red-500",
         defaultData: {
@@ -473,13 +580,13 @@ const nodeCategories = [
         },
       },
       {
-        type: "tryCatchNode",
+        type: "try_catch",
         label: "Try-Catch",
         color: "bg-orange-500",
         defaultData: { continue_on_error: true },
       },
       {
-        type: "timeoutNode",
+        type: "timeout",
         label: "Timeout",
         color: "bg-amber-500",
         defaultData: { timeout: "30s", timeout_action: "error" },
@@ -490,7 +597,7 @@ const nodeCategories = [
     name: "Utilities",
     nodes: [
       {
-        type: "delayNode",
+        type: "delay",
         label: "Delay",
         color: "bg-gray-500",
         defaultData: { duration: "1s" },
@@ -501,91 +608,91 @@ const nodeCategories = [
     name: "Array Operations",
     nodes: [
       {
-        type: "mapNode",
+        type: "map",
         label: "Map",
         color: "bg-cyan-600",
         defaultData: { expression: "item * 2" },
       },
       {
-        type: "reduceNode",
+        type: "reduce",
         label: "Reduce",
         color: "bg-teal-600",
         defaultData: { expression: "acc + item", initial_value: "0" },
       },
       {
-        type: "sliceNode",
+        type: "slice",
         label: "Slice",
         color: "bg-emerald-600",
         defaultData: { start: 0, end: -1 },
       },
       {
-        type: "sortNode",
+        type: "sort",
         label: "Sort",
         color: "bg-lime-600",
         defaultData: { field: "", order: "asc" },
       },
       {
-        type: "findNode",
+        type: "find",
         label: "Find",
         color: "bg-sky-600",
         defaultData: { expression: "item.id == 1" },
       },
       {
-        type: "flatMapNode",
+        type: "flat_map",
         label: "FlatMap",
         color: "bg-indigo-600",
         defaultData: { expression: "item.values" },
       },
       {
-        type: "groupByNode",
+        type: "group_by",
         label: "Group By",
         color: "bg-violet-600",
         defaultData: { key_field: "category" },
       },
       {
-        type: "uniqueNode",
+        type: "unique",
         label: "Unique",
         color: "bg-fuchsia-600",
         defaultData: { by_field: "" },
       },
       {
-        type: "chunkNode",
+        type: "chunk",
         label: "Chunk",
         color: "bg-pink-600",
         defaultData: { size: 3 },
       },
       {
-        type: "reverseNode",
+        type: "reverse",
         label: "Reverse",
         color: "bg-rose-600",
         defaultData: {},
       },
       {
-        type: "partitionNode",
+        type: "partition",
         label: "Partition",
         color: "bg-orange-600",
         defaultData: { expression: "item > 0" },
       },
       {
-        type: "zipNode",
+        type: "zip",
         label: "Zip",
         color: "bg-yellow-600",
         defaultData: {},
       },
       {
-        type: "sampleNode",
+        type: "sample",
         label: "Sample",
         color: "bg-blue-600",
         defaultData: { count: 1 },
       },
       {
-        type: "rangeNode",
+        type: "range",
         label: "Range",
         color: "bg-green-600",
         defaultData: { start: 0, end: 10, step: 1 },
       },
       {
-        type: "transposeNode",
+        type: "transpose",
         label: "Transpose",
         color: "bg-red-600",
         defaultData: {},
@@ -596,10 +703,10 @@ const nodeCategories = [
 
 function Canvas() {
   const router = useRouter();
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [nodes, setNodes, onNodesChangeBase] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
   const [showPayload, setShowPayload] = useState(false);
-  const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+  const [isPaletteOpen, setIsPaletteOpen] = useState(true); // Start with palette open
   const [showExamplesModal, setShowExamplesModal] = useState(false);
   const [workflowTitle, setWorkflowTitle] = useState("Untitled Workflow");
   const [contextMenu, setContextMenu] = useState<{
@@ -611,19 +718,36 @@ function Canvas() {
     nodeId: string;
     nodeName: string;
   } | null>(null);
-  
+
   // Execution panel state
   const [isExecutionPanelOpen, setIsExecutionPanelOpen] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
-  const [executionResult, setExecutionResult] = useState<ExecutionResult | null>(null);
+  const [executionResult, setExecutionResult] =
+    useState<ExecutionResult | null>(null);
   const [executionError, setExecutionError] = useState<string | null>(null);
   const [executionPanelHeight, setExecutionPanelHeight] = useState(250);
   const abortControllerRef = useRef<AbortController | null>(null);
-  
+
   const { project, getNodes } = useReactFlow();
 
+  // Track the next available node ID (never decrements, only increments)
+  // Initialize to 9 since initial nodes use IDs 1-8
+  const nextNodeId = useRef(9);
+
+  // Wrap onNodesChange - no special handling needed
+  const onNodesChange = useCallback(
+    (changes: NodeChange[]) => {
+      // Apply the changes
+      onNodesChangeBase(changes);
+    },
+    [onNodesChangeBase]
+  );
+
   const onConnect = useCallback(
-    (params: Connection) => setEdges((eds: RFEdge[]) => addEdge(params, eds)),
+    (params: Connection) =>
+      setEdges((eds: RFEdge[]) =>
+        addEdge({ ...params, type: "smoothstep" }, eds)
+      ),
     [setEdges]
   );
 
@@ -638,7 +762,7 @@ function Canvas() {
     () => ({
       nodes: nodes.map((n) => ({
         id: n.id,
-        type: n.type,
+        type: n.type || "",
         data: n.data,
         position: n.position,
       })),
@@ -653,196 +777,245 @@ function Canvas() {
 
   const nodeTypes = useMemo(
     () => ({
-      numberNode: withContextMenu(NumberNode, handleNodeContextMenu, () =>
+      number: withContextMenu(NumberNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      opNode: withContextMenu(OperationNode, handleNodeContextMenu, () =>
+      operation: withContextMenu(OperationNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      vizNode: withContextMenu(VizNode, handleNodeContextMenu, () =>
+      visualization: withContextMenu(VizNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      barChartNode: withContextMenu(BarChartNode, handleNodeContextMenu, () =>
+      renderer: withContextMenu(RendererNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      rendererNode: withContextMenu(RendererNode, handleNodeContextMenu, () =>
+      text_input: withContextMenu(TextInputNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      textInputNode: withContextMenu(TextInputNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false)
-      ),
-      textOpNode: withContextMenu(
+      text_operation: withContextMenu(
         TextOperationNode,
         handleNodeContextMenu,
         () => setIsPaletteOpen(false)
       ),
-      httpNode: withContextMenu(HttpNode, handleNodeContextMenu, () =>
+      http: withContextMenu(HttpNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      conditionNode: withContextMenu(ConditionNode, handleNodeContextMenu, () =>
+      condition: withContextMenu(ConditionNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      filterNode: withContextMenu(FilterNode, handleNodeContextMenu, () =>
+      filter: withContextMenu(FilterNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      forEachNode: withContextMenu(ForEachNode, handleNodeContextMenu, () =>
+      for_each: withContextMenu(ForEachNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      whileLoopNode: withContextMenu(WhileLoopNode, handleNodeContextMenu, () =>
+      while_loop: withContextMenu(WhileLoopNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      variableNode: withContextMenu(VariableNode, handleNodeContextMenu, () =>
+      variable: withContextMenu(VariableNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      extractNode: withContextMenu(ExtractNode, handleNodeContextMenu, () =>
+      extract: withContextMenu(ExtractNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      transformNode: withContextMenu(TransformNode, handleNodeContextMenu, () =>
+      transform: withContextMenu(TransformNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      parseNode: withContextMenu(ParseNode, handleNodeContextMenu, () =>
+      parse: withContextMenu(ParseNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      accumulatorNode: withContextMenu(
-        AccumulatorNode,
-        handleNodeContextMenu,
-        () => setIsPaletteOpen(false)
-      ),
-      counterNode: withContextMenu(CounterNode, handleNodeContextMenu, () =>
+      expression: withContextMenu(ExpressionNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      switchNode: withContextMenu(SwitchNode, handleNodeContextMenu, () =>
+      accumulator: withContextMenu(AccumulatorNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      parallelNode: withContextMenu(ParallelNode, handleNodeContextMenu, () =>
+      counter: withContextMenu(CounterNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      joinNode: withContextMenu(JoinNode, handleNodeContextMenu, () =>
+      switch: withContextMenu(SwitchNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      splitNode: withContextMenu(SplitNode, handleNodeContextMenu, () =>
+      parallel: withContextMenu(ParallelNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      delayNode: withContextMenu(DelayNode, handleNodeContextMenu, () =>
+      join: withContextMenu(JoinNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      cacheNode: withContextMenu(CacheNode, handleNodeContextMenu, () =>
+      split: withContextMenu(SplitNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      retryNode: withContextMenu(RetryNode, handleNodeContextMenu, () =>
+      delay: withContextMenu(DelayNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      tryCatchNode: withContextMenu(TryCatchNode, handleNodeContextMenu, () =>
+      cache: withContextMenu(CacheNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      timeoutNode: withContextMenu(TimeoutNode, handleNodeContextMenu, () =>
+      retry: withContextMenu(RetryNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      mapNode: withContextMenu(MapNode, handleNodeContextMenu, () =>
+      try_catch: withContextMenu(TryCatchNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      reduceNode: withContextMenu(ReduceNode, handleNodeContextMenu, () =>
+      timeout: withContextMenu(TimeoutNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      sliceNode: withContextMenu(SliceNode, handleNodeContextMenu, () =>
+      map: withContextMenu(MapNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      sortNode: withContextMenu(SortNode, handleNodeContextMenu, () =>
+      reduce: withContextMenu(ReduceNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      findNode: withContextMenu(FindNode, handleNodeContextMenu, () =>
+      slice: withContextMenu(SliceNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      flatMapNode: withContextMenu(FlatMapNode, handleNodeContextMenu, () =>
+      sort: withContextMenu(SortNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      groupByNode: withContextMenu(GroupByNode, handleNodeContextMenu, () =>
+      find: withContextMenu(FindNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      uniqueNode: withContextMenu(UniqueNode, handleNodeContextMenu, () =>
+      flat_map: withContextMenu(FlatMapNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      chunkNode: withContextMenu(ChunkNode, handleNodeContextMenu, () =>
+      group_by: withContextMenu(GroupByNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      reverseNode: withContextMenu(ReverseNode, handleNodeContextMenu, () =>
+      unique: withContextMenu(UniqueNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      partitionNode: withContextMenu(PartitionNode, handleNodeContextMenu, () =>
+      chunk: withContextMenu(ChunkNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      zipNode: withContextMenu(ZipNode, handleNodeContextMenu, () =>
+      reverse: withContextMenu(ReverseNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      sampleNode: withContextMenu(SampleNode, handleNodeContextMenu, () =>
+      partition: withContextMenu(PartitionNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      rangeNode: withContextMenu(RangeNode, handleNodeContextMenu, () =>
+      zip: withContextMenu(ZipNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
-      transposeNode: withContextMenu(TransposeNode, handleNodeContextMenu, () =>
+      sample: withContextMenu(SampleNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      range: withContextMenu(RangeNode, handleNodeContextMenu, () =>
+        setIsPaletteOpen(false)
+      ),
+      transpose: withContextMenu(TransposeNode, handleNodeContextMenu, () =>
         setIsPaletteOpen(false)
       ),
     }),
     [handleNodeContextMenu]
   );
 
-  const [nextId, setNextId] = useState(5);
-
   // Check for overlapping nodes
-  const findNonOverlappingPosition = (basePosition: XYPosition): XYPosition => {
-    const existingNodes = getNodes();
-    const nodeWidth = 150;
-    const nodeHeight = 80;
-    const padding = 20;
+  const findNonOverlappingPosition = useCallback(
+    (basePosition: XYPosition): XYPosition => {
+      const existingNodes = getNodes();
+      const nodeWidth = 150;
+      const nodeHeight = 80;
+      const padding = 20;
 
-    let position = { ...basePosition };
-    let attempts = 0;
-    const maxAttempts = 50;
+      let position = { ...basePosition };
+      let attempts = 0;
+      const maxAttempts = 50;
 
-    while (attempts < maxAttempts) {
-      const overlaps = existingNodes.some((node) => {
-        const dx = Math.abs(node.position.x - position.x);
-        const dy = Math.abs(node.position.y - position.y);
-        return dx < nodeWidth + padding && dy < nodeHeight + padding;
-      });
+      while (attempts < maxAttempts) {
+        const overlaps = existingNodes.some((node) => {
+          const dx = Math.abs(node.position.x - position.x);
+          const dy = Math.abs(node.position.y - position.y);
+          return dx < nodeWidth + padding && dy < nodeHeight + padding;
+        });
 
-      if (!overlaps) {
-        return position;
+        if (!overlaps) {
+          return position;
+        }
+
+        // Try offset positions
+        position = {
+          x: basePosition.x + attempts * 30,
+          y: basePosition.y + (attempts % 5) * 25,
+        };
+        attempts++;
       }
 
-      // Try offset positions
-      position = {
-        x: basePosition.x + attempts * 30,
-        y: basePosition.y + (attempts % 5) * 25,
+      return position;
+    },
+    [getNodes]
+  );
+
+  const addNode = useCallback(
+    (
+      type: string,
+      defaultData: Record<string, unknown>,
+      position?: XYPosition
+    ) => {
+      // Use incrementing counter for node ID
+      const id = String(nextNodeId.current);
+      nextNodeId.current += 1;
+
+      let finalPosition: XYPosition;
+
+      if (position) {
+        // If position is provided (from drag-and-drop), use it directly
+        finalPosition = position;
+      } else {
+        // Get viewport dimensions (accounting for nav bars: 14px app + 12px workflow + 7px status = 33px total)
+        const navHeight = 112; // Total height of both navs + status bar
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight - navHeight;
+
+        // Get base position at center of visible viewport
+        const basePosition: XYPosition = project
+          ? project({ x: viewportWidth / 2 - 75, y: viewportHeight / 2 })
+          : { x: 400, y: 200 };
+
+        // Find non-overlapping position
+        finalPosition = findNonOverlappingPosition(basePosition);
+      }
+
+      const baseData: NodeData = {
+        ...defaultData,
+        label: `${type} ${id}`,
       };
-      attempts++;
-    }
+      const newNode: RFNode<NodeData> = {
+        id,
+        position: finalPosition,
+        data: baseData,
+        type,
+      };
+      setNodes((nds) => nds.concat(newNode));
+    },
+    [project, setNodes, findNonOverlappingPosition]
+  );
 
-    return position;
-  };
+  const onDragOver = useCallback((event: React.DragEvent) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+  }, []);
 
-  const addNode = (type: string, defaultData: Record<string, unknown>) => {
-    const id = String(nextId);
-    setNextId((s) => s + 1);
+  const onDrop = useCallback(
+    (event: React.DragEvent) => {
+      event.preventDefault();
 
-    // Get viewport dimensions (accounting for nav bars: 14px app + 12px workflow + 7px status = 33px total)
-    const navHeight = 112; // Total height of both navs + status bar
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight - navHeight;
+      const data = event.dataTransfer.getData("application/reactflow");
+      if (!data) return;
 
-    // Get base position at center of visible viewport
-    const basePosition: XYPosition = project
-      ? project({ x: viewportWidth / 2 - 75, y: viewportHeight / 2 })
-      : { x: 400, y: 200 };
+      const { type, defaultData } = JSON.parse(data);
 
-    // Find non-overlapping position
-    const position = findNonOverlappingPosition(basePosition);
+      // Get the position where the node was dropped
+      const position = project
+        ? project({
+            x: event.clientX - 75, // offset to center the node
+            y: event.clientY - 40,
+          })
+        : { x: event.clientX, y: event.clientY };
 
-    const baseData: NodeData = { ...defaultData, label: `${type} ${id}` };
-    const newNode: RFNode<NodeData> = { id, position, data: baseData, type };
-    setNodes((nds) => nds.concat(newNode));
-  };
+      addNode(type, defaultData, position);
+    },
+    [project, addNode]
+  );
 
   const handleNewWorkflow = () => {
     router.push("/");
@@ -865,17 +1038,17 @@ function Canvas() {
 
     // Set the nodes and edges
     setNodes(nodesWithPositions);
-    setEdges(exampleEdges);
+    setEdges(exampleEdges.map((edge) => ({ ...edge, type: "smoothstep" })));
 
     // Update workflow title
     setWorkflowTitle(example.title);
 
-    // Update next ID
+    // Update nextNodeId to be higher than any existing node ID
     const maxId = exampleNodes.reduce((max, node) => {
       const nodeId = parseInt(String(node.id), 10);
       return isNaN(nodeId) ? max : Math.max(max, nodeId);
     }, 0);
-    setNextId(maxId + 1);
+    nextNodeId.current = maxId + 1;
   };
 
   const handleSave = () => {
@@ -975,14 +1148,14 @@ function Canvas() {
 
     // Set the imported nodes and edges
     setNodes(nodesWithPositions);
-    setEdges(importedEdges);
+    setEdges(importedEdges.map((edge) => ({ ...edge, type: "smoothstep" })));
 
-    // Update the next ID to be higher than any existing node ID
+    // Update nextNodeId to be higher than any existing node ID
     const maxId = importedNodes.reduce((max, node) => {
-      const nodeId = parseInt(node.id, 10);
+      const nodeId = parseInt(String(node.id), 10);
       return isNaN(nodeId) ? max : Math.max(max, nodeId);
     }, 0);
-    setNextId(maxId + 1);
+    nextNodeId.current = maxId + 1;
   };
 
   const handleDeleteNode = (nodeId: string) => {
@@ -1014,14 +1187,14 @@ function Canvas() {
   useEffect(() => {
     if (executionResult?.success && executionResult.results?.node_results) {
       const nodeResults = executionResult.results.node_results;
-      
+
       setNodes((nds) =>
         nds.map((node) => {
           // Only update renderer nodes
-          if (node.type === "rendererNode") {
+          if (node.type === "renderer") {
             // Get the execution data for this node
             const executionData = nodeResults[node.id];
-            
+
             return {
               ...node,
               data: {
@@ -1056,51 +1229,94 @@ function Canvas() {
         onImport={handleImport}
       />
 
-      {/* Main Content */}
-      <div className="flex-1 relative">
-        {/* Add Node Button - Bottom Left */}
-        {!isPaletteOpen && (
-          <button
-            onClick={() => setIsPaletteOpen(true)}
-            className="absolute left-4 bottom-4 z-10 bg-gray-800 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg shadow-lg transition-all border border-gray-700 hover:border-gray-600 text-sm font-medium flex items-center gap-1.5"
-            title="Add Node"
-          >
-            <span className="text-base">+</span>
-            <span>Add Node</span>
-          </button>
+      {/* Main Content - Flex container for sidebar and canvas */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Node Palette Sidebar */}
+        {isPaletteOpen && (
+          <NodePalette
+            isOpen={isPaletteOpen}
+            onClose={() => setIsPaletteOpen(false)}
+            categories={nodeCategories}
+            onAddNode={addNode}
+          />
         )}
 
-        {/* Node Palette with Search */}
-        <NodePalette
-          isOpen={isPaletteOpen}
-          onClose={() => setIsPaletteOpen(false)}
-          categories={nodeCategories}
-          onAddNode={addNode}
-        />
+        {/* Canvas Container */}
+        <div className="flex-1 relative">
+          {/* Toggle Sidebar Button - Top Left of Canvas */}
+          <button
+            onClick={() => setIsPaletteOpen(!isPaletteOpen)}
+            className="absolute left-4 top-4 z-10 bg-gray-800 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg shadow-lg transition-all border border-gray-700 hover:border-gray-600 text-sm font-medium flex items-center gap-1.5"
+            title={isPaletteOpen ? "Hide Nodes Panel" : "Show Nodes Panel"}
+          >
+            {isPaletteOpen ? (
+              <>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="w-4 h-4"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M18.75 19.5l-7.5-7.5 7.5-7.5m-6 15L5.25 12l7.5-7.5"
+                  />
+                </svg>
+                <span>Hide Nodes</span>
+              </>
+            ) : (
+              <>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="w-4 h-4"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                  />
+                </svg>
+                <span>Show Nodes</span>
+              </>
+            )}
+          </button>
 
-        {/* React Flow Canvas */}
-        <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          onConnect={onConnect}
-          nodeTypes={nodeTypes}
-          fitView
-          className="bg-gray-950"
-        />
-        <JSONPayloadModal
-          isOpen={showPayload}
-          onClose={() => setShowPayload(false)}
-          payload={payload}
-          workflowTitle={workflowTitle}
-        />
-        <WorkflowExamplesModal
-          isOpen={showExamplesModal}
-          onClose={() => setShowExamplesModal(false)}
-          onSelect={handleSelectExample}
-        />
+          {/* React Flow Canvas */}
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onDragOver={onDragOver}
+            onDrop={onDrop}
+            nodeTypes={nodeTypes}
+            fitView
+            className="bg-gray-950"
+          />
+        </div>
       </div>
+
+      {/* Modals */}
+      <JSONPayloadModal
+        isOpen={showPayload}
+        onClose={() => setShowPayload(false)}
+        payload={payload}
+        workflowTitle={workflowTitle}
+      />
+      <WorkflowExamplesModal
+        isOpen={showExamplesModal}
+        onClose={() => setShowExamplesModal(false)}
+        onSelect={handleSelectExample}
+      />
+
       {contextMenu && (
         <NodeContextMenu
           x={contextMenu.x}

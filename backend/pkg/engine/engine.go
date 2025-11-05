@@ -184,6 +184,7 @@ func DefaultRegistry() *executor.Registry {
 	reg.MustRegister(&executor.OperationExecutor{})
 	reg.MustRegister(&executor.TextOperationExecutor{})
 	reg.MustRegister(executor.NewHTTPExecutor())
+	reg.MustRegister(&executor.ExpressionExecutor{})
 
 	// Control flow nodes
 	reg.MustRegister(&executor.ConditionExecutor{})
@@ -871,9 +872,10 @@ func (e *Engine) interpolateTemplate(text string) string {
 		var value interface{}
 		var exists bool
 
-		if contextType == "variable" {
+		switch contextType {
+		case "variable":
 			value, exists = e.state.GetContextVariable(varName)
-		} else if contextType == "const" {
+		case "const":
 			value, exists = e.state.GetContextConstant(varName)
 		}
 

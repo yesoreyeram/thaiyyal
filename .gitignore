@@ -68,3 +68,5 @@ backend/examples
 /playwright/.cache/
 # Keep E2E screenshots in repo for documentation
 #!/e2e/screenshots/
+
+thaiyyal-server

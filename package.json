@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && npm run copy:static",
+    "build:frontend": "next build",
+    "copy:static": "rm -rf backend/pkg/server/static/* && cp -r out/* backend/pkg/server/static/",
     "start": "next start",
     "lint": "eslint",
     "test:e2e": "playwright test",

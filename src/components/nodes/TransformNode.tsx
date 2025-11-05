@@ -1,11 +1,14 @@
 /**
  * TransformNode Component
- * 
+ *
  * Transforms data using an expression.
  */
 
 import React from "react";
-import { Handle, Position, useReactFlow, NodeProps } from "reactflow";
+import { Handle, Position, useReactFlow } from "reactflow";
+import { NodePropsWithOptions } from "./nodeTypes";
+import { NodeWrapper } from "./NodeWrapper";
+import { getNodeInfo } from "./nodeInfo";
 
 type TransformNodeData = {
   transform_type?: string;
@@ -14,16 +17,20 @@ type TransformNodeData = {
 
 /**
  * TransformNode React Component
- * 
+ *
  * This component renders a visual node in the workflow editor that transforms data using expressions
- * 
+ *
  * @param {NodePropsWithOptions<TransformNodeData>} props - Component props
  * @param {string} props.id - Unique identifier for this node instance
  * @param {TransformNodeData} props.data - Node configuration data
  * @param {function} [props.onShowOptions] - Callback to show the options context menu
  * @returns {JSX.Element} A rendered node component
  */
-export function TransformNode({ id, data }: NodeProps<TransformNodeData>) {
+export function TransformNode({
+  id,
+  data,
+  onShowOptions,
+}: NodePropsWithOptions<TransformNodeData>) {
   const { setNodes } = useReactFlow();
 
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -35,16 +42,28 @@ export function TransformNode({ id, data }: NodeProps<TransformNodeData>) {
     );
   };
 
+  const handleTitleChange = (newTitle: string) => {
+    setNodes((nds) =>
+      nds.map((n) =>
+        n.id === id ? { ...n, data: { ...n.data, label: newTitle } } : n
+      )
+    );
+  };
+
+  const nodeInfo = getNodeInfo("transformNode");
+
   return (
-    <div className="px-2 py-1 bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all">
+    <NodeWrapper
+      title={String(data?.label || "Transform")}
+      nodeInfo={nodeInfo}
+      onShowOptions={onShowOptions}
+      onTitleChange={handleTitleChange}
+    >
       <Handle
         type="target"
         position={Position.Left}
         className="w-2 h-2 bg-blue-400"
       />
-      <div className="text-xs font-semibold mb-1 text-gray-200">
-        {String(data?.label || "Transform")}
-      </div>
       <select
         value={String(data?.transform_type ?? "to_array")}
         onChange={onChange}
@@ -61,6 +80,6 @@ export function TransformNode({ id, data }: NodeProps<TransformNodeData>) {
         position={Position.Right}
         className="w-2 h-2 bg-green-400"
       />
-    </div>
+    </NodeWrapper>
   );
 }

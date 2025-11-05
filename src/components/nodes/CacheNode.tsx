@@ -1,11 +1,14 @@
 /**
  * CacheNode Component
- * 
+ *
  * Caches data for reuse.
  */
 
 import React from "react";
-import { Handle, Position, useReactFlow, NodeProps } from "reactflow";
+import { Handle, Position, useReactFlow } from "reactflow";
+import { NodePropsWithOptions } from "./nodeTypes";
+import { NodeWrapper } from "./NodeWrapper";
+import { getNodeInfo } from "./nodeInfo";
 
 type CacheNodeData = {
   cache_op?: string;
@@ -16,16 +19,20 @@ type CacheNodeData = {
 
 /**
  * CacheNode React Component
- * 
+ *
  * This component renders a visual node in the workflow editor that caches data for reuse
- * 
+ *
  * @param {NodePropsWithOptions<CacheNodeData>} props - Component props
  * @param {string} props.id - Unique identifier for this node instance
  * @param {CacheNodeData} props.data - Node configuration data
  * @param {function} [props.onShowOptions] - Callback to show the options context menu
  * @returns {JSX.Element} A rendered node component
  */
-export function CacheNode({ id, data }: NodeProps<CacheNodeData>) {
+export function CacheNode({
+  id,
+  data,
+  onShowOptions,
+}: NodePropsWithOptions<CacheNodeData>) {
   const { setNodes } = useReactFlow();
 
   const onOpChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -53,16 +60,28 @@ export function CacheNode({ id, data }: NodeProps<CacheNodeData>) {
     );
   };
 
+  const handleTitleChange = (newTitle: string) => {
+    setNodes((nds) =>
+      nds.map((n) =>
+        n.id === id ? { ...n, data: { ...n.data, label: newTitle } } : n
+      )
+    );
+  };
+
+  const nodeInfo = getNodeInfo("cacheNode");
+
   return (
-    <div className="px-2 py-1 bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all">
+    <NodeWrapper
+      title={String(data?.label || "Cache")}
+      nodeInfo={nodeInfo}
+      onShowOptions={onShowOptions}
+      onTitleChange={handleTitleChange}
+    >
       <Handle
         type="target"
         position={Position.Left}
         className="w-2 h-2 bg-blue-400"
       />
-      <div className="text-xs font-semibold mb-1 text-gray-200">
-        {String(data?.label || "Cache")}
-      </div>
       <select
         value={String(data?.cache_op ?? "get")}
         onChange={onOpChange}
@@ -93,7 +112,7 @@ export function CacheNode({ id, data }: NodeProps<CacheNodeData>) {
         position={Position.Right}
         className="w-2 h-2 bg-green-400"
       />
-    </div>
+    </NodeWrapper>
   );
 }
 

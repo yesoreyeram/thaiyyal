@@ -22,7 +22,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "httpNode",
+        "type": "http",
         "position": {
           "x": 100,
           "y": 100
@@ -35,7 +35,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -81,7 +81,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "httpNode",
+        "type": "http",
         "position": {
           "x": 300,
           "y": 100
@@ -94,7 +94,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 500,
           "y": 100
@@ -144,7 +144,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "httpNode",
+        "type": "http",
         "position": {
           "x": 300,
           "y": 100
@@ -157,7 +157,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 500,
           "y": 100
@@ -194,7 +194,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 50,
           "y": 100
@@ -206,7 +206,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "parseNode",
+        "type": "parse",
         "position": {
           "x": 250,
           "y": 100
@@ -218,7 +218,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "httpNode",
+        "type": "http",
         "position": {
           "x": 450,
           "y": 100
@@ -231,7 +231,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 650,
           "y": 100
@@ -273,7 +273,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "httpNode",
+        "type": "http",
         "position": {
           "x": 100,
           "y": 100
@@ -286,7 +286,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "extractNode",
+        "type": "extract",
         "position": {
           "x": 300,
           "y": 100
@@ -298,7 +298,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "variableNode",
+        "type": "variable",
         "position": {
           "x": 500,
           "y": 100
@@ -311,7 +311,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 700,
           "y": 100
@@ -365,7 +365,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "httpNode",
+        "type": "http",
         "position": {
           "x": 300,
           "y": 50
@@ -378,7 +378,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "httpNode",
+        "type": "http",
         "position": {
           "x": 300,
           "y": 150
@@ -391,7 +391,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "httpNode",
+        "type": "http",
         "position": {
           "x": 300,
           "y": 250
@@ -416,7 +416,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "6",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 700,
           "y": 150
@@ -504,7 +504,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "httpNode",
+        "type": "http",
         "position": {
           "x": 500,
           "y": 100
@@ -517,7 +517,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 700,
           "y": 100
@@ -559,7 +559,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "httpNode",
+        "type": "http",
         "position": {
           "x": 100,
           "y": 100
@@ -572,7 +572,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -604,7 +604,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "httpNode",
+        "type": "http",
         "position": {
           "x": 100,
           "y": 100
@@ -617,7 +617,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -649,7 +649,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "cacheNode",
+        "type": "cache",
         "position": {
           "x": 100,
           "y": 100
@@ -662,7 +662,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "conditionNode",
+        "type": "condition",
         "position": {
           "x": 300,
           "y": 100
@@ -674,7 +674,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "httpNode",
+        "type": "http",
         "position": {
           "x": 500,
           "y": 50
@@ -687,7 +687,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "cacheNode",
+        "type": "cache",
         "position": {
           "x": 700,
           "y": 50
@@ -700,7 +700,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "5",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 900,
           "y": 100
@@ -752,7 +752,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "httpNode",
+        "type": "http",
         "position": {
           "x": 100,
           "y": 100
@@ -765,7 +765,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -797,7 +797,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "httpNode",
+        "type": "http",
         "position": {
           "x": 100,
           "y": 100
@@ -810,7 +810,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -842,7 +842,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "httpNode",
+        "type": "http",
         "position": {
           "x": 100,
           "y": 100
@@ -855,7 +855,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -899,7 +899,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "httpNode",
+        "type": "http",
         "position": {
           "x": 300,
           "y": 100
@@ -912,7 +912,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 500,
           "y": 100
@@ -949,7 +949,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "httpNode",
+        "type": "http",
         "position": {
           "x": 100,
           "y": 100
@@ -962,7 +962,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -994,7 +994,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "httpNode",
+        "type": "http",
         "position": {
           "x": 100,
           "y": 100
@@ -1007,7 +1007,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -1039,7 +1039,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "httpNode",
+        "type": "http",
         "position": {
           "x": 100,
           "y": 100
@@ -1052,7 +1052,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -1084,7 +1084,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "httpNode",
+        "type": "http",
         "position": {
           "x": 100,
           "y": 100
@@ -1097,7 +1097,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -1129,7 +1129,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "httpNode",
+        "type": "http",
         "position": {
           "x": 100,
           "y": 100
@@ -1142,7 +1142,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -1174,7 +1174,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "httpNode",
+        "type": "http",
         "position": {
           "x": 100,
           "y": 100
@@ -1187,7 +1187,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -1245,7 +1245,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 450,
           "y": 100
@@ -1308,7 +1308,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 450,
           "y": 100
@@ -1371,7 +1371,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 450,
           "y": 100
@@ -1434,7 +1434,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 450,
           "y": 100
@@ -1497,7 +1497,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 450,
           "y": 100
@@ -1560,7 +1560,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 450,
           "y": 100
@@ -1623,7 +1623,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 450,
           "y": 100
@@ -1686,7 +1686,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 450,
           "y": 100
@@ -1749,7 +1749,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 450,
           "y": 100
@@ -1812,7 +1812,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 450,
           "y": 100
@@ -1875,7 +1875,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 450,
           "y": 100
@@ -1938,7 +1938,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 450,
           "y": 100
@@ -2001,7 +2001,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 450,
           "y": 100
@@ -2064,7 +2064,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 450,
           "y": 100
@@ -2127,7 +2127,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 450,
           "y": 100
@@ -2190,7 +2190,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 450,
           "y": 100
@@ -2253,7 +2253,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 450,
           "y": 100
@@ -2316,7 +2316,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 450,
           "y": 100
@@ -2379,7 +2379,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 450,
           "y": 100
@@ -2442,7 +2442,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 450,
           "y": 100
@@ -2479,7 +2479,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "numberNode",
+        "type": "number",
         "position": {
           "x": 50,
           "y": 150
@@ -2491,7 +2491,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "conditionNode",
+        "type": "condition",
         "position": {
           "x": 200,
           "y": 150
@@ -2503,7 +2503,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -2515,7 +2515,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 200
@@ -2557,7 +2557,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "numberNode",
+        "type": "number",
         "position": {
           "x": 50,
           "y": 150
@@ -2569,7 +2569,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "conditionNode",
+        "type": "condition",
         "position": {
           "x": 200,
           "y": 150
@@ -2581,7 +2581,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -2593,7 +2593,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 200
@@ -2635,7 +2635,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "numberNode",
+        "type": "number",
         "position": {
           "x": 50,
           "y": 150
@@ -2647,7 +2647,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "conditionNode",
+        "type": "condition",
         "position": {
           "x": 200,
           "y": 150
@@ -2659,7 +2659,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -2671,7 +2671,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 200
@@ -2713,7 +2713,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "numberNode",
+        "type": "number",
         "position": {
           "x": 50,
           "y": 150
@@ -2725,7 +2725,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "conditionNode",
+        "type": "condition",
         "position": {
           "x": 200,
           "y": 150
@@ -2737,7 +2737,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -2749,7 +2749,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 200
@@ -2791,7 +2791,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "numberNode",
+        "type": "number",
         "position": {
           "x": 50,
           "y": 150
@@ -2803,7 +2803,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "conditionNode",
+        "type": "condition",
         "position": {
           "x": 200,
           "y": 150
@@ -2815,7 +2815,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -2827,7 +2827,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 200
@@ -2869,7 +2869,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "numberNode",
+        "type": "number",
         "position": {
           "x": 50,
           "y": 150
@@ -2881,7 +2881,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "conditionNode",
+        "type": "condition",
         "position": {
           "x": 200,
           "y": 150
@@ -2893,7 +2893,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -2905,7 +2905,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 200
@@ -2947,7 +2947,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "numberNode",
+        "type": "number",
         "position": {
           "x": 50,
           "y": 150
@@ -2959,7 +2959,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "conditionNode",
+        "type": "condition",
         "position": {
           "x": 200,
           "y": 150
@@ -2971,7 +2971,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -2983,7 +2983,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 200
@@ -3025,7 +3025,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "numberNode",
+        "type": "number",
         "position": {
           "x": 50,
           "y": 150
@@ -3037,7 +3037,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "conditionNode",
+        "type": "condition",
         "position": {
           "x": 200,
           "y": 150
@@ -3049,7 +3049,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -3061,7 +3061,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 200
@@ -3103,7 +3103,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "numberNode",
+        "type": "number",
         "position": {
           "x": 50,
           "y": 150
@@ -3115,7 +3115,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "conditionNode",
+        "type": "condition",
         "position": {
           "x": 200,
           "y": 150
@@ -3127,7 +3127,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -3139,7 +3139,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 200
@@ -3181,7 +3181,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "numberNode",
+        "type": "number",
         "position": {
           "x": 50,
           "y": 150
@@ -3193,7 +3193,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "conditionNode",
+        "type": "condition",
         "position": {
           "x": 200,
           "y": 150
@@ -3205,7 +3205,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -3217,7 +3217,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 200
@@ -3259,7 +3259,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "numberNode",
+        "type": "number",
         "position": {
           "x": 50,
           "y": 150
@@ -3271,7 +3271,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "conditionNode",
+        "type": "condition",
         "position": {
           "x": 200,
           "y": 150
@@ -3283,7 +3283,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -3295,7 +3295,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 200
@@ -3337,7 +3337,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "numberNode",
+        "type": "number",
         "position": {
           "x": 50,
           "y": 150
@@ -3349,7 +3349,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "conditionNode",
+        "type": "condition",
         "position": {
           "x": 200,
           "y": 150
@@ -3361,7 +3361,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -3373,7 +3373,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 200
@@ -3415,7 +3415,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "numberNode",
+        "type": "number",
         "position": {
           "x": 50,
           "y": 150
@@ -3427,7 +3427,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "conditionNode",
+        "type": "condition",
         "position": {
           "x": 200,
           "y": 150
@@ -3439,7 +3439,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -3451,7 +3451,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 200
@@ -3493,7 +3493,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "numberNode",
+        "type": "number",
         "position": {
           "x": 50,
           "y": 150
@@ -3505,7 +3505,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "conditionNode",
+        "type": "condition",
         "position": {
           "x": 200,
           "y": 150
@@ -3517,7 +3517,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -3529,7 +3529,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 200
@@ -3571,7 +3571,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "numberNode",
+        "type": "number",
         "position": {
           "x": 50,
           "y": 150
@@ -3583,7 +3583,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "conditionNode",
+        "type": "condition",
         "position": {
           "x": 200,
           "y": 150
@@ -3595,7 +3595,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -3607,7 +3607,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 200
@@ -3649,7 +3649,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "numberNode",
+        "type": "number",
         "position": {
           "x": 50,
           "y": 150
@@ -3661,7 +3661,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "conditionNode",
+        "type": "condition",
         "position": {
           "x": 200,
           "y": 150
@@ -3673,7 +3673,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -3685,7 +3685,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 200
@@ -3727,7 +3727,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "numberNode",
+        "type": "number",
         "position": {
           "x": 50,
           "y": 150
@@ -3739,7 +3739,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "conditionNode",
+        "type": "condition",
         "position": {
           "x": 200,
           "y": 150
@@ -3751,7 +3751,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -3763,7 +3763,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 200
@@ -3805,7 +3805,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "numberNode",
+        "type": "number",
         "position": {
           "x": 50,
           "y": 150
@@ -3817,7 +3817,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "conditionNode",
+        "type": "condition",
         "position": {
           "x": 200,
           "y": 150
@@ -3829,7 +3829,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -3841,7 +3841,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 200
@@ -3883,7 +3883,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "numberNode",
+        "type": "number",
         "position": {
           "x": 50,
           "y": 150
@@ -3895,7 +3895,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "conditionNode",
+        "type": "condition",
         "position": {
           "x": 200,
           "y": 150
@@ -3907,7 +3907,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -3919,7 +3919,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 200
@@ -3961,7 +3961,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "numberNode",
+        "type": "number",
         "position": {
           "x": 50,
           "y": 150
@@ -3973,7 +3973,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "conditionNode",
+        "type": "condition",
         "position": {
           "x": 200,
           "y": 150
@@ -3985,7 +3985,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -3997,7 +3997,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 200
@@ -4039,7 +4039,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "numberNode",
+        "type": "number",
         "position": {
           "x": 50,
           "y": 100
@@ -4051,7 +4051,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "variableNode",
+        "type": "variable",
         "position": {
           "x": 250,
           "y": 100
@@ -4064,7 +4064,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "variableNode",
+        "type": "variable",
         "position": {
           "x": 450,
           "y": 100
@@ -4077,7 +4077,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 650,
           "y": 100
@@ -4119,7 +4119,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "numberNode",
+        "type": "number",
         "position": {
           "x": 50,
           "y": 100
@@ -4131,7 +4131,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "variableNode",
+        "type": "variable",
         "position": {
           "x": 250,
           "y": 100
@@ -4144,7 +4144,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "variableNode",
+        "type": "variable",
         "position": {
           "x": 450,
           "y": 100
@@ -4157,7 +4157,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 650,
           "y": 100
@@ -4199,7 +4199,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "numberNode",
+        "type": "number",
         "position": {
           "x": 50,
           "y": 100
@@ -4211,7 +4211,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "variableNode",
+        "type": "variable",
         "position": {
           "x": 250,
           "y": 100
@@ -4224,7 +4224,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "variableNode",
+        "type": "variable",
         "position": {
           "x": 450,
           "y": 100
@@ -4237,7 +4237,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 650,
           "y": 100
@@ -4279,7 +4279,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "numberNode",
+        "type": "number",
         "position": {
           "x": 50,
           "y": 100
@@ -4291,7 +4291,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "variableNode",
+        "type": "variable",
         "position": {
           "x": 250,
           "y": 100
@@ -4304,7 +4304,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "variableNode",
+        "type": "variable",
         "position": {
           "x": 450,
           "y": 100
@@ -4317,7 +4317,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 650,
           "y": 100
@@ -4359,7 +4359,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "numberNode",
+        "type": "number",
         "position": {
           "x": 50,
           "y": 100
@@ -4371,7 +4371,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "variableNode",
+        "type": "variable",
         "position": {
           "x": 250,
           "y": 100
@@ -4384,7 +4384,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "variableNode",
+        "type": "variable",
         "position": {
           "x": 450,
           "y": 100
@@ -4397,7 +4397,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 650,
           "y": 100
@@ -4439,7 +4439,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "numberNode",
+        "type": "number",
         "position": {
           "x": 50,
           "y": 100
@@ -4451,7 +4451,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "variableNode",
+        "type": "variable",
         "position": {
           "x": 250,
           "y": 100
@@ -4464,7 +4464,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "variableNode",
+        "type": "variable",
         "position": {
           "x": 450,
           "y": 100
@@ -4477,7 +4477,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 650,
           "y": 100
@@ -4519,7 +4519,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "numberNode",
+        "type": "number",
         "position": {
           "x": 50,
           "y": 100
@@ -4531,7 +4531,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "variableNode",
+        "type": "variable",
         "position": {
           "x": 250,
           "y": 100
@@ -4544,7 +4544,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "variableNode",
+        "type": "variable",
         "position": {
           "x": 450,
           "y": 100
@@ -4557,7 +4557,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 650,
           "y": 100
@@ -4599,7 +4599,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "numberNode",
+        "type": "number",
         "position": {
           "x": 50,
           "y": 100
@@ -4611,7 +4611,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "variableNode",
+        "type": "variable",
         "position": {
           "x": 250,
           "y": 100
@@ -4624,7 +4624,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "variableNode",
+        "type": "variable",
         "position": {
           "x": 450,
           "y": 100
@@ -4637,7 +4637,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 650,
           "y": 100
@@ -4679,7 +4679,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "numberNode",
+        "type": "number",
         "position": {
           "x": 50,
           "y": 100
@@ -4691,7 +4691,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "variableNode",
+        "type": "variable",
         "position": {
           "x": 250,
           "y": 100
@@ -4704,7 +4704,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "variableNode",
+        "type": "variable",
         "position": {
           "x": 450,
           "y": 100
@@ -4717,7 +4717,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 650,
           "y": 100
@@ -4759,7 +4759,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "numberNode",
+        "type": "number",
         "position": {
           "x": 50,
           "y": 100
@@ -4771,7 +4771,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "variableNode",
+        "type": "variable",
         "position": {
           "x": 250,
           "y": 100
@@ -4784,7 +4784,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "variableNode",
+        "type": "variable",
         "position": {
           "x": 450,
           "y": 100
@@ -4797,7 +4797,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "4",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 650,
           "y": 100
@@ -4839,7 +4839,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 50,
           "y": 100
@@ -4863,7 +4863,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 450,
           "y": 100
@@ -4900,7 +4900,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 50,
           "y": 100
@@ -4924,7 +4924,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 450,
           "y": 100
@@ -4961,7 +4961,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 50,
           "y": 100
@@ -4985,7 +4985,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 450,
           "y": 100
@@ -5022,7 +5022,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 50,
           "y": 100
@@ -5046,7 +5046,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 450,
           "y": 100
@@ -5083,7 +5083,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 50,
           "y": 100
@@ -5107,7 +5107,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 450,
           "y": 100
@@ -5144,7 +5144,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 50,
           "y": 100
@@ -5168,7 +5168,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 450,
           "y": 100
@@ -5205,7 +5205,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 50,
           "y": 100
@@ -5229,7 +5229,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 450,
           "y": 100
@@ -5266,7 +5266,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 50,
           "y": 100
@@ -5290,7 +5290,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 450,
           "y": 100
@@ -5327,7 +5327,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 50,
           "y": 100
@@ -5351,7 +5351,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 450,
           "y": 100
@@ -5388,7 +5388,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 50,
           "y": 100
@@ -5412,7 +5412,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "3",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 450,
           "y": 100
@@ -5929,7 +5929,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -5941,7 +5941,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -5973,7 +5973,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -5985,7 +5985,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -6017,7 +6017,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -6029,7 +6029,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -6061,7 +6061,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -6073,7 +6073,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -6105,7 +6105,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -6117,7 +6117,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -6149,7 +6149,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -6161,7 +6161,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -6193,7 +6193,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -6205,7 +6205,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -6237,7 +6237,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -6249,7 +6249,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -6281,7 +6281,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -6293,7 +6293,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -6325,7 +6325,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -6337,7 +6337,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -6369,7 +6369,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -6381,7 +6381,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -6413,7 +6413,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -6425,7 +6425,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -6457,7 +6457,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -6469,7 +6469,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -6501,7 +6501,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -6513,7 +6513,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -6545,7 +6545,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -6557,7 +6557,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -6589,7 +6589,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -6601,7 +6601,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -6633,7 +6633,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -6645,7 +6645,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -6677,7 +6677,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -6689,7 +6689,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -6721,7 +6721,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -6733,7 +6733,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -6765,7 +6765,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -6777,7 +6777,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -6809,7 +6809,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -6821,7 +6821,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -6853,7 +6853,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -6865,7 +6865,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -6897,7 +6897,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -6909,7 +6909,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -6941,7 +6941,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -6953,7 +6953,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -6985,7 +6985,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -6997,7 +6997,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -7029,7 +7029,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -7041,7 +7041,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -7073,7 +7073,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -7085,7 +7085,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -7117,7 +7117,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -7129,7 +7129,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -7161,7 +7161,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -7173,7 +7173,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -7205,7 +7205,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -7217,7 +7217,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -7249,7 +7249,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -7261,7 +7261,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -7293,7 +7293,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -7305,7 +7305,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -7337,7 +7337,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -7349,7 +7349,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -7381,7 +7381,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -7393,7 +7393,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -7425,7 +7425,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -7437,7 +7437,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -7469,7 +7469,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -7481,7 +7481,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -7513,7 +7513,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -7525,7 +7525,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -7557,7 +7557,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -7569,7 +7569,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -7601,7 +7601,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -7613,7 +7613,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -7645,7 +7645,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -7657,7 +7657,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -7689,7 +7689,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -7701,7 +7701,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -7733,7 +7733,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -7745,7 +7745,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -7777,7 +7777,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -7789,7 +7789,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -7821,7 +7821,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -7833,7 +7833,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -7865,7 +7865,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -7877,7 +7877,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -7909,7 +7909,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -7921,7 +7921,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -7953,7 +7953,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -7965,7 +7965,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -7997,7 +7997,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -8009,7 +8009,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -8041,7 +8041,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -8053,7 +8053,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -8085,7 +8085,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -8097,7 +8097,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -8129,7 +8129,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -8141,7 +8141,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -8173,7 +8173,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -8185,7 +8185,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -8217,7 +8217,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -8229,7 +8229,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -8261,7 +8261,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -8273,7 +8273,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -8305,7 +8305,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -8317,7 +8317,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -8349,7 +8349,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -8361,7 +8361,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -8393,7 +8393,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -8405,7 +8405,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -8437,7 +8437,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -8449,7 +8449,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -8481,7 +8481,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -8493,7 +8493,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100
@@ -8525,7 +8525,7 @@ export const workflowExamples: WorkflowExample[] =
     "nodes": [
       {
         "id": "1",
-        "type": "textInputNode",
+        "type": "text_input",
         "position": {
           "x": 100,
           "y": 100
@@ -8537,7 +8537,7 @@ export const workflowExamples: WorkflowExample[] =
       },
       {
         "id": "2",
-        "type": "vizNode",
+        "type": "visualization",
         "position": {
           "x": 400,
           "y": 100

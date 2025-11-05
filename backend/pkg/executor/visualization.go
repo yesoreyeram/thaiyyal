@@ -9,21 +9,18 @@ import (
 // VisualizationExecutor executes Visualization nodes
 type VisualizationExecutor struct{}
 
-// Execute formats output for display
+// Execute acts as a pass-through, returning the input data directly to the frontend
+// The frontend RendererNode will handle the visualization logic
 func (e *VisualizationExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-	if node.Data.Mode == nil {
-		return nil, fmt.Errorf("visualization node missing mode")
-	}
 
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("visualization needs at least 1 input")
 	}
 
-	return map[string]interface{}{
-		"mode":  *node.Data.Mode,
-		"value": inputs[0],
-	}, nil
+	// Pass through the input data unchanged
+	// The frontend will auto-detect the best rendering mode
+	return inputs[0], nil
 }
 
 // NodeType returns the node type this executor handles
@@ -33,8 +30,5 @@ func (e *VisualizationExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *VisualizationExecutor) Validate(node types.Node) error {
-	if node.Data.Mode == nil {
-		return fmt.Errorf("visualization node missing mode")
-	}
 	return nil
 }

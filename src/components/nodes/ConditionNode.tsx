@@ -4,7 +4,6 @@ import React from "react";
 import { NodeWrapper } from "./NodeWrapper";
 import { getNodeInfo } from "./nodeInfo";
 
-
 type ConditionNodeData = {
   condition?: string;
   true_path?: string;
@@ -12,9 +11,13 @@ type ConditionNodeData = {
   label?: string;
 };
 
-export function ConditionNode({ id, data, onShowOptions }: NodePropsWithOptions<ConditionNodeData>) {
+export function ConditionNode({
+  id,
+  data,
+  onShowOptions,
+}: NodePropsWithOptions<ConditionNodeData>) {
   const { setNodes } = useReactFlow();
-  
+
   const onConditionChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const condition = e.target.value;
     setNodes((nds) =>
@@ -40,9 +43,13 @@ export function ConditionNode({ id, data, onShowOptions }: NodePropsWithOptions<
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
       onTitleChange={handleTitleChange}
-      className="bg-gradient-to-br from-amber-600 to-amber-700 text-white shadow-lg rounded-lg border border-amber-500 hover:border-amber-400 transition-all"
+      className="bg-linear-to-br from-emerald-700 to-emerald-800 text-white shadow-lg rounded-lg border border-emerald-600 hover:border-emerald-500 transition-all"
     >
-      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-2 h-2 bg-blue-400"
+      />
       <input
         value={String(data?.condition ?? ">0")}
         type="text"
@@ -52,20 +59,20 @@ export function ConditionNode({ id, data, onShowOptions }: NodePropsWithOptions<
         aria-label="Condition expression"
       />
       {/* True path handle (top right) */}
-      <Handle 
-        type="source" 
-        position={Position.Right} 
+      <Handle
+        type="source"
+        position={Position.Right}
         id="true"
-        style={{ top: '30%' }}
+        style={{ top: "30%" }}
         className="w-2 h-2 bg-green-500"
         title="True path"
       />
       {/* False path handle (bottom right) */}
-      <Handle 
-        type="source" 
-        position={Position.Right} 
+      <Handle
+        type="source"
+        position={Position.Right}
         id="false"
-        style={{ top: '70%' }}
+        style={{ top: "70%" }}
         className="w-2 h-2 bg-red-500"
         title="False path"
       />

@@ -6,6 +6,9 @@ import (
 	"strings"
 	"time"
 	"unicode"
+
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 // ============================================================================
@@ -228,7 +231,8 @@ func evaluateCondition(condition string, value interface{}) bool {
 
 // toTitleCase converts text to Title Case (first letter of each word capitalized).
 func toTitleCase(s string) string {
-	return strings.Title(strings.ToLower(s))
+	c := cases.Title(language.English)
+	return c.String(strings.ToLower(s))
 }
 
 // toCamelCase converts text to camelCase.

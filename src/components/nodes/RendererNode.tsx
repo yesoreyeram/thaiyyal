@@ -1,5 +1,5 @@
 import { NodeProps, Handle, Position, useReactFlow } from "reactflow";
-import React, { useState } from "react";
+import React from "react";
 import { NodeWrapper } from "./NodeWrapper";
 import { getNodeInfo } from "./nodeInfo";
 
@@ -9,9 +9,12 @@ type RendererNodeData = {
   _executionData?: unknown;
 };
 
-export function RendererNode({ id, data, ...props }: NodeProps<RendererNodeData>) {
+export function RendererNode({
+  id,
+  data,
+  ...props
+}: NodeProps<RendererNodeData>) {
   const { setNodes } = useReactFlow();
-  const [isExpanded, setIsExpanded] = useState(false);
 
   const handleTitleChange = (newTitle: string) => {
     setNodes((nds) =>
@@ -37,13 +40,26 @@ export function RendererNode({ id, data, ...props }: NodeProps<RendererNodeData>
       return "text";
     }
 
+    if (typeof executionData === "boolean") {
+      return typeof executionData;
+    }
+
+    if (
+      typeof executionData === "number" ||
+      typeof executionData === "bigint"
+    ) {
+      return "number";
+    }
+
     // If it's a string, check if it's JSON, CSV, TSV, or XML
     if (typeof executionData === "string") {
       const trimmed = executionData.trim();
-      
+
       // Check for JSON
-      if ((trimmed.startsWith("{") && trimmed.endsWith("}")) ||
-          (trimmed.startsWith("[") && trimmed.endsWith("]"))) {
+      if (
+        (trimmed.startsWith("{") && trimmed.endsWith("}")) ||
+        (trimmed.startsWith("[") && trimmed.endsWith("]"))
+      ) {
         try {
           JSON.parse(trimmed);
           return "json";
@@ -51,26 +67,26 @@ export function RendererNode({ id, data, ...props }: NodeProps<RendererNodeData>
           // Not valid JSON, continue checking
         }
       }
-      
+
       // Check for XML
       if (trimmed.startsWith("<") && trimmed.endsWith(">")) {
         return "xml";
       }
-      
+
       // Check for CSV/TSV (has multiple lines with separators)
       const lines = trimmed.split("\n");
       if (lines.length > 1) {
         const firstLine = lines[0];
         const commas = (firstLine.match(/,/g) || []).length;
         const tabs = (firstLine.match(/\t/g) || []).length;
-        
+
         if (tabs > 0 && tabs >= commas) {
           return "tsv";
         } else if (commas > 0) {
           return "csv";
         }
       }
-      
+
       return "text";
     }
 
@@ -81,18 +97,22 @@ export function RendererNode({ id, data, ...props }: NodeProps<RendererNodeData>
       }
 
       const firstItem = executionData[0];
-      
+
       // Check if it's array of objects with 'label' and 'value' for bar chart
       if (typeof firstItem === "object" && firstItem !== null) {
         const obj = firstItem as Record<string, unknown>;
-        if (("label" in obj || "name" in obj) && "value" in obj && typeof obj.value === "number") {
+        if (
+          ("label" in obj || "name" in obj) &&
+          "value" in obj &&
+          typeof obj.value === "number"
+        ) {
           return "bar_chart";
         }
-        
+
         // Array of objects - use table
         return "table";
       }
-      
+
       // Array of primitives or mixed - use JSON
       return "json";
     }
@@ -112,9 +132,7 @@ export function RendererNode({ id, data, ...props }: NodeProps<RendererNodeData>
 
     if (isEmptyData(executionData)) {
       return (
-        <div className="text-xs text-gray-500 italic py-2 px-1">
-          No data
-        </div>
+        <div className="text-xs text-gray-500 italic py-2 px-1">No data</div>
       );
     }
 
@@ -132,10 +150,12 @@ export function RendererNode({ id, data, ...props }: NodeProps<RendererNodeData>
               jsonData = executionData;
             }
           }
-          
+
           return (
             <div>
-              <div className="text-[8px] text-gray-500 mb-1 px-1">Format: JSON</div>
+              <div className="text-[8px] text-gray-500 mb-1 px-1">
+                Format: JSON
+              </div>
               <pre className="text-[9px] leading-tight bg-gray-950 p-1.5 rounded border border-gray-700 overflow-auto max-h-48 font-mono">
                 {JSON.stringify(jsonData, null, 2)}
               </pre>
@@ -147,7 +167,7 @@ export function RendererNode({ id, data, ...props }: NodeProps<RendererNodeData>
         case "tsv": {
           const separator = mode === "csv" ? "," : "\t";
           let csvText = "";
-          
+
           if (typeof executionData === "string") {
             csvText = executionData;
           } else if (Array.isArray(executionData) && executionData.length > 0) {
@@ -156,11 +176,11 @@ export function RendererNode({ id, data, ...props }: NodeProps<RendererNodeData>
             if (typeof firstItem === "object" && firstItem !== null) {
               const headers = Object.keys(firstItem);
               csvText = headers.join(separator) + "\n";
-              
+
               // Add rows
               executionData.forEach((item) => {
                 if (typeof item === "object" && item !== null) {
-                  const row = headers.map(h => {
+                  const row = headers.map((h) => {
                     const val = (item as Record<string, unknown>)[h];
                     return val !== undefined && val !== null ? String(val) : "";
                   });
@@ -171,10 +191,12 @@ export function RendererNode({ id, data, ...props }: NodeProps<RendererNodeData>
           } else {
             csvText = String(executionData);
           }
-          
+
           return (
             <div>
-              <div className="text-[8px] text-gray-500 mb-1 px-1">Format: {mode.toUpperCase()}</div>
+              <div className="text-[8px] text-gray-500 mb-1 px-1">
+                Format: {mode.toUpperCase()}
+              </div>
               <pre className="text-[9px] leading-tight bg-gray-950 p-1.5 rounded border border-gray-700 overflow-auto max-h-48 font-mono whitespace-pre">
                 {csvText}
               </pre>
@@ -192,23 +214,28 @@ export function RendererNode({ id, data, ...props }: NodeProps<RendererNodeData>
               return `<${rootName}>${String(obj)}</${rootName}>`;
             }
             if (Array.isArray(obj)) {
-              return obj.map(item => toXML(item, "item")).join("\n");
+              return obj.map((item) => toXML(item, "item")).join("\n");
             }
             let xml = `<${rootName}>`;
-            Object.entries(obj as Record<string, unknown>).forEach(([key, value]) => {
-              xml += `\n  ${toXML(value, key)}`;
-            });
+            Object.entries(obj as Record<string, unknown>).forEach(
+              ([key, value]) => {
+                xml += `\n  ${toXML(value, key)}`;
+              }
+            );
             xml += `\n</${rootName}>`;
             return xml;
           };
-          
-          const xmlContent = typeof executionData === "string" 
-            ? executionData 
-            : toXML(executionData);
-          
+
+          const xmlContent =
+            typeof executionData === "string"
+              ? executionData
+              : toXML(executionData);
+
           return (
             <div>
-              <div className="text-[8px] text-gray-500 mb-1 px-1">Format: XML</div>
+              <div className="text-[8px] text-gray-500 mb-1 px-1">
+                Format: XML
+              </div>
               <pre className="text-[9px] leading-tight bg-gray-950 p-1.5 rounded border border-gray-700 overflow-auto max-h-48 font-mono">
                 {xmlContent}
               </pre>
@@ -221,16 +248,21 @@ export function RendererNode({ id, data, ...props }: NodeProps<RendererNodeData>
             const firstItem = executionData[0];
             if (typeof firstItem === "object" && firstItem !== null) {
               const headers = Object.keys(firstItem);
-              
+
               return (
                 <div>
-                  <div className="text-[8px] text-gray-500 mb-1 px-1">Format: Table</div>
+                  <div className="text-[8px] text-gray-500 mb-1 px-1">
+                    Format: Table
+                  </div>
                   <div className="text-[9px] overflow-auto max-h-48">
                     <table className="w-full border-collapse">
                       <thead>
                         <tr className="bg-gray-800">
                           {headers.map((h, i) => (
-                            <th key={i} className="border border-gray-700 px-1 py-0.5 text-left">
+                            <th
+                              key={i}
+                              className="border border-gray-700 px-1 py-0.5 text-left"
+                            >
                               {h}
                             </th>
                           ))}
@@ -242,8 +274,13 @@ export function RendererNode({ id, data, ...props }: NodeProps<RendererNodeData>
                             {headers.map((h, colIdx) => {
                               const val = (item as Record<string, unknown>)[h];
                               return (
-                                <td key={colIdx} className="border border-gray-700 px-1 py-0.5">
-                                  {val !== undefined && val !== null ? String(val) : ""}
+                                <td
+                                  key={colIdx}
+                                  className="border border-gray-700 px-1 py-0.5"
+                                >
+                                  {val !== undefined && val !== null
+                                    ? String(val)
+                                    : ""}
                                 </td>
                               );
                             })}
@@ -263,7 +300,9 @@ export function RendererNode({ id, data, ...props }: NodeProps<RendererNodeData>
           }
           return (
             <div>
-              <div className="text-[8px] text-gray-500 mb-1 px-1">Format: JSON (fallback)</div>
+              <div className="text-[8px] text-gray-500 mb-1 px-1">
+                Format: JSON (fallback)
+              </div>
               <pre className="text-[9px] leading-tight bg-gray-950 p-1.5 rounded border border-gray-700 overflow-auto max-h-48">
                 {JSON.stringify(executionData, null, 2)}
               </pre>
@@ -278,7 +317,9 @@ export function RendererNode({ id, data, ...props }: NodeProps<RendererNodeData>
             const chartData = executionData.slice(0, 20).map((item, index) => {
               if (typeof item === "object" && item !== null) {
                 const obj = item as Record<string, unknown>;
-                const label = obj.label ? String(obj.label) : String(obj.name || "");
+                const label = obj.label
+                  ? String(obj.label)
+                  : String(obj.name || "");
                 const value = typeof obj.value === "number" ? obj.value : 0;
                 maxValue = Math.max(maxValue, value);
                 return { label, value };
@@ -291,17 +332,26 @@ export function RendererNode({ id, data, ...props }: NodeProps<RendererNodeData>
 
             return (
               <div>
-                <div className="text-[8px] text-gray-500 mb-1 px-1">Format: Bar Chart</div>
+                <div className="text-[8px] text-gray-500 mb-1 px-1">
+                  Format: Bar Chart
+                </div>
                 <div className="text-[9px] py-1 px-1 max-h-48 overflow-auto">
                   {chartData.map((item, idx) => (
                     <div key={idx} className="flex items-center gap-1 mb-1">
-                      <span className="w-12 truncate text-gray-400" title={item.label}>
+                      <span
+                        className="w-12 truncate text-gray-400"
+                        title={item.label}
+                      >
                         {item.label}
                       </span>
                       <div className="flex-1 bg-gray-800 rounded h-3 relative">
                         <div
                           className="bg-blue-500 h-full rounded transition-all"
-                          style={{ width: `${maxValue > 0 ? (item.value / maxValue) * 100 : 0}%` }}
+                          style={{
+                            width: `${
+                              maxValue > 0 ? (item.value / maxValue) * 100 : 0
+                            }%`,
+                          }}
                         />
                       </div>
                       <span className="w-8 text-right text-gray-300">
@@ -320,7 +370,9 @@ export function RendererNode({ id, data, ...props }: NodeProps<RendererNodeData>
           }
           return (
             <div>
-              <div className="text-[8px] text-gray-500 mb-1 px-1">Format: Text (fallback)</div>
+              <div className="text-[8px] text-gray-500 mb-1 px-1">
+                Format: Text (fallback)
+              </div>
               <div className="text-xs text-gray-500 italic py-2 px-1">
                 Data must be an array for bar chart
               </div>
@@ -328,12 +380,41 @@ export function RendererNode({ id, data, ...props }: NodeProps<RendererNodeData>
           );
         }
 
+        case "number": {
+          return (
+            <div className="bg-gray-950 text-2xl rounded border border-gray-700 overflow-auto text-center">
+              {typeof executionData === "number" ||
+              typeof executionData === "bigint"
+                ? executionData
+                : JSON.stringify(executionData, null, 2)}
+            </div>
+          );
+        }
+
+        case "boolean": {
+          return typeof executionData === "boolean" ? (
+            executionData ? (
+              <div className="bg-green-500 text-2xl rounded border border-gray-700 overflow-auto text-center">
+                ⬆️
+              </div>
+            ) : (
+              <div className="bg-red-500 text-2xl rounded border border-gray-700 overflow-auto text-center">
+                ⬇️
+              </div>
+            )
+          ) : (
+            JSON.stringify(executionData, null, 2)
+          );
+        }
+
         case "text":
         default:
           return (
             <div>
-              <div className="text-[8px] text-gray-500 mb-1 px-1">Format: Plain Text</div>
-              <pre className="text-[9px] leading-tight bg-gray-950 p-1.5 rounded border border-gray-700 overflow-auto max-h-48 whitespace-pre-wrap break-words">
+              <div className="text-[8px] text-gray-500 mb-1 px-1">
+                Format: Plain Text
+              </div>
+              <pre className="text-[9px] leading-tight bg-gray-950 p-1.5 rounded border border-gray-700 overflow-auto max-h-48 whitespace-pre-wrap wrap-break-word">
                 {typeof executionData === "string"
                   ? executionData
                   : JSON.stringify(executionData, null, 2)}
@@ -344,7 +425,8 @@ export function RendererNode({ id, data, ...props }: NodeProps<RendererNodeData>
     } catch (error) {
       return (
         <div className="text-xs text-red-400 py-2 px-1">
-          Error rendering data: {error instanceof Error ? error.message : "Unknown error"}
+          Error rendering data:{" "}
+          {error instanceof Error ? error.message : "Unknown error"}
         </div>
       );
     }
@@ -357,26 +439,23 @@ export function RendererNode({ id, data, ...props }: NodeProps<RendererNodeData>
       onShowOptions={onShowOptions}
       onTitleChange={handleTitleChange}
     >
-      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
-      
-      <div className="flex flex-col gap-1">
-        {/* Expand/Collapse button */}
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className="w-32 text-[10px] border border-gray-600 px-1 py-0.5 rounded bg-gray-800 hover:bg-gray-700 text-white transition-colors"
-        >
-          {isExpanded ? "▼ Collapse" : "▶ Expand"}
-        </button>
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-2 h-2 bg-blue-400"
+      />
 
-        {/* Rendered data */}
-        {isExpanded && (
-          <div className="w-64 border border-gray-600 rounded bg-gray-900 mt-1">
-            {renderData()}
-          </div>
-        )}
+      <div className="flex flex-col gap-1">
+        <div className="w-64 border border-gray-600 rounded bg-gray-900 mt-1">
+          {renderData()}
+        </div>
       </div>
-      
-      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-2 h-2 bg-green-400"
+      />
     </NodeWrapper>
   );
 }

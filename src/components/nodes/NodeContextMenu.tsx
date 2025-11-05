@@ -41,7 +41,7 @@ export function NodeContextMenu({
   return (
     <div
       ref={menuRef}
-      className="fixed bg-gray-800 border border-gray-700 rounded-lg shadow-2xl py-1 z-50 min-w-[160px]"
+      className="fixed bg-gray-800 border border-gray-700 rounded-lg shadow-2xl py-1 z-50 min-w-40"
       style={{ left: x, top: y }}
       role="menu"
     >
@@ -71,7 +71,9 @@ export function NodeContextMenu({
           <span>Copy</span>
         </button>
       )}
-      {(onDuplicate || onCopy) && <div className="border-t border-gray-700 my-1"></div>}
+      {(onDuplicate || onCopy) && (
+        <div className="border-t border-gray-700 my-1"></div>
+      )}
       <button
         onClick={() => {
           onDelete();

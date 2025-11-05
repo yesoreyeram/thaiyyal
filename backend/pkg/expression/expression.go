@@ -391,7 +391,7 @@ func resolveValue(ref string, input interface{}, ctx *Context) (interface{}, err
 		// Parse: variables.name.field or just variables.name or variables.name[0]
 		// First, remove "variables." prefix
 		refWithoutPrefix := ref[10:] // Remove "variables."
-		
+
 		// Find the variable name (up to first . or [)
 		varEndIdx := len(refWithoutPrefix)
 		if dotIdx := strings.Index(refWithoutPrefix, "."); dotIdx != -1 {
@@ -400,7 +400,7 @@ func resolveValue(ref string, input interface{}, ctx *Context) (interface{}, err
 		if bracketIdx := strings.Index(refWithoutPrefix, "["); bracketIdx != -1 && bracketIdx < varEndIdx {
 			varEndIdx = bracketIdx
 		}
-		
+
 		varName := refWithoutPrefix[:varEndIdx]
 		val, ok := ctx.Variables[varName]
 		if !ok {
@@ -415,9 +415,7 @@ func resolveValue(ref string, input interface{}, ctx *Context) (interface{}, err
 		// Navigate to nested field/index using resolveFieldPath
 		fieldPath := refWithoutPrefix[varEndIdx:]
 		// Remove leading . if present
-		if strings.HasPrefix(fieldPath, ".") {
-			fieldPath = fieldPath[1:]
-		}
+		fieldPath = strings.TrimPrefix(fieldPath, ".")
 		return resolveFieldPath(fieldPath, val)
 	}
 
@@ -484,7 +482,7 @@ func resolveFieldPath(path string, obj interface{}) (interface{}, error) {
 			methodIdx := strings.Index(field, "(")
 			methodName := field[:methodIdx]
 			argsStr := field[methodIdx+1 : len(field)-1]
-			
+
 			// Parse arguments (simple comma-separated for now)
 			var args []interface{}
 			if argsStr != "" {
@@ -499,7 +497,7 @@ func resolveFieldPath(path string, obj interface{}) (interface{}, error) {
 					}
 				}
 			}
-			
+
 			// Call the method
 			result, err := callMethod(current, methodName, args)
 			if err != nil {
@@ -508,13 +506,13 @@ func resolveFieldPath(path string, obj interface{}) (interface{}, error) {
 			current = result
 			continue
 		}
-		
+
 		// Handle array indexing: field[index]
 		if idx := strings.Index(field, "["); idx != -1 && strings.HasSuffix(field, "]") {
 			// Extract field name and index
 			fieldName := field[:idx]
 			indexStr := field[idx+1 : len(field)-1]
-			
+
 			// First navigate to the field if there's a field name
 			if fieldName != "" {
 				if m, ok := current.(map[string]interface{}); ok {
@@ -527,13 +525,13 @@ func resolveFieldPath(path string, obj interface{}) (interface{}, error) {
 					return nil, fmt.Errorf("cannot access field %s on non-object", fieldName)
 				}
 			}
-			
+
 			// Parse index
 			index, err := strconv.Atoi(indexStr)
 			if err != nil {
 				return nil, fmt.Errorf("invalid array index: %s", indexStr)
 			}
-			
+
 			// Access array element
 			if arr, ok := current.([]interface{}); ok {
 				if index < 0 || index >= len(arr) {
@@ -545,7 +543,7 @@ func resolveFieldPath(path string, obj interface{}) (interface{}, error) {
 			}
 			continue
 		}
-		
+
 		// Handle special property: .length
 		if field == "length" {
 			if arr, ok := current.([]interface{}); ok {
@@ -556,7 +554,7 @@ func resolveFieldPath(path string, obj interface{}) (interface{}, error) {
 			}
 			return nil, fmt.Errorf(".length property only available on arrays and strings, got %T", current)
 		}
-		
+
 		// Regular field access
 		if m, ok := current.(map[string]interface{}); ok {
 			if val, exists := m[field]; exists {
@@ -578,10 +576,10 @@ func splitFieldPath(path string) []string {
 	var current strings.Builder
 	parenDepth := 0
 	bracketDepth := 0
-	
+
 	for i := 0; i < len(path); i++ {
 		ch := path[i]
-		
+
 		switch ch {
 		case '(':
 			parenDepth++
@@ -610,12 +608,12 @@ func splitFieldPath(path string) []string {
 			current.WriteByte(ch)
 		}
 	}
-	
+
 	// Add the last part
 	if current.Len() > 0 {
 		parts = append(parts, current.String())
 	}
-	
+
 	return parts
 }
 
@@ -628,19 +626,19 @@ func callMethod(obj interface{}, method string, args []interface{}) (interface{}
 			return strings.ToUpper(str), nil
 		}
 		return nil, fmt.Errorf("toUpperCase() can only be called on strings, got %T", obj)
-		
+
 	case "toLowerCase":
 		if str, ok := obj.(string); ok {
 			return strings.ToLower(str), nil
 		}
 		return nil, fmt.Errorf("toLowerCase() can only be called on strings, got %T", obj)
-		
+
 	case "trim":
 		if str, ok := obj.(string); ok {
 			return strings.TrimSpace(str), nil
 		}
 		return nil, fmt.Errorf("trim() can only be called on strings, got %T", obj)
-		
+
 	case "includes":
 		if str, ok := obj.(string); ok {
 			if len(args) != 1 {
@@ -662,7 +660,7 @@ func callMethod(obj interface{}, method string, args []interface{}) (interface{}
 			return false, nil
 		}
 		return nil, fmt.Errorf("includes() can only be called on strings or arrays, got %T", obj)
-		
+
 	case "startsWith":
 		if str, ok := obj.(string); ok {
 			if len(args) != 1 {
@@ -672,7 +670,7 @@ func callMethod(obj interface{}, method string, args []interface{}) (interface{}
 			return strings.HasPrefix(str, prefix), nil
 		}
 		return nil, fmt.Errorf("startsWith() can only be called on strings, got %T", obj)
-		
+
 	case "endsWith":
 		if str, ok := obj.(string); ok {
 			if len(args) != 1 {
@@ -682,7 +680,7 @@ func callMethod(obj interface{}, method string, args []interface{}) (interface{}
 			return strings.HasSuffix(str, suffix), nil
 		}
 		return nil, fmt.Errorf("endsWith() can only be called on strings, got %T", obj)
-		
+
 	case "replace":
 		if str, ok := obj.(string); ok {
 			if len(args) != 2 {
@@ -693,7 +691,7 @@ func callMethod(obj interface{}, method string, args []interface{}) (interface{}
 			return strings.ReplaceAll(str, old, new), nil
 		}
 		return nil, fmt.Errorf("replace() can only be called on strings, got %T", obj)
-		
+
 	case "split":
 		if str, ok := obj.(string); ok {
 			if len(args) != 1 {
@@ -708,7 +706,7 @@ func callMethod(obj interface{}, method string, args []interface{}) (interface{}
 			return result, nil
 		}
 		return nil, fmt.Errorf("split() can only be called on strings, got %T", obj)
-		
+
 	// Array methods
 	case "join":
 		if arr, ok := obj.([]interface{}); ok {
@@ -723,7 +721,7 @@ func callMethod(obj interface{}, method string, args []interface{}) (interface{}
 			return strings.Join(strParts, separator), nil
 		}
 		return nil, fmt.Errorf("join() can only be called on arrays, got %T", obj)
-		
+
 	case "reverse":
 		if arr, ok := obj.([]interface{}); ok {
 			reversed := make([]interface{}, len(arr))
@@ -733,7 +731,7 @@ func callMethod(obj interface{}, method string, args []interface{}) (interface{}
 			return reversed, nil
 		}
 		return nil, fmt.Errorf("reverse() can only be called on arrays, got %T", obj)
-		
+
 	case "first":
 		if arr, ok := obj.([]interface{}); ok {
 			if len(arr) == 0 {
@@ -742,7 +740,7 @@ func callMethod(obj interface{}, method string, args []interface{}) (interface{}
 			return arr[0], nil
 		}
 		return nil, fmt.Errorf("first() can only be called on arrays, got %T", obj)
-		
+
 	case "last":
 		if arr, ok := obj.([]interface{}); ok {
 			if len(arr) == 0 {
@@ -751,7 +749,7 @@ func callMethod(obj interface{}, method string, args []interface{}) (interface{}
 			return arr[len(arr)-1], nil
 		}
 		return nil, fmt.Errorf("last() can only be called on arrays, got %T", obj)
-		
+
 	default:
 		return nil, fmt.Errorf("unknown method: %s", method)
 	}

@@ -1,6 +1,6 @@
 # Multi-stage build for Thaiyyal workflow engine
 # Stage 1: Build frontend
-FROM node:20-alpine AS frontend-builder
+FROM node:alpine AS frontend-builder
 
 WORKDIR /app
 
@@ -18,11 +18,11 @@ RUN npm ci
 COPY src ./src
 COPY public ./public
 
-# Build Next.js application
-RUN npm run build
+# Build Next.js application (export mode only, don't copy to backend yet)
+RUN npm run build:frontend
 
 # Stage 2: Build backend
-FROM golang:1.24.7-alpine AS backend-builder
+FROM golang:alpine AS backend-builder
 
 # Install build dependencies
 RUN apk add --no-cache git make
@@ -40,9 +40,8 @@ COPY backend ./backend
 RUN mkdir -p backend/pkg/server/static
 
 # Copy frontend build output to backend static directory
-COPY --from=frontend-builder /app/.next/standalone/.next/server/app/*.html ./backend/pkg/server/static/
-COPY --from=frontend-builder /app/.next/static ./backend/pkg/server/static/_next
-COPY --from=frontend-builder /app/public/* ./backend/pkg/server/static/
+# Next.js export mode creates an 'out' directory with all static files
+COPY --from=frontend-builder /app/out ./backend/pkg/server/static/
 
 # Build Go binary
 RUN cd backend/cmd/server && \

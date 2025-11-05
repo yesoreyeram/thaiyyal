@@ -113,11 +113,11 @@ func (e *ForEachExecutor) Execute(ctx ExecutionContext, node types.Node) (interf
 //
 // For now, we prepare the context and log the iteration.
 func (e *ForEachExecutor) executeIteration(
-	ctx ExecutionContext,
+	_ ExecutionContext,
 	node types.Node,
 	item interface{},
 	index int,
-	items []interface{},
+	_ []interface{},
 ) error {
 	slog.Debug("for_each iteration",
 		slog.String("node_id", node.ID),

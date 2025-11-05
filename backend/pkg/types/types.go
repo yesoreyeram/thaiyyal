@@ -59,9 +59,10 @@ const (
 	NodeTypeCondition     NodeType = "condition"
 	NodeTypeForEach       NodeType = "for_each"
 	NodeTypeWhileLoop     NodeType = "while_loop"
-	NodeTypeFilter        NodeType = "filter" // Filter array elements with expression
-	NodeTypeMap           NodeType = "map"    // Transform array elements
-	NodeTypeReduce        NodeType = "reduce" // Reduce array to single value
+	NodeTypeFilter        NodeType = "filter"     // Filter array elements with expression
+	NodeTypeMap           NodeType = "map"        // Transform array elements
+	NodeTypeReduce        NodeType = "reduce"     // Reduce array to single value
+	NodeTypeExpression    NodeType = "expression" // Apply custom expression to input
 	// Array Processing nodes
 	NodeTypeSlice     NodeType = "slice"     // Extract portion of array (pagination)
 	NodeTypeSort      NodeType = "sort"      // Sort array by field
@@ -159,20 +160,20 @@ type NodeData struct {
 	FillMissing interface{} `json:"fill_missing,omitempty"` // for zip node (value for shorter arrays)
 	RemoveEmpty *bool       `json:"remove_empty,omitempty"` // for compact node
 	// State & Memory fields
-	VarName       *string     `json:"var_name,omitempty"`       // for variable nodes (variable name)
-	VarOp         *string     `json:"var_op,omitempty"`         // for variable nodes (get/set)
-	Field         *string     `json:"field,omitempty"`          // for extract nodes (field path)
-	Fields        []string    `json:"fields,omitempty"`         // for extract nodes (multiple fields)
-	TransformType *string     `json:"transform_type,omitempty"` // for transform nodes (to_array, to_object, etc.)
-	InitialValue  interface{} `json:"initial_value,omitempty"`  // for accumulator/counter initial value
-	AccumOp       *string     `json:"accum_op,omitempty"`       // for accumulator operation (sum, product, concat, etc.)
-	CounterOp     *string     `json:"counter_op,omitempty"`     // for counter operation (increment, decrement, reset)
-	Delta         *float64    `json:"delta,omitempty"`          // for counter delta value
-	InputType     *string     `json:"input_type,omitempty"`     // for parse node (AUTO, JSON, CSV, TSV, YAML, XML)
-	OutputType    *string     `json:"output_type,omitempty"`    // for format node (JSON, CSV, TSV)
-	PrettyPrint   *bool       `json:"pretty_print,omitempty"`   // for format node (JSON pretty printing)
-	IncludeHeaders *bool      `json:"include_headers,omitempty"` // for format node (CSV/TSV headers)
-	Delimiter     *string     `json:"delimiter,omitempty"`      // for format node (CSV delimiter)
+	VarName        *string     `json:"var_name,omitempty"`        // for variable nodes (variable name)
+	VarOp          *string     `json:"var_op,omitempty"`          // for variable nodes (get/set)
+	Field          *string     `json:"field,omitempty"`           // for extract nodes (field path)
+	Fields         []string    `json:"fields,omitempty"`          // for extract nodes (multiple fields)
+	TransformType  *string     `json:"transform_type,omitempty"`  // for transform nodes (to_array, to_object, etc.)
+	InitialValue   interface{} `json:"initial_value,omitempty"`   // for accumulator/counter initial value
+	AccumOp        *string     `json:"accum_op,omitempty"`        // for accumulator operation (sum, product, concat, etc.)
+	CounterOp      *string     `json:"counter_op,omitempty"`      // for counter operation (increment, decrement, reset)
+	Delta          *float64    `json:"delta,omitempty"`           // for counter delta value
+	InputType      *string     `json:"input_type,omitempty"`      // for parse node (AUTO, JSON, CSV, TSV, YAML, XML)
+	OutputType     *string     `json:"output_type,omitempty"`     // for format node (JSON, CSV, TSV)
+	PrettyPrint    *bool       `json:"pretty_print,omitempty"`    // for format node (JSON pretty printing)
+	IncludeHeaders *bool       `json:"include_headers,omitempty"` // for format node (CSV/TSV headers)
+	Delimiter      *string     `json:"delimiter,omitempty"`       // for format node (CSV delimiter)
 	// Advanced Control Flow fields
 	Cases          []SwitchCase `json:"cases,omitempty"`           // for switch node (case definitions)
 	DefaultPath    *string      `json:"default_path,omitempty"`    // for switch node (default case)
@@ -196,28 +197,28 @@ type NodeData struct {
 	ErrorOutputPath *string     `json:"error_output_path,omitempty"` // for try-catch node
 	TimeoutAction   *string     `json:"timeout_action,omitempty"`    // for timeout node (error/continue_with_partial)
 	// Phase 4: Advanced Node fields
-	MaxRequests      *int    `json:"max_requests,omitempty"`       // for rate_limiter node
-	PerDuration      *string `json:"per_duration,omitempty"`       // for rate_limiter node (1s, 1m, 1h)
-	RateLimitStrategy *string `json:"strategy,omitempty"`           // for rate_limiter node (fixed_window, sliding_window, token_bucket)
-	RequestsPerSecond *float64 `json:"requests_per_second,omitempty"` // for throttle node
-	Schema           interface{} `json:"schema,omitempty"`          // for schema_validator node (JSON schema)
-	Strict           *bool       `json:"strict,omitempty"`          // for schema_validator node
-	PaginationStrategy *string    `json:"pagination_strategy,omitempty"` // for paginator node (offset_limit, page_number, cursor, link_header)
-	OffsetParam      *string    `json:"offset_param,omitempty"`    // for paginator node
-	LimitParam       *string    `json:"limit_param,omitempty"`     // for paginator node
-	PageSize         *int       `json:"page_size,omitempty"`       // for paginator node
-	MaxPages         *int       `json:"max_pages,omitempty"`       // for paginator node
-	PageParam        *string    `json:"page_param,omitempty"`      // for paginator node
-	PerPageParam     *string    `json:"per_page_param,omitempty"`  // for paginator node
-	CursorParam      *string    `json:"cursor_param,omitempty"`    // for paginator node
-	NextCursorPath   *string    `json:"next_cursor_path,omitempty"` // for paginator node
-	LinkHeader       *string    `json:"link_header,omitempty"`     // for paginator node
-	TotalCountPath   *string    `json:"total_count_path,omitempty"` // for paginator node
-	ResultsPath      *string    `json:"results_path,omitempty"`    // for paginator node
-	MaxSize          *int       `json:"max_size,omitempty"`        // for enhanced cache node
-	Eviction         *string    `json:"eviction,omitempty"`        // for enhanced cache node (lru, lfu, ttl)
-	Storage          *string    `json:"storage,omitempty"`         // for enhanced cache node (memory, redis)
-	Scope            *string    `json:"scope,omitempty"`           // for variable node (global, workflow, local)
+	MaxRequests        *int        `json:"max_requests,omitempty"`        // for rate_limiter node
+	PerDuration        *string     `json:"per_duration,omitempty"`        // for rate_limiter node (1s, 1m, 1h)
+	RateLimitStrategy  *string     `json:"strategy,omitempty"`            // for rate_limiter node (fixed_window, sliding_window, token_bucket)
+	RequestsPerSecond  *float64    `json:"requests_per_second,omitempty"` // for throttle node
+	Schema             interface{} `json:"schema,omitempty"`              // for schema_validator node (JSON schema)
+	Strict             *bool       `json:"strict,omitempty"`              // for schema_validator node
+	PaginationStrategy *string     `json:"pagination_strategy,omitempty"` // for paginator node (offset_limit, page_number, cursor, link_header)
+	OffsetParam        *string     `json:"offset_param,omitempty"`        // for paginator node
+	LimitParam         *string     `json:"limit_param,omitempty"`         // for paginator node
+	PageSize           *int        `json:"page_size,omitempty"`           // for paginator node
+	MaxPages           *int        `json:"max_pages,omitempty"`           // for paginator node
+	PageParam          *string     `json:"page_param,omitempty"`          // for paginator node
+	PerPageParam       *string     `json:"per_page_param,omitempty"`      // for paginator node
+	CursorParam        *string     `json:"cursor_param,omitempty"`        // for paginator node
+	NextCursorPath     *string     `json:"next_cursor_path,omitempty"`    // for paginator node
+	LinkHeader         *string     `json:"link_header,omitempty"`         // for paginator node
+	TotalCountPath     *string     `json:"total_count_path,omitempty"`    // for paginator node
+	ResultsPath        *string     `json:"results_path,omitempty"`        // for paginator node
+	MaxSize            *int        `json:"max_size,omitempty"`            // for enhanced cache node
+	Eviction           *string     `json:"eviction,omitempty"`            // for enhanced cache node (lru, lfu, ttl)
+	Storage            *string     `json:"storage,omitempty"`             // for enhanced cache node (memory, redis)
+	Scope              *string     `json:"scope,omitempty"`               // for variable node (global, workflow, local)
 	// Context node fields
 	ContextName   *string                `json:"context_name,omitempty"`   // DEPRECATED: Use ContextValues for multiple values
 	ContextValue  interface{}            `json:"context_value,omitempty"`  // DEPRECATED: Use ContextValues for multiple values
