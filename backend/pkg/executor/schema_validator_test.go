@@ -7,10 +7,10 @@ import (
 )
 
 func TestSchemaValidatorExecutor_Type(t *testing.T) {
-executor := &SchemaValidatorExecutor{}
-if executor.Type() != types.NodeTypeSchemaValidator {
-t.Errorf("Expected type %v, got %v", types.NodeTypeSchemaValidator, executor.Type())
-}
+	executor := &SchemaValidatorExecutor{}
+	if executor.NodeType() != types.NodeTypeSchemaValidator {
+		t.Errorf("Expected type %v, got %v", types.NodeTypeSchemaValidator, executor.NodeType())
+	}
 }
 
 func TestSchemaValidatorExecutor_Validate(t *testing.T) {

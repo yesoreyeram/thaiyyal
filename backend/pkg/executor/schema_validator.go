@@ -11,8 +11,8 @@ import (
 // SchemaValidatorExecutor validates data against JSON schemas
 type SchemaValidatorExecutor struct{}
 
-// Type returns the node type
-func (e *SchemaValidatorExecutor) Type() types.NodeType {
+// NodeType returns the node type
+func (e *SchemaValidatorExecutor) NodeType() types.NodeType {
 	return types.NodeTypeSchemaValidator
 }
 
