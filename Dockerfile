@@ -1,24 +1,54 @@
-# Build stage
-FROM golang:1.24.7-alpine AS builder
+# Multi-stage build for Thaiyyal workflow engine
+# Stage 1: Build frontend
+FROM node:20-alpine AS frontend-builder
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+COPY next.config.ts ./
+COPY tsconfig.json ./
+COPY postcss.config.mjs ./
+COPY eslint.config.mjs ./
+
+# Install dependencies
+RUN npm ci
+
+# Copy source files
+COPY src ./src
+COPY public ./public
+
+# Build Next.js application
+RUN npm run build
+
+# Stage 2: Build backend
+FROM golang:1.24.7-alpine AS backend-builder
 
 # Install build dependencies
 RUN apk add --no-cache git make
 
-# Set working directory
-WORKDIR /build
+WORKDIR /app
 
-# Copy go mod files
+# Copy Go modules files
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy source code
-COPY backend/ ./backend/
+# Copy backend source
+COPY backend ./backend
 
-# Build the server
+# Create static directory and copy frontend build output
+RUN mkdir -p backend/pkg/server/static
+
+# Copy frontend build output to backend static directory
+COPY --from=frontend-builder /app/.next/standalone/.next/server/app/*.html ./backend/pkg/server/static/
+COPY --from=frontend-builder /app/.next/static ./backend/pkg/server/static/_next
+COPY --from=frontend-builder /app/public/* ./backend/pkg/server/static/
+
+# Build Go binary
 RUN cd backend/cmd/server && \
-    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o /build/thaiyyal-server .
+    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o /app/thaiyyal-server .
 
-# Runtime stage
+# Stage 3: Final runtime image
 FROM alpine:3.19
 
 # Install ca-certificates for HTTPS and wget for health checks
@@ -32,7 +62,7 @@ RUN addgroup -g 1000 thaiyyal && \
 WORKDIR /app
 
 # Copy binary from builder
-COPY --from=builder /build/thaiyyal-server /app/thaiyyal-server
+COPY --from=backend-builder /app/thaiyyal-server /app/thaiyyal-server
 
 # Change ownership
 RUN chown -R thaiyyal:thaiyyal /app

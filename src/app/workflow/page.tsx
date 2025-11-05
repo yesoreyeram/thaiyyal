@@ -1,5 +1,5 @@
 "use client";
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState, useRef } from "react";
 import ReactFlow, {
   addEdge,
   ReactFlowProvider,
@@ -66,6 +66,7 @@ import { WorkflowStatusBar } from "../../components/WorkflowStatusBar";
 import { NodePalette } from "../../components/NodePalette";
 import { JSONPayloadModal } from "../../components/JSONPayloadModal";
 import { WorkflowExamplesModal } from "../../components/WorkflowExamplesModal";
+import { ExecutionPanel, ExecutionResult } from "../../components/ExecutionPanel";
 import { WorkflowExample } from "../../data/workflowExamples";
 import { useRouter } from "next/navigation";
 
@@ -603,6 +604,15 @@ function Canvas() {
     nodeId: string;
     nodeName: string;
   } | null>(null);
+  
+  // Execution panel state
+  const [isExecutionPanelOpen, setIsExecutionPanelOpen] = useState(false);
+  const [isExecuting, setIsExecuting] = useState(false);
+  const [executionResult, setExecutionResult] = useState<ExecutionResult | null>(null);
+  const [executionError, setExecutionError] = useState<string | null>(null);
+  const [executionPanelHeight, setExecutionPanelHeight] = useState(250);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  
   const { project, getNodes } = useReactFlow();
 
   const onConnect = useCallback(
@@ -867,9 +877,60 @@ function Canvas() {
     // TODO: Delete workflow
   };
 
-  const handleRun = () => {
-    // TODO: Run workflow
-    console.log("Run workflow", payload);
+  const handleRun = async () => {
+    // Open execution panel
+    setIsExecutionPanelOpen(true);
+    setIsExecuting(true);
+    setExecutionResult(null);
+    setExecutionError(null);
+
+    // Create abort controller for cancellation
+    abortControllerRef.current = new AbortController();
+
+    try {
+      const response = await fetch("/api/v1/workflow/execute", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+        signal: abortControllerRef.current.signal,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || `HTTP error! status: ${response.status}`);
+      }
+
+      setExecutionResult(data);
+    } catch (error) {
+      if (error instanceof Error) {
+        if (error.name === "AbortError") {
+          setExecutionError("Execution cancelled by user");
+        } else {
+          setExecutionError(error.message);
+        }
+      } else {
+        setExecutionError("An unknown error occurred");
+      }
+    } finally {
+      setIsExecuting(false);
+      abortControllerRef.current = null;
+    }
+  };
+
+  const handleCancelExecution = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
+  };
+
+  const handleCloseExecutionPanel = () => {
+    setIsExecutionPanelOpen(false);
+    setExecutionResult(null);
+    setExecutionError(null);
   };
 
   const handleExport = () => {
@@ -1022,8 +1083,22 @@ function Canvas() {
         />
       )}
 
-      {/* Bottom Status Bar */}
-      <WorkflowStatusBar nodeCount={nodes.length} edgeCount={edges.length} />
+      {/* Execution Results Panel */}
+      <ExecutionPanel
+        isOpen={isExecutionPanelOpen}
+        isLoading={isExecuting}
+        result={executionResult}
+        error={executionError}
+        onCancel={handleCancelExecution}
+        onClose={handleCloseExecutionPanel}
+        height={executionPanelHeight}
+        onHeightChange={setExecutionPanelHeight}
+      />
+
+      {/* Bottom Status Bar - Only show when execution panel is closed */}
+      {!isExecutionPanelOpen && (
+        <WorkflowStatusBar nodeCount={nodes.length} edgeCount={edges.length} />
+      )}
     </div>
   );
 }

@@ -27,12 +27,19 @@
 //
 // The server exposes the following endpoints:
 //
-//	POST   /api/v1/workflow/execute   - Execute a workflow
-//	POST   /api/v1/workflow/validate  - Validate a workflow
-//	GET    /health                    - Health check
-//	GET    /health/live               - Liveness probe
-//	GET    /health/ready              - Readiness probe
-//	GET    /metrics                   - Prometheus metrics
+//	POST   /api/v1/workflow/execute        - Execute a workflow
+//	POST   /api/v1/workflow/validate       - Validate a workflow
+//	POST   /api/v1/workflow/save           - Save a workflow
+//	GET    /api/v1/workflow/list           - List all saved workflows
+//	GET    /api/v1/workflow/load/{id}      - Load a workflow by ID
+//	DELETE /api/v1/workflow/delete/{id}    - Delete a workflow by ID
+//	POST   /api/v1/workflow/execute/{id}   - Execute a workflow by ID
+//	POST   /api/v1/httpclient/register     - Register an HTTP client
+//	GET    /api/v1/httpclient/list         - List registered HTTP clients
+//	GET    /health                         - Health check
+//	GET    /health/live                    - Liveness probe
+//	GET    /health/ready                   - Readiness probe
+//	GET    /metrics                        - Prometheus metrics
 package main
 
 import (

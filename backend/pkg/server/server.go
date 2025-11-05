@@ -17,9 +17,11 @@ import (
 
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/engine"
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/health"
+	"github.com/yesoreyeram/thaiyyal/backend/pkg/httpclient"
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/logging"
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/telemetry"
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/types"
+	"github.com/yesoreyeram/thaiyyal/backend"
 )
 
 // Config holds server configuration
@@ -57,12 +59,14 @@ func DefaultConfig() Config {
 
 // Server is the HTTP API server
 type Server struct {
-	config           Config
-	httpServer       *http.Server
-	healthChecker    *health.Checker
-	telemetryProvider *telemetry.Provider
-	logger           *logging.Logger
-	engineConfig     types.Config
+	config             Config
+	httpServer         *http.Server
+	healthChecker      *health.Checker
+	telemetryProvider  *telemetry.Provider
+	logger             *logging.Logger
+	engineConfig       types.Config
+	httpClientRegistry *httpclient.Registry
+	workflowRegistry   *workflow.WorkflowRegistry
 }
 
 // New creates a new server instance
@@ -86,12 +90,20 @@ func New(config Config, engineConfig types.Config) (*Server, error) {
 		return nil
 	}, 5*time.Second, true)
 	
+	// Create HTTP client registry
+	httpClientRegistry := httpclient.NewRegistry()
+	
+	// Create workflow registry
+	workflowRegistry := workflow.NewWorkflowRegistry()
+	
 	server := &Server{
-		config:            config,
-		healthChecker:     healthChecker,
-		telemetryProvider: telemetryProvider,
-		logger:            logger,
-		engineConfig:      engineConfig,
+		config:             config,
+		healthChecker:      healthChecker,
+		telemetryProvider:  telemetryProvider,
+		logger:             logger,
+		engineConfig:       engineConfig,
+		httpClientRegistry: httpClientRegistry,
+		workflowRegistry:   workflowRegistry,
 	}
 	
 	// Create HTTP server
@@ -121,6 +133,20 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 	// API endpoints
 	mux.HandleFunc("/api/v1/workflow/execute", s.handleExecuteWorkflow)
 	mux.HandleFunc("/api/v1/workflow/validate", s.handleValidateWorkflow)
+	
+	// Workflow storage endpoints
+	mux.HandleFunc("/api/v1/workflow/save", s.handleSaveWorkflow)
+	mux.HandleFunc("/api/v1/workflow/list", s.handleListWorkflows)
+	mux.HandleFunc("/api/v1/workflow/load/", s.handleLoadWorkflow)
+	mux.HandleFunc("/api/v1/workflow/delete/", s.handleDeleteWorkflow)
+	mux.HandleFunc("/api/v1/workflow/execute/", s.handleExecuteWorkflowByID)
+	
+	// HTTP Client management endpoints
+	mux.HandleFunc("/api/v1/httpclient/register", s.handleRegisterHTTPClient)
+	mux.HandleFunc("/api/v1/httpclient/list", s.handleListHTTPClients)
+	
+	// Static file serving (should be last to act as catch-all)
+	mux.HandleFunc("/", s.handleStaticFiles)
 }
 
 // middlewareChain applies middleware to the handler

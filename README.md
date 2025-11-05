@@ -14,12 +14,24 @@ A powerful, secure, and extensible visual workflow engine that combines a Next.j
 - **Real-time Validation**: Instant feedback on workflow configuration
 - **Rich Node Palette**: 40+ built-in node types across multiple categories
 - **Workflow Persistence**: Save and load workflows with version control
+- **Live Execution Results**: Resizable panel with real-time execution feedback
+- **Interactive Canvas**: Pan, zoom, and organize workflows visually
 
 ### Powerful Execution Engine
 - **Type-Safe Execution**: Strong typing with automatic type inference
 - **Topological Sorting**: Automatic dependency resolution and execution ordering
 - **Parallel Processing**: Execute independent nodes concurrently
 - **State Management**: Variables, accumulators, counters, and caching
+- **Real-time Feedback**: Live execution results with node-by-node breakdown
+- **Cancellation Support**: Stop long-running workflows on demand
+
+### Execution Results Display
+- **Resizable Results Panel**: Drag-to-resize execution panel (100px-600px)
+- **Loading Indicators**: Professional animated spinners and progress display
+- **Detailed Results**: Execution summary, final output, and per-node results
+- **Error Handling**: Comprehensive error messages with detailed context
+- **Execution History**: View previous execution results
+- **Cancel Execution**: Abort long-running workflows instantly
 
 ### Security & Protection
 - **Zero-Trust Architecture**: All inputs validated, all outputs sanitized
@@ -39,10 +51,13 @@ A powerful, secure, and extensible visual workflow engine that combines a Next.j
 - [Quick Start Guide](#quick-start)
 - [Installation](#installation)
 - [Basic Concepts](#basic-concepts)
+- [**Workflow Execution Guide**](docs/WORKFLOW_EXECUTION_GUIDE.md) - Step-by-step guide with screenshots
 
 ### Core Documentation
 - [Architecture Overview](docs/ARCHITECTURE.md)
 - [Design Patterns](docs/ARCHITECTURE_DESIGN_PATTERNS.md)
+- [Server Implementation](docs/SERVER_IMPLEMENTATION.md)
+- [API Examples](docs/API_EXAMPLES.md)
 - [Developer Guide](DEV_GUIDE.md)
 - [Contributing Guidelines](CONTRIBUTING.md)
 - [Agent System](AGENTS.md)
@@ -126,6 +141,46 @@ npm start
 5. **Configure Nodes**: Click nodes to configure their properties
 6. **Execute**: Click the "Run" button to execute your workflow
 7. **View Results**: See results in the visualization panel
+
+## 🎥 Demo Video
+
+See Thaiyyal in action! This video demonstrates the complete workflow creation and execution process:
+
+<!-- Video will be embedded here once recorded -->
+<!--
+![Thaiyyal Workflow Demo](docs/demo/thaiyyal-demo.mp4)
+
+Or view on: [YouTube Link](https://youtube.com/watch?v=...)
+-->
+
+### What the Demo Shows
+
+1. **Creating a Workflow** (0:00-0:30)
+   - Opening the workflow builder
+   - Adding nodes from the palette
+   - Connecting nodes visually
+
+2. **Configuring Nodes** (0:30-1:00)
+   - Setting node properties
+   - Configuring data sources
+   - Adjusting parameters
+
+3. **Running the Workflow** (1:00-1:30)
+   - Clicking the Run button
+   - Viewing the execution panel expand
+   - Watching the loading indicator
+
+4. **Viewing Results** (1:30-2:00)
+   - Reviewing execution summary
+   - Examining final output
+   - Exploring node-by-node results
+
+5. **Advanced Features** (2:00-2:30)
+   - Resizing the results panel
+   - Handling errors gracefully
+   - Canceling long-running executions
+
+📖 For detailed instructions, see the [Workflow Execution Guide](docs/WORKFLOW_EXECUTION_GUIDE.md)
 
 ## 💡 Basic Concepts
 

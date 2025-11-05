@@ -44,6 +44,7 @@ next-env.d.ts
 # Go
 /backend/examples/examples
 /backend/bin/
+/server
 *.exe
 *.exe~
 *.dll
@@ -55,3 +56,15 @@ go.work
 go.work.sum
 examples/parallel_demo
 backend/examples
+
+# Backend static files (generated from frontend build)
+/backend/pkg/server/static/*
+!/backend/pkg/server/static/README.md
+
+# Playwright E2E test artifacts
+/test-results/
+/playwright-report/
+/e2e-report/
+/playwright/.cache/
+# Keep E2E screenshots in repo for documentation
+#!/e2e/screenshots/
