@@ -240,6 +240,9 @@ func DefaultRegistry() *executor.Registry {
 	reg.MustRegister(&executor.ContextVariableExecutor{})
 	reg.MustRegister(&executor.ContextConstantExecutor{})
 
+	// Visualization nodes
+	reg.MustRegister(&executor.RendererExecutor{})
+
 	return reg
 }
 
