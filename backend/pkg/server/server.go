@@ -19,6 +19,7 @@ import (
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/health"
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/httpclient"
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/logging"
+	"github.com/yesoreyeram/thaiyyal/backend/pkg/storage"
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/telemetry"
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/types"
 )
@@ -65,6 +66,7 @@ type Server struct {
 	logger             *logging.Logger
 	engineConfig       types.Config
 	httpClientRegistry *httpclient.Registry
+	workflowStore      storage.Store
 }
 
 // New creates a new server instance
@@ -91,6 +93,9 @@ func New(config Config, engineConfig types.Config) (*Server, error) {
 	// Create HTTP client registry
 	httpClientRegistry := httpclient.NewRegistry()
 	
+	// Create workflow store
+	workflowStore := storage.NewInMemoryStore()
+	
 	server := &Server{
 		config:             config,
 		healthChecker:      healthChecker,
@@ -98,6 +103,7 @@ func New(config Config, engineConfig types.Config) (*Server, error) {
 		logger:             logger,
 		engineConfig:       engineConfig,
 		httpClientRegistry: httpClientRegistry,
+		workflowStore:      workflowStore,
 	}
 	
 	// Create HTTP server
@@ -128,9 +134,19 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/api/v1/workflow/execute", s.handleExecuteWorkflow)
 	mux.HandleFunc("/api/v1/workflow/validate", s.handleValidateWorkflow)
 	
+	// Workflow storage endpoints
+	mux.HandleFunc("/api/v1/workflow/save", s.handleSaveWorkflow)
+	mux.HandleFunc("/api/v1/workflow/list", s.handleListWorkflows)
+	mux.HandleFunc("/api/v1/workflow/load/", s.handleLoadWorkflow)
+	mux.HandleFunc("/api/v1/workflow/delete/", s.handleDeleteWorkflow)
+	mux.HandleFunc("/api/v1/workflow/execute/", s.handleExecuteWorkflowByID)
+	
 	// HTTP Client management endpoints
 	mux.HandleFunc("/api/v1/httpclient/register", s.handleRegisterHTTPClient)
 	mux.HandleFunc("/api/v1/httpclient/list", s.handleListHTTPClients)
+	
+	// Static file serving (should be last to act as catch-all)
+	mux.HandleFunc("/", s.handleStaticFiles)
 }
 
 // middlewareChain applies middleware to the handler
