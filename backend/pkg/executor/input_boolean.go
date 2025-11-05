@@ -1,8 +1,6 @@
 package executor
 
 import (
-	"fmt"
-
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/types"
 )
 
@@ -15,7 +13,7 @@ func (e *BooleanInputExecutor) Execute(ctx ExecutionContext, node types.Node) (i
 	if node.Data.BooleanValue != nil {
 		return *node.Data.BooleanValue, nil
 	}
-	
+
 	// Default to false if no value is set
 	return false, nil
 }
