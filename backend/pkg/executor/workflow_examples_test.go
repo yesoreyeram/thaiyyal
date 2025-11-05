@@ -1,6 +1,7 @@
 package executor
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/types"
@@ -360,6 +361,253 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 		t.Logf("   Normalized %d emails", len(emails))
 		t.Logf("   Filtered to %d users from example.com", len(exampleUsers))
 		t.Logf("   Transformed %d names to uppercase", len(names))
+	})
+}
+
+// TestWorkflowExamples_FormatConversion demonstrates Phase 3 data format conversions
+func TestWorkflowExamples_FormatConversion(t *testing.T) {
+	t.Run("Example25_CSVtoJSON", func(t *testing.T) {
+		// Example 25: Convert CSV data to JSON format
+		// Demonstrates: Parse → Format conversion pipeline
+		
+		parseExec := &ParseExecutor{}
+		formatExec := &FormatExecutor{}
+		
+		ctx := &MockExecutionContext{
+			inputs: map[string][]interface{}{},
+		}
+		
+		// Input: CSV string
+		csvData := "name,age,active\nAlice,30,true\nBob,25,false\nCharlie,35,true"
+		
+		// Stage 1: Parse CSV
+		ctx.inputs["parse1"] = []interface{}{csvData}
+		csvType := "CSV"
+		parseNode := types.Node{
+			ID:   "parse1",
+			Type: types.NodeTypeParse,
+			Data: types.NodeData{
+				InputType: &csvType,
+			},
+		}
+		
+		parseResult, err := parseExec.Execute(ctx, parseNode)
+		if err != nil {
+			t.Fatalf("Parse execution failed: %v", err)
+		}
+		
+		// Verify parsing worked
+		var parsedData []interface{}
+		switch data := parseResult.(type) {
+		case []interface{}:
+			parsedData = data
+		case []map[string]interface{}:
+			parsedData = make([]interface{}, len(data))
+			for i, item := range data {
+				parsedData[i] = item
+			}
+		default:
+			t.Fatalf("Unexpected parse result type: %T", parseResult)
+		}
+		
+		if len(parsedData) != 3 {
+			t.Errorf("Expected 3 parsed records, got %d", len(parsedData))
+		}
+		
+		// Stage 2: Format as JSON
+		ctx.inputs["format1"] = []interface{}{parseResult}
+		jsonType := "JSON"
+		prettyPrint := true
+		formatNode := types.Node{
+			ID:   "format1",
+			Type: types.NodeTypeFormat,
+			Data: types.NodeData{
+				OutputType:  &jsonType,
+				PrettyPrint: &prettyPrint,
+			},
+		}
+		
+		formatResult, err := formatExec.Execute(ctx, formatNode)
+		if err != nil {
+			t.Fatalf("Format execution failed: %v", err)
+		}
+		
+		jsonOutput, ok := formatResult.(string)
+		if !ok {
+			t.Fatalf("Format result should be string, got %T", formatResult)
+		}
+		
+		// Verify JSON output contains expected data
+		if !strings.Contains(jsonOutput, "Alice") || !strings.Contains(jsonOutput, "Bob") {
+			t.Errorf("JSON output missing expected names: %s", jsonOutput)
+		}
+		
+		t.Log("✅ CSV to JSON conversion working correctly!")
+		t.Logf("   Input: CSV with %d rows", 3)
+		t.Logf("   Parsed: %d records", len(parsedData))
+		t.Logf("   Output: Pretty-printed JSON (%d bytes)", len(jsonOutput))
+	})
+	
+	t.Run("Example26_JSONtoCSV", func(t *testing.T) {
+		// Example 26: Convert JSON array to CSV format
+		// Demonstrates: JSON data → CSV export pipeline
+		
+		formatExec := &FormatExecutor{}
+		
+		ctx := &MockExecutionContext{
+			inputs: map[string][]interface{}{},
+		}
+		
+		// Input: JSON array of objects (simulating parsed JSON)
+		jsonData := []interface{}{
+			map[string]interface{}{"product": "Widget", "price": float64(19.99), "stock": float64(100)},
+			map[string]interface{}{"product": "Gadget", "price": float64(29.99), "stock": float64(50)},
+			map[string]interface{}{"product": "Doohickey", "price": float64(9.99), "stock": float64(200)},
+		}
+		
+		// Format as CSV with headers
+		ctx.inputs["format1"] = []interface{}{jsonData}
+		csvType := "CSV"
+		includeHeaders := true
+		formatNode := types.Node{
+			ID:   "format1",
+			Type: types.NodeTypeFormat,
+			Data: types.NodeData{
+				OutputType:     &csvType,
+				IncludeHeaders: &includeHeaders,
+			},
+		}
+		
+		formatResult, err := formatExec.Execute(ctx, formatNode)
+		if err != nil {
+			t.Fatalf("Format execution failed: %v", err)
+		}
+		
+		csvOutput, ok := formatResult.(string)
+		if !ok {
+			t.Fatalf("Format result should be string, got %T", formatResult)
+		}
+		
+		// Verify CSV output
+		lines := strings.Split(strings.TrimSpace(csvOutput), "\n")
+		if len(lines) != 4 { // 1 header + 3 data rows
+			t.Errorf("Expected 4 CSV lines (header + 3 rows), got %d", len(lines))
+		}
+		
+		// Check header
+		if !strings.Contains(lines[0], "product") || !strings.Contains(lines[0], "price") {
+			t.Errorf("CSV header missing expected columns: %s", lines[0])
+		}
+		
+		// Check data
+		if !strings.Contains(csvOutput, "Widget") || !strings.Contains(csvOutput, "Gadget") {
+			t.Errorf("CSV output missing expected products")
+		}
+		
+		t.Log("✅ JSON to CSV conversion working correctly!")
+		t.Logf("   Input: %d JSON objects", len(jsonData))
+		t.Logf("   Output: CSV with %d lines", len(lines))
+		t.Logf("   Headers included: %v", includeHeaders)
+	})
+	
+	t.Run("Example27_MultiFormatPipeline", func(t *testing.T) {
+		// Example 27: Multi-format data transformation pipeline
+		// Demonstrates: CSV → JSON → Filter → CSV conversion
+		
+		parseExec := &ParseExecutor{}
+		formatExec := &FormatExecutor{}
+		filterExec := &FilterExecutor{}
+		
+		ctx := &MockExecutionContext{
+			inputs: map[string][]interface{}{},
+		}
+		
+		// Stage 1: Parse CSV input
+		csvInput := "name,score,passed\nAlice,95,true\nBob,65,false\nCharlie,88,true\nDiana,72,true"
+		
+		ctx.inputs["parse1"] = []interface{}{csvInput}
+		csvType := "CSV"
+		parseNode := types.Node{
+			ID:   "parse1",
+			Type: types.NodeTypeParse,
+			Data: types.NodeData{
+				InputType: &csvType,
+			},
+		}
+		
+		parsedCSV, err := parseExec.Execute(ctx, parseNode)
+		if err != nil {
+			t.Fatalf("Parse CSV failed: %v", err)
+		}
+		
+		// Convert to []interface{} for filter
+		var records []interface{}
+		switch data := parsedCSV.(type) {
+		case []interface{}:
+			records = data
+		case []map[string]interface{}:
+			records = make([]interface{}, len(data))
+			for i, item := range data {
+				records[i] = item
+			}
+		}
+		
+		// Stage 2: Filter records where score > 80
+		ctx.inputs["filter1"] = []interface{}{records}
+		filterCond := "item.score > 80"
+		filterNode := types.Node{
+			ID:   "filter1",
+			Type: types.NodeTypeFilter,
+			Data: types.NodeData{
+				Condition: &filterCond,
+			},
+		}
+		
+		filteredData, err := filterExec.Execute(ctx, filterNode)
+		if err != nil {
+			t.Fatalf("Filter failed: %v", err)
+		}
+		
+		filtered := filteredData.(map[string]interface{})["filtered"].([]interface{})
+		
+		// Should have 2 records (Alice: 95, Charlie: 88)
+		if len(filtered) != 2 {
+			t.Errorf("Expected 2 filtered records, got %d", len(filtered))
+		}
+		
+		// Stage 3: Format back to CSV
+		ctx.inputs["format1"] = []interface{}{filtered}
+		includeHeaders := true
+		formatNode := types.Node{
+			ID:   "format1",
+			Type: types.NodeTypeFormat,
+			Data: types.NodeData{
+				OutputType:     &csvType,
+				IncludeHeaders: &includeHeaders,
+			},
+		}
+		
+		csvOutput, err := formatExec.Execute(ctx, formatNode)
+		if err != nil {
+			t.Fatalf("Format to CSV failed: %v", err)
+		}
+		
+		outputStr := csvOutput.(string)
+		
+		// Verify output contains high scorers
+		if !strings.Contains(outputStr, "Alice") || !strings.Contains(outputStr, "Charlie") {
+			t.Errorf("CSV output missing expected names")
+		}
+		
+		// Should NOT contain low scorers
+		if strings.Contains(outputStr, "Bob") || strings.Contains(outputStr, "Diana") {
+			t.Errorf("CSV output should not contain filtered-out records")
+		}
+		
+		t.Log("✅ Multi-format pipeline working correctly!")
+		t.Logf("   Stage 1: Parsed %d CSV records", len(records))
+		t.Logf("   Stage 2: Filtered to %d high-scoring records", len(filtered))
+		t.Logf("   Stage 3: Exported to CSV format")
 	})
 }
 

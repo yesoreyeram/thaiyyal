@@ -216,6 +216,7 @@ func DefaultRegistry() *executor.Registry {
 	reg.MustRegister(&executor.AccumulatorExecutor{})
 	reg.MustRegister(&executor.CounterExecutor{})
 	reg.MustRegister(&executor.ParseExecutor{})
+	reg.MustRegister(&executor.FormatExecutor{})
 
 	// Advanced control flow nodes
 	reg.MustRegister(&executor.SwitchExecutor{})
