@@ -1,13 +1,52 @@
 # Conditional Branching Examples
 
-This directory contains comprehensive examples demonstrating conditional branching capabilities in Thaiyyal workflows.
+This directory contains comprehensive examples demonstrating conditional branching and **conditional execution** capabilities in Thaiyyal workflows.
 
 ## Overview
 
 Conditional branching allows workflows to make decisions and route data based on conditions. Thaiyyal provides two primary nodes for conditional logic:
 
-- **Condition Node**: Evaluates a boolean expression and returns metadata about the result
-- **Switch Node**: Multi-way branching with pattern matching
+- **Condition Node**: Evaluates a boolean expression and provides "true" and "false" output paths
+- **Switch Node**: Multi-way branching with pattern matching and custom output paths
+
+## ✨ NEW: Conditional Execution (Path Termination)
+
+**As of this update**, Thaiyyal now supports **conditional execution** where nodes are only executed if their incoming edge conditions are satisfied. This enables true branching workflows where only one path executes based on runtime conditions.
+
+### How It Works
+
+1. **Condition Nodes** have two output handles:
+   - 🟢 **True Handle** (top-right): Connects to nodes that execute when condition is true
+   - 🔴 **False Handle** (bottom-right): Connects to nodes that execute when condition is false
+
+2. **Switch Nodes** have output paths based on cases:
+   - Each case can have a custom `output_path` (e.g., "success", "error", "not_found")
+   - Edges from switch nodes use `sourceHandle` to specify which path they represent
+
+3. **The Engine** automatically:
+   - Evaluates conditions during execution
+   - Skips nodes whose incoming edge conditions aren't satisfied
+   - Executes only the nodes in the active path
+
+### Example: Age-Based Routing
+
+```json
+{
+  "nodes": [
+    {"id": "age", "type": "number", "data": {"value": 25}},
+    {"id": "check", "type": "condition", "data": {"condition": ">=18"}},
+    {"id": "adult_path", "type": "text_input", "data": {"text": "Adult"}},
+    {"id": "minor_path", "type": "text_input", "data": {"text": "Minor"}}
+  ],
+  "edges": [
+    {"source": "age", "target": "check"},
+    {"source": "check", "target": "adult_path", "sourceHandle": "true"},
+    {"source": "check", "target": "minor_path", "sourceHandle": "false"}
+  ]
+}
+```
+
+**Result**: If age is 25, only `adult_path` executes. The `minor_path` node is **skipped entirely**.
 
 ## Examples
 
@@ -430,5 +469,264 @@ See [Workflow Execution Guide](../../docs/WORKFLOW_EXECUTION_GUIDE.md) for step-
 
 **Total Examples**: 8  
 **Coverage**: Basic, Nested, Switch, Validation, Feature Flags, Multi-tenant, Boolean Logic, Arithmetic + Conditions
+
+For more examples and tutorials, see the main [Examples Directory](../README.md).
+
+---
+
+### 09. Age-Based API Routing ⭐ NEW
+**File**: `09-age-based-api-routing.json`
+
+**Real-world conditional execution example**: Routes users to different APIs based on age.
+- If age >= 18: Fetch profile → Register for sports
+- If age < 18: Register for education
+
+**Demonstrates**:
+- Conditional execution (path termination)
+- True/false path routing with `sourceHandle`
+- Nodes execute only in active path
+
+**Use Case**: User registration systems, age-gated content
+
+---
+
+### 10. Multi-Step Registration Flow ⭐ NEW
+**File**: `10-multi-step-registration.json`
+
+**Complex conditional workflow** with multiple steps in each branch:
+- Adult path: Parse user → Fetch profile → Extract interests → Register programs
+- Minor path: Direct registration to education
+
+**Demonstrates**:
+- Multi-node conditional branches
+- Sequential processing within a branch
+- Path convergence (both paths lead to confirmation)
+
+**Use Case**: SaaS onboarding, tiered service registration
+
+---
+
+### 11. HTTP Status Code Routing ⭐ NEW
+**File**: `11-http-status-routing.json`
+
+**Switch-based conditional execution** routing based on API response codes:
+- 200 → Success handler
+- 404 → Retry handler
+- 500+ → Error handler
+
+**Demonstrates**:
+- Switch node with custom output paths
+- Multiple conditional paths from single node
+- Error handling patterns
+
+**Use Case**: API orchestration, error recovery workflows
+
+---
+
+## Conditional Execution API
+
+### Edge Schema
+
+Edges now support conditional routing through the `sourceHandle` field:
+
+```typescript
+{
+  "id": "edge1",
+  "source": "condition_node",
+  "target": "target_node",
+  "sourceHandle": "true"  // or "false", "success", "error", etc.
+}
+```
+
+### Condition Node Handles
+
+Condition nodes provide two output handles:
+
+- **`true`**: Top-right handle (green) - connects to nodes that execute when condition is met
+- **`false`**: Bottom-right handle (red) - connects to nodes that execute when condition is not met
+
+### Switch Node Handles
+
+Switch nodes dynamically create handles based on defined cases:
+
+- Each case's `output_path` becomes a handle name
+- Example: `"success"`, `"error"`, `"not_found"`, `"grade_a"`, etc.
+
+### Frontend Integration (React Flow)
+
+The frontend automatically handles conditional edges using React Flow's handle system:
+
+```tsx
+// Condition node with multiple handles
+<Handle 
+  type="source" 
+  position={Position.Right}
+  id="true"
+  style={{ top: "30%" }}
+  className="w-2 h-2 bg-green-500"
+/>
+<Handle 
+  type="source" 
+  position={Position.Right}
+  id="false"
+  style={{ top: "70%" }}
+  className="w-2 h-2 bg-red-500"
+/>
+```
+
+When users connect edges in the UI, React Flow automatically includes `sourceHandle` and `targetHandle` in the edge data.
+
+### Backend Processing
+
+The workflow engine processes conditional edges:
+
+1. **Topological Sort**: All nodes are sorted for execution order
+2. **Condition Check**: Before executing each node, check incoming edges
+3. **Path Evaluation**: 
+   - If any incoming edge has `sourceHandle`, evaluate the source node's result
+   - Match `sourceHandle` value against source node's output (`path`, `output_path`, etc.)
+   - Skip node if no incoming edge condition is satisfied
+4. **Execution**: Only execute nodes in the active path
+
+## Visual Guide
+
+### Creating Conditional Workflows
+
+1. **Add Condition Node**
+   - Drag "Condition" node from palette
+   - Set condition expression (e.g., ">18")
+
+2. **Connect True Path**
+   - Click on the **green handle** (top-right)
+   - Drag to target node
+   - Edge automatically gets `sourceHandle: "true"`
+
+3. **Connect False Path**
+   - Click on the **red handle** (bottom-right)
+   - Drag to alternate target node
+   - Edge automatically gets `sourceHandle: "false"`
+
+4. **Execute Workflow**
+   - Only nodes in the active path execute
+   - Inactive path nodes are skipped
+
+### Creating Switch-Based Workflows
+
+1. **Configure Switch Node**
+   - Set cases with `output_path` values
+   - Example: `[{when: "==200", output_path: "success"}]`
+
+2. **Connect Paths**
+   - Connect edges using appropriate handles
+   - Each edge's `sourceHandle` matches a case's `output_path`
+
+3. **Runtime Routing**
+   - Engine evaluates which case matches
+   - Only the matching path executes
+
+## Migration Guide
+
+### From Metadata-Only to Conditional Execution
+
+**Before** (all nodes execute, check metadata manually):
+```json
+{
+  "nodes": [
+    {"id": "check", "type": "condition"},
+    {"id": "action1", "type": "text_input"},
+    {"id": "action2", "type": "text_input"}
+  ],
+  "edges": [
+    {"source": "check", "target": "action1"},
+    {"source": "check", "target": "action2"}
+  ]
+}
+```
+Result: Both `action1` and `action2` execute. You must manually check condition metadata.
+
+**After** (only active path executes):
+```json
+{
+  "nodes": [
+    {"id": "check", "type": "condition"},
+    {"id": "action1", "type": "text_input"},
+    {"id": "action2", "type": "text_input"}
+  ],
+  "edges": [
+    {"source": "check", "target": "action1", "sourceHandle": "true"},
+    {"source": "check", "target": "action2", "sourceHandle": "false"}
+  ]
+}
+```
+Result: Only one action executes based on condition result!
+
+### Backward Compatibility
+
+- Edges without `sourceHandle` are **unconditional** (always execute)
+- Mix conditional and unconditional edges as needed
+- Legacy `condition` field still supported (deprecated in favor of `sourceHandle`)
+
+## Best Practices
+
+### 1. Use Conditional Execution for Mutually Exclusive Paths
+✅ **Good**: Different API calls based on user type
+```
+Condition → [True: Premium API] or [False: Standard API]
+```
+
+### 2. Always Provide Both Paths
+✅ **Good**: Handle both true and false cases
+❌ **Avoid**: Leaving one path unhandled (leads to incomplete workflows)
+
+### 3. Use Switch for 3+ Options
+✅ **Good**: HTTP status routing with switch
+❌ **Avoid**: Nested if-else for multiple options
+
+### 4. Converge Paths When Needed
+Multiple paths can converge to a single node:
+```
+[True Path] ──┐
+              ├──→ [Final Step]
+[False Path] ─┘
+```
+
+### 5. Label Your Paths Clearly
+Use descriptive `output_path` names:
+- ✅ "premium_user", "standard_user"
+- ❌ "path1", "path2"
+
+## Troubleshooting
+
+**Q: My node doesn't execute even though it should**
+- Check if incoming edge has correct `sourceHandle`
+- Verify source node's output contains matching path field
+- Ensure condition evaluates to expected result
+
+**Q: Both paths execute (I expected only one)**
+- Ensure edges have `sourceHandle` set
+- Check for unconditional edges to the same node
+
+**Q: No nodes execute after condition**
+- Verify at least one edge's condition is satisfied
+- Check condition expression syntax
+
+## Performance Notes
+
+- Conditional execution **improves performance** by skipping unnecessary nodes
+- Use for expensive operations (API calls, heavy computations)
+- Engine evaluates conditions in microseconds
+
+## Related Documentation
+
+- [Workflow Execution Guide](../../docs/WORKFLOW_EXECUTION_GUIDE.md)
+- [Conditional Branching Testing Summary](../../docs/CONDITIONAL_BRANCHING_TESTING_SUMMARY.md)
+- [Node Types Reference](../../docs/NODE_TYPES.md)
+- [React Flow Documentation](https://reactflow.dev/learn/advanced-use/computing-flows)
+
+---
+
+**Total Examples**: 11 (8 original + 3 new conditional execution examples)  
+**New Feature**: Conditional Execution (Path Termination) ✨  
+**Coverage**: Basic branching, nested conditions, switch routing, real-world API flows
 
 For more examples and tutorials, see the main [Examples Directory](../README.md).

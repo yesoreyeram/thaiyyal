@@ -1,0 +1,109 @@
+{
+  "name": "HTTP Status Code Routing",
+  "description": "Route workflow based on API response status: 200->success handler, 404->retry, 500->error handler",
+  "nodes": [
+    {
+      "id": "api_status",
+      "type": "number",
+      "data": {
+        "value": 200,
+        "label": "API Status Code"
+      }
+    },
+    {
+      "id": "status_router",
+      "type": "switch",
+      "data": {
+        "label": "Route by Status",
+        "cases": [
+          {
+            "when": "==200",
+            "value": 200,
+            "output_path": "success"
+          },
+          {
+            "when": "==404",
+            "value": 404,
+            "output_path": "not_found"
+          },
+          {
+            "when": ">=500",
+            "output_path": "server_error"
+          }
+        ],
+        "default_path": "other"
+      }
+    },
+    {
+      "id": "success_handler",
+      "type": "text_input",
+      "data": {
+        "text": "Data processed successfully",
+        "label": "Success Handler"
+      }
+    },
+    {
+      "id": "retry_handler",
+      "type": "text_input",
+      "data": {
+        "text": "Retrying request...",
+        "label": "Retry on 404"
+      }
+    },
+    {
+      "id": "error_handler",
+      "type": "text_input",
+      "data": {
+        "text": "Server error - alerting admin",
+        "label": "Error Handler"
+      }
+    },
+    {
+      "id": "result",
+      "type": "visualization",
+      "data": {
+        "mode": "json"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "api_status",
+      "target": "status_router"
+    },
+    {
+      "id": "e2_success",
+      "source": "status_router",
+      "target": "success_handler",
+      "sourceHandle": "success"
+    },
+    {
+      "id": "e3_not_found",
+      "source": "status_router",
+      "target": "retry_handler",
+      "sourceHandle": "not_found"
+    },
+    {
+      "id": "e4_error",
+      "source": "status_router",
+      "target": "error_handler",
+      "sourceHandle": "server_error"
+    },
+    {
+      "id": "e5",
+      "source": "success_handler",
+      "target": "result"
+    },
+    {
+      "id": "e6",
+      "source": "retry_handler",
+      "target": "result"
+    },
+    {
+      "id": "e7",
+      "source": "error_handler",
+      "target": "result"
+    }
+  ]
+}
