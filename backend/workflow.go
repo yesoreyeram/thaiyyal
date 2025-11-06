@@ -80,7 +80,7 @@ import (
 type (
 	NodeType             = types.NodeType
 	Node                 = types.Node
-	NodeData             = types.NodeData
+	NodeDataInterface    = types.NodeDataInterface
 	Edge                 = types.Edge
 	Payload              = types.Payload
 	Result               = types.Result
