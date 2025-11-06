@@ -89,7 +89,7 @@ func TestFlatMapExecutor_Validate(t *testing.T) {
 	exec := &FlatMapExecutor{}
 	node := types.Node{
 		Type: types.NodeTypeFlatMap,
-		Data: types.NodeData{},
+		Data: types.FlatMapData{},
 	}
 
 	err := exec.Validate(node)

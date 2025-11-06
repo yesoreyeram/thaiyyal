@@ -25,7 +25,7 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 		rangeNode := types.Node{
 			ID:   "1",
 			Type: types.NodeTypeRange,
-			Data: types.NodeData{
+			Data: types.RangeData{
 				Start: 1,
 				End:   10,
 				Step:  1,
@@ -83,7 +83,7 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 		rangeNode := types.Node{
 			ID:   "1",
 			Type: types.NodeTypeRange,
-			Data: types.NodeData{
+			Data: types.RangeData{
 				Start: 1,
 				End:   10,
 				Step:  1,
@@ -113,7 +113,7 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 		filterNode := types.Node{
 			ID:   "2",
 			Type: types.NodeTypeFilter,
-			Data: types.NodeData{
+			Data: types.ConditionData{
 				Condition: &condition,
 			},
 		}
@@ -166,7 +166,7 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 		rangeNode := types.Node{
 			ID:   "range1",
 			Type: types.NodeTypeRange,
-			Data: types.NodeData{
+			Data: types.FilterData{
 				Start: 1,
 				End:   10,
 				Step:  1,
@@ -186,7 +186,7 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 		mapNode1 := types.Node{
 			ID:   "map1",
 			Type: types.NodeTypeMap,
-			Data: types.NodeData{
+			Data: types.ExpressionData{
 				Expression: &doubleExpr,
 			},
 		}
@@ -217,7 +217,7 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 		filterNode := types.Node{
 			ID:   "filter1",
 			Type: types.NodeTypeFilter,
-			Data: types.NodeData{
+			Data: types.ConditionData{
 				Condition: &filterCond,
 			},
 		}
@@ -240,7 +240,7 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 		mapNode2 := types.Node{
 			ID:   "map2",
 			Type: types.NodeTypeMap,
-			Data: types.NodeData{
+			Data: types.ExpressionData{
 				Expression: &squareExpr,
 			},
 		}
@@ -291,7 +291,7 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 		mapNode1 := types.Node{
 			ID:   "map1",
 			Type: types.NodeTypeMap,
-			Data: types.NodeData{
+			Data: types.ExpressionData{
 				Expression: &normalizeExpr,
 			},
 		}
@@ -314,7 +314,7 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 		filterNode := types.Node{
 			ID:   "filter1",
 			Type: types.NodeTypeFilter,
-			Data: types.NodeData{
+			Data: types.ConditionData{
 				Condition: &filterCond,
 			},
 		}
@@ -337,7 +337,7 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 		mapNode2 := types.Node{
 			ID:   "map2",
 			Type: types.NodeTypeMap,
-			Data: types.NodeData{
+			Data: types.ExpressionData{
 				Expression: &nameExpr,
 			},
 		}
@@ -386,7 +386,7 @@ func TestWorkflowExamples_FormatConversion(t *testing.T) {
 		parseNode := types.Node{
 			ID:   "parse1",
 			Type: types.NodeTypeParse,
-			Data: types.NodeData{
+			Data: types.ParseData{
 				InputType: &csvType,
 			},
 		}
@@ -421,7 +421,7 @@ func TestWorkflowExamples_FormatConversion(t *testing.T) {
 		formatNode := types.Node{
 			ID:   "format1",
 			Type: types.NodeTypeFormat,
-			Data: types.NodeData{
+			Data: types.FormatData{
 				OutputType:  &jsonType,
 				PrettyPrint: &prettyPrint,
 			},
@@ -472,7 +472,7 @@ func TestWorkflowExamples_FormatConversion(t *testing.T) {
 		formatNode := types.Node{
 			ID:   "format1",
 			Type: types.NodeTypeFormat,
-			Data: types.NodeData{
+			Data: types.FormatData{
 				OutputType:     &csvType,
 				IncludeHeaders: &includeHeaders,
 			},
@@ -530,7 +530,7 @@ func TestWorkflowExamples_FormatConversion(t *testing.T) {
 		parseNode := types.Node{
 			ID:   "parse1",
 			Type: types.NodeTypeParse,
-			Data: types.NodeData{
+			Data: types.ParseData{
 				InputType: &csvType,
 			},
 		}
@@ -558,7 +558,7 @@ func TestWorkflowExamples_FormatConversion(t *testing.T) {
 		filterNode := types.Node{
 			ID:   "filter1",
 			Type: types.NodeTypeFilter,
-			Data: types.NodeData{
+			Data: types.ConditionData{
 				Condition: &filterCond,
 			},
 		}
@@ -581,7 +581,7 @@ func TestWorkflowExamples_FormatConversion(t *testing.T) {
 		formatNode := types.Node{
 			ID:   "format1",
 			Type: types.NodeTypeFormat,
-			Data: types.NodeData{
+			Data: types.FormatData{
 				OutputType:     &csvType,
 				IncludeHeaders: &includeHeaders,
 			},
@@ -627,7 +627,7 @@ func TestWorkflowExamples_ControlFlow(t *testing.T) {
 		condNode := types.Node{
 			ID:   "1",
 			Type: types.NodeTypeCondition,
-			Data: types.NodeData{
+			Data: types.ConditionData{
 				Condition: &condition,
 			},
 		}
@@ -772,7 +772,7 @@ func TestWorkflowExamples_Phase4_AdvancedNodes(t *testing.T) {
 		rangeNode := types.Node{
 			ID:   "range1",
 			Type: types.NodeTypeRange,
-			Data: types.NodeData{
+			Data: types.MapData{
 				Start: 1,
 				End:   5,
 				Step:  1,
@@ -796,7 +796,7 @@ func TestWorkflowExamples_Phase4_AdvancedNodes(t *testing.T) {
 		rateLimitNode := types.Node{
 			ID:   "ratelimit1",
 			Type: types.NodeTypeRateLimiter,
-			Data: types.NodeData{
+			Data: types.DelayData{
 				MaxRequests: &maxReq,
 				PerDuration: strPtr("1s"),
 			},
@@ -842,7 +842,7 @@ func TestWorkflowExamples_Phase4_AdvancedNodes(t *testing.T) {
 		rangeNode := types.Node{
 			ID:   "range1",
 			Type: types.NodeTypeRange,
-			Data: types.NodeData{
+			Data: types.RateLimiterData{
 				Start: 1,
 				End:   3,
 				Step:  1,
@@ -862,7 +862,7 @@ func TestWorkflowExamples_Phase4_AdvancedNodes(t *testing.T) {
 		throttleNode := types.Node{
 			ID:   "throttle1",
 			Type: types.NodeTypeThrottle,
-			Data: types.NodeData{
+			Data: types.ThrottleData{
 				RequestsPerSecond: &rps,
 			},
 		}
@@ -931,7 +931,7 @@ func TestWorkflowExamples_Phase4_AdvancedNodes(t *testing.T) {
 		validatorNode := types.Node{
 			ID:   "validator1",
 			Type: types.NodeTypeSchemaValidator,
-			Data: types.NodeData{
+			Data: types.SchemaValidatorData{
 				Schema: schema,
 				Strict: &strictFalse, // Lenient mode - return errors instead of failing
 			},

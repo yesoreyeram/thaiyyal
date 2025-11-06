@@ -126,7 +126,8 @@ func TestInferNodeTypes(t *testing.T) {
 		t.Fatalf("Failed to create engine: %v", err)
 	}
 
-	engine.inferNodeTypes()
+	// Type inference now happens automatically during JSON unmarshaling
+	// Just verify the types were inferred correctly
 
 	if engine.nodes[0].Type != types.NodeTypeNumber {
 		t.Errorf("Expected type 'number', got %s", engine.nodes[0].Type)

@@ -82,7 +82,7 @@ func TestFormatExecutor_JSON(t *testing.T) {
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeFormat,
-				Data: types.NodeData{
+				Data: types.FormatData{
 					OutputType:  &outputType,
 					PrettyPrint: &tt.prettyPrint,
 				},
@@ -189,7 +189,7 @@ func TestFormatExecutor_CSV(t *testing.T) {
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeFormat,
-				Data: types.NodeData{
+				Data: types.FormatData{
 					OutputType:     &outputType,
 					IncludeHeaders: &tt.includeHeaders,
 				},
@@ -254,7 +254,7 @@ func TestFormatExecutor_TSV(t *testing.T) {
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeFormat,
-				Data: types.NodeData{
+				Data: types.FormatData{
 					OutputType:     &outputType,
 					IncludeHeaders: &tt.includeHeaders,
 				},
@@ -300,7 +300,7 @@ func TestFormatExecutor_CustomDelimiter(t *testing.T) {
 	node := types.Node{
 		ID:   "test-node",
 		Type: types.NodeTypeFormat,
-		Data: types.NodeData{
+		Data: types.FormatData{
 			OutputType:     &outputType,
 			Delimiter:      &delimiter,
 			IncludeHeaders: &includeHeaders,
@@ -363,7 +363,7 @@ func TestFormatExecutor_Errors(t *testing.T) {
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeFormat,
-				Data: types.NodeData{
+				Data: types.FormatData{
 					OutputType: &tt.outType,
 				},
 			}
@@ -417,7 +417,7 @@ func TestFormatExecutor_Validate(t *testing.T) {
 			exec := &FormatExecutor{}
 			node := types.Node{
 				Type: types.NodeTypeFormat,
-				Data: types.NodeData{
+				Data: types.FormatData{
 					OutputType: &tt.outType,
 				},
 			}
@@ -447,7 +447,7 @@ func TestFormatExecutor_NoInput(t *testing.T) {
 	node := types.Node{
 		ID:   "test-node",
 		Type: types.NodeTypeFormat,
-		Data: types.NodeData{
+		Data: types.FormatData{
 			OutputType: &outputType,
 		},
 	}
@@ -477,7 +477,7 @@ func TestFormatExecutor_DefaultValues(t *testing.T) {
 	node := types.Node{
 		ID:   "test-node",
 		Type: types.NodeTypeFormat,
-		Data: types.NodeData{},
+		Data: types.FormatData{},
 	}
 
 	result, err := exec.Execute(ctx, node)
@@ -537,7 +537,7 @@ func TestRoundTrip_ParseAndFormat(t *testing.T) {
 			formatNode := types.Node{
 				ID:   "format-node",
 				Type: types.NodeTypeFormat,
-				Data: types.NodeData{
+				Data: types.FormatData{
 					OutputType: &tt.formatType,
 				},
 			}
@@ -563,7 +563,7 @@ func TestRoundTrip_ParseAndFormat(t *testing.T) {
 			parseNode := types.Node{
 				ID:   "parse-node",
 				Type: types.NodeTypeParse,
-				Data: types.NodeData{
+				Data: types.ParseData{
 					InputType: &tt.parseType,
 				},
 			}

@@ -64,7 +64,7 @@ func TestGroupByExecutor_Basic(t *testing.T) {
 				},
 			}
 
-			nodeData := types.NodeData{
+			nodeData := types.ExtractData{
 				Field: &tt.field,
 			}
 			if tt.aggregate != nil {

@@ -92,7 +92,7 @@ func TestConditionExecutor_Basic(t *testing.T) {
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeCondition,
-				Data: types.NodeData{
+				Data: types.ConditionData{
 					Condition: &tt.condition,
 				},
 			}
@@ -185,7 +185,7 @@ func TestConditionExecutor_ComplexExpressions(t *testing.T) {
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeCondition,
-				Data: types.NodeData{
+				Data: types.ConditionData{
 					Condition: &tt.condition,
 				},
 			}
@@ -222,7 +222,7 @@ func TestConditionExecutor_WithVariables(t *testing.T) {
 	node := types.Node{
 		ID:   "test-node",
 		Type: types.NodeTypeCondition,
-		Data: types.NodeData{
+		Data: types.ConditionData{
 			Condition: &condition,
 		},
 	}
@@ -254,7 +254,7 @@ func TestConditionExecutor_WithContextVariables(t *testing.T) {
 	node := types.Node{
 		ID:   "test-node",
 		Type: types.NodeTypeCondition,
-		Data: types.NodeData{
+		Data: types.ConditionData{
 			Condition: &condition,
 		},
 	}
@@ -286,7 +286,7 @@ func TestConditionExecutor_WithNodeReferences(t *testing.T) {
 	node := types.Node{
 		ID:   "test-node",
 		Type: types.NodeTypeCondition,
-		Data: types.NodeData{
+		Data: types.ConditionData{
 			Condition: &condition,
 		},
 	}
@@ -313,7 +313,7 @@ func TestConditionExecutor_Validation(t *testing.T) {
 			name: "Valid node",
 			node: types.Node{
 				Type: types.NodeTypeCondition,
-				Data: types.NodeData{
+				Data: types.ConditionData{
 					Condition: strPtr(">0"),
 				},
 			},
@@ -323,7 +323,7 @@ func TestConditionExecutor_Validation(t *testing.T) {
 			name: "Missing condition",
 			node: types.Node{
 				Type: types.NodeTypeCondition,
-				Data: types.NodeData{},
+				Data: types.ConditionData{},
 			},
 			expectError: true,
 		},
@@ -355,7 +355,7 @@ func TestConditionExecutor_MissingInput(t *testing.T) {
 	node := types.Node{
 		ID:   "test-node",
 		Type: types.NodeTypeCondition,
-		Data: types.NodeData{
+		Data: types.ConditionData{
 			Condition: &condition,
 		},
 	}

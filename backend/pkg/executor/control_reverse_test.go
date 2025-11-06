@@ -54,7 +54,7 @@ func TestReverseExecutor_Basic(t *testing.T) {
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeReverse,
-				Data: types.NodeData{},
+				Data: types.ReverseData{},
 			}
 
 			result, err := exec.Execute(ctx, node)
@@ -96,7 +96,7 @@ func TestReverseExecutor_Validate(t *testing.T) {
 	exec := &ReverseExecutor{}
 	node := types.Node{
 		Type: types.NodeTypeReverse,
-		Data: types.NodeData{},
+		Data: types.ReverseData{},
 	}
 
 	err := exec.Validate(node)

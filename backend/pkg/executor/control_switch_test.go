@@ -67,7 +67,7 @@ func TestSwitchExecutor_ValueMatching(t *testing.T) {
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeSwitch,
-				Data: types.NodeData{
+				Data: types.SwitchData{
 					Cases:       tt.cases,
 					DefaultPath: tt.defaultPath,
 				},
@@ -167,7 +167,7 @@ func TestSwitchExecutor_ConditionMatching(t *testing.T) {
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeSwitch,
-				Data: types.NodeData{
+				Data: types.SwitchData{
 					Cases: tt.cases,
 				},
 			}
@@ -212,7 +212,7 @@ func TestSwitchExecutor_DefaultPath(t *testing.T) {
 	node := types.Node{
 		ID:   "test-node",
 		Type: types.NodeTypeSwitch,
-		Data: types.NodeData{
+		Data: types.SwitchData{
 			Cases: []types.SwitchCase{
 				{When: "<10", OutputPath: strPtr("small")},
 			},
@@ -247,7 +247,7 @@ func TestSwitchExecutor_Validation(t *testing.T) {
 			name: "Valid node with cases",
 			node: types.Node{
 				Type: types.NodeTypeSwitch,
-				Data: types.NodeData{
+				Data: types.SwitchData{
 					Cases: []types.SwitchCase{
 						{When: ">0"},
 					},
@@ -259,7 +259,7 @@ func TestSwitchExecutor_Validation(t *testing.T) {
 			name: "No cases",
 			node: types.Node{
 				Type: types.NodeTypeSwitch,
-				Data: types.NodeData{
+				Data: types.SwitchData{
 					Cases: []types.SwitchCase{},
 				},
 			},
@@ -292,7 +292,7 @@ func TestSwitchExecutor_MissingInput(t *testing.T) {
 	node := types.Node{
 		ID:   "test-node",
 		Type: types.NodeTypeSwitch,
-		Data: types.NodeData{
+		Data: types.SwitchData{
 			Cases: []types.SwitchCase{
 				{When: ">0"},
 			},

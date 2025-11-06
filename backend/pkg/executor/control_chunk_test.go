@@ -56,7 +56,7 @@ func TestChunkExecutor_Basic(t *testing.T) {
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeChunk,
-				Data: types.NodeData{
+				Data: types.ChunkData{
 					Size: tt.size,
 				},
 			}

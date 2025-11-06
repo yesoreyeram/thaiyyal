@@ -62,7 +62,7 @@ func TestPartitionExecutor_Basic(t *testing.T) {
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypePartition,
-				Data: types.NodeData{
+				Data: types.ConditionData{
 					Condition: &tt.condition,
 				},
 			}
@@ -105,7 +105,7 @@ func TestPartitionExecutor_Validate(t *testing.T) {
 	// Missing condition
 	node := types.Node{
 		Type: types.NodeTypePartition,
-		Data: types.NodeData{},
+		Data: types.PartitionData{},
 	}
 
 	err := exec.Validate(node)

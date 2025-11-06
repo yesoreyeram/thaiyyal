@@ -61,7 +61,7 @@ for _, tt := range tests {
 t.Run(tt.name, func(t *testing.T) {
 executor := &SchemaValidatorExecutor{}
 node := types.Node{
-Data: types.NodeData{
+Data: types.CustomExecutorData{
 Schema: tt.schema,
 Strict: tt.strict,
 },
@@ -156,7 +156,7 @@ executor := &SchemaValidatorExecutor{}
 node := types.Node{
 ID:   "validator1",
 Type: types.NodeTypeSchemaValidator,
-Data: types.NodeData{
+Data: types.SchemaValidatorData{
 Schema: tt.schema,
 Strict: tt.strict,
 },
@@ -278,7 +278,7 @@ executor := &SchemaValidatorExecutor{}
 node := types.Node{
 ID:   "validator1",
 Type: types.NodeTypeSchemaValidator,
-Data: types.NodeData{
+Data: types.SchemaValidatorData{
 Schema: schema,
 },
 }

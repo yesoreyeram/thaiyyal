@@ -57,7 +57,7 @@ func TestWhileLoopExecutor_Basic(t *testing.T) {
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeWhileLoop,
-				Data: types.NodeData{
+				Data: types.ConditionData{
 					Condition:     &tt.condition,
 					MaxIterations: tt.maxIterations,
 				},
@@ -110,7 +110,7 @@ func TestWhileLoopExecutor_Validation(t *testing.T) {
 			name: "Valid node",
 			node: types.Node{
 				Type: types.NodeTypeWhileLoop,
-				Data: types.NodeData{
+				Data: types.ConditionData{
 					Condition: strPtr(">0"),
 				},
 			},
@@ -120,7 +120,7 @@ func TestWhileLoopExecutor_Validation(t *testing.T) {
 			name: "Missing condition",
 			node: types.Node{
 				Type: types.NodeTypeWhileLoop,
-				Data: types.NodeData{},
+				Data: types.WhileLoopData{},
 			},
 			expectError: true,
 		},
@@ -152,7 +152,7 @@ func TestWhileLoopExecutor_MissingInput(t *testing.T) {
 	node := types.Node{
 		ID:   "test-node",
 		Type: types.NodeTypeWhileLoop,
-		Data: types.NodeData{
+		Data: types.ConditionData{
 			Condition: &condition,
 		},
 	}

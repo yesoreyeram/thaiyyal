@@ -27,14 +27,157 @@ func (n *Node) UnmarshalJSON(data []byte) error {
 		return nil
 	}
 
+	// If type is not set, try to infer it from the data
+	if n.Type == "" {
+		inferredType := inferTypeFromRawData(temp.Data)
+		if inferredType != "" {
+			n.Type = inferredType
+		}
+	}
+
 	// Decode data based on node type
-	nodeData, err := unmarshalNodeData(temp.Type, temp.Data)
+	nodeData, err := unmarshalNodeData(n.Type, temp.Data)
 	if err != nil {
 		return fmt.Errorf("failed to unmarshal data for node %s (type %s): %w", n.ID, n.Type, err)
 	}
 
 	n.Data = nodeData
 	return nil
+}
+
+// inferTypeFromRawData infers node type from raw JSON data
+// This provides backward compatibility for workflows that don't specify types
+func inferTypeFromRawData(rawData json.RawMessage) NodeType {
+	// Parse the data to check for field presence
+	var data map[string]interface{}
+	if err := json.Unmarshal(rawData, &data); err != nil {
+		return ""
+	}
+
+	// Basic I/O nodes (checked first as they're most common)
+	if _, hasValue := data["value"]; hasValue {
+		return NodeTypeNumber
+	}
+	if _, hasText := data["text"]; hasText {
+		return NodeTypeTextInput
+	}
+	if _, hasBooleanValue := data["boolean_value"]; hasBooleanValue {
+		return NodeTypeBooleanInput
+	}
+	if _, hasDateValue := data["date_value"]; hasDateValue {
+		return NodeTypeDateInput
+	}
+	if _, hasDateTimeValue := data["datetime_value"]; hasDateTimeValue {
+		return NodeTypeDateTimeInput
+	}
+	if _, hasMode := data["mode"]; hasMode {
+		return NodeTypeVisualization
+	}
+
+	// Operation nodes
+	if _, hasOp := data["op"]; hasOp {
+		return NodeTypeOperation
+	}
+	if _, hasTextOp := data["text_op"]; hasTextOp {
+		return NodeTypeTextOperation
+	}
+	if _, hasURL := data["url"]; hasURL {
+		return NodeTypeHTTP
+	}
+
+	// Control flow nodes
+	if _, hasCondition := data["condition"]; hasCondition {
+		// Could be condition, filter, partition, find, or while_loop
+		// Use additional heuristics
+		if _, hasTruePath := data["true_path"]; hasTruePath {
+			return NodeTypeCondition
+		}
+		// Default to filter for simple condition
+		return NodeTypeFilter
+	}
+
+	// Expression node
+	if expr, hasExpression := data["expression"]; hasExpression {
+		// Could be expression, map, reduce, or flatmap
+		if _, hasInitialValue := data["initial_value"]; hasInitialValue {
+			return NodeTypeReduce
+		}
+		// Check if it's a simple expression node
+		if exprStr, ok := expr.(string); ok && exprStr != "" {
+			return NodeTypeExpression
+		}
+	}
+
+	// State & memory nodes
+	if _, hasVarName := data["var_name"]; hasVarName {
+		if _, hasVarOp := data["var_op"]; hasVarOp {
+			return NodeTypeVariable
+		}
+	}
+	if _, hasField := data["field"]; hasField {
+		return NodeTypeExtract
+	}
+	if _, hasFields := data["fields"]; hasFields {
+		return NodeTypeExtract
+	}
+	if _, hasTransformType := data["transform_type"]; hasTransformType {
+		return NodeTypeTransform
+	}
+	if _, hasAccumOp := data["accum_op"]; hasAccumOp {
+		return NodeTypeAccumulator
+	}
+	if _, hasCounterOp := data["counter_op"]; hasCounterOp {
+		return NodeTypeCounter
+	}
+
+	// Advanced control flow nodes
+	if _, hasCases := data["cases"]; hasCases {
+		return NodeTypeSwitch
+	}
+	if _, hasJoinStrategy := data["join_strategy"]; hasJoinStrategy {
+		return NodeTypeJoin
+	}
+	if _, hasPaths := data["paths"]; hasPaths {
+		return NodeTypeSplit
+	}
+	if _, hasDuration := data["duration"]; hasDuration {
+		return NodeTypeDelay
+	}
+	if _, hasCacheOp := data["cache_op"]; hasCacheOp {
+		if _, hasCacheKey := data["cache_key"]; hasCacheKey {
+			return NodeTypeCache
+		}
+	}
+
+	// Context nodes
+	if _, hasContextName := data["context_name"]; hasContextName {
+		return NodeTypeContextVariable
+	}
+	if _, hasContextValues := data["context_values"]; hasContextValues {
+		return NodeTypeContextVariable
+	}
+
+	// Error handling & resilience nodes
+	if _, hasMaxAttempts := data["max_attempts"]; hasMaxAttempts {
+		return NodeTypeRetry
+	}
+	if _, hasBackoffStrategy := data["backoff_strategy"]; hasBackoffStrategy {
+		return NodeTypeRetry
+	}
+	if _, hasFallbackValue := data["fallback_value"]; hasFallbackValue {
+		return NodeTypeTryCatch
+	}
+	if _, hasContinueOnError := data["continue_on_error"]; hasContinueOnError {
+		return NodeTypeTryCatch
+	}
+	if _, hasTimeout := data["timeout"]; hasTimeout {
+		if _, hasTimeoutAction := data["timeout_action"]; hasTimeoutAction {
+			return NodeTypeTimeout
+		}
+	}
+
+	// Cannot infer type - will use custom executor
+	return ""
 }
 
 // unmarshalNodeData decodes the JSON data into the appropriate NodeData type

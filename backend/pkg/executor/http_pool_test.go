@@ -40,7 +40,7 @@ func TestHTTPExecutor_ConnectionPooling(t *testing.T) {
 	node := types.Node{
 		ID:   "1",
 		Type: types.NodeTypeHTTP,
-		Data: types.NodeData{
+		Data: types.HTTPData{
 			URL: &url,
 		},
 	}
@@ -99,7 +99,7 @@ func TestHTTPExecutor_ConcurrentRequests(t *testing.T) {
 	node := types.Node{
 		ID:   "1",
 		Type: types.NodeTypeHTTP,
-		Data: types.NodeData{
+		Data: types.HTTPData{
 			URL: &url,
 		},
 	}
@@ -162,7 +162,7 @@ func TestHTTPExecutor_ClientReuse(t *testing.T) {
 	node := types.Node{
 		ID:   "1",
 		Type: types.NodeTypeHTTP,
-		Data: types.NodeData{
+		Data: types.HTTPData{
 			URL: &url,
 		},
 	}
@@ -220,7 +220,7 @@ func TestHTTPExecutor_MultipleHosts(t *testing.T) {
 	node1 := types.Node{
 		ID:   "1",
 		Type: types.NodeTypeHTTP,
-		Data: types.NodeData{URL: &url1},
+		Data: types.HTTPData{URL: &url1},
 	}
 
 	result1, err := executor.Execute(ctx, node1)
@@ -236,7 +236,7 @@ func TestHTTPExecutor_MultipleHosts(t *testing.T) {
 	node2 := types.Node{
 		ID:   "2",
 		Type: types.NodeTypeHTTP,
-		Data: types.NodeData{URL: &url2},
+		Data: types.HTTPData{URL: &url2},
 	}
 
 	result2, err := executor.Execute(ctx, node2)

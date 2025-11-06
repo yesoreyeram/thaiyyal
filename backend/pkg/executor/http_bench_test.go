@@ -29,7 +29,7 @@ func BenchmarkHTTPExecutor_Sequential(b *testing.B) {
 	node := types.Node{
 		ID:   "1",
 		Type: types.NodeTypeHTTP,
-		Data: types.NodeData{URL: &url},
+		Data: types.HTTPData{URL: &url},
 	}
 
 	b.ResetTimer()
@@ -102,7 +102,7 @@ func BenchmarkHTTPExecutor_Concurrent(b *testing.B) {
 	node := types.Node{
 		ID:   "1",
 		Type: types.NodeTypeHTTP,
-		Data: types.NodeData{URL: &url},
+		Data: types.HTTPData{URL: &url},
 	}
 
 	b.ResetTimer()
@@ -149,7 +149,7 @@ func BenchmarkHTTPExecutor_MultipleHosts(b *testing.B) {
 		node := types.Node{
 			ID:   "1",
 			Type: types.NodeTypeHTTP,
-			Data: types.NodeData{URL: &url},
+			Data: types.HTTPData{URL: &url},
 		}
 
 		_, err := executor.Execute(ctx, node)

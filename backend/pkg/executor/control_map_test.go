@@ -21,7 +21,7 @@ func TestMapExecutor_ExtractField(t *testing.T) {
 	node := types.Node{
 		ID:   "map1",
 		Type: types.NodeTypeMap,
-		Data: types.NodeData{
+		Data: types.ExtractData{
 			Field: &field,
 		},
 	}
@@ -61,7 +61,7 @@ func TestMapExecutor_ExpressionTransform(t *testing.T) {
 	node := types.Node{
 		ID:   "map1",
 		Type: types.NodeTypeMap,
-		Data: types.NodeData{
+		Data: types.ExpressionData{
 			Expression: &expr,
 		},
 	}
@@ -102,7 +102,7 @@ func TestMapExecutor_ExpressionWithObjectField(t *testing.T) {
 	node := types.Node{
 		ID:   "map1",
 		Type: types.NodeTypeMap,
-		Data: types.NodeData{
+		Data: types.ExpressionData{
 			Expression: &expr,
 		},
 	}
@@ -140,7 +140,7 @@ func TestMapExecutor_NonArrayInput(t *testing.T) {
 	node := types.Node{
 		ID:   "map1",
 		Type: types.NodeTypeMap,
-		Data: types.NodeData{
+		Data: types.ExtractData{
 			Field: &field,
 		},
 	}
@@ -157,7 +157,7 @@ func TestMapExecutor_Validate(t *testing.T) {
 	// Valid: has expression
 	expr := "item * 2"
 	node := types.Node{
-		Data: types.NodeData{Expression: &expr},
+		Data: types.ExpressionData{Expression: &expr},
 	}
 	if err := executor.Validate(node); err != nil {
 		t.Errorf("Validation should pass with expression: %v", err)
@@ -166,7 +166,7 @@ func TestMapExecutor_Validate(t *testing.T) {
 	// Valid: has field
 	field := "name"
 	node = types.Node{
-		Data: types.NodeData{Field: &field},
+		Data: types.ExtractData{Field: &field},
 	}
 	if err := executor.Validate(node); err != nil {
 		t.Errorf("Validation should pass with field: %v", err)
@@ -174,7 +174,7 @@ func TestMapExecutor_Validate(t *testing.T) {
 
 	// Invalid: has both
 	node = types.Node{
-		Data: types.NodeData{Expression: &expr, Field: &field},
+		Data: types.ExpressionData{Expression: &expr, Field: &field},
 	}
 	if err := executor.Validate(node); err == nil {
 		t.Error("Validation should fail with both expression and field")
@@ -182,7 +182,7 @@ func TestMapExecutor_Validate(t *testing.T) {
 
 	// Invalid: has neither
 	node = types.Node{
-		Data: types.NodeData{},
+		Data: types.MapData{},
 	}
 	if err := executor.Validate(node); err == nil {
 		t.Error("Validation should fail without expression or field")
@@ -201,7 +201,7 @@ func TestMapExecutor_EmptyArray(t *testing.T) {
 	node := types.Node{
 		ID:   "map1",
 		Type: types.NodeTypeMap,
-		Data: types.NodeData{
+		Data: types.ExtractData{
 			Field: &field,
 		},
 	}
