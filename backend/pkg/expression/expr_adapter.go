@@ -33,10 +33,13 @@ func (e *ExprEngine) EvaluateBoolean(expression string, input interface{}, ctx *
 		}
 	}
 
+	// Convert Thaiyyal syntax to expr-lang syntax
+	expression = convertSyntax(expression)
+
 	// Build environment with all context data
 	env := e.buildEnvironment(input, ctx)
 
-	// Try to get cached program
+	// Try to get cached program (cache key includes converted expression)
 	program, exists := e.programCache[expression]
 	if !exists {
 		// Compile the expression
@@ -73,6 +76,9 @@ func (e *ExprEngine) EvaluateValue(expression string, input interface{}, ctx *Co
 			ContextVars: make(map[string]interface{}),
 		}
 	}
+
+	// Convert Thaiyyal syntax to expr-lang syntax
+	expression = convertSyntax(expression)
 
 	// Build environment with all context data
 	env := e.buildEnvironment(input, ctx)
@@ -238,7 +244,7 @@ func (e *ExprEngine) addCustomFunctions(env map[string]interface{}) {
 	}
 
 	// Aggregation functions - expr-lang has sum, min, max built-in
-	// but we add avg for compatibility
+	// but we add avg for compatibility and make sum variadic
 	env["avg"] = func(args ...interface{}) float64 {
 		if len(args) == 0 {
 			return 0
@@ -264,6 +270,197 @@ func (e *ExprEngine) addCustomFunctions(env map[string]interface{}) {
 			}
 		}
 		return sum / float64(len(args))
+	}
+	
+	// Override sum to support variadic args (expr-lang's sum only takes array)
+	env["sum"] = func(args ...interface{}) float64 {
+		if len(args) == 0 {
+			return 0
+		}
+		// Check if first arg is an array
+		if arr, ok := args[0].([]interface{}); ok && len(args) == 1 {
+			sum := 0.0
+			for _, v := range arr {
+				if n, ok := toFloat64(v); ok {
+					sum += n
+				}
+			}
+			return sum
+		}
+		// Multiple arguments
+		sum := 0.0
+		for _, v := range args {
+			if n, ok := toFloat64(v); ok {
+				sum += n
+			}
+		}
+		return sum
+	}
+	
+	// Override min/max to support variadic args
+	env["min"] = func(args ...interface{}) (float64, error) {
+		if len(args) == 0 {
+			return 0, fmt.Errorf("min() requires at least 1 argument")
+		}
+		// Check if first arg is an array
+		if arr, ok := args[0].([]interface{}); ok && len(args) == 1 {
+			if len(arr) == 0 {
+				return 0, fmt.Errorf("min() on empty array")
+			}
+			minVal, ok := toFloat64(arr[0])
+			if !ok {
+				return 0, fmt.Errorf("min() requires numeric values")
+			}
+			for _, v := range arr[1:] {
+				if n, ok := toFloat64(v); ok && n < minVal {
+					minVal = n
+				}
+			}
+			return minVal, nil
+		}
+		// Multiple arguments
+		minVal, ok := toFloat64(args[0])
+		if !ok {
+			return 0, fmt.Errorf("min() requires numeric values")
+		}
+		for _, v := range args[1:] {
+			if n, ok := toFloat64(v); ok && n < minVal {
+				minVal = n
+			}
+		}
+		return minVal, nil
+	}
+	
+	env["max"] = func(args ...interface{}) (float64, error) {
+		if len(args) == 0 {
+			return 0, fmt.Errorf("max() requires at least 1 argument")
+		}
+		// Check if first arg is an array
+		if arr, ok := args[0].([]interface{}); ok && len(args) == 1 {
+			if len(arr) == 0 {
+				return 0, fmt.Errorf("max() on empty array")
+			}
+			maxVal, ok := toFloat64(arr[0])
+			if !ok {
+				return 0, fmt.Errorf("max() requires numeric values")
+			}
+			for _, v := range arr[1:] {
+				if n, ok := toFloat64(v); ok && n > maxVal {
+					maxVal = n
+				}
+			}
+			return maxVal, nil
+		}
+		// Multiple arguments
+		maxVal, ok := toFloat64(args[0])
+		if !ok {
+			return 0, fmt.Errorf("max() requires numeric values")
+		}
+		for _, v := range args[1:] {
+			if n, ok := toFloat64(v); ok && n > maxVal {
+				maxVal = n
+			}
+		}
+		return maxVal, nil
+	}
+	
+	// Add zip function
+	env["zip"] = func(args ...interface{}) []interface{} {
+		if len(args) < 2 {
+			return []interface{}{}
+		}
+		
+		// Convert all args to arrays
+		arrays := make([][]interface{}, 0, len(args))
+		maxLen := 0
+		for _, arg := range args {
+			if arr, ok := arg.([]interface{}); ok {
+				arrays = append(arrays, arr)
+				if len(arr) > maxLen {
+					maxLen = len(arr)
+				}
+			}
+		}
+		
+		// Zip the arrays
+		result := make([]interface{}, maxLen)
+		for i := 0; i < maxLen; i++ {
+			tuple := make([]interface{}, len(arrays))
+			for j, arr := range arrays {
+				if i < len(arr) {
+					tuple[j] = arr[i]
+				} else {
+					tuple[j] = nil
+				}
+			}
+			result[i] = tuple
+		}
+		return result
+	}
+
+	// Math functions that can work on arrays
+	env["round"] = func(arg interface{}) interface{} {
+		if arr, ok := arg.([]interface{}); ok {
+			result := make([]interface{}, len(arr))
+			for i, v := range arr {
+				if n, ok := toFloat64(v); ok {
+					result[i] = math.Round(n)
+				}
+			}
+			return result
+		}
+		if n, ok := toFloat64(arg); ok {
+			return math.Round(n)
+		}
+		return arg
+	}
+	
+	env["floor"] = func(arg interface{}) interface{} {
+		if arr, ok := arg.([]interface{}); ok {
+			result := make([]interface{}, len(arr))
+			for i, v := range arr {
+				if n, ok := toFloat64(v); ok {
+					result[i] = math.Floor(n)
+				}
+			}
+			return result
+		}
+		if n, ok := toFloat64(arg); ok {
+			return math.Floor(n)
+		}
+		return arg
+	}
+	
+	env["ceil"] = func(arg interface{}) interface{} {
+		if arr, ok := arg.([]interface{}); ok {
+			result := make([]interface{}, len(arr))
+			for i, v := range arr {
+				if n, ok := toFloat64(v); ok {
+					result[i] = math.Ceil(n)
+				}
+			}
+			return result
+		}
+		if n, ok := toFloat64(arg); ok {
+			return math.Ceil(n)
+		}
+		return arg
+	}
+	
+	env["abs"] = func(arg interface{}) interface{} {
+		if arr, ok := arg.([]interface{}); ok {
+			result := make([]interface{}, len(arr))
+			for i, v := range arr {
+				if n, ok := toFloat64(v); ok {
+					result[i] = math.Abs(n)
+				}
+			}
+			return result
+		}
+		if n, ok := toFloat64(arg); ok {
+			return math.Abs(n)
+		}
+		return arg
 	}
 
 	// Date/Time functions
