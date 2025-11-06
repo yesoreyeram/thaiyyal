@@ -1,0 +1,13 @@
+{
+  "name": "A/B Testing - Feature Flags",
+  "description": "Route users to different features based on user ID",
+  "nodes": [
+    {"id": "user_id", "type": "number", "data": {"value": 12345}},
+    {"id": "ab_test", "type": "condition", "data": {"condition": "input % 2 == 0"}},
+    {"id": "result", "type": "visualization", "data": {"mode": "json"}}
+  ],
+  "edges": [
+    {"source": "user_id", "target": "ab_test"},
+    {"source": "ab_test", "target": "result"}
+  ]
+}

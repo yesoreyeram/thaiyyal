@@ -1,0 +1,26 @@
+{
+  "name": "Grade Calculation - Switch Statement",
+  "description": "Use switch node to assign letter grades based on numeric score",
+  "nodes": [
+    {"id": "score", "type": "number", "data": {"value": 85, "label": "Test Score"}},
+    {
+      "id": "grade_assignment",
+      "type": "switch",
+      "data": {
+        "label": "Assign Grade",
+        "cases": [
+          {"when": ">=90", "output_path": "grade_a"},
+          {"when": ">=80", "output_path": "grade_b"},
+          {"when": ">=70", "output_path": "grade_c"},
+          {"when": ">=60", "output_path": "grade_d"}
+        ],
+        "default_path": "grade_f"
+      }
+    },
+    {"id": "display", "type": "visualization", "data": {"mode": "json", "label": "Grade Result"}}
+  ],
+  "edges": [
+    {"id": "e1", "source": "score", "target": "grade_assignment"},
+    {"id": "e2", "source": "grade_assignment", "target": "display"}
+  ]
+}

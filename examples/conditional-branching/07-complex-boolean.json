@@ -1,0 +1,13 @@
+{
+  "name": "Complex Boolean Logic",
+  "description": "Demonstrate AND/OR combinations in conditional expressions",
+  "nodes": [
+    {"id": "temp", "type": "number", "data": {"value": 75}},
+    {"id": "comfort_check", "type": "condition", "data": {"condition": "(input >= 68 && input <= 78) || input == 72"}},
+    {"id": "result", "type": "visualization", "data": {"mode": "json"}}
+  ],
+  "edges": [
+    {"source": "temp", "target": "comfort_check"},
+    {"source": "comfort_check", "target": "result"}
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "name": "Basic Age Check - Conditional Branching",
+  "description": "Simple conditional branching example checking if age is >= 18",
+  "nodes": [
+    {
+      "id": "user_age",
+      "type": "number",
+      "data": {
+        "value": 25,
+        "label": "User Age"
+      }
+    },
+    {
+      "id": "age_check",
+      "type": "condition",
+      "data": {
+        "condition": ">=18",
+        "label": "Is Adult?"
+      }
+    },
+    {
+      "id": "result",
+      "type": "visualization",
+      "data": {
+        "mode": "json",
+        "label": "Result"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "user_age",
+      "target": "age_check"
+    },
+    {
+      "id": "e2",
+      "source": "age_check",
+      "target": "result"
+    }
+  ]
+}
