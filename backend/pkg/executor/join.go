@@ -68,10 +68,10 @@ func (e *JoinExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *JoinExecutor) Validate(node types.Node) error {
-data, err := types.AsJoinData(node.Data)
-if err != nil {
-return err
-}
+	// Validate node data type
+	if _, err := types.AsJoinData(node.Data); err != nil {
+		return err
+	}
 	// No required fields for join
 	return nil
 }

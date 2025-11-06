@@ -77,10 +77,10 @@ func (e *ParallelExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *ParallelExecutor) Validate(node types.Node) error {
-data, err := types.AsParallelData(node.Data)
-if err != nil {
-return err
-}
+	// Validate node data type
+	if _, err := types.AsParallelData(node.Data); err != nil {
+		return err
+	}
 	// No required fields for parallel
 	return nil
 }

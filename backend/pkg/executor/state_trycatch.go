@@ -14,10 +14,11 @@ type TryCatchExecutor struct{}
 // Implements error handling with fallback values
 // Catches errors and provides fallback values or continues workflow execution
 func (e *TryCatchExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsTryCatchData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsTryCatchData(node.Data)
+	if err != nil {
+		return nil, err
+	}
+	
 	// Get configuration
 	fallbackValue := data.FallbackValue
 
@@ -88,10 +89,10 @@ func (e *TryCatchExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *TryCatchExecutor) Validate(node types.Node) error {
-data, err := types.AsTryCatchData(node.Data)
-if err != nil {
-return err
-}
+	// Validate node data type
+	if _, err := types.AsTryCatchData(node.Data); err != nil {
+		return err
+	}
 	// No required fields for try-catch - all have defaults
 	return nil
 }

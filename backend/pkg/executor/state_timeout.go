@@ -91,10 +91,10 @@ func (e *TimeoutExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *TimeoutExecutor) Validate(node types.Node) error {
-data, err := types.AsTimeoutData(node.Data)
-if err != nil {
-return err
-}
+	// Validate node data type
+	if _, err := types.AsTimeoutData(node.Data); err != nil {
+		return err
+	}
 	// No required fields for timeout - all have defaults
 	return nil
 }

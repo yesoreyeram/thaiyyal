@@ -12,6 +12,11 @@ type SliceExecutor struct{}
 
 // Execute extracts array slice based on start/end indices
 func (e *SliceExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+	data, err := types.AsSliceData(node.Data)
+	if err != nil {
+		return nil, err
+	}
+	
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("slice node needs at least 1 input")
@@ -37,9 +42,9 @@ func (e *SliceExecutor) Execute(ctx ExecutionContext, node types.Node) (interfac
 
 	// Get start index (default: 0)
 	start := 0
-	if startVal, ok := node.Data.Start.(float64); ok {
+	if startVal, ok := data.Start.(float64); ok {
 		start = int(startVal)
-	} else if startVal, ok := node.Data.Start.(int); ok {
+	} else if startVal, ok := data.Start.(int); ok {
 		start = startVal
 	}
 
@@ -58,20 +63,20 @@ func (e *SliceExecutor) Execute(ctx ExecutionContext, node types.Node) (interfac
 	var end int
 	hasEnd := false
 
-	if endVal, ok := node.Data.End.(float64); ok {
+	if endVal, ok := data.End.(float64); ok {
 		end = int(endVal)
 		hasEnd = true
-	} else if endVal, ok := node.Data.End.(int); ok {
+	} else if endVal, ok := data.End.(int); ok {
 		end = endVal
 		hasEnd = true
 	}
 
 	// Check for length parameter
 	if !hasEnd {
-		if lengthVal, ok := node.Data.Length.(float64); ok {
+		if lengthVal, ok := data.Length.(float64); ok {
 			end = start + int(lengthVal)
 			hasEnd = true
-		} else if lengthVal, ok := node.Data.Length.(int); ok {
+		} else if lengthVal, ok := data.Length.(int); ok {
 			end = start + lengthVal
 			hasEnd = true
 		}
@@ -117,6 +122,10 @@ func (e *SliceExecutor) NodeType() types.NodeType {
 
 // Validate checks if the node configuration is valid
 func (e *SliceExecutor) Validate(node types.Node) error {
+// Validate node data type
+	if _, err := types.AsSliceData(node.Data); err != nil {
+		return err
+	}
 	// All parameters are optional with sensible defaults
 	return nil
 }

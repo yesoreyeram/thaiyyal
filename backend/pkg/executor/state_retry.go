@@ -155,10 +155,10 @@ func (e *RetryExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *RetryExecutor) Validate(node types.Node) error {
-data, err := types.AsRetryData(node.Data)
-if err != nil {
-return err
-}
+	// Validate node data type
+	if _, err := types.AsRetryData(node.Data); err != nil {
+		return err
+	}
 	// No required fields for retry - all have defaults
 	return nil
 }

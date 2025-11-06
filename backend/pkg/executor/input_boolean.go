@@ -29,10 +29,10 @@ func (e *BooleanInputExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *BooleanInputExecutor) Validate(node types.Node) error {
-data, err := types.AsBooleanInputData(node.Data)
-if err != nil {
-return err
-}
+	// Validate node data type
+	if _, err := types.AsBooleanInputData(node.Data); err != nil {
+		return err
+	}
 	// Boolean value is optional, defaults to false
 	return nil
 }

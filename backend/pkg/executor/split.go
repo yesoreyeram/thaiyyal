@@ -48,10 +48,10 @@ func (e *SplitExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *SplitExecutor) Validate(node types.Node) error {
-data, err := types.AsSplitData(node.Data)
-if err != nil {
-return err
-}
+	// Validate node data type
+	if _, err := types.AsSplitData(node.Data); err != nil {
+		return err
+	}
 	// No required fields for split
 	return nil
 }
