@@ -4,9 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 interface WorkflowNavBarProps {
   workflowTitle: string;
   onTitleChange: (title: string) => void;
-  onSave: () => void;
   onShowJSON: () => void;
-  onDelete: () => void;
   onRun: () => void;
   onExport: () => void;
   onImport: (data: { nodes: unknown[]; edges: unknown[] }) => void;
@@ -16,9 +14,7 @@ interface WorkflowNavBarProps {
 export function WorkflowNavBar({
   workflowTitle,
   onTitleChange,
-  onSave,
   onShowJSON,
-  onDelete,
   onRun,
   onExport,
   onImport,
@@ -123,25 +119,6 @@ export function WorkflowNavBar({
                 ✏️
               </span>
             </button>
-            <button
-              onClick={onDelete}
-              className="p-1.5 hover:bg-gray-800 text-red-400 hover:text-red-300 rounded transition-all"
-              title="Delete Workflow"
-              aria-label="Delete Workflow"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 16 16"
-                fill="currentColor"
-                className="w-4 h-4"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.713Z"
-                  clipRule="evenodd"
-                />
-              </svg>
-            </button>
           </div>
         )}
 
@@ -153,27 +130,6 @@ export function WorkflowNavBar({
         )}
       </div>
       <div className="flex items-center gap-2">
-        <button
-          onClick={onSave}
-          className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded transition-all text-sm font-medium flex items-center gap-1.5"
-          title="Save Workflow (Ctrl+S)"
-          aria-label="Save Workflow"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 16 16"
-            fill="currentColor"
-            className="w-4 h-4"
-          >
-            <path
-              fillRule="evenodd"
-              d="M13.78 2.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 7.28a.75.75 0 0 1 1.06-1.06L6 8.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"
-              clipRule="evenodd"
-            />
-          </svg>
-          <span>Save</span>
-        </button>
-
         <button
           onClick={onExport}
           className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded transition-all text-sm font-medium flex items-center gap-1.5"

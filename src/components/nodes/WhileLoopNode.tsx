@@ -1,6 +1,6 @@
 /**
  * WhileLoopNode Component
- * 
+ *
  * Continues executing while a condition is true.
  */
 
@@ -18,9 +18,9 @@ type WhileLoopNodeData = {
 
 /**
  * WhileLoopNode React Component
- * 
+ *
  * This component renders a visual node in the workflow editor that repeats execution while a condition is true
- * 
+ *
  * @param {NodePropsWithOptions<WhileLoopNodeData>} props - Component props
  * @param {string} props.id - Unique identifier for this node instance
  * @param {WhileLoopNodeData} props.data - Node configuration data
@@ -52,22 +52,14 @@ export function WhileLoopNode({
     );
   };
 
-  const handleTitleChange = (newTitle: string) => {
-    setNodes((nds) =>
-      nds.map((n) =>
-        n.id === id ? { ...n, data: { ...n.data, label: newTitle } } : n
-      )
-    );
-  };
-
   const nodeInfo = getNodeInfo("whileLoopNode");
 
   return (
     <NodeWrapper
+      id={id}
       title={String(data?.label || "While Loop")}
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
-      onTitleChange={handleTitleChange}
     >
       <Handle
         type="target"
@@ -79,7 +71,7 @@ export function WhileLoopNode({
           value={String(data?.condition ?? ">0")}
           type="text"
           onChange={onConditionChange}
-          className="w-20 text-[10px] leading-tight border border-gray-600 px-1 py-0.5 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-1 focus:ring-blue-400 focus:outline-none"
+          className="w-36 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
           placeholder="Condition"
           aria-label="Loop condition"
         />
@@ -87,7 +79,7 @@ export function WhileLoopNode({
           value={Number(data?.max_iterations ?? 100)}
           type="number"
           onChange={onMaxIterChange}
-          className="w-20 text-[10px] leading-tight border border-gray-600 px-1 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
+          className="w-36 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
           placeholder="Max iter"
           aria-label="Max iterations"
         />

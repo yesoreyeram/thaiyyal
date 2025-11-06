@@ -9,24 +9,16 @@ type BooleanInputNodeData = {
   label?: string;
 };
 
-export function BooleanInputNode({
-  id,
-  data,
-  onShowOptions,
-}: NodePropsWithOptions<BooleanInputNodeData>) {
+export function BooleanInputNode(
+  props: NodePropsWithOptions<BooleanInputNodeData>
+) {
+  const { id, data, onShowOptions } = props;
   const { setNodes } = useReactFlow();
-
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const boolean_value = e.target.checked;
     setNodes((nds) =>
-      nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, boolean_value } } : n))
-    );
-  };
-
-  const handleTitleChange = (newTitle: string) => {
-    setNodes((nds) =>
       nds.map((n) =>
-        n.id === id ? { ...n, data: { ...n.data, label: newTitle } } : n
+        n.id === id ? { ...n, data: { ...n.data, boolean_value } } : n
       )
     );
   };
@@ -35,23 +27,22 @@ export function BooleanInputNode({
 
   return (
     <NodeWrapper
+      id={id}
       title={String(data?.label || "Boolean")}
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
-      onTitleChange={handleTitleChange}
-      className="bg-gradient-to-br from-indigo-700 to-indigo-800 text-white shadow-lg rounded-lg border border-indigo-600 hover:border-indigo-500 transition-all"
     >
       <Handle
         type="target"
         position={Position.Left}
         className="w-2 h-2 bg-blue-400"
       />
-      <div className="flex items-center gap-2 px-1">
+      <div className="w-36 flex items-center gap-2 px-1">
         <input
           checked={data?.boolean_value ?? false}
           type="checkbox"
           onChange={onChange}
-          className="w-4 h-4 text-indigo-600 bg-gray-900 border-indigo-600 rounded focus:ring-indigo-500 focus:ring-2"
+          className="text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-gray-900 focus:ring-1 focus:ring-blue-400 focus:outline-none"
           aria-label="Boolean value"
         />
         <span className="text-xs text-gray-300">

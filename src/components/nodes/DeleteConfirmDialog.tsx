@@ -33,7 +33,7 @@ export function DeleteConfirmDialog({
         aria-describedby="delete-dialog-description"
       >
         <div className="flex items-start gap-3 mb-4">
-          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center">
+          <div className="shrink-0 w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 20 20"
@@ -54,12 +54,9 @@ export function DeleteConfirmDialog({
             >
               Delete Node
             </h3>
-            <p
-              id="delete-dialog-description"
-              className="text-sm text-gray-400"
-            >
-              Are you sure you want to delete &quot;{nodeName}&quot;? This action cannot
-              be undone.
+            <p id="delete-dialog-description" className="text-sm text-gray-400">
+              Are you sure you want to delete &quot;{nodeName}&quot;? This
+              action cannot be undone.
             </p>
           </div>
         </div>

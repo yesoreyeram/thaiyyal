@@ -1,7 +1,4 @@
-
-
 services:
-  # Thaiyyal Workflow Engine Server
   thaiyyal-server:
     build:
       context: .
@@ -9,7 +6,6 @@ services:
     ports:
       - "8080:8080"
     environment:
-      # Server configuration
       - SERVER_ADDR=:8080
       - MAX_EXECUTION_TIME=1m
       - MAX_NODE_EXECUTIONS=10000
@@ -25,40 +21,38 @@ services:
     networks:
       - thaiyyal
 
-  # # Prometheus for metrics collection
-  # prometheus:
-  #   image: prom/prometheus:v2.48.0
-  #   ports:
-  #     - "9090:9090"
-  #   volumes:
-  #     - ./deployments/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-  #     - prometheus-data:/prometheus
-  #   command:
-  #     - '--config.file=/etc/prometheus/prometheus.yml'
-  #     - '--storage.tsdb.path=/prometheus'
-  #     - '--web.console.libraries=/usr/share/prometheus/console_libraries'
-  #     - '--web.console.templates=/usr/share/prometheus/consoles'
-  #   restart: unless-stopped
-  #   networks:
-  #     - thaiyyal
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./deployments/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    restart: unless-stopped
+    networks:
+      - thaiyyal
 
-  # # Grafana for visualization
-  # grafana:
-  #   image: grafana/grafana:10.2.2
-  #   ports:
-  #     - "3001:3000"
-  #   environment:
-  #     - GF_SECURITY_ADMIN_PASSWORD=admin
-  #     - GF_USERS_ALLOW_SIGN_UP=false
-  #   volumes:
-  #     - ./deployments/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
-  #     - ./deployments/grafana/datasources:/etc/grafana/provisioning/datasources:ro
-  #     - grafana-data:/var/lib/grafana
-  #   restart: unless-stopped
-  #   networks:
-  #     - thaiyyal
-  #   depends_on:
-  #     - prometheus
+  grafana:
+    image: grafana/grafana-enterprise:latest
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - ./deployments/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./deployments/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+      - grafana-data:/var/lib/grafana
+    restart: unless-stopped
+    networks:
+      - thaiyyal
+    depends_on:
+      - prometheus
 
 networks:
   thaiyyal:

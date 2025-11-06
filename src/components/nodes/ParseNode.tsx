@@ -42,22 +42,14 @@ export function ParseNode({
     );
   };
 
-  const handleTitleChange = (newTitle: string) => {
-    setNodes((nds) =>
-      nds.map((n) =>
-        n.id === id ? { ...n, data: { ...n.data, label: newTitle } } : n
-      )
-    );
-  };
-
   const nodeInfo = getNodeInfo("parseNode");
 
   return (
     <NodeWrapper
+      id={id}
       title={String(data?.label || "Parse")}
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
-      onTitleChange={handleTitleChange}
     >
       <Handle
         type="target"
@@ -67,7 +59,7 @@ export function ParseNode({
       <select
         value={String(data?.input_type ?? "AUTO")}
         onChange={onChange}
-        className="w-24 text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 focus:outline-none"
+        className="w-36 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
       >
         <option value="AUTO">Auto</option>
         <option value="JSON">JSON</option>

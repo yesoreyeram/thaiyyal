@@ -1,29 +1,14 @@
-import { NodeProps, Handle, Position, useReactFlow } from "reactflow";
-import React from "react";
+import { NodeProps, Handle, Position } from "reactflow";
 import { NodeWrapper } from "./NodeWrapper";
 import { getNodeInfo } from "./nodeInfo";
 
 type RendererNodeData = {
   label?: string;
-  // Execution result data - populated after workflow execution
   _executionData?: unknown;
 };
 
-export function RendererNode({
-  id,
-  data,
-  ...props
-}: NodeProps<RendererNodeData>) {
-  const { setNodes } = useReactFlow();
-
-  const handleTitleChange = (newTitle: string) => {
-    setNodes((nds) =>
-      nds.map((n) =>
-        n.id === id ? { ...n, data: { ...n.data, label: newTitle } } : n
-      )
-    );
-  };
-
+export function RendererNode(props: NodeProps<RendererNodeData>) {
+  const { id, data } = props;
   const nodeInfo = getNodeInfo("rendererNode");
   // Type assertion is consistent with other nodes in the codebase
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -246,7 +231,7 @@ export function RendererNode({
         case "table": {
           if (Array.isArray(executionData) && executionData.length > 0) {
             const firstItem = executionData[0];
-            
+
             // Handle array of objects
             if (typeof firstItem === "object" && firstItem !== null) {
               const headers = Object.keys(firstItem);
@@ -299,7 +284,7 @@ export function RendererNode({
                 </div>
               );
             }
-            
+
             // Handle array of primitives (numbers, strings, etc.)
             return (
               <div>
@@ -432,11 +417,11 @@ export function RendererNode({
         case "boolean": {
           return typeof executionData === "boolean" ? (
             executionData ? (
-              <div className="bg-green-500 text-2xl rounded border border-gray-700 overflow-auto text-center">
+              <div className="bg-green-700/80 text-2xl rounded border border-gray-700 overflow-auto text-center">
                 ⬆️
               </div>
             ) : (
-              <div className="bg-red-500 text-2xl rounded border border-gray-700 overflow-auto text-center">
+              <div className="bg-red-500/50 text-2xl rounded border border-gray-700 overflow-auto text-center">
                 ⬇️
               </div>
             )
@@ -472,10 +457,10 @@ export function RendererNode({
 
   return (
     <NodeWrapper
+      id={id}
       title={String(data?.label || "Renderer")}
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
-      onTitleChange={handleTitleChange}
     >
       <Handle
         type="target"
@@ -484,7 +469,7 @@ export function RendererNode({
       />
 
       <div className="flex flex-col gap-1">
-        <div className="w-64 border border-gray-600 rounded bg-gray-900 mt-1">
+        <div className="w-36 border border-gray-600 rounded bg-gray-900 mt-1">
           {renderData()}
         </div>
       </div>

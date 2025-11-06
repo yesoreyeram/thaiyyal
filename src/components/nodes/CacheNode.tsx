@@ -60,53 +60,49 @@ export function CacheNode({
     );
   };
 
-  const handleTitleChange = (newTitle: string) => {
-    setNodes((nds) =>
-      nds.map((n) =>
-        n.id === id ? { ...n, data: { ...n.data, label: newTitle } } : n
-      )
-    );
-  };
-
   const nodeInfo = getNodeInfo("cacheNode");
 
   return (
     <NodeWrapper
+      id={id}
       title={String(data?.label || "Cache")}
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
-      onTitleChange={handleTitleChange}
     >
       <Handle
         type="target"
         position={Position.Left}
         className="w-2 h-2 bg-blue-400"
       />
-      <select
-        value={String(data?.cache_op ?? "get")}
-        onChange={onOpChange}
-        className="w-24 text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 focus:outline-none"
-      >
-        <option value="get">Get</option>
-        <option value="set">Set</option>
-        <option value="delete">Delete</option>
-      </select>
-      <input
-        value={String(data?.cache_key ?? "")}
-        type="text"
-        onChange={onKeyChange}
-        className="w-24 text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 focus:outline-none"
-        placeholder="Cache key"
-      />
-      {data?.cache_op === "set" && (
+      <div className="flex items-center gap-0.5 w-36">
+        <select
+          value={String(data?.cache_op ?? "get")}
+          onChange={onOpChange}
+          className="w-14 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
+        >
+          <option value="get">Get</option>
+          <option value="set">Set</option>
+          <option value="delete">Delete</option>
+        </select>
         <input
-          value={String(data?.ttl ?? "5m")}
+          value={String(data?.cache_key ?? "")}
           type="text"
-          onChange={onTTLChange}
-          className="w-24 text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 focus:outline-none"
-          placeholder="TTL (5m, 1h)"
+          onChange={onKeyChange}
+          className="w-22 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
+          placeholder="Cache key"
         />
-      )}
+      </div>
+      <div className="flex items-center gap-0.5 w-36 mt-1">
+        {data?.cache_op === "set" && (
+          <input
+            value={String(data?.ttl ?? "5m")}
+            type="text"
+            onChange={onTTLChange}
+            className="w-36 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
+            placeholder="TTL (5m, 1h)"
+          />
+        )}
+      </div>
       <Handle
         type="source"
         position={Position.Right}

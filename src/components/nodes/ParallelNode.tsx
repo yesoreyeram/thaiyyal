@@ -1,9 +1,3 @@
-/**
- * ParallelNode Component
- *
- * Executes multiple paths simultaneously.
- */
-
 import React from "react";
 import { Handle, Position, useReactFlow } from "reactflow";
 import { NodePropsWithOptions } from "./nodeTypes";
@@ -15,17 +9,6 @@ type ParallelNodeData = {
   label?: string;
 };
 
-/**
- * ParallelNode React Component
- *
- * This component renders a visual node in the workflow editor that executes paths simultaneously
- *
- * @param {NodePropsWithOptions<ParallelNodeData>} props - Component props
- * @param {string} props.id - Unique identifier for this node instance
- * @param {ParallelNodeData} props.data - Node configuration data
- * @param {function} [props.onShowOptions] - Callback to show the options context menu
- * @returns {JSX.Element} A rendered node component
- */
 export function ParallelNode({
   id,
   data,
@@ -42,22 +25,14 @@ export function ParallelNode({
     );
   };
 
-  const handleTitleChange = (newTitle: string) => {
-    setNodes((nds) =>
-      nds.map((n) =>
-        n.id === id ? { ...n, data: { ...n.data, label: newTitle } } : n
-      )
-    );
-  };
-
   const nodeInfo = getNodeInfo("parallelNode");
 
   return (
     <NodeWrapper
+      id={id}
       title={String(data?.label || "Parallel")}
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
-      onTitleChange={handleTitleChange}
     >
       <Handle
         type="target"
@@ -68,7 +43,7 @@ export function ParallelNode({
         value={Number(data?.max_concurrency ?? 10)}
         type="number"
         onChange={onChange}
-        className="w-24 text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-blue-400 focus:outline-none"
+        className="w-36 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
         placeholder="Max concurrency"
       />
       <Handle

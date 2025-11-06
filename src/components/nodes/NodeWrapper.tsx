@@ -1,9 +1,11 @@
-import React, { ReactNode, useState, useCallback, useRef } from "react";
+import { ReactNode, useState, useCallback, useRef } from "react";
+import { useReactFlow } from "reactflow";
 import { NodeTopBar } from "./NodeTopBar";
 import { NodeDescriptionModal } from "./NodeDescriptionModal";
 import { NodeResizeHandle } from "./NodeResizeHandle";
 
 export interface NodeWrapperProps {
+  id: string;
   title: string;
   children: ReactNode;
   nodeInfo?: {
@@ -12,26 +14,26 @@ export interface NodeWrapperProps {
     outputs?: string[];
   };
   onShowOptions?: (x: number, y: number) => void;
-  onTitleChange?: (newTitle: string) => void;
   onDelete?: () => void;
   className?: string;
   enableResize?: boolean;
   onOpenInfo?: () => void;
 }
 
-export function NodeWrapper({
-  title,
-  children,
-  nodeInfo,
-  onShowOptions,
-  onTitleChange,
-  onDelete,
-  className = "",
-  enableResize = true,
-  onOpenInfo,
-}: NodeWrapperProps) {
+export function NodeWrapper(props: NodeWrapperProps) {
+  const {
+    id,
+    title,
+    children,
+    nodeInfo,
+    onShowOptions,
+    onDelete,
+    onOpenInfo,
+    enableResize = false,
+  } = props;
   const [showInfo, setShowInfo] = useState(false);
   const nodeRef = useRef<HTMLDivElement>(null);
+  const { setNodes } = useReactFlow();
 
   const handleShowInfo = useCallback(() => {
     if (onOpenInfo) {
@@ -44,30 +46,44 @@ export function NodeWrapper({
     setShowInfo(false);
   }, []);
 
-  const handleShowOptions = useCallback((x: number, y: number) => {
-    if (nodeRef.current && onShowOptions) {
-      // Get node position to calculate relative coordinates
-      const nodeRect = nodeRef.current.getBoundingClientRect();
-      // Position menu relative to node's bottom-right area
-      const relativeX = nodeRect.left + nodeRect.width;
-      const relativeY = y;
-      onShowOptions(relativeX, relativeY);
-    }
-  }, [onShowOptions]);
+  const handleShowOptions = useCallback(
+    (x: number, y: number) => {
+      if (nodeRef.current && onShowOptions) {
+        // Get node position to calculate relative coordinates
+        const nodeRect = nodeRef.current.getBoundingClientRect();
+        // Position menu relative to node's bottom-right area
+        const relativeX = nodeRect.left + nodeRect.width;
+        const relativeY = y;
+        onShowOptions(relativeX, relativeY);
+      }
+    },
+    [onShowOptions]
+  );
+
+  const handleTitleChange = (newTitle: string) => {
+    setNodes((nds) =>
+      nds.map((n) =>
+        n.id === id ? { ...n, data: { ...n.data, label: newTitle } } : n
+      )
+    );
+  };
 
   return (
-    <div ref={nodeRef} className={`relative bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all ${className}`}>
+    <div
+      ref={nodeRef}
+      className={`relative bg-gray-800 text-white shadow-lg rounded border border-gray-700 hover:border-gray-600 transition-all`}
+    >
       <div className="px-2 py-1">
         <NodeTopBar
           title={title}
           onInfo={nodeInfo ? handleShowInfo : undefined}
           onOptions={handleShowOptions}
-          onTitleChange={onTitleChange}
+          onTitleChange={handleTitleChange}
           onDelete={onDelete}
         />
         {children}
       </div>
-      {enableResize && <NodeResizeHandle />}
+      {enableResize && <NodeResizeHandle onResize={() => {}} />}
       {showInfo && nodeInfo && (
         <NodeDescriptionModal
           title={title}

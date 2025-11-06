@@ -9,7 +9,13 @@ interface NodeTopBarProps {
   compact?: boolean;
 }
 
-export function NodeTopBar({ title, onInfo, onOptions, onTitleChange, onDelete }: NodeTopBarProps) {
+export function NodeTopBar({
+  title,
+  onInfo,
+  onOptions,
+  onTitleChange,
+  onDelete,
+}: NodeTopBarProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(title);
   const optionsRef = useRef<HTMLButtonElement>(null);
@@ -66,91 +72,95 @@ export function NodeTopBar({ title, onInfo, onOptions, onTitleChange, onDelete }
   };
 
   return (
-    <div className="flex items-center justify-between gap-1 mb-0.5 pb-0.5 border-b border-white/10 bg-black/20 -mx-2 -mt-1 px-1.5 pt-0.5 rounded-t">
-      {isEditing ? (
-        <input
-          ref={inputRef}
-          type="text"
-          value={editValue}
-          onChange={(e) => setEditValue(e.target.value)}
-          onBlur={handleTitleSubmit}
-          onKeyDown={handleKeyDown}
-          className="text-[10px] leading-tight font-medium text-gray-100 flex-1 min-w-0 bg-gray-900 border border-gray-600 rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          onClick={(e) => e.stopPropagation()}
-        />
-      ) : (
-        <div 
-          className={`text-[10px] leading-tight font-medium text-gray-100 truncate flex-1 min-w-0 ${onTitleChange ? 'cursor-text hover:text-white' : ''}`}
-          onClick={handleTitleClick}
-          title={onTitleChange ? "Click to edit title" : title}
-        >
-          {title}
+    <div>
+      <div className="flex items-center justify-between gap-1 mb-0.5 pb-0.5 border-b border-white/10 bg-black/20 -mx-2 -mt-1 px-1.5 pt-0.5 rounded-t">
+        {isEditing ? (
+          <input
+            ref={inputRef}
+            type="text"
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onBlur={handleTitleSubmit}
+            onKeyDown={handleKeyDown}
+            className="text-[10px] leading-tight font-medium text-gray-100 flex-1 min-w-0 bg-gray-900 border border-gray-600 rounded px-1 py-0.5 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            onClick={(e) => e.stopPropagation()}
+          />
+        ) : (
+          <div
+            className={`text-[10px] leading-tight font-extralight text-white truncate flex-1 min-w-0 ${
+              onTitleChange ? "cursor-text hover:text-white" : ""
+            }`}
+            onClick={handleTitleClick}
+            title={onTitleChange ? "Click to edit title" : title}
+          >
+            {title}
+          </div>
+        )}
+        <div className="flex items-center gap-0.5 shrink-0">
+          {onInfo && (
+            <button
+              onClick={handleInfoClick}
+              className="w-3.5 h-3.5 flex items-center justify-center rounded hover:bg-white/10 transition-colors text-gray-300 hover:text-white"
+              aria-label="Show node information"
+              title="Show information"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 16 16"
+                fill="currentColor"
+                className="w-2.5 h-2.5"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M15 8A7 7 0 1 1 1 8a7 7 0 0 1 14 0ZM9 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM6.75 8a.75.75 0 0 0 0 1.5h.75v1.75a.75.75 0 0 0 1.5 0v-2.5A.75.75 0 0 0 8.25 8h-1.5Z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+          )}
+          {onOptions && (
+            <button
+              ref={optionsRef}
+              onClick={handleOptionsClick}
+              className="w-3.5 h-3.5 flex items-center justify-center rounded hover:bg-white/10 transition-colors text-gray-300 hover:text-white"
+              aria-label="Show node options"
+              title="Show options"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 16 16"
+                fill="currentColor"
+                className="w-2.5 h-2.5"
+              >
+                <path d="M2 8a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM6.5 8a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM12.5 6.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z" />
+              </svg>
+            </button>
+          )}
+          {onDelete && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+              className="w-3.5 h-3.5 flex items-center justify-center rounded hover:bg-red-900/20 transition-colors text-gray-300 hover:text-red-400"
+              aria-label="Delete node"
+              title="Delete node"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 16 16"
+                fill="currentColor"
+                className="w-2.5 h-2.5"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.713Z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+          )}
         </div>
-      )}
-      <div className="flex items-center gap-0.5 flex-shrink-0">
-        {onInfo && (
-          <button
-            onClick={handleInfoClick}
-            className="w-3.5 h-3.5 flex items-center justify-center rounded hover:bg-white/10 transition-colors text-gray-300 hover:text-white"
-            aria-label="Show node information"
-            title="Show information"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 16 16"
-              fill="currentColor"
-              className="w-2.5 h-2.5"
-            >
-              <path
-                fillRule="evenodd"
-                d="M15 8A7 7 0 1 1 1 8a7 7 0 0 1 14 0ZM9 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0ZM6.75 8a.75.75 0 0 0 0 1.5h.75v1.75a.75.75 0 0 0 1.5 0v-2.5A.75.75 0 0 0 8.25 8h-1.5Z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </button>
-        )}
-        {onOptions && (
-          <button
-            ref={optionsRef}
-            onClick={handleOptionsClick}
-            className="w-3.5 h-3.5 flex items-center justify-center rounded hover:bg-white/10 transition-colors text-gray-300 hover:text-white"
-            aria-label="Show node options"
-            title="Show options"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 16 16"
-              fill="currentColor"
-              className="w-2.5 h-2.5"
-            >
-              <path d="M2 8a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM6.5 8a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM12.5 6.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z" />
-            </svg>
-          </button>
-        )}
-        {onDelete && (
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete();
-            }}
-            className="w-3.5 h-3.5 flex items-center justify-center rounded hover:bg-red-900/20 transition-colors text-gray-300 hover:text-red-400"
-            aria-label="Delete node"
-            title="Delete node"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 16 16"
-              fill="currentColor"
-              className="w-2.5 h-2.5"
-            >
-              <path
-                fillRule="evenodd"
-                d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.713Z"
-                clipRule="evenodd"
-              />
-            </svg>
-          </button>
-        )}
       </div>
     </div>
   );
