@@ -1,0 +1,13 @@
+{
+  "name": "Multi-Tenant Data Processing",
+  "description": "Route data processing based on tenant tier",
+  "nodes": [
+    {"id": "tenant_id", "type": "number", "data": {"value": 1001}},
+    {"id": "tier_check", "type": "condition", "data": {"condition": "input >= 1000"}},
+    {"id": "result", "type": "visualization", "data": {"mode": "json"}}
+  ],
+  "edges": [
+    {"source": "tenant_id", "target": "tier_check"},
+    {"source": "tier_check", "target": "result"}
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "name": "Age-Based API Routing - Adult Profile",
+  "description": "Demonstrates conditional execution: If user age >= 18, call profile API to fetch interests, then call sports registration API. Otherwise, call education registration API.",
+  "nodes": [
+    {
+      "id": "user_age_input",
+      "type": "number",
+      "data": {
+        "value": 25,
+        "label": "User Age"
+      }
+    },
+    {
+      "id": "age_check",
+      "type": "condition",
+      "data": {
+        "condition": ">=18",
+        "label": "Is Adult (>=18)?"
+      }
+    },
+    {
+      "id": "fetch_profile",
+      "type": "text_input",
+      "data": {
+        "text": "MOCK: User profile with interests=['sports', 'fitness', 'travel']",
+        "label": "Fetch User Profile API (Adult)"
+      }
+    },
+    {
+      "id": "register_sports",
+      "type": "text_input",
+      "data": {
+        "text": "MOCK: Registered for Sports Program",
+        "label": "Sports Registration API"
+      }
+    },
+    {
+      "id": "register_education",
+      "type": "text_input",
+      "data": {
+        "text": "MOCK: Registered for Education Program",
+        "label": "Education Registration API (Minor)"
+      }
+    },
+    {
+      "id": "final_result",
+      "type": "visualization",
+      "data": {
+        "mode": "json",
+        "label": "Registration Result"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "user_age_input",
+      "target": "age_check"
+    },
+    {
+      "id": "e2_true",
+      "source": "age_check",
+      "target": "fetch_profile",
+      "sourceHandle": "true"
+    },
+    {
+      "id": "e3",
+      "source": "fetch_profile",
+      "target": "register_sports"
+    },
+    {
+      "id": "e4_false",
+      "source": "age_check",
+      "target": "register_education",
+      "sourceHandle": "false"
+    },
+    {
+      "id": "e5_adult",
+      "source": "register_sports",
+      "target": "final_result"
+    },
+    {
+      "id": "e6_minor",
+      "source": "register_education",
+      "target": "final_result"
+    }
+  ]
+}

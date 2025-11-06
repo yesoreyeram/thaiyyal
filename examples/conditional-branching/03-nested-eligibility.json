@@ -1,0 +1,17 @@
+{
+  "name": "Nested Eligibility Check",
+  "description": "Multi-level conditional checks for loan eligibility",
+  "nodes": [
+    {"id": "age", "type": "number", "data": {"value": 30}},
+    {"id": "age_check", "type": "condition", "data": {"condition": ">=21"}},
+    {"id": "extract1", "type": "extract", "data": {"field": "value"}},
+    {"id": "age_range", "type": "condition", "data": {"condition": "<65"}},
+    {"id": "result", "type": "visualization", "data": {"mode": "json"}}
+  ],
+  "edges": [
+    {"source": "age", "target": "age_check"},
+    {"source": "age_check", "target": "extract1"},
+    {"source": "extract1", "target": "age_range"},
+    {"source": "age_range", "target": "result"}
+  ]
+}

@@ -1,0 +1,153 @@
+{
+  "name": "Multi-Step User Registration Flow",
+  "description": "Complex conditional workflow: Age check -> Adult path (profile fetch -> interest-based registration) OR Minor path (education registration)",
+  "nodes": [
+    {
+      "id": "user_data",
+      "type": "text_input",
+      "data": {
+        "text": "{\"age\": 30, \"name\": \"John\"}",
+        "label": "User Input Data"
+      }
+    },
+    {
+      "id": "parse_user",
+      "type": "parse",
+      "data": {
+        "parser": "json",
+        "label": "Parse User Data"
+      }
+    },
+    {
+      "id": "extract_age",
+      "type": "extract",
+      "data": {
+        "field": "age",
+        "label": "Extract Age"
+      }
+    },
+    {
+      "id": "age_verification",
+      "type": "condition",
+      "data": {
+        "condition": ">=18",
+        "label": "Verify Adult Status"
+      }
+    },
+    {
+      "id": "fetch_user_profile",
+      "type": "text_input",
+      "data": {
+        "text": "{\"interests\": [\"sports\", \"technology\", \"music\"], \"premium\": true}",
+        "label": "Fetch Profile API"
+      }
+    },
+    {
+      "id": "parse_profile",
+      "type": "parse",
+      "data": {
+        "parser": "json",
+        "label": "Parse Profile"
+      }
+    },
+    {
+      "id": "check_interests",
+      "type": "extract",
+      "data": {
+        "field": "interests",
+        "label": "Extract Interests"
+      }
+    },
+    {
+      "id": "register_adult_programs",
+      "type": "text_input",
+      "data": {
+        "text": "SUCCESS: Registered for Sports, Technology, and Music programs",
+        "label": "Adult Program Registration"
+      }
+    },
+    {
+      "id": "register_minor_education",
+      "type": "text_input",
+      "data": {
+        "text": "SUCCESS: Registered for Education Program (K-12)",
+        "label": "Education Registration"
+      }
+    },
+    {
+      "id": "send_confirmation",
+      "type": "text_input",
+      "data": {
+        "text": "Confirmation email sent",
+        "label": "Send Confirmation"
+      }
+    },
+    {
+      "id": "final_output",
+      "type": "visualization",
+      "data": {
+        "mode": "json",
+        "label": "Registration Complete"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "user_data",
+      "target": "parse_user"
+    },
+    {
+      "id": "e2",
+      "source": "parse_user",
+      "target": "extract_age"
+    },
+    {
+      "id": "e3",
+      "source": "extract_age",
+      "target": "age_verification"
+    },
+    {
+      "id": "e4_adult_path",
+      "source": "age_verification",
+      "target": "fetch_user_profile",
+      "sourceHandle": "true"
+    },
+    {
+      "id": "e5",
+      "source": "fetch_user_profile",
+      "target": "parse_profile"
+    },
+    {
+      "id": "e6",
+      "source": "parse_profile",
+      "target": "check_interests"
+    },
+    {
+      "id": "e7",
+      "source": "check_interests",
+      "target": "register_adult_programs"
+    },
+    {
+      "id": "e8_minor_path",
+      "source": "age_verification",
+      "target": "register_minor_education",
+      "sourceHandle": "false"
+    },
+    {
+      "id": "e9_adult",
+      "source": "register_adult_programs",
+      "target": "send_confirmation"
+    },
+    {
+      "id": "e10_minor",
+      "source": "register_minor_education",
+      "target": "send_confirmation"
+    },
+    {
+      "id": "e11",
+      "source": "send_confirmation",
+      "target": "final_output"
+    }
+  ]
+}

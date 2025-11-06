@@ -1,0 +1,13 @@
+{
+  "name": "Data Validation with Error Routing",
+  "description": "Validate input data and route based on validation results",
+  "nodes": [
+    {"id": "input", "type": "number", "data": {"value": 42}},
+    {"id": "range_check", "type": "condition", "data": {"condition": "input >= 0 && input <= 100"}},
+    {"id": "result", "type": "visualization", "data": {"mode": "json"}}
+  ],
+  "edges": [
+    {"source": "input", "target": "range_check"},
+    {"source": "range_check", "target": "result"}
+  ]
+}

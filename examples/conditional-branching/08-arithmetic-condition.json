@@ -1,0 +1,17 @@
+{
+  "name": "Conditional After Arithmetic",
+  "description": "Perform calculations then apply conditional logic",
+  "nodes": [
+    {"id": "price", "type": "number", "data": {"value": 100}},
+    {"id": "discount", "type": "number", "data": {"value": 20}},
+    {"id": "calc", "type": "operation", "data": {"op": "subtract"}},
+    {"id": "min_check", "type": "condition", "data": {"condition": ">=50"}},
+    {"id": "result", "type": "visualization", "data": {"mode": "json"}}
+  ],
+  "edges": [
+    {"source": "price", "target": "calc"},
+    {"source": "discount", "target": "calc"},
+    {"source": "calc", "target": "min_check"},
+    {"source": "min_check", "target": "result"}
+  ]
+}

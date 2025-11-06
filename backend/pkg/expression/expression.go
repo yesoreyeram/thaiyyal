@@ -35,11 +35,13 @@ func Evaluate(expression string, input interface{}, ctx *Context) (bool, error) 
 		}
 	}
 
-	// If input is provided and not already in variables as 'item', add it
-	// This allows expressions like "item.items.length > 0" to work
+	// If input is provided, ensure it's available as both 'item' and 'input'
+	// This allows expressions like "item.items.length > 0" and "input % 2 == 0" to work
 	if input != nil {
-		if _, hasItem := ctx.Variables["item"]; !hasItem {
-			// Create a copy of the context with item added
+		_, hasItem := ctx.Variables["item"]
+		_, hasInput := ctx.Variables["input"]
+		if !hasItem || !hasInput {
+			// Create a copy of the context with item and input added
 			newCtx := &Context{
 				NodeResults: ctx.NodeResults,
 				Variables:   make(map[string]interface{}),
@@ -49,14 +51,42 @@ func Evaluate(expression string, input interface{}, ctx *Context) (bool, error) 
 			for k, v := range ctx.Variables {
 				newCtx.Variables[k] = v
 			}
-			// Add item
-			newCtx.Variables["item"] = input
+			// Add item and input
+			if !hasItem {
+				newCtx.Variables["item"] = input
+			}
+			if !hasInput {
+				newCtx.Variables["input"] = input
+			}
 			ctx = newCtx
 		}
 	}
 
 	// Trim whitespace
 	expression = strings.TrimSpace(expression)
+
+	// Handle parentheses - strip outer parentheses if expression is fully wrapped
+	if strings.HasPrefix(expression, "(") && strings.HasSuffix(expression, ")") {
+		// Check if these are matching outer parentheses
+		depth := 0
+		allWrapped := true
+		for i, ch := range expression {
+			if ch == '(' {
+				depth++
+			} else if ch == ')' {
+				depth--
+				// If we hit zero before the end, these aren't outer wrapping parentheses
+				if depth == 0 && i < len(expression)-1 {
+					allWrapped = false
+					break
+				}
+			}
+		}
+		if allWrapped && depth == 0 {
+			// Strip outer parentheses and re-evaluate
+			return Evaluate(expression[1:len(expression)-1], input, ctx)
+		}
+	}
 
 	// Handle boolean constants
 	if expression == "true" {
@@ -344,10 +374,30 @@ func evaluateComparison(expr string, input interface{}, ctx *Context) (bool, boo
 		left := strings.TrimSpace(expr[:idx])
 		right := strings.TrimSpace(expr[idx+len(op):])
 
-		// Resolve left operand
-		leftVal, err := resolveValue(left, input, ctx)
-		if err != nil {
-			return false, false
+		// Handle shorthand syntax: >=80 means input >= 80
+		// If left side is empty, use input as the left operand
+		var leftVal interface{}
+		var err error
+		if left == "" {
+			leftVal = input
+			// If input is a map with a "value" field, extract it for comparison
+			// This handles common node output patterns like {value: 85, condition_met: true, ...}
+			// Recursively extract nested "value" fields (e.g., {value: {value: 85}})
+			for {
+				if m, ok := leftVal.(map[string]interface{}); ok {
+					if v, exists := m["value"]; exists {
+						leftVal = v
+						continue
+					}
+				}
+				break
+			}
+		} else {
+			// Resolve left operand
+			leftVal, err = resolveValue(left, input, ctx)
+			if err != nil {
+				return false, false
+			}
 		}
 
 		// Resolve right operand
