@@ -60,7 +60,7 @@ func TestUniqueExecutor_Basic(t *testing.T) {
 				},
 			}
 
-			nodeData := types.NodeData{}
+			nodeData := types.UniqueData{}
 			if tt.field != nil {
 				nodeData.Field = tt.field
 			}

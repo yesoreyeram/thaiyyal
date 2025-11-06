@@ -61,7 +61,7 @@ func TestFindExecutor_Basic(t *testing.T) {
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeFind,
-				Data: types.ConditionData{
+				Data: types.FindData{
 					Condition: &tt.condition,
 				},
 			}
@@ -109,7 +109,12 @@ func TestFindExecutor_Validate(t *testing.T) {
 
 	// Valid condition
 	condition := "variables.item > 5"
-	node.Data.Condition = &condition
+	node = types.Node{
+		Type: types.NodeTypeFind,
+		Data: types.FindData{
+			Condition: &condition,
+		},
+	}
 	err = exec.Validate(node)
 	if err != nil {
 		t.Errorf("Unexpected validation error: %v", err)

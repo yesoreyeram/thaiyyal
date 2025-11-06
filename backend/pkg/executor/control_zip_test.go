@@ -42,7 +42,7 @@ func TestZipExecutor_Basic(t *testing.T) {
 				},
 			}
 
-			nodeData := types.NodeData{}
+			nodeData := types.ZipData{}
 			if tt.fillMissing != nil {
 				nodeData.FillMissing = tt.fillMissing
 			}
@@ -134,7 +134,7 @@ func TestCompactExecutor_Basic(t *testing.T) {
 				},
 			}
 
-			nodeData := types.NodeData{}
+			nodeData := types.ZipData{}
 			if tt.removeEmpty != nil {
 				nodeData.RemoveEmpty = tt.removeEmpty
 			}

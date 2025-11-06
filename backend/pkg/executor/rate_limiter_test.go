@@ -41,7 +41,7 @@ func TestRateLimiterExecutor_Execute(t *testing.T) {
 			node := types.Node{
 				ID:   "rate1",
 				Type: types.NodeTypeRateLimiter,
-				Data: types.DelayData{
+				Data: types.RateLimiterData{
 					MaxRequests:       &tt.maxRequests,
 					PerDuration:       &tt.perDuration,
 				},
@@ -76,7 +76,7 @@ func TestRateLimiterExecutor_Validate(t *testing.T) {
 			node: types.Node{
 				ID:   "rate1",
 				Type: types.NodeTypeRateLimiter,
-				Data: types.DelayData{
+				Data: types.RateLimiterData{
 					MaxRequests: intPtr(10),
 					PerDuration: strPtr("1s"),
 				},
@@ -110,7 +110,7 @@ func TestRateLimiterExecutor_Validate(t *testing.T) {
 			node: types.Node{
 				ID:   "rate1",
 				Type: types.NodeTypeRateLimiter,
-				Data: types.DelayData{
+				Data: types.RateLimiterData{
 					PerDuration: strPtr("invalid"),
 				},
 			},
@@ -151,7 +151,7 @@ func TestRateLimiterExecutor_PassThrough(t *testing.T) {
 	node := types.Node{
 		ID:   "rate1",
 		Type: types.NodeTypeRateLimiter,
-		Data: types.DelayData{
+		Data: types.RateLimiterData{
 			MaxRequests: &maxReq,
 			PerDuration: strPtr("1s"),
 		},
@@ -207,7 +207,7 @@ func TestThrottleExecutor_Execute(t *testing.T) {
 			node := types.Node{
 				ID:   "throttle1",
 				Type: types.NodeTypeThrottle,
-				Data: types.RateLimiterData{
+				Data: types.ThrottleData{
 					RequestsPerSecond: &tt.requestsPerSecond,
 				},
 			}

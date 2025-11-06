@@ -22,7 +22,7 @@ func TestReduceExecutor_Sum(t *testing.T) {
 	node := types.Node{
 		ID:   "reduce1",
 		Type: types.NodeTypeReduce,
-		Data: types.NumberData{
+		Data: types.ReduceData{
 			InitialValue: initVal,
 			Expression:   &expr,
 		},
@@ -58,7 +58,7 @@ func TestReduceExecutor_SumObjectFields(t *testing.T) {
 	node := types.Node{
 		ID:   "reduce1",
 		Type: types.NodeTypeReduce,
-		Data: types.NumberData{
+		Data: types.ReduceData{
 			InitialValue: initVal,
 			Expression:   &expr,
 		},
@@ -93,7 +93,7 @@ func TestReduceExecutor_Product(t *testing.T) {
 	node := types.Node{
 		ID:   "reduce1",
 		Type: types.NodeTypeReduce,
-		Data: types.NumberData{
+		Data: types.ReduceData{
 			InitialValue: initVal,
 			Expression:   &expr,
 		},
@@ -128,7 +128,7 @@ func TestReduceExecutor_Max(t *testing.T) {
 	node := types.Node{
 		ID:   "reduce1",
 		Type: types.NodeTypeReduce,
-		Data: types.NumberData{
+		Data: types.ReduceData{
 			InitialValue: initVal,
 			Expression:   &expr,
 		},
@@ -247,7 +247,7 @@ func TestReduceExecutor_EmptyArray(t *testing.T) {
 	node := types.Node{
 		ID:   "reduce1",
 		Type: types.NodeTypeReduce,
-		Data: types.NumberData{
+		Data: types.ReduceData{
 			InitialValue: initVal,
 			Expression:   &expr,
 		},

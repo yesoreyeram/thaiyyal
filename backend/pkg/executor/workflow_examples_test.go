@@ -166,7 +166,7 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 		rangeNode := types.Node{
 			ID:   "range1",
 			Type: types.NodeTypeRange,
-			Data: types.FilterData{
+			Data: types.RangeData{
 				Start: 1,
 				End:   10,
 				Step:  1,
@@ -772,7 +772,7 @@ func TestWorkflowExamples_Phase4_AdvancedNodes(t *testing.T) {
 		rangeNode := types.Node{
 			ID:   "range1",
 			Type: types.NodeTypeRange,
-			Data: types.MapData{
+			Data: types.RangeData{
 				Start: 1,
 				End:   5,
 				Step:  1,
@@ -796,7 +796,7 @@ func TestWorkflowExamples_Phase4_AdvancedNodes(t *testing.T) {
 		rateLimitNode := types.Node{
 			ID:   "ratelimit1",
 			Type: types.NodeTypeRateLimiter,
-			Data: types.DelayData{
+			Data: types.RateLimiterData{
 				MaxRequests: &maxReq,
 				PerDuration: strPtr("1s"),
 			},
@@ -842,7 +842,7 @@ func TestWorkflowExamples_Phase4_AdvancedNodes(t *testing.T) {
 		rangeNode := types.Node{
 			ID:   "range1",
 			Type: types.NodeTypeRange,
-			Data: types.RateLimiterData{
+			Data: types.RangeData{
 				Start: 1,
 				End:   3,
 				Step:  1,

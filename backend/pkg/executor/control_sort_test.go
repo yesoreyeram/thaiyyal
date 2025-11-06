@@ -63,7 +63,7 @@ func TestSortExecutor_Basic(t *testing.T) {
 				},
 			}
 
-			nodeData := types.NodeData{}
+			nodeData := types.SortData{}
 			if tt.field != nil {
 				nodeData.Field = tt.field
 			}

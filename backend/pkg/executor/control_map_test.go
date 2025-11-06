@@ -21,7 +21,7 @@ func TestMapExecutor_ExtractField(t *testing.T) {
 	node := types.Node{
 		ID:   "map1",
 		Type: types.NodeTypeMap,
-		Data: types.ExtractData{
+		Data: types.MapData{
 			Field: &field,
 		},
 	}
@@ -140,7 +140,7 @@ func TestMapExecutor_NonArrayInput(t *testing.T) {
 	node := types.Node{
 		ID:   "map1",
 		Type: types.NodeTypeMap,
-		Data: types.ExtractData{
+		Data: types.MapData{
 			Field: &field,
 		},
 	}
@@ -174,7 +174,7 @@ func TestMapExecutor_Validate(t *testing.T) {
 
 	// Invalid: has both
 	node = types.Node{
-		Data: types.ExpressionData{Expression: &expr, Field: &field},
+		Data: types.MapData{Expression: &expr, Field: &field},
 	}
 	if err := executor.Validate(node); err == nil {
 		t.Error("Validation should fail with both expression and field")
@@ -201,7 +201,7 @@ func TestMapExecutor_EmptyArray(t *testing.T) {
 	node := types.Node{
 		ID:   "map1",
 		Type: types.NodeTypeMap,
-		Data: types.ExtractData{
+		Data: types.MapData{
 			Field: &field,
 		},
 	}

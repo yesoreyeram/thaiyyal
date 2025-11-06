@@ -66,7 +66,7 @@ func TestSliceExecutor_Basic(t *testing.T) {
 				},
 			}
 
-			nodeData := types.NodeData{}
+			nodeData := types.SliceData{}
 			if tt.start != nil {
 				nodeData.Start = tt.start
 			}
