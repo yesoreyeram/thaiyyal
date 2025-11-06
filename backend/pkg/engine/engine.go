@@ -370,6 +370,12 @@ func (e *Engine) Execute() (*types.Result, error) {
 			default:
 			}
 
+			// Check if this node should be executed based on conditional edges
+			if !e.shouldExecuteNode(nodeID) {
+				e.structuredLogger.WithNodeID(nodeID).Debug("node skipped due to conditional edge")
+				continue
+			}
+
 			node := e.getNode(nodeID)
 			value, err := e.executeNode(ctx, node)
 			if err != nil {
@@ -836,6 +842,120 @@ func (e *Engine) getNode(nodeID string) types.Node {
 	}
 	return types.Node{}
 }
+
+// shouldExecuteNode determines if a node should execute based on conditional edges
+// Returns true if:
+// - The node has no incoming edges (orphan/start node)
+// - The node has unconditional incoming edges
+// - At least one conditional edge's condition is satisfied
+func (e *Engine) shouldExecuteNode(nodeID string) bool {
+	// Find all edges targeting this node
+	incomingEdges := e.getIncomingEdges(nodeID)
+	
+	// If no incoming edges, it's an orphan/start node - always execute
+	if len(incomingEdges) == 0 {
+		return true
+	}
+	
+	// Check if any incoming edge's condition is satisfied
+	hasConditionalEdge := false
+	conditionSatisfied := false
+	
+	for _, edge := range incomingEdges {
+		// Get the source node's result
+		sourceResult, ok := e.GetNodeResult(edge.Source)
+		if !ok {
+			// Source hasn't executed yet - this shouldn't happen in topological order
+			// But if it does, allow execution (unconditional edge)
+			continue
+		}
+		
+		// Check if this edge has a condition (sourceHandle or legacy condition field)
+		edgeCondition := edge.SourceHandle
+		if edgeCondition == nil && edge.Condition != nil {
+			edgeCondition = edge.Condition // Backward compatibility
+		}
+		
+		if edgeCondition == nil {
+			// Unconditional edge - node should execute
+			return true
+		}
+		
+		hasConditionalEdge = true
+		
+		// Check if the condition is satisfied based on source node result
+		if e.isConditionSatisfied(sourceResult, *edgeCondition) {
+			conditionSatisfied = true
+			break // At least one condition satisfied - execute the node
+		}
+	}
+	
+	// If all edges are conditional, at least one must be satisfied
+	// If no conditional edges exist, execute the node
+	return !hasConditionalEdge || conditionSatisfied
+}
+
+// getIncomingEdges returns all edges that target the specified node
+func (e *Engine) getIncomingEdges(nodeID string) []types.Edge {
+	var incoming []types.Edge
+	for _, edge := range e.edges {
+		if edge.Target == nodeID {
+			incoming = append(incoming, edge)
+		}
+	}
+	return incoming
+}
+
+// isConditionSatisfied checks if an edge condition is satisfied by the source node's result
+// Supports:
+// - "true"/"false" for condition nodes
+// - Custom paths from switch nodes (e.g., "success", "error", "grade_a")
+func (e *Engine) isConditionSatisfied(sourceResult interface{}, condition string) bool {
+	// Handle condition node results
+	if resultMap, ok := sourceResult.(map[string]interface{}); ok {
+		// Check for condition node's path field
+		if path, exists := resultMap["path"]; exists {
+			if pathStr, ok := path.(string); ok && pathStr == condition {
+				return true
+			}
+		}
+		
+		// Check for switch node's output_path field
+		if outputPath, exists := resultMap["output_path"]; exists {
+			if pathStr, ok := outputPath.(string); ok && pathStr == condition {
+				return true
+			}
+		}
+		
+		// Check for boolean "true" or "false" fields
+		if condition == "true" {
+			if truePath, exists := resultMap["true_path"]; exists {
+				if b, ok := truePath.(bool); ok {
+					return b
+				}
+			}
+			if condMet, exists := resultMap["condition_met"]; exists {
+				if b, ok := condMet.(bool); ok {
+					return b
+				}
+			}
+		} else if condition == "false" {
+			if falsePath, exists := resultMap["false_path"]; exists {
+				if b, ok := falsePath.(bool); ok {
+					return b
+				}
+			}
+			if condMet, exists := resultMap["condition_met"]; exists {
+				if b, ok := condMet.(bool); ok {
+					return !b
+				}
+			}
+		}
+	}
+	
+	return false
+}
+
 
 // getFinalOutput determines the final output of the workflow.
 // The final output is the result of a terminal node (node with no outgoing edges).

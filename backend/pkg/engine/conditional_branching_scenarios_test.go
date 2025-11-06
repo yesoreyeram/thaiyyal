@@ -960,3 +960,7 @@ if !mustGetMapResult(t, result, "cond")["condition_met"].(bool) {
 t.Error("Expected condition after subtraction to be met")
 }
 }
+
+func boolPtr(b bool) *bool {
+return &b
+}

@@ -145,10 +145,14 @@ type ContextVariableValue struct {
 }
 
 // Edge represents a connection between nodes
+// Supports conditional execution through sourceHandle and condition fields
 type Edge struct {
-	ID     string `json:"id"`
-	Source string `json:"source"`
-	Target string `json:"target"`
+	ID           string  `json:"id"`
+	Source       string  `json:"source"`
+	Target       string  `json:"target"`
+	SourceHandle *string `json:"sourceHandle,omitempty"` // Output port from source node (e.g., "true", "false", "success", "error")
+	TargetHandle *string `json:"targetHandle,omitempty"` // Input port on target node (usually not needed)
+	Condition    *string `json:"condition,omitempty"`    // Deprecated: Use sourceHandle instead. Kept for backward compatibility.
 }
 
 // Result represents the execution result of the workflow
