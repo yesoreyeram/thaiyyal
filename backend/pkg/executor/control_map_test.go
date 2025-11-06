@@ -157,7 +157,7 @@ func TestMapExecutor_Validate(t *testing.T) {
 	// Valid: has expression
 	expr := "item * 2"
 	node := types.Node{
-		Data: types.ExpressionData{Expression: &expr},
+		Data: types.MapData{Expression: &expr},
 	}
 	if err := executor.Validate(node); err != nil {
 		t.Errorf("Validation should pass with expression: %v", err)
@@ -166,7 +166,7 @@ func TestMapExecutor_Validate(t *testing.T) {
 	// Valid: has field
 	field := "name"
 	node = types.Node{
-		Data: types.ExtractData{Field: &field},
+		Data: types.MapData{Field: &field},
 	}
 	if err := executor.Validate(node); err != nil {
 		t.Errorf("Validation should pass with field: %v", err)

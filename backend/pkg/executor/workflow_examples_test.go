@@ -113,7 +113,7 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 		filterNode := types.Node{
 			ID:   "2",
 			Type: types.NodeTypeFilter,
-			Data: types.ConditionData{
+			Data: types.FilterData{
 				Condition: &condition,
 			},
 		}
@@ -186,7 +186,7 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 		mapNode1 := types.Node{
 			ID:   "map1",
 			Type: types.NodeTypeMap,
-			Data: types.ExpressionData{
+			Data: types.MapData{
 				Expression: &doubleExpr,
 			},
 		}
@@ -217,7 +217,7 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 		filterNode := types.Node{
 			ID:   "filter1",
 			Type: types.NodeTypeFilter,
-			Data: types.ConditionData{
+			Data: types.FilterData{
 				Condition: &filterCond,
 			},
 		}
@@ -240,7 +240,7 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 		mapNode2 := types.Node{
 			ID:   "map2",
 			Type: types.NodeTypeMap,
-			Data: types.ExpressionData{
+			Data: types.MapData{
 				Expression: &squareExpr,
 			},
 		}
@@ -291,7 +291,7 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 		mapNode1 := types.Node{
 			ID:   "map1",
 			Type: types.NodeTypeMap,
-			Data: types.ExpressionData{
+			Data: types.MapData{
 				Expression: &normalizeExpr,
 			},
 		}
@@ -314,7 +314,7 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 		filterNode := types.Node{
 			ID:   "filter1",
 			Type: types.NodeTypeFilter,
-			Data: types.ConditionData{
+			Data: types.FilterData{
 				Condition: &filterCond,
 			},
 		}
@@ -337,7 +337,7 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 		mapNode2 := types.Node{
 			ID:   "map2",
 			Type: types.NodeTypeMap,
-			Data: types.ExpressionData{
+			Data: types.MapData{
 				Expression: &nameExpr,
 			},
 		}
@@ -558,7 +558,7 @@ func TestWorkflowExamples_FormatConversion(t *testing.T) {
 		filterNode := types.Node{
 			ID:   "filter1",
 			Type: types.NodeTypeFilter,
-			Data: types.ConditionData{
+			Data: types.FilterData{
 				Condition: &filterCond,
 			},
 		}

@@ -17,6 +17,7 @@ func TestForEachExecutor_BasicIteration(t *testing.T) {
 	node := types.Node{
 		ID:   "foreach1",
 		Type: types.NodeTypeForEach,
+		Data: types.ForEachData{},
 	}
 
 	result, err := executor.Execute(ctx, node)

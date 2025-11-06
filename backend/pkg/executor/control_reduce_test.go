@@ -162,7 +162,7 @@ func TestReduceExecutor_DefaultInitialValue(t *testing.T) {
 	node := types.Node{
 		ID:   "reduce1",
 		Type: types.NodeTypeReduce,
-		Data: types.ExpressionData{
+		Data: types.ReduceData{
 			Expression: &expr,
 			// No InitialValue specified - should default to 0
 		},
@@ -210,7 +210,7 @@ func TestReduceExecutor_Validate(t *testing.T) {
 	// Valid: has expression
 	expr := "accumulator + item"
 	node := types.Node{
-		Data: types.ExpressionData{Expression: &expr},
+		Data: types.ReduceData{Expression: &expr},
 	}
 	if err := executor.Validate(node); err != nil {
 		t.Errorf("Validation should pass with expression: %v", err)

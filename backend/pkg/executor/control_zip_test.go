@@ -134,15 +134,12 @@ func TestCompactExecutor_Basic(t *testing.T) {
 				},
 			}
 
-			nodeData := types.ZipData{}
-			if tt.removeEmpty != nil {
-				nodeData.RemoveEmpty = tt.removeEmpty
-			}
-
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeCompact,
-				Data: nodeData,
+				Data: types.CompactData{
+					RemoveEmpty: tt.removeEmpty,
+				},
 			}
 
 			result, err := exec.Execute(ctx, node)
