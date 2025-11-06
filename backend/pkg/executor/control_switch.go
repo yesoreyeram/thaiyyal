@@ -12,6 +12,10 @@ type SwitchExecutor struct{}
 // Execute runs the Switch node
 // Handles switch/case node execution
 func (e *SwitchExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+data, err := types.AsSwitchData(node.Data)
+if err != nil {
+return nil, err
+}
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("switch node requires at least one input")
@@ -21,7 +25,7 @@ func (e *SwitchExecutor) Execute(ctx ExecutionContext, node types.Node) (interfa
 	inputValue := inputs[0]
 
 	// Check each case
-	for _, switchCase := range node.Data.Cases {
+	for _, switchCase := range data.Cases {
 		matched := false
 
 		// If switchCase.Value is set, do value matching
@@ -48,8 +52,8 @@ func (e *SwitchExecutor) Execute(ctx ExecutionContext, node types.Node) (interfa
 
 	// No case matched, use default
 	defaultPath := "default"
-	if node.Data.DefaultPath != nil {
-		defaultPath = *node.Data.DefaultPath
+	if data.DefaultPath != nil {
+		defaultPath = *data.DefaultPath
 	}
 
 	return map[string]interface{}{
@@ -66,8 +70,12 @@ func (e *SwitchExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *SwitchExecutor) Validate(node types.Node) error {
+data, err := types.AsSwitchData(node.Data)
+if err != nil {
+return err
+}
 	// Switch node should have at least one case
-	if len(node.Data.Cases) == 0 {
+	if len(data.Cases) == 0 {
 		return fmt.Errorf("switch node requires at least one case")
 	}
 	return nil

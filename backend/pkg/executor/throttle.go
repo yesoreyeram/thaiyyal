@@ -25,6 +25,10 @@ func NewThrottleExecutor() *ThrottleExecutor {
 // Execute runs the Throttle node
 // Adds delay between requests based on requests_per_second
 func (e *ThrottleExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+data, err := types.AsThrottleData(node.Data)
+if err != nil {
+return nil, err
+}
 	inputs := ctx.GetNodeInputs(node.ID)
 	var inputValue interface{}
 	if len(inputs) > 0 {
@@ -33,8 +37,8 @@ func (e *ThrottleExecutor) Execute(ctx ExecutionContext, node types.Node) (inter
 
 	// Get requests per second (default: 5)
 	requestsPerSecond := 5.0
-	if node.Data.RequestsPerSecond != nil {
-		requestsPerSecond = *node.Data.RequestsPerSecond
+	if data.RequestsPerSecond != nil {
+		requestsPerSecond = *data.RequestsPerSecond
 	}
 
 	if requestsPerSecond <= 0 {
@@ -81,8 +85,12 @@ func (e *ThrottleExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *ThrottleExecutor) Validate(node types.Node) error {
-	if node.Data.RequestsPerSecond != nil && *node.Data.RequestsPerSecond <= 0 {
-		return fmt.Errorf("requests_per_second must be positive, got %f", *node.Data.RequestsPerSecond)
+data, err := types.AsThrottleData(node.Data)
+if err != nil {
+return err
+}
+	if data.RequestsPerSecond != nil && *data.RequestsPerSecond <= 0 {
+		return fmt.Errorf("requests_per_second must be positive, got %f", *data.RequestsPerSecond)
 	}
 	return nil
 }

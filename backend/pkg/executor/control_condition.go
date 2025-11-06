@@ -15,7 +15,11 @@ type ConditionExecutor struct{}
 // with metadata about whether the condition was met.
 // Supports advanced expressions with node references, variables, and boolean logic.
 func (e *ConditionExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-	if node.Data.Condition == nil {
+data, err := types.AsConditionData(node.Data)
+if err != nil {
+return nil, err
+}
+	if data.Condition == nil {
 		return nil, fmt.Errorf("condition node missing condition")
 	}
 
@@ -34,10 +38,10 @@ func (e *ConditionExecutor) Execute(ctx ExecutionContext, node types.Node) (inte
 	}
 
 	// Evaluate condition using expression engine
-	conditionMet, err := expression.Evaluate(*node.Data.Condition, input, exprCtx)
+	conditionMet, err := expression.Evaluate(*data.Condition, input, exprCtx)
 	if err != nil {
 		// Fallback to simple evaluation for backward compatibility
-		conditionMet = evaluateCondition(*node.Data.Condition, input)
+		conditionMet = evaluateCondition(*data.Condition, input)
 	}
 
 	// Determine which path was taken
@@ -50,7 +54,7 @@ func (e *ConditionExecutor) Execute(ctx ExecutionContext, node types.Node) (inte
 	return map[string]interface{}{
 		"value":         input,
 		"condition_met": conditionMet,
-		"condition":     *node.Data.Condition,
+		"condition":     *data.Condition,
 		"path":          pathTaken,
 		"true_path":     conditionMet,
 		"false_path":    !conditionMet,
@@ -64,7 +68,11 @@ func (e *ConditionExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *ConditionExecutor) Validate(node types.Node) error {
-	if node.Data.Condition == nil {
+data, err := types.AsConditionData(node.Data)
+if err != nil {
+return err
+}
+	if data.Condition == nil {
 		return fmt.Errorf("condition node missing condition")
 	}
 	return nil

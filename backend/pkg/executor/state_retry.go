@@ -17,38 +17,42 @@ type RetryExecutor struct{}
 // Implements retry logic with configurable backoff strategies
 // Retries failed operations automatically with exponential, linear, or constant backoff
 func (e *RetryExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+data, err := types.AsRetryData(node.Data)
+if err != nil {
+return nil, err
+}
 	// Get retry configuration with defaults
 	maxAttempts := 3
-	if node.Data.MaxAttempts != nil {
-		maxAttempts = *node.Data.MaxAttempts
+	if data.MaxAttempts != nil {
+		maxAttempts = *data.MaxAttempts
 	}
 
 	backoffStrategy := "exponential"
-	if node.Data.BackoffStrategy != nil {
-		backoffStrategy = *node.Data.BackoffStrategy
+	if data.BackoffStrategy != nil {
+		backoffStrategy = *data.BackoffStrategy
 	}
 
 	initialDelay := 1 * time.Second
-	if node.Data.InitialDelay != nil {
-		if d, err := parseDuration(*node.Data.InitialDelay); err == nil {
+	if data.InitialDelay != nil {
+		if d, err := parseDuration(*data.InitialDelay); err == nil {
 			initialDelay = d
 		}
 	}
 
 	maxDelay := 30 * time.Second
-	if node.Data.MaxDelay != nil {
-		if d, err := parseDuration(*node.Data.MaxDelay); err == nil {
+	if data.MaxDelay != nil {
+		if d, err := parseDuration(*data.MaxDelay); err == nil {
 			maxDelay = d
 		}
 	}
 
 	multiplier := 2.0
-	if node.Data.Multiplier != nil {
-		multiplier = *node.Data.Multiplier
+	if data.Multiplier != nil {
+		multiplier = *data.Multiplier
 	}
 
 	// Get retry_on_errors patterns (optional)
-	retryOnErrors := node.Data.RetryOnErrors
+	retryOnErrors := data.RetryOnErrors
 
 	// Validate inputs
 	inputs := ctx.GetNodeInputs(node.ID)
@@ -151,6 +155,10 @@ func (e *RetryExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *RetryExecutor) Validate(node types.Node) error {
+data, err := types.AsRetryData(node.Data)
+if err != nil {
+return err
+}
 	// No required fields for retry - all have defaults
 	return nil
 }

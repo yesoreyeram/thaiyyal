@@ -14,6 +14,10 @@ type SortExecutor struct{}
 
 // Execute sorts the input array
 func (e *SortExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+data, err := types.AsSortData(node.Data)
+if err != nil {
+return nil, err
+}
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("sort node needs at least 1 input")
@@ -37,14 +41,14 @@ func (e *SortExecutor) Execute(ctx ExecutionContext, node types.Node) (interface
 
 	// Get field to sort by
 	field := ""
-	if node.Data.Field != nil {
-		field = *node.Data.Field
+	if data.Field != nil {
+		field = *data.Field
 	}
 
 	// Get order (default: asc)
 	order := "asc"
-	if node.Data.Order != nil {
-		order = strings.ToLower(*node.Data.Order)
+	if data.Order != nil {
+		order = strings.ToLower(*data.Order)
 	}
 
 	// Make a copy to sort
@@ -136,10 +140,14 @@ func (e *SortExecutor) NodeType() types.NodeType {
 
 // Validate checks if the node configuration is valid
 func (e *SortExecutor) Validate(node types.Node) error {
-	if node.Data.Order != nil {
-		orderLower := strings.ToLower(*node.Data.Order)
+data, err := types.AsSortData(node.Data)
+if err != nil {
+return err
+}
+	if data.Order != nil {
+		orderLower := strings.ToLower(*data.Order)
 		if orderLower != "asc" && orderLower != "desc" {
-			return fmt.Errorf("sort order must be 'asc' or 'desc', got '%s'", *node.Data.Order)
+			return fmt.Errorf("sort order must be 'asc' or 'desc', got '%s'", *data.Order)
 		}
 	}
 	return nil

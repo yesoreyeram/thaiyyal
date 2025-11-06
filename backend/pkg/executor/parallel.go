@@ -14,14 +14,18 @@ type ParallelExecutor struct{}
 // Execute runs the Parallel node
 // Handles parallel execution of multiple branches
 func (e *ParallelExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+data, err := types.AsParallelData(node.Data)
+if err != nil {
+return nil, err
+}
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("parallel node requires at least one input")
 	}
 
 	maxConcurrency := 10 // default
-	if node.Data.MaxConcurrency != nil {
-		maxConcurrency = *node.Data.MaxConcurrency
+	if data.MaxConcurrency != nil {
+		maxConcurrency = *data.MaxConcurrency
 	}
 
 	// Create semaphore for concurrency control
@@ -73,6 +77,10 @@ func (e *ParallelExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *ParallelExecutor) Validate(node types.Node) error {
+data, err := types.AsParallelData(node.Data)
+if err != nil {
+return err
+}
 	// No required fields for parallel
 	return nil
 }

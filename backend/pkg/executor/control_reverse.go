@@ -12,6 +12,11 @@ type ReverseExecutor struct{}
 
 // Execute reverses the input array
 func (e *ReverseExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+	// Validate node data type
+	if _, err := types.AsReverseData(node.Data); err != nil {
+		return nil, err
+	}
+	
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("reverse node needs at least 1 input")
@@ -52,6 +57,10 @@ func (e *ReverseExecutor) NodeType() types.NodeType {
 
 // Validate checks if the node configuration is valid
 func (e *ReverseExecutor) Validate(node types.Node) error {
+	// Validate node data type
+	if _, err := types.AsReverseData(node.Data); err != nil {
+		return err
+	}
 	// No configuration needed
 	return nil
 }

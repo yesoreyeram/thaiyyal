@@ -12,7 +12,11 @@ type TextOperationExecutor struct{}
 
 // Execute performs text transformations on string inputs
 func (e *TextOperationExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-	if node.Data.TextOp == nil {
+data, err := types.AsTextOperationData(node.Data)
+if err != nil {
+return nil, err
+}
+	if data.TextOp == nil {
 		return nil, fmt.Errorf("text operation node missing text_op")
 	}
 
@@ -23,13 +27,13 @@ func (e *TextOperationExecutor) Execute(ctx ExecutionContext, node types.Node) (
 	}
 
 	// Handle concat operation (can accept multiple inputs)
-	if *node.Data.TextOp == "concat" {
-		return e.executeTextConcat(inputs, node.Data.Separator)
+	if *data.TextOp == "concat" {
+		return e.executeTextConcat(inputs, data.Separator)
 	}
 
 	// Handle repeat operation
-	if *node.Data.TextOp == "repeat" {
-		return e.executeTextRepeat(inputs[0], node.Data.RepeatN)
+	if *data.TextOp == "repeat" {
+		return e.executeTextRepeat(inputs[0], data.RepeatN)
 	}
 
 	// For other operations, validate single input is a string
@@ -39,7 +43,7 @@ func (e *TextOperationExecutor) Execute(ctx ExecutionContext, node types.Node) (
 	}
 
 	// Perform text transformation using strategy pattern
-	switch *node.Data.TextOp {
+	switch *data.TextOp {
 	case "uppercase":
 		return strings.ToUpper(inputText), nil
 	case "lowercase":
@@ -51,7 +55,7 @@ func (e *TextOperationExecutor) Execute(ctx ExecutionContext, node types.Node) (
 	case "inversecase":
 		return toInverseCase(inputText), nil
 	default:
-		return nil, fmt.Errorf("unknown text operation: %s", *node.Data.TextOp)
+		return nil, fmt.Errorf("unknown text operation: %s", *data.TextOp)
 	}
 }
 
@@ -62,7 +66,11 @@ func (e *TextOperationExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *TextOperationExecutor) Validate(node types.Node) error {
-	if node.Data.TextOp == nil {
+data, err := types.AsTextOperationData(node.Data)
+if err != nil {
+return err
+}
+	if data.TextOp == nil {
 		return fmt.Errorf("text operation node missing text_op")
 	}
 	return nil

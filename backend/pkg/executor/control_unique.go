@@ -12,6 +12,11 @@ type UniqueExecutor struct{}
 
 // Execute removes duplicates from the input array
 func (e *UniqueExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+	data, err := types.AsUniqueData(node.Data)
+	if err != nil {
+		return nil, err
+	}
+	
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("unique node needs at least 1 input")
@@ -35,8 +40,8 @@ func (e *UniqueExecutor) Execute(ctx ExecutionContext, node types.Node) (interfa
 
 	// Get field for uniqueness check (optional)
 	field := ""
-	if node.Data.Field != nil {
-		field = *node.Data.Field
+	if data.Field != nil {
+		field = *data.Field
 	}
 
 	// Track seen values
@@ -84,6 +89,10 @@ func (e *UniqueExecutor) NodeType() types.NodeType {
 
 // Validate checks if the node configuration is valid
 func (e *UniqueExecutor) Validate(node types.Node) error {
+	// Validate node data type
+	if _, err := types.AsUniqueData(node.Data); err != nil {
+		return err
+	}
 	// No required fields - field is optional
 	return nil
 }

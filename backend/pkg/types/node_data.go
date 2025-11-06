@@ -217,12 +217,11 @@ func (d FilterData) Validate() error {
 type MapData struct {
 	CommonData
 	Expression *string `json:"expression,omitempty"`
+	Field      *string `json:"field,omitempty"` // Field to extract from each element
 }
 
 func (d MapData) Validate() error {
-	if d.Expression == nil {
-		return ErrMissingRequiredField("expression")
-	}
+	// Either expression or field should be provided, but both are optional
 	return nil
 }
 
@@ -285,12 +284,11 @@ func (d FindData) Validate() error {
 type FlatMapData struct {
 	CommonData
 	Expression *string `json:"expression,omitempty"`
+	Field      *string `json:"field,omitempty"` // Field to extract from each element before flattening
 }
 
 func (d FlatMapData) Validate() error {
-	if d.Expression == nil {
-		return ErrMissingRequiredField("expression")
-	}
+	// Either expression or field should be provided, but both are optional
 	return nil
 }
 
@@ -359,6 +357,7 @@ type ZipData struct {
 	CommonData
 	Arrays      interface{} `json:"arrays,omitempty"`
 	FillMissing interface{} `json:"fill_missing,omitempty"`
+	RemoveEmpty *bool       `json:"remove_empty,omitempty"` // Remove entries where any array is missing
 }
 
 func (d ZipData) Validate() error {

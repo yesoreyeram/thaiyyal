@@ -27,7 +27,7 @@ func NewHTTPExecutor() *HTTPExecutor {
 // Uses a shared connection pool for better performance.
 //
 // Named HTTP Clients:
-//   - If node.Data.HTTPClientUID is specified, uses the named client from the registry
+//   - If data.HTTPClientUID is specified, uses the named client from the registry
 //   - Named clients have pre-configured authentication, headers, and settings
 //   - Falls back to default client if HTTPClientUID is not specified
 //
@@ -40,7 +40,11 @@ func NewHTTPExecutor() *HTTPExecutor {
 //   - SSRF protection against cloud metadata endpoints
 //   - HTTP call count limit per execution
 func (e *HTTPExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-	if node.Data.URL == nil {
+data, err := types.AsHTTPData(node.Data)
+if err != nil {
+return nil, err
+}
+	if data.URL == nil {
 		return nil, fmt.Errorf("HTTP node missing url")
 	}
 
@@ -61,14 +65,14 @@ func (e *HTTPExecutor) Execute(ctx ExecutionContext, node types.Node) (interface
 
 	// Validate URL for security (SSRF protection) if using default client
 	// Named clients handle SSRF protection in their own middleware
-	if node.Data.HTTPClientUID == nil || *node.Data.HTTPClientUID == "" {
-		if err := isAllowedURL(*node.Data.URL, config); err != nil {
+	if data.HTTPClientUID == nil || *data.HTTPClientUID == "" {
+		if err := isAllowedURL(*data.URL, config); err != nil {
 			return nil, fmt.Errorf("URL validation failed: %w", err)
 		}
 	}
 
 	// Make HTTP GET request
-	resp, err := client.Get(*node.Data.URL)
+	resp, err := client.Get(*data.URL)
 	if err != nil {
 		return nil, fmt.Errorf("HTTP request failed: %w", err)
 	}
@@ -102,8 +106,15 @@ func (e *HTTPExecutor) Execute(ctx ExecutionContext, node types.Node) (interface
 // If a named client UID is specified, it retrieves it from the registry.
 // Otherwise, it uses the default shared client.
 func (e *HTTPExecutor) getHTTPClient(ctx ExecutionContext, node types.Node, config types.Config) *http.Client {
+	// Extract HTTP data
+	data, err := types.AsHTTPData(node.Data)
+	if err != nil {
+		// If we can't get the data, return default client
+		return e.getOrCreateClient(config)
+	}
+	
 	// Check if a named client UID is specified
-	if node.Data.HTTPClientUID != nil && *node.Data.HTTPClientUID != "" {
+	if data.HTTPClientUID != nil && *data.HTTPClientUID != "" {
 		// Try to get the named client from the registry
 		registryInterface := ctx.GetHTTPClientRegistry()
 		if registryInterface != nil {
@@ -113,7 +124,7 @@ func (e *HTTPExecutor) getHTTPClient(ctx ExecutionContext, node types.Node, conf
 			}
 
 			if registry, ok := registryInterface.(httpClientGetter); ok {
-				client, err := registry.Get(*node.Data.HTTPClientUID)
+				client, err := registry.Get(*data.HTTPClientUID)
 				if err == nil && client != nil {
 					return client
 				}
@@ -185,7 +196,11 @@ func (e *HTTPExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *HTTPExecutor) Validate(node types.Node) error {
-	if node.Data.URL == nil {
+data, err := types.AsHTTPData(node.Data)
+if err != nil {
+return err
+}
+	if data.URL == nil {
 		return fmt.Errorf("HTTP node missing url")
 	}
 	return nil

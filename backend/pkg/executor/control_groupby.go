@@ -12,6 +12,10 @@ type GroupByExecutor struct{}
 
 // Execute groups the input array and aggregates
 func (e *GroupByExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+data, err := types.AsGroupByData(node.Data)
+if err != nil {
+return nil, err
+}
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("group_by node needs at least 1 input")
@@ -35,8 +39,8 @@ func (e *GroupByExecutor) Execute(ctx ExecutionContext, node types.Node) (interf
 
 	// Get grouping field
 	field := ""
-	if node.Data.Field != nil {
-		field = *node.Data.Field
+	if data.Field != nil {
+		field = *data.Field
 	}
 	if field == "" {
 		return nil, fmt.Errorf("group_by node requires 'field' string")
@@ -44,14 +48,14 @@ func (e *GroupByExecutor) Execute(ctx ExecutionContext, node types.Node) (interf
 
 	// Get aggregate function (default: count)
 	aggregate := "count"
-	if node.Data.Aggregate != nil {
-		aggregate = *node.Data.Aggregate
+	if data.Aggregate != nil {
+		aggregate = *data.Aggregate
 	}
 
 	// Get value field for numeric aggregations
 	valueField := ""
-	if node.Data.ValueField != nil {
-		valueField = *node.Data.ValueField
+	if data.ValueField != nil {
+		valueField = *data.ValueField
 	}
 
 	// Group items
@@ -220,12 +224,16 @@ func (e *GroupByExecutor) NodeType() types.NodeType {
 
 // Validate checks if the node configuration is valid
 func (e *GroupByExecutor) Validate(node types.Node) error {
-	if node.Data.Field == nil || *node.Data.Field == "" {
+data, err := types.AsGroupByData(node.Data)
+if err != nil {
+return err
+}
+	if data.Field == nil || *data.Field == "" {
 		return fmt.Errorf("group_by node requires non-empty 'field'")
 	}
 
-	if node.Data.Aggregate != nil {
-		aggregate := *node.Data.Aggregate
+	if data.Aggregate != nil {
+		aggregate := *data.Aggregate
 		validAgg := []string{"count", "sum", "avg", "min", "max", "values"}
 		found := false
 		for _, valid := range validAgg {
@@ -239,7 +247,7 @@ func (e *GroupByExecutor) Validate(node types.Node) error {
 		}
 
 		// Check value_field for numeric aggregations
-		if (aggregate == "sum" || aggregate == "avg" || aggregate == "min" || aggregate == "max") && (node.Data.ValueField == nil || *node.Data.ValueField == "") {
+		if (aggregate == "sum" || aggregate == "avg" || aggregate == "min" || aggregate == "max") && (data.ValueField == nil || *data.ValueField == "") {
 			return fmt.Errorf("group_by with '%s' aggregate requires 'value_field'", aggregate)
 		}
 	}

@@ -36,6 +36,10 @@ type ExpressionExecutor struct{}
 //	Conditional: 150 → Expression("input > 100 ? 'high' : 'low'") → "high"
 //	Field comparison: {age:25} → Expression("input.age > 18") → true
 func (e *ExpressionExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+data, err := types.AsExpressionData(node.Data)
+if err != nil {
+return nil, err
+}
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("expression node needs at least 1 input")
@@ -44,7 +48,7 @@ func (e *ExpressionExecutor) Execute(ctx ExecutionContext, node types.Node) (int
 	input := inputs[0]
 
 	// Check if expression is provided
-	if node.Data.Expression == nil || *node.Data.Expression == "" {
+	if data.Expression == nil || *data.Expression == "" {
 		slog.Warn("expression node has no expression specified, passing through input unchanged",
 			slog.String("node_id", node.ID),
 		)
@@ -54,7 +58,7 @@ func (e *ExpressionExecutor) Execute(ctx ExecutionContext, node types.Node) (int
 		}, nil
 	}
 
-	expr := *node.Data.Expression
+	expr := *data.Expression
 
 	slog.Debug("expression node starting",
 		slog.String("node_id", node.ID),
@@ -110,16 +114,20 @@ func (e *ExpressionExecutor) NodeType() types.NodeType {
 
 // Validate validates the Expression node configuration
 func (e *ExpressionExecutor) Validate(node types.Node) error {
+data, err := types.AsExpressionData(node.Data)
+if err != nil {
+return err
+}
 	if node.Type != types.NodeTypeExpression {
 		return fmt.Errorf("invalid node type: expected %s, got %s", types.NodeTypeExpression, node.Type)
 	}
 
-	if node.Data.Expression == nil || *node.Data.Expression == "" {
+	if data.Expression == nil || *data.Expression == "" {
 		return fmt.Errorf("expression is required")
 	}
 
 	// Basic validation - check expression is not too long
-	if len(*node.Data.Expression) > 10000 {
+	if len(*data.Expression) > 10000 {
 		return fmt.Errorf("expression is too long (max 10000 characters)")
 	}
 

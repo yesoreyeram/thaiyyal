@@ -11,27 +11,31 @@ type RangeExecutor struct{}
 
 // Execute generates a range of numbers
 func (e *RangeExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+data, err := types.AsRangeData(node.Data)
+if err != nil {
+return nil, err
+}
 	// Get start
 	start := 0.0
-	if startVal, ok := node.Data.Start.(float64); ok {
+	if startVal, ok := data.Start.(float64); ok {
 		start = startVal
-	} else if startVal, ok := node.Data.Start.(int); ok {
+	} else if startVal, ok := data.Start.(int); ok {
 		start = float64(startVal)
 	}
 
 	// Get end
 	end := 10.0 // default
-	if endVal, ok := node.Data.End.(float64); ok {
+	if endVal, ok := data.End.(float64); ok {
 		end = endVal
-	} else if endVal, ok := node.Data.End.(int); ok {
+	} else if endVal, ok := data.End.(int); ok {
 		end = float64(endVal)
 	}
 
 	// Get step
 	step := 1.0 // default
-	if stepVal, ok := node.Data.Step.(float64); ok {
+	if stepVal, ok := data.Step.(float64); ok {
 		step = stepVal
-	} else if stepVal, ok := node.Data.Step.(int); ok {
+	} else if stepVal, ok := data.Step.(int); ok {
 		step = float64(stepVal)
 	}
 
@@ -81,11 +85,15 @@ func (e *RangeExecutor) NodeType() types.NodeType {
 
 // Validate checks if the node configuration is valid
 func (e *RangeExecutor) Validate(node types.Node) error {
+data, err := types.AsRangeData(node.Data)
+if err != nil {
+return err
+}
 	// Get step for validation
 	step := 1.0
-	if stepVal, ok := node.Data.Step.(float64); ok {
+	if stepVal, ok := data.Step.(float64); ok {
 		step = stepVal
-	} else if stepVal, ok := node.Data.Step.(int); ok {
+	} else if stepVal, ok := data.Step.(int); ok {
 		step = float64(stepVal)
 	}
 
@@ -95,16 +103,16 @@ func (e *RangeExecutor) Validate(node types.Node) error {
 
 	// Get start and end for validation
 	start := 0.0
-	if startVal, ok := node.Data.Start.(float64); ok {
+	if startVal, ok := data.Start.(float64); ok {
 		start = startVal
-	} else if startVal, ok := node.Data.Start.(int); ok {
+	} else if startVal, ok := data.Start.(int); ok {
 		start = float64(startVal)
 	}
 
 	end := 10.0
-	if endVal, ok := node.Data.End.(float64); ok {
+	if endVal, ok := data.End.(float64); ok {
 		end = endVal
-	} else if endVal, ok := node.Data.End.(int); ok {
+	} else if endVal, ok := data.End.(int); ok {
 		end = float64(endVal)
 	}
 

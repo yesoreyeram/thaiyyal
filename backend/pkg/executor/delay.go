@@ -13,17 +13,21 @@ type DelayExecutor struct{}
 // Execute runs the Delay node
 // Handles execution delay
 func (e *DelayExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+data, err := types.AsDelayData(node.Data)
+if err != nil {
+return nil, err
+}
 	inputs := ctx.GetNodeInputs(node.ID)
 	var inputValue interface{}
 	if len(inputs) > 0 {
 		inputValue = inputs[0]
 	}
 
-	if node.Data.Duration == nil {
+	if data.Duration == nil {
 		return nil, fmt.Errorf("delay node requires duration field")
 	}
 
-	duration, err := parseDuration(*node.Data.Duration)
+	duration, err := parseDuration(*data.Duration)
 	if err != nil {
 		return nil, fmt.Errorf("invalid duration format: %w", err)
 	}
@@ -33,7 +37,7 @@ func (e *DelayExecutor) Execute(ctx ExecutionContext, node types.Node) (interfac
 
 	return map[string]interface{}{
 		"value":    inputValue,
-		"duration": *node.Data.Duration,
+		"duration": *data.Duration,
 		"delayed":  true,
 	}, nil
 }
@@ -45,7 +49,11 @@ func (e *DelayExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *DelayExecutor) Validate(node types.Node) error {
-	if node.Data.Duration == nil {
+data, err := types.AsDelayData(node.Data)
+if err != nil {
+return err
+}
+	if data.Duration == nil {
 		return fmt.Errorf("delay node requires duration field")
 	}
 	return nil

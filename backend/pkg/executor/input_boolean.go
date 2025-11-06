@@ -9,9 +9,13 @@ type BooleanInputExecutor struct{}
 
 // Execute returns the boolean value from a boolean input node
 func (e *BooleanInputExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+data, err := types.AsBooleanInputData(node.Data)
+if err != nil {
+return nil, err
+}
 	// Get the boolean value from the node data
-	if node.Data.BooleanValue != nil {
-		return *node.Data.BooleanValue, nil
+	if data.BooleanValue != nil {
+		return *data.BooleanValue, nil
 	}
 
 	// Default to false if no value is set
@@ -25,6 +29,10 @@ func (e *BooleanInputExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *BooleanInputExecutor) Validate(node types.Node) error {
+data, err := types.AsBooleanInputData(node.Data)
+if err != nil {
+return err
+}
 	// Boolean value is optional, defaults to false
 	return nil
 }

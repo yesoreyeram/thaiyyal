@@ -12,6 +12,10 @@ type ExtractExecutor struct{}
 // Execute runs the Extract node
 // Extracts specific fields from object inputs.
 func (e *ExtractExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+data, err := types.AsExtractData(node.Data)
+if err != nil {
+return nil, err
+}
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("extract node requires input")
@@ -24,8 +28,8 @@ func (e *ExtractExecutor) Execute(ctx ExecutionContext, node types.Node) (interf
 	}
 
 	// Single field extraction
-	if node.Data.Field != nil {
-		field := *node.Data.Field
+	if data.Field != nil {
+		field := *data.Field
 		value, exists := inputMap[field]
 		if !exists {
 			return nil, fmt.Errorf("field '%s' not found in input object", field)
@@ -37,9 +41,9 @@ func (e *ExtractExecutor) Execute(ctx ExecutionContext, node types.Node) (interf
 	}
 
 	// Multiple fields extraction
-	if len(node.Data.Fields) > 0 {
+	if len(data.Fields) > 0 {
 		result := make(map[string]interface{})
-		for _, field := range node.Data.Fields {
+		for _, field := range data.Fields {
 			value, exists := inputMap[field]
 			if exists {
 				result[field] = value
@@ -58,7 +62,11 @@ func (e *ExtractExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *ExtractExecutor) Validate(node types.Node) error {
-	if node.Data.Field == nil && len(node.Data.Fields) == 0 {
+data, err := types.AsExtractData(node.Data)
+if err != nil {
+return err
+}
+	if data.Field == nil && len(data.Fields) == 0 {
 		return fmt.Errorf("extract node requires 'field' or 'fields' configuration")
 	}
 	return nil

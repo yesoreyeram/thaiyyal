@@ -12,11 +12,15 @@ type JoinExecutor struct{}
 // Execute runs the Join node
 // Handles joining/merging multiple inputs
 func (e *JoinExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+data, err := types.AsJoinData(node.Data)
+if err != nil {
+return nil, err
+}
 	inputs := ctx.GetNodeInputs(node.ID)
 
 	strategy := "all" // default strategy
-	if node.Data.JoinStrategy != nil {
-		strategy = *node.Data.JoinStrategy
+	if data.JoinStrategy != nil {
+		strategy = *data.JoinStrategy
 	}
 
 	switch strategy {
@@ -64,6 +68,10 @@ func (e *JoinExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *JoinExecutor) Validate(node types.Node) error {
+data, err := types.AsJoinData(node.Data)
+if err != nil {
+return err
+}
 	// No required fields for join
 	return nil
 }
