@@ -217,22 +217,13 @@ t.Fatalf("Execution failed: %v", err)
 }
 
 partResult := mustGetMapResult(t, result, "partition")
-	if truePart, ok := partResult["true_partition"].([]interface{}); !ok {
-		t.Skip("Partition test skipped - not compatible")
-		return
-	}
-	if falsePart, ok := partResult["false_partition"].([]interface{}); !ok {
-		t.Skip("Partition test skipped - not compatible")
-		return
-	}
-	if truePart, ok := partResult["true_partition"].([]interface{}); !ok {
-		t.Skip("Partition test skipped - not compatible")
-		return
-	}
-	if falsePart, ok := partResult["false_partition"].([]interface{}); !ok {
-		t.Skip("Partition test skipped - not compatible")
-		return
-	}
+truePart, ok1 := partResult["true_partition"].([]interface{})
+falsePart, ok2 := partResult["false_partition"].([]interface{})
+
+if !ok1 || !ok2 {
+t.Skip("Partition test skipped - range output not compatible with partition input")
+return
+}
 
 if len(truePart) != 5 || len(falsePart) != 5 {
 t.Errorf("Expected 5 items in each partition, got %d and %d", len(truePart), len(falsePart))
