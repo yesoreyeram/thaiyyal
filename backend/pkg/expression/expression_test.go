@@ -617,25 +617,34 @@ func TestCoalesceFunction(t *testing.T) {
 	}
 
 	tests := []struct {
-		name    string
-		args    []interface{}
-		want    interface{}
-		wantErr bool
+		name       string
+		expression string
+		want       interface{}
+		wantErr    bool
 	}{
-		{"first non-null", []interface{}{nil, nil, 100.0, 200.0}, 100.0, false},
-		{"all null", []interface{}{nil, nil, nil}, nil, false},
-		{"first is non-null", []interface{}{100.0, nil, 200.0}, 100.0, false},
+		{"first non-null", "coalesce(nil, nil, 100, 200)", 100.0, false},
+		{"all null", "coalesce(nil, nil, nil)", nil, false},
+		{"first is non-null", "coalesce(100, nil, 200)", 100.0, false},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := callDateTimeFunction("coalesce", tt.args, ctx)
+			got, err := EvaluateExpression(tt.expression, nil, ctx)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("coalesce() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			if !tt.wantErr && got != tt.want {
-				t.Errorf("coalesce() = %v, want %v", got, tt.want)
+			if !tt.wantErr {
+				// Convert both to float64 for comparison if numeric
+				gotFloat, gotIsNum := got.(float64)
+				wantFloat, wantIsNum := tt.want.(float64)
+				if gotIsNum && wantIsNum {
+					if gotFloat != wantFloat {
+						t.Errorf("coalesce() = %v, want %v", got, tt.want)
+					}
+				} else if got != tt.want {
+					t.Errorf("coalesce() = %v, want %v", got, tt.want)
+				}
 			}
 		})
 	}
