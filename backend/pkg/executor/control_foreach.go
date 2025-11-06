@@ -40,10 +40,10 @@ type ForEachExecutor struct{}
 //	Each iteration: variables.item = {"name":"Alice"}, variables.index = 0
 //	Output: {iterations: 2, successful: 2, failed: 0}
 func (e *ForEachExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsForEachData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsForEachData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("for_each node needs at least 1 input")

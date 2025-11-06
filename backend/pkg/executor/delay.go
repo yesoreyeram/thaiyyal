@@ -13,10 +13,10 @@ type DelayExecutor struct{}
 // Execute runs the Delay node
 // Handles execution delay
 func (e *DelayExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsDelayData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsDelayData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	inputs := ctx.GetNodeInputs(node.ID)
 	var inputValue interface{}
 	if len(inputs) > 0 {
@@ -49,10 +49,10 @@ func (e *DelayExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *DelayExecutor) Validate(node types.Node) error {
-data, err := types.AsDelayData(node.Data)
-if err != nil {
-return err
-}
+	data, err := types.AsDelayData(node.Data)
+	if err != nil {
+		return err
+	}
 	if data.Duration == nil {
 		return fmt.Errorf("delay node requires duration field")
 	}

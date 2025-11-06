@@ -13,10 +13,10 @@ type CacheExecutor struct{}
 // Execute runs the Cache node
 // Handles cache get/set operations
 func (e *CacheExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsCacheData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsCacheData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	if data.CacheOp == nil {
 		return nil, fmt.Errorf("cache node requires cache_op field")
 	}
@@ -99,10 +99,10 @@ func (e *CacheExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *CacheExecutor) Validate(node types.Node) error {
-data, err := types.AsCacheData(node.Data)
-if err != nil {
-return err
-}
+	data, err := types.AsCacheData(node.Data)
+	if err != nil {
+		return err
+	}
 	if data.CacheOp == nil {
 		return fmt.Errorf("cache node requires cache_op field")
 	}

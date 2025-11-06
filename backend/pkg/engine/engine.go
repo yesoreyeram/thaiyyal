@@ -849,18 +849,19 @@ func (e *Engine) getNode(nodeID string) types.Node {
 // - At least one incoming edge's source has executed AND:
 //   - The edge is unconditional, OR
 //   - The edge's condition is satisfied
+//
 // Returns false if:
 // - All source nodes have been skipped (none executed)
 // - All incoming edges are conditional and none are satisfied
 func (e *Engine) shouldExecuteNode(nodeID string) bool {
 	// Find all edges targeting this node
 	incomingEdges := e.getIncomingEdges(nodeID)
-	
+
 	// If no incoming edges, it's an orphan/start node - always execute
 	if len(incomingEdges) == 0 {
 		return true
 	}
-	
+
 	// Check if any incoming edge allows execution
 	// We need at least one source node to have executed AND either:
 	// 1. The edge is unconditional, OR
@@ -868,7 +869,7 @@ func (e *Engine) shouldExecuteNode(nodeID string) bool {
 	hasExecutedSource := false
 	hasConditionalEdge := false
 	conditionSatisfied := false
-	
+
 	for _, edge := range incomingEdges {
 		// Check if the source node has executed
 		sourceResult, sourceExecuted := e.GetNodeResult(edge.Source)
@@ -877,34 +878,34 @@ func (e *Engine) shouldExecuteNode(nodeID string) bool {
 			// This edge cannot contribute to allowing this node to execute
 			continue
 		}
-		
+
 		hasExecutedSource = true
-		
+
 		// Check if this edge has a condition (sourceHandle or legacy condition field)
 		edgeCondition := edge.SourceHandle
 		if edgeCondition == nil && edge.Condition != nil {
 			edgeCondition = edge.Condition // Backward compatibility
 		}
-		
+
 		if edgeCondition == nil {
 			// Unconditional edge from an executed source - node should execute
 			return true
 		}
-		
+
 		hasConditionalEdge = true
-		
+
 		// Check if the condition is satisfied based on source node result
 		if e.isConditionSatisfied(sourceResult, *edgeCondition) {
 			conditionSatisfied = true
 			// Don't break here - we might find an unconditional edge
 		}
 	}
-	
+
 	// If no source nodes have executed, don't execute this node
 	if !hasExecutedSource {
 		return false
 	}
-	
+
 	// If all edges are conditional, at least one must be satisfied
 	// If no conditional edges exist, execute the node
 	return !hasConditionalEdge || conditionSatisfied
@@ -934,14 +935,14 @@ func (e *Engine) isConditionSatisfied(sourceResult interface{}, condition string
 				return true
 			}
 		}
-		
+
 		// Check for switch node's output_path field
 		if outputPath, exists := resultMap["output_path"]; exists {
 			if pathStr, ok := outputPath.(string); ok && pathStr == condition {
 				return true
 			}
 		}
-		
+
 		// Check for boolean "true" or "false" fields
 		if condition == "true" {
 			if truePath, exists := resultMap["true_path"]; exists {
@@ -967,10 +968,9 @@ func (e *Engine) isConditionSatisfied(sourceResult interface{}, condition string
 			}
 		}
 	}
-	
+
 	return false
 }
-
 
 // getFinalOutput determines the final output of the workflow.
 // The final output is the result of a terminal node (node with no outgoing edges).

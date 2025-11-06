@@ -13,10 +13,10 @@ type CounterExecutor struct{}
 // Handles counter operations (increment, decrement, reset, get).
 // The counter maintains a single numeric value across workflow execution.
 func (e *CounterExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsCounterData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsCounterData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	if data.CounterOp == nil {
 		return nil, fmt.Errorf("counter node missing counter_op")
 	}
@@ -80,10 +80,10 @@ func (e *CounterExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *CounterExecutor) Validate(node types.Node) error {
-data, err := types.AsCounterData(node.Data)
-if err != nil {
-return err
-}
+	data, err := types.AsCounterData(node.Data)
+	if err != nil {
+		return err
+	}
 	if data.CounterOp == nil {
 		return fmt.Errorf("counter node missing counter_op")
 	}

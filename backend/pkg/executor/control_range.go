@@ -11,10 +11,10 @@ type RangeExecutor struct{}
 
 // Execute generates a range of numbers
 func (e *RangeExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsRangeData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsRangeData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	// Get start
 	start := 0.0
 	if startVal, ok := data.Start.(float64); ok {
@@ -85,10 +85,10 @@ func (e *RangeExecutor) NodeType() types.NodeType {
 
 // Validate checks if the node configuration is valid
 func (e *RangeExecutor) Validate(node types.Node) error {
-data, err := types.AsRangeData(node.Data)
-if err != nil {
-return err
-}
+	data, err := types.AsRangeData(node.Data)
+	if err != nil {
+		return err
+	}
 	// Get step for validation
 	step := 1.0
 	if stepVal, ok := data.Step.(float64); ok {

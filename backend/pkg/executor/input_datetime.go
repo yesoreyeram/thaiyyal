@@ -11,10 +11,10 @@ type DateTimeInputExecutor struct{}
 
 // Execute returns the datetime value from a datetime input node
 func (e *DateTimeInputExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsDateTimeInputData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsDateTimeInputData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	if data.DateTimeValue != nil {
 		return *data.DateTimeValue, nil
 	}
@@ -28,10 +28,10 @@ func (e *DateTimeInputExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *DateTimeInputExecutor) Validate(node types.Node) error {
-data, err := types.AsDateTimeInputData(node.Data)
-if err != nil {
-return err
-}
+	data, err := types.AsDateTimeInputData(node.Data)
+	if err != nil {
+		return err
+	}
 	if data.DateTimeValue == nil {
 		return fmt.Errorf("datetime input node missing datetime value")
 	}

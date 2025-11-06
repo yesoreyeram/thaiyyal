@@ -18,7 +18,7 @@ func (e *TryCatchExecutor) Execute(ctx ExecutionContext, node types.Node) (inter
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Get configuration
 	fallbackValue := data.FallbackValue
 

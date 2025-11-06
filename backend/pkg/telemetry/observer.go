@@ -15,11 +15,11 @@ import (
 // for workflow execution events.
 type TelemetryObserver struct {
 	provider *Provider
-	
+
 	// Track active spans for workflow and nodes
 	workflowSpan trace.Span
 	nodeSpans    map[string]trace.Span
-	
+
 	// Track execution times
 	workflowStartTime time.Time
 	nodeStartTimes    map[string]time.Time
@@ -59,7 +59,7 @@ func (o *TelemetryObserver) handleWorkflowStart(ctx context.Context, event obser
 			attribute.String("execution.id", event.ExecutionID),
 		),
 	)
-	
+
 	o.workflowSpan = span
 	o.workflowStartTime = event.Timestamp
 }
@@ -67,7 +67,7 @@ func (o *TelemetryObserver) handleWorkflowStart(ctx context.Context, event obser
 func (o *TelemetryObserver) handleWorkflowEnd(ctx context.Context, event observer.Event) {
 	// Calculate duration
 	duration := time.Since(o.workflowStartTime)
-	
+
 	// Get nodes executed count from metadata
 	nodesExecuted := 0
 	if val, ok := event.Metadata["nodes_executed"]; ok {
@@ -75,11 +75,11 @@ func (o *TelemetryObserver) handleWorkflowEnd(ctx context.Context, event observe
 			nodesExecuted = count
 		}
 	}
-	
+
 	// Record metrics
 	success := event.Status == observer.StatusSuccess
 	o.provider.RecordWorkflowExecution(ctx, event.WorkflowID, duration, success, nodesExecuted)
-	
+
 	// End workflow span
 	if o.workflowSpan != nil {
 		if event.Error != nil {
@@ -100,7 +100,7 @@ func (o *TelemetryObserver) handleNodeStart(ctx context.Context, event observer.
 	} else {
 		spanCtx = ctx
 	}
-	
+
 	_, span := o.provider.Tracer().Start(spanCtx, "node.execute",
 		trace.WithAttributes(
 			attribute.String("node.id", event.NodeID),
@@ -108,7 +108,7 @@ func (o *TelemetryObserver) handleNodeStart(ctx context.Context, event observer.
 			attribute.String("execution.id", event.ExecutionID),
 		),
 	)
-	
+
 	o.nodeSpans[event.NodeID] = span
 	o.nodeStartTimes[event.NodeID] = event.Timestamp
 }
@@ -128,10 +128,10 @@ func (o *TelemetryObserver) handleNodeEnd(ctx context.Context, event observer.Ev
 		duration = time.Since(startTime)
 		delete(o.nodeStartTimes, event.NodeID)
 	}
-	
+
 	// Record metrics
 	o.provider.RecordNodeExecution(ctx, event.NodeID, event.NodeType, duration, success)
-	
+
 	// End node span
 	if span, ok := o.nodeSpans[event.NodeID]; ok {
 		if event.Error != nil {

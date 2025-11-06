@@ -55,7 +55,7 @@ func (e *ExpressionError) Error() string {
 		} else {
 			pointer = "^"
 		}
-		
+
 		msg := fmt.Sprintf("Expression error: %s\n  %s\n  %s", e.Message, e.Expression, pointer)
 		if e.Context != "" {
 			msg += fmt.Sprintf("\n  Context: %s", e.Context)
@@ -65,7 +65,7 @@ func (e *ExpressionError) Error() string {
 		}
 		return msg
 	}
-	
+
 	msg := fmt.Sprintf("Expression error: %s", e.Message)
 	if e.Expression != "" {
 		msg += fmt.Sprintf("\n  Expression: %s", e.Expression)

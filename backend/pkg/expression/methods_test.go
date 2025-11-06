@@ -138,7 +138,7 @@ func TestStringMethods(t *testing.T) {
 					}
 					return
 				}
-				
+
 				if got != tt.want {
 					t.Errorf("EvaluateExpression() = %v, want %v", got, tt.want)
 				}
@@ -305,7 +305,7 @@ func TestArrayMethods(t *testing.T) {
 					}
 					return
 				}
-				
+
 				if got != tt.want {
 					t.Errorf("EvaluateExpression() = %v, want %v", got, tt.want)
 				}

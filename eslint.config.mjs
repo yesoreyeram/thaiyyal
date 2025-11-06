@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Ignore frontend static assets copied for Go server to serve
+    "backend/pkg/server/static/**",
   ]),
 ]);
 

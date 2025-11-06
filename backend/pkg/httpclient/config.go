@@ -46,10 +46,10 @@ type APIKeyAuthConfig struct {
 
 // AuthConfig contains authentication configuration
 type AuthConfig struct {
-	Type     AuthType          `json:"type,omitempty" yaml:"type,omitempty"`               // Authentication type (default: "none")
-	BasicAuth *BasicAuthConfig `json:"basic_auth,omitempty" yaml:"basic_auth,omitempty"`   // Basic auth credentials
-	Token     *TokenAuthConfig `json:"token,omitempty" yaml:"token,omitempty"`             // Bearer token
-	APIKey    *APIKeyAuthConfig `json:"api_key,omitempty" yaml:"api_key,omitempty"`         // API key configuration
+	Type      AuthType          `json:"type,omitempty" yaml:"type,omitempty"`             // Authentication type (default: "none")
+	BasicAuth *BasicAuthConfig  `json:"basic_auth,omitempty" yaml:"basic_auth,omitempty"` // Basic auth credentials
+	Token     *TokenAuthConfig  `json:"token,omitempty" yaml:"token,omitempty"`           // Bearer token
+	APIKey    *APIKeyAuthConfig `json:"api_key,omitempty" yaml:"api_key,omitempty"`       // API key configuration
 }
 
 // NetworkConfig contains network-level configuration
@@ -115,7 +115,7 @@ func (c *Config) Validate() error {
 	}
 
 	// Validate auth type
-	if c.Auth.Type != "" && c.Auth.Type != AuthTypeNone && c.Auth.Type != AuthTypeBasic && 
+	if c.Auth.Type != "" && c.Auth.Type != AuthTypeNone && c.Auth.Type != AuthTypeBasic &&
 		c.Auth.Type != AuthTypeBearer && c.Auth.Type != AuthTypeAPIKey {
 		return fmt.Errorf("invalid auth_type: %s (must be one of: none, basic, bearer, apikey)", c.Auth.Type)
 	}

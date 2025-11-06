@@ -14,10 +14,10 @@ type ParallelExecutor struct{}
 // Execute runs the Parallel node
 // Handles parallel execution of multiple branches
 func (e *ParallelExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsParallelData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsParallelData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("parallel node requires at least one input")

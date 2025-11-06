@@ -118,9 +118,9 @@ func (d OperationData) Validate() error {
 // TextOperationData contains data for text operation nodes
 type TextOperationData struct {
 	CommonData
-	TextOp    *string `json:"text_op,omitempty"`    // concat, uppercase, lowercase, etc.
-	Separator *string `json:"separator,omitempty"`  // for concat operation
-	RepeatN   *int    `json:"repeat_n,omitempty"`   // for repeat operation
+	TextOp    *string `json:"text_op,omitempty"`   // concat, uppercase, lowercase, etc.
+	Separator *string `json:"separator,omitempty"` // for concat operation
+	RepeatN   *int    `json:"repeat_n,omitempty"`  // for repeat operation
 }
 
 func (d TextOperationData) Validate() error {
@@ -503,10 +503,10 @@ func (d ParseData) Validate() error {
 // FormatData contains data for format nodes
 type FormatData struct {
 	CommonData
-	OutputType     *string `json:"output_type,omitempty"`      // JSON, CSV, TSV
-	PrettyPrint    *bool   `json:"pretty_print,omitempty"`     // For JSON
-	IncludeHeaders *bool   `json:"include_headers,omitempty"`  // For CSV/TSV
-	Delimiter      *string `json:"delimiter,omitempty"`        // For CSV
+	OutputType     *string `json:"output_type,omitempty"`     // JSON, CSV, TSV
+	PrettyPrint    *bool   `json:"pretty_print,omitempty"`    // For JSON
+	IncludeHeaders *bool   `json:"include_headers,omitempty"` // For CSV/TSV
+	Delimiter      *string `json:"delimiter,omitempty"`       // For CSV
 }
 
 func (d FormatData) Validate() error {
@@ -585,7 +585,7 @@ func (d DelayData) Validate() error {
 // CacheData contains data for cache nodes
 type CacheData struct {
 	CommonData
-	CacheOp  *string `json:"cache_op,omitempty"`  // get, set
+	CacheOp  *string `json:"cache_op,omitempty"` // get, set
 	CacheKey *string `json:"cache_key,omitempty"`
 	TTL      *string `json:"ttl,omitempty"`
 	MaxSize  *int    `json:"max_size,omitempty"`

@@ -1,9 +1,12 @@
 package executor
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -40,10 +43,10 @@ func NewHTTPExecutor() *HTTPExecutor {
 //   - SSRF protection against cloud metadata endpoints
 //   - HTTP call count limit per execution
 func (e *HTTPExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsHTTPData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsHTTPData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	if data.URL == nil {
 		return nil, fmt.Errorf("HTTP node missing url")
 	}
@@ -99,6 +102,24 @@ return nil, err
 		}
 	}
 
+	// If the response content-type is JSON (or looks like JSON), parse and return the object
+	contentType := resp.Header.Get("Content-Type")
+	if isJSONContentType(contentType) || (contentType == "" && looksLikeJSON(body)) {
+		var v interface{}
+		dec := json.NewDecoder(bytes.NewReader(body))
+		// Preserve numbers as json.Number to avoid unintended float conversions
+		dec.UseNumber()
+		if err := dec.Decode(&v); err != nil {
+			// If server declared JSON but it's invalid, return an error
+			if isJSONContentType(contentType) {
+				return nil, fmt.Errorf("failed to parse JSON response: %w", err)
+			}
+			// Otherwise, fall back to returning the raw string body
+		} else {
+			return v, nil
+		}
+	}
+
 	return string(body), nil
 }
 
@@ -112,7 +133,7 @@ func (e *HTTPExecutor) getHTTPClient(ctx ExecutionContext, node types.Node, conf
 		// If we can't get the data, return default client
 		return e.getOrCreateClient(config)
 	}
-	
+
 	// Check if a named client UID is specified
 	if data.HTTPClientUID != nil && *data.HTTPClientUID != "" {
 		// Try to get the named client from the registry
@@ -196,10 +217,10 @@ func (e *HTTPExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *HTTPExecutor) Validate(node types.Node) error {
-data, err := types.AsHTTPData(node.Data)
-if err != nil {
-return err
-}
+	data, err := types.AsHTTPData(node.Data)
+	if err != nil {
+		return err
+	}
 	if data.URL == nil {
 		return fmt.Errorf("HTTP node missing url")
 	}
@@ -225,4 +246,35 @@ func isAllowedURL(url string, config types.Config) error {
 
 	// Validate URL
 	return protection.ValidateURL(url)
+}
+
+// isJSONContentType returns true if the provided Content-Type header value denotes JSON
+func isJSONContentType(ct string) bool {
+	if ct == "" {
+		return false
+	}
+	ct = strings.ToLower(ct)
+	// Strip parameters such as charset
+	if idx := strings.Index(ct, ";"); idx >= 0 {
+		ct = ct[:idx]
+	}
+	ct = strings.TrimSpace(ct)
+	if ct == "application/json" {
+		return true
+	}
+	// Accept vendor-specific types like application/problem+json, application/vnd.api+json
+	return strings.HasPrefix(ct, "application/") && strings.HasSuffix(ct, "+json")
+}
+
+// looksLikeJSON performs a lightweight check on the raw body to see if it appears to be JSON
+func looksLikeJSON(b []byte) bool {
+	if len(b) == 0 {
+		return false
+	}
+	s := bytes.TrimSpace(b)
+	if len(s) == 0 {
+		return false
+	}
+	first := s[0]
+	return first == '{' || first == '['
 }

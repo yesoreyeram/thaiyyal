@@ -14,10 +14,10 @@ type SortExecutor struct{}
 
 // Execute sorts the input array
 func (e *SortExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsSortData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsSortData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("sort node needs at least 1 input")
@@ -140,10 +140,10 @@ func (e *SortExecutor) NodeType() types.NodeType {
 
 // Validate checks if the node configuration is valid
 func (e *SortExecutor) Validate(node types.Node) error {
-data, err := types.AsSortData(node.Data)
-if err != nil {
-return err
-}
+	data, err := types.AsSortData(node.Data)
+	if err != nil {
+		return err
+	}
 	if data.Order != nil {
 		orderLower := strings.ToLower(*data.Order)
 		if orderLower != "asc" && orderLower != "desc" {

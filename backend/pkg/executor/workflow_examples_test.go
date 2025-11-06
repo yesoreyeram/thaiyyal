@@ -14,13 +14,13 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 		// Example 21: Parse JSON data from various sources and extract specific fields
 		// Node types: rangeNode, mapNode, vizNode
 		// Description: Handles nested structures and arrays
-		
+
 		rangeExec := &RangeExecutor{}
-		
+
 		ctx := &MockExecutionContext{
 			inputs: map[string][]interface{}{},
 		}
-		
+
 		// Execute range node to generate data (1-10 inclusive)
 		rangeNode := types.Node{
 			ID:   "1",
@@ -31,27 +31,27 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 				Step:  1,
 			},
 		}
-		
+
 		rangeResult, err := rangeExec.Execute(ctx, rangeNode)
 		if err != nil {
 			t.Fatalf("Range execution failed: %v", err)
 		}
-		
+
 		// Verify range result - Range executor returns a map with "range" field
 		resultMap, ok := rangeResult.(map[string]interface{})
 		if !ok {
 			t.Fatalf("Expected map result, got %T", rangeResult)
 		}
-		
+
 		results, ok := resultMap["range"].([]interface{})
 		if !ok || results == nil {
 			t.Fatalf("Expected range array, got %T", resultMap["range"])
 		}
-		
+
 		if len(results) != 10 {
 			t.Errorf("Expected 10 results (1-10 inclusive), got %d", len(results))
 		}
-		
+
 		// Verify the range values - starts at 1, goes to 10 inclusive
 		for i, val := range results {
 			expected := float64(i + 1) // Should be 1, 2, 3, ..., 10
@@ -65,20 +65,20 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 			}
 		}
 	})
-	
+
 	t.Run("Example22_ArrayFiltering", func(t *testing.T) {
 		// Example 22: Filter array elements based on conditions
 		// Node types: rangeNode, filterNode, vizNode
 		// ✅ Now supported with expression engine enhancements!
-		
+
 		// Create executors
 		rangeExec := &RangeExecutor{}
 		filterExec := &FilterExecutor{}
-		
+
 		ctx := &MockExecutionContext{
 			inputs: map[string][]interface{}{},
 		}
-		
+
 		// Execute range node to generate data (1-10 inclusive)
 		rangeNode := types.Node{
 			ID:   "1",
@@ -89,25 +89,25 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 				Step:  1,
 			},
 		}
-		
+
 		rangeResult, err := rangeExec.Execute(ctx, rangeNode)
 		if err != nil {
 			t.Fatalf("Range execution failed: %v", err)
 		}
-		
+
 		resultMap, ok := rangeResult.(map[string]interface{})
 		if !ok {
 			t.Fatalf("Expected map result, got %T", rangeResult)
 		}
-		
+
 		results, ok := resultMap["range"].([]interface{})
 		if !ok || results == nil {
 			t.Fatalf("Expected range array, got %T", resultMap["range"])
 		}
-		
+
 		// Add to context for filter node
 		ctx.inputs["2"] = []interface{}{results}
-		
+
 		// Execute filter node (filter for numbers > 5)
 		condition := "item > 5"
 		filterNode := types.Node{
@@ -117,28 +117,28 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 				Condition: &condition,
 			},
 		}
-		
+
 		filterResult, err := filterExec.Execute(ctx, filterNode)
 		if err != nil {
 			t.Fatalf("Filter execution failed: %v", err)
 		}
-		
+
 		// Verify filtered results
 		filterMap, ok := filterResult.(map[string]interface{})
 		if !ok {
 			t.Fatalf("Expected map result from filter, got %T", filterResult)
 		}
-		
+
 		filtered, ok := filterMap["filtered"].([]interface{})
 		if !ok {
 			t.Fatalf("Expected filtered array, got %T", filterMap["filtered"])
 		}
-		
+
 		// Should have 5 items: 6, 7, 8, 9, 10
 		if len(filtered) != 5 {
 			t.Errorf("Expected 5 filtered items, got %d", len(filtered))
 		}
-		
+
 		// Verify first filtered item is 6
 		if len(filtered) > 0 {
 			firstItem, ok := filtered[0].(float64)
@@ -147,21 +147,21 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 			}
 		}
 	})
-	
+
 	t.Run("Example23_DataTransformationPipeline", func(t *testing.T) {
 		// Example 23: Transform data through multiple stages
 		// Node types: rangeNode, mapNode (multiple), filterNode, reduceNode
 		// ✅ Now fully supported with expression engine enhancements!
-		
+
 		// Create executors
 		rangeExec := &RangeExecutor{}
 		mapExec := &MapExecutor{}
 		filterExec := &FilterExecutor{}
-		
+
 		ctx := &MockExecutionContext{
 			inputs: map[string][]interface{}{},
 		}
-		
+
 		// Stage 1: Generate numbers 1-10
 		rangeNode := types.Node{
 			ID:   "range1",
@@ -172,14 +172,14 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 				Step:  1,
 			},
 		}
-		
+
 		rangeResult, err := rangeExec.Execute(ctx, rangeNode)
 		if err != nil {
 			t.Fatalf("Range execution failed: %v", err)
 		}
-		
+
 		numbers := rangeResult.(map[string]interface{})["range"].([]interface{})
-		
+
 		// Stage 2: Map - double each number
 		ctx.inputs["map1"] = []interface{}{numbers}
 		doubleExpr := "item * 2"
@@ -190,14 +190,14 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 				Expression: &doubleExpr,
 			},
 		}
-		
+
 		mapResult1, err := mapExec.Execute(ctx, mapNode1)
 		if err != nil {
 			t.Fatalf("Map execution failed: %v", err)
 		}
-		
+
 		doubled := mapResult1.(map[string]interface{})["results"].([]interface{})
-		
+
 		// Verify doubling worked
 		if len(doubled) != 10 {
 			t.Fatalf("Expected 10 doubled items, got %d", len(doubled))
@@ -210,7 +210,7 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 		} else if dval != 2.0 {
 			t.Errorf("Expected first doubled item to be 2, got %v", dval)
 		}
-		
+
 		// Stage 3: Filter - keep only numbers > 10
 		ctx.inputs["filter1"] = []interface{}{doubled}
 		filterCond := "item > 10"
@@ -221,19 +221,19 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 				Condition: &filterCond,
 			},
 		}
-		
+
 		filterResult, err := filterExec.Execute(ctx, filterNode)
 		if err != nil {
 			t.Fatalf("Filter execution failed: %v", err)
 		}
-		
+
 		filtered := filterResult.(map[string]interface{})["filtered"].([]interface{})
-		
+
 		// Verify filtering: doubled values > 10 are: 12, 14, 16, 18, 20 (5 items)
 		if len(filtered) != 5 {
 			t.Errorf("Expected 5 filtered items, got %d", len(filtered))
 		}
-		
+
 		// Stage 4: Map - square the remaining numbers
 		ctx.inputs["map2"] = []interface{}{filtered}
 		squareExpr := "item * item"
@@ -244,14 +244,14 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 				Expression: &squareExpr,
 			},
 		}
-		
+
 		mapResult2, err := mapExec.Execute(ctx, mapNode2)
 		if err != nil {
 			t.Fatalf("Second map execution failed: %v", err)
 		}
-		
+
 		squared := mapResult2.(map[string]interface{})["results"].([]interface{})
-		
+
 		// Verify squaring: 12²=144, 14²=196, 16²=256, 18²=324, 20²=400
 		if len(squared) != 5 {
 			t.Errorf("Expected 5 squared items, got %d", len(squared))
@@ -259,32 +259,32 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 		if squared[0].(float64) != 144.0 {
 			t.Errorf("Expected first squared item to be 144, got %v", squared[0])
 		}
-		
+
 		t.Log("✅ Multi-stage transformation pipeline working correctly!")
 		t.Logf("   Stage 1 (Range): Generated %d numbers", len(numbers))
 		t.Logf("   Stage 2 (Map): Doubled to %d values", len(doubled))
 		t.Logf("   Stage 3 (Filter): Filtered to %d values > 10", len(filtered))
 		t.Logf("   Stage 4 (Map): Squared to final %d values", len(squared))
 	})
-	
+
 	t.Run("Example24_StringTransformation", func(t *testing.T) {
 		// Example: Transform user data with string methods
 		// Demonstrates: string methods, field access, method chaining
-		
+
 		mapExec := &MapExecutor{}
 		filterExec := &FilterExecutor{}
-		
+
 		ctx := &MockExecutionContext{
 			inputs: map[string][]interface{}{},
 		}
-		
+
 		// Test data: user records with mixed-case emails and names
 		users := []interface{}{
 			map[string]interface{}{"name": "  Alice Smith  ", "email": "ALICE@EXAMPLE.COM", "role": "admin"},
 			map[string]interface{}{"name": "Bob Jones", "email": "bob@test.com", "role": "user"},
 			map[string]interface{}{"name": " Charlie Brown ", "email": "CHARLIE@EXAMPLE.COM", "role": "moderator"},
 		}
-		
+
 		// Stage 1: Normalize emails to lowercase
 		ctx.inputs["map1"] = []interface{}{users}
 		normalizeExpr := "item.email.toLowerCase()"
@@ -295,19 +295,19 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 				Expression: &normalizeExpr,
 			},
 		}
-		
+
 		mapResult1, err := mapExec.Execute(ctx, mapNode1)
 		if err != nil {
 			t.Fatalf("Map execution failed: %v", err)
 		}
-		
+
 		emails := mapResult1.(map[string]interface{})["results"].([]interface{})
-		
+
 		// Verify email normalization
 		if emails[0].(string) != "alice@example.com" {
 			t.Errorf("Expected normalized email 'alice@example.com', got %v", emails[0])
 		}
-		
+
 		// Stage 2: Filter users from example.com domain
 		ctx.inputs["filter1"] = []interface{}{users}
 		filterCond := "item.email.toLowerCase().includes('@example.com')"
@@ -318,19 +318,19 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 				Condition: &filterCond,
 			},
 		}
-		
+
 		filterResult, err := filterExec.Execute(ctx, filterNode)
 		if err != nil {
 			t.Fatalf("Filter execution failed: %v", err)
 		}
-		
+
 		exampleUsers := filterResult.(map[string]interface{})["filtered"].([]interface{})
-		
+
 		// Should have 2 users from example.com
 		if len(exampleUsers) != 2 {
 			t.Errorf("Expected 2 users from example.com, got %d", len(exampleUsers))
 		}
-		
+
 		// Stage 3: Extract trimmed, uppercase names
 		ctx.inputs["map2"] = []interface{}{exampleUsers}
 		nameExpr := "item.name.trim().toUpperCase()"
@@ -341,14 +341,14 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 				Expression: &nameExpr,
 			},
 		}
-		
+
 		mapResult2, err := mapExec.Execute(ctx, mapNode2)
 		if err != nil {
 			t.Fatalf("Second map execution failed: %v", err)
 		}
-		
+
 		names := mapResult2.(map[string]interface{})["results"].([]interface{})
-		
+
 		// Verify name transformation
 		if names[0].(string) != "ALICE SMITH" {
 			t.Errorf("Expected 'ALICE SMITH', got %v", names[0])
@@ -356,7 +356,7 @@ func TestWorkflowExamples_DataProcessing(t *testing.T) {
 		if names[1].(string) != "CHARLIE BROWN" {
 			t.Errorf("Expected 'CHARLIE BROWN', got %v", names[1])
 		}
-		
+
 		t.Log("✅ String transformation pipeline working correctly!")
 		t.Logf("   Normalized %d emails", len(emails))
 		t.Logf("   Filtered to %d users from example.com", len(exampleUsers))
@@ -369,17 +369,17 @@ func TestWorkflowExamples_FormatConversion(t *testing.T) {
 	t.Run("Example25_CSVtoJSON", func(t *testing.T) {
 		// Example 25: Convert CSV data to JSON format
 		// Demonstrates: Parse → Format conversion pipeline
-		
+
 		parseExec := &ParseExecutor{}
 		formatExec := &FormatExecutor{}
-		
+
 		ctx := &MockExecutionContext{
 			inputs: map[string][]interface{}{},
 		}
-		
+
 		// Input: CSV string
 		csvData := "name,age,active\nAlice,30,true\nBob,25,false\nCharlie,35,true"
-		
+
 		// Stage 1: Parse CSV
 		ctx.inputs["parse1"] = []interface{}{csvData}
 		csvType := "CSV"
@@ -390,12 +390,12 @@ func TestWorkflowExamples_FormatConversion(t *testing.T) {
 				InputType: &csvType,
 			},
 		}
-		
+
 		parseResult, err := parseExec.Execute(ctx, parseNode)
 		if err != nil {
 			t.Fatalf("Parse execution failed: %v", err)
 		}
-		
+
 		// Verify parsing worked
 		var parsedData []interface{}
 		switch data := parseResult.(type) {
@@ -409,11 +409,11 @@ func TestWorkflowExamples_FormatConversion(t *testing.T) {
 		default:
 			t.Fatalf("Unexpected parse result type: %T", parseResult)
 		}
-		
+
 		if len(parsedData) != 3 {
 			t.Errorf("Expected 3 parsed records, got %d", len(parsedData))
 		}
-		
+
 		// Stage 2: Format as JSON
 		ctx.inputs["format1"] = []interface{}{parseResult}
 		jsonType := "JSON"
@@ -426,45 +426,45 @@ func TestWorkflowExamples_FormatConversion(t *testing.T) {
 				PrettyPrint: &prettyPrint,
 			},
 		}
-		
+
 		formatResult, err := formatExec.Execute(ctx, formatNode)
 		if err != nil {
 			t.Fatalf("Format execution failed: %v", err)
 		}
-		
+
 		jsonOutput, ok := formatResult.(string)
 		if !ok {
 			t.Fatalf("Format result should be string, got %T", formatResult)
 		}
-		
+
 		// Verify JSON output contains expected data
 		if !strings.Contains(jsonOutput, "Alice") || !strings.Contains(jsonOutput, "Bob") {
 			t.Errorf("JSON output missing expected names: %s", jsonOutput)
 		}
-		
+
 		t.Log("✅ CSV to JSON conversion working correctly!")
 		t.Logf("   Input: CSV with %d rows", 3)
 		t.Logf("   Parsed: %d records", len(parsedData))
 		t.Logf("   Output: Pretty-printed JSON (%d bytes)", len(jsonOutput))
 	})
-	
+
 	t.Run("Example26_JSONtoCSV", func(t *testing.T) {
 		// Example 26: Convert JSON array to CSV format
 		// Demonstrates: JSON data → CSV export pipeline
-		
+
 		formatExec := &FormatExecutor{}
-		
+
 		ctx := &MockExecutionContext{
 			inputs: map[string][]interface{}{},
 		}
-		
+
 		// Input: JSON array of objects (simulating parsed JSON)
 		jsonData := []interface{}{
 			map[string]interface{}{"product": "Widget", "price": float64(19.99), "stock": float64(100)},
 			map[string]interface{}{"product": "Gadget", "price": float64(29.99), "stock": float64(50)},
 			map[string]interface{}{"product": "Doohickey", "price": float64(9.99), "stock": float64(200)},
 		}
-		
+
 		// Format as CSV with headers
 		ctx.inputs["format1"] = []interface{}{jsonData}
 		csvType := "CSV"
@@ -477,54 +477,54 @@ func TestWorkflowExamples_FormatConversion(t *testing.T) {
 				IncludeHeaders: &includeHeaders,
 			},
 		}
-		
+
 		formatResult, err := formatExec.Execute(ctx, formatNode)
 		if err != nil {
 			t.Fatalf("Format execution failed: %v", err)
 		}
-		
+
 		csvOutput, ok := formatResult.(string)
 		if !ok {
 			t.Fatalf("Format result should be string, got %T", formatResult)
 		}
-		
+
 		// Verify CSV output
 		lines := strings.Split(strings.TrimSpace(csvOutput), "\n")
 		if len(lines) != 4 { // 1 header + 3 data rows
 			t.Errorf("Expected 4 CSV lines (header + 3 rows), got %d", len(lines))
 		}
-		
+
 		// Check header
 		if !strings.Contains(lines[0], "product") || !strings.Contains(lines[0], "price") {
 			t.Errorf("CSV header missing expected columns: %s", lines[0])
 		}
-		
+
 		// Check data
 		if !strings.Contains(csvOutput, "Widget") || !strings.Contains(csvOutput, "Gadget") {
 			t.Errorf("CSV output missing expected products")
 		}
-		
+
 		t.Log("✅ JSON to CSV conversion working correctly!")
 		t.Logf("   Input: %d JSON objects", len(jsonData))
 		t.Logf("   Output: CSV with %d lines", len(lines))
 		t.Logf("   Headers included: %v", includeHeaders)
 	})
-	
+
 	t.Run("Example27_MultiFormatPipeline", func(t *testing.T) {
 		// Example 27: Multi-format data transformation pipeline
 		// Demonstrates: CSV → JSON → Filter → CSV conversion
-		
+
 		parseExec := &ParseExecutor{}
 		formatExec := &FormatExecutor{}
 		filterExec := &FilterExecutor{}
-		
+
 		ctx := &MockExecutionContext{
 			inputs: map[string][]interface{}{},
 		}
-		
+
 		// Stage 1: Parse CSV input
 		csvInput := "name,score,passed\nAlice,95,true\nBob,65,false\nCharlie,88,true\nDiana,72,true"
-		
+
 		ctx.inputs["parse1"] = []interface{}{csvInput}
 		csvType := "CSV"
 		parseNode := types.Node{
@@ -534,12 +534,12 @@ func TestWorkflowExamples_FormatConversion(t *testing.T) {
 				InputType: &csvType,
 			},
 		}
-		
+
 		parsedCSV, err := parseExec.Execute(ctx, parseNode)
 		if err != nil {
 			t.Fatalf("Parse CSV failed: %v", err)
 		}
-		
+
 		// Convert to []interface{} for filter
 		var records []interface{}
 		switch data := parsedCSV.(type) {
@@ -551,7 +551,7 @@ func TestWorkflowExamples_FormatConversion(t *testing.T) {
 				records[i] = item
 			}
 		}
-		
+
 		// Stage 2: Filter records where score > 80
 		ctx.inputs["filter1"] = []interface{}{records}
 		filterCond := "item.score > 80"
@@ -562,19 +562,19 @@ func TestWorkflowExamples_FormatConversion(t *testing.T) {
 				Condition: &filterCond,
 			},
 		}
-		
+
 		filteredData, err := filterExec.Execute(ctx, filterNode)
 		if err != nil {
 			t.Fatalf("Filter failed: %v", err)
 		}
-		
+
 		filtered := filteredData.(map[string]interface{})["filtered"].([]interface{})
-		
+
 		// Should have 2 records (Alice: 95, Charlie: 88)
 		if len(filtered) != 2 {
 			t.Errorf("Expected 2 filtered records, got %d", len(filtered))
 		}
-		
+
 		// Stage 3: Format back to CSV
 		ctx.inputs["format1"] = []interface{}{filtered}
 		includeHeaders := true
@@ -586,24 +586,24 @@ func TestWorkflowExamples_FormatConversion(t *testing.T) {
 				IncludeHeaders: &includeHeaders,
 			},
 		}
-		
+
 		csvOutput, err := formatExec.Execute(ctx, formatNode)
 		if err != nil {
 			t.Fatalf("Format to CSV failed: %v", err)
 		}
-		
+
 		outputStr := csvOutput.(string)
-		
+
 		// Verify output contains high scorers
 		if !strings.Contains(outputStr, "Alice") || !strings.Contains(outputStr, "Charlie") {
 			t.Errorf("CSV output missing expected names")
 		}
-		
+
 		// Should NOT contain low scorers
 		if strings.Contains(outputStr, "Bob") || strings.Contains(outputStr, "Diana") {
 			t.Errorf("CSV output should not contain filtered-out records")
 		}
-		
+
 		t.Log("✅ Multi-format pipeline working correctly!")
 		t.Logf("   Stage 1: Parsed %d CSV records", len(records))
 		t.Logf("   Stage 2: Filtered to %d high-scoring records", len(filtered))
@@ -616,13 +616,13 @@ func TestWorkflowExamples_ControlFlow(t *testing.T) {
 	t.Run("ConditionalBranching", func(t *testing.T) {
 		// Tests conditional execution based on runtime values
 		condExec := &ConditionExecutor{}
-		
+
 		ctx := &MockExecutionContext{
 			inputs: map[string][]interface{}{
 				"1": {float64(15)},
 			},
 		}
-		
+
 		condition := "input > 10"
 		condNode := types.Node{
 			ID:   "1",
@@ -631,28 +631,28 @@ func TestWorkflowExamples_ControlFlow(t *testing.T) {
 				Condition: &condition,
 			},
 		}
-		
+
 		result, err := condExec.Execute(ctx, condNode)
 		if err != nil {
 			t.Fatalf("Condition execution failed: %v", err)
 		}
-		
+
 		resultMap, ok := result.(map[string]interface{})
 		if !ok {
 			t.Fatalf("Expected map result, got %T", result)
 		}
-		
+
 		// Condition executor returns metadata about the evaluation
 		// Check the "condition_met" boolean field
 		condResult, ok := resultMap["condition_met"].(bool)
 		if !ok {
 			t.Fatalf("Expected bool condition_met result, got %T", resultMap["condition_met"])
 		}
-		
+
 		if !condResult {
 			t.Errorf("Expected condition to be met for input > 10 with input=15")
 		}
-		
+
 		// Also verify path is "true"
 		path, ok := resultMap["path"].(string)
 		if !ok || path != "true" {
@@ -742,14 +742,14 @@ func TestWorkflowExamples_GapSummary(t *testing.T) {
 // See workflow_test.go in backend/ for examples of HTTP testing with httptest.NewServer
 func TestWorkflowExample_APICalls(t *testing.T) {
 	t.Skip("HTTP workflow tests require integration test setup - see backend/workflow_test.go for examples")
-	
+
 	// Example pattern for HTTP testing:
 	// 1. Create httptest.NewServer with mock responses
 	// 2. Create HTTPExecutor with config allowing HTTP
 	// 3. Configure mock context
 	// 4. Execute HTTP node with server.URL
 	// 5. Verify response handling
-	
+
 	// Gap: Current MockExecutionContext returns DefaultConfig() which has AllowHTTP=false
 	// Would need TestConfig() helper or config override in mock
 }
@@ -760,14 +760,14 @@ func TestWorkflowExamples_Phase4_AdvancedNodes(t *testing.T) {
 		// Example 28: Rate-limited API calls
 		// Scenario: Make multiple API calls with rate limiting to avoid overwhelming server
 		// Nodes: rangeNode → rateLimiterNode → (httpNode would go here)
-		
+
 		rangeExec := &RangeExecutor{}
 		rateLimiterExec := NewRateLimiterExecutor()
-		
+
 		ctx := &MockExecutionContext{
 			inputs: make(map[string][]interface{}),
 		}
-		
+
 		// Generate 5 requests
 		rangeNode := types.Node{
 			ID:   "range1",
@@ -778,19 +778,19 @@ func TestWorkflowExamples_Phase4_AdvancedNodes(t *testing.T) {
 				Step:  1,
 			},
 		}
-		
+
 		rangeResult, err := rangeExec.Execute(ctx, rangeNode)
 		if err != nil {
 			t.Fatalf("Range execution failed: %v", err)
 		}
-		
+
 		resultMap := rangeResult.(map[string]interface{})
 		requests := resultMap["range"].([]interface{})
-		
+
 		if len(requests) != 5 {
 			t.Fatalf("Expected 5 requests, got %d", len(requests))
 		}
-		
+
 		// Apply rate limiting - 2 requests per second
 		maxReq := 2
 		rateLimitNode := types.Node{
@@ -801,43 +801,43 @@ func TestWorkflowExamples_Phase4_AdvancedNodes(t *testing.T) {
 				PerDuration: strPtr("1s"),
 			},
 		}
-		
+
 		// Process each request through rate limiter
 		for i, req := range requests {
 			ctx.inputs["ratelimit1"] = []interface{}{req}
-			
+
 			result, err := rateLimiterExec.Execute(ctx, rateLimitNode)
 			if err != nil {
 				t.Fatalf("Rate limiter failed for request %d: %v", i, err)
 			}
-			
+
 			// Verify rate limiting metadata
 			limiterResult := result.(map[string]interface{})
 			if limiterResult["rate_limited"] != true {
 				t.Errorf("Expected rate_limited=true")
 			}
-			
+
 			// Verify value passed through
 			if limiterResult["value"] != req {
 				t.Errorf("Value not passed through correctly")
 			}
 		}
-		
+
 		t.Log("✓ Rate limiting workflow completed successfully")
 	})
-	
+
 	t.Run("Example29_ThrottledBatchOperations", func(t *testing.T) {
 		// Example 29: Throttled batch operations
 		// Scenario: Process batch of items with simple throttling
 		// Nodes: rangeNode → throttleNode
-		
+
 		rangeExec := &RangeExecutor{}
 		throttleExec := NewThrottleExecutor()
-		
+
 		ctx := &MockExecutionContext{
 			inputs: make(map[string][]interface{}),
 		}
-		
+
 		// Generate batch of items
 		rangeNode := types.Node{
 			ID:   "range1",
@@ -848,15 +848,15 @@ func TestWorkflowExamples_Phase4_AdvancedNodes(t *testing.T) {
 				Step:  1,
 			},
 		}
-		
+
 		rangeResult, err := rangeExec.Execute(ctx, rangeNode)
 		if err != nil {
 			t.Fatalf("Range execution failed: %v", err)
 		}
-		
+
 		resultMap := rangeResult.(map[string]interface{})
 		items := resultMap["range"].([]interface{})
-		
+
 		// Apply throttling - 5 requests per second
 		rps := 5.0
 		throttleNode := types.Node{
@@ -866,42 +866,42 @@ func TestWorkflowExamples_Phase4_AdvancedNodes(t *testing.T) {
 				RequestsPerSecond: &rps,
 			},
 		}
-		
+
 		// Process each item through throttle
 		for i, item := range items {
 			ctx.inputs["throttle1"] = []interface{}{item}
-			
+
 			result, err := throttleExec.Execute(ctx, throttleNode)
 			if err != nil {
 				t.Fatalf("Throttle failed for item %d: %v", i, err)
 			}
-			
+
 			// Verify throttling metadata
 			throttleResult := result.(map[string]interface{})
 			if throttleResult["throttled"] != true {
 				t.Errorf("Expected throttled=true")
 			}
-			
+
 			if throttleResult["requests_per_second"] != rps {
 				t.Errorf("Expected requests_per_second=%f, got %v", rps, throttleResult["requests_per_second"])
 			}
 		}
-		
+
 		t.Log("✓ Throttling workflow completed successfully")
 	})
-	
+
 	t.Run("Example30_SchemaValidation", func(t *testing.T) {
 		// Example 30: Validate API request data against JSON schema
 		// Node types: schema_validator
 		// Description: Ensures data quality and type safety
 		// Use case: API request validation, data quality checks
-		
+
 		schemaExec := &SchemaValidatorExecutor{}
-		
+
 		ctx := &MockExecutionContext{
 			inputs: map[string][]interface{}{},
 		}
-		
+
 		// Define user profile schema
 		schema := map[string]interface{}{
 			"type": "object",
@@ -926,7 +926,7 @@ func TestWorkflowExamples_Phase4_AdvancedNodes(t *testing.T) {
 			},
 			"required": []interface{}{"name", "email"},
 		}
-		
+
 		strictFalse := false
 		validatorNode := types.Node{
 			ID:   "validator1",
@@ -936,7 +936,7 @@ func TestWorkflowExamples_Phase4_AdvancedNodes(t *testing.T) {
 				Strict: &strictFalse, // Lenient mode - return errors instead of failing
 			},
 		}
-		
+
 		// Test 1: Valid user data
 		validUser := map[string]interface{}{
 			"name":  "John Doe",
@@ -944,77 +944,77 @@ func TestWorkflowExamples_Phase4_AdvancedNodes(t *testing.T) {
 			"email": "john@example.com",
 			"role":  "admin",
 		}
-		
+
 		ctx.inputs["validator1"] = []interface{}{validUser}
 		result, err := schemaExec.Execute(ctx, validatorNode)
 		if err != nil {
 			t.Fatalf("Schema validation failed: %v", err)
 		}
-		
+
 		resultMap := result.(map[string]interface{})
 		if resultMap["valid"] != true {
 			t.Errorf("Expected valid=true for valid user, got errors: %v", resultMap["errors"])
 		}
-		
+
 		// Test 2: Invalid user data (missing email)
 		invalidUser := map[string]interface{}{
 			"name": "Jane Doe",
 			"age":  float64(25),
 			// Missing required email
 		}
-		
+
 		ctx.inputs["validator1"] = []interface{}{invalidUser}
 		result, err = schemaExec.Execute(ctx, validatorNode)
 		if err != nil {
 			t.Fatalf("Schema validation failed: %v", err)
 		}
-		
+
 		resultMap = result.(map[string]interface{})
 		if resultMap["valid"] != false {
 			t.Errorf("Expected valid=false for invalid user")
 		}
-		
+
 		errors, ok := resultMap["errors"].([]map[string]interface{})
 		if !ok || len(errors) == 0 {
 			t.Errorf("Expected validation errors for invalid user")
 		}
-		
+
 		// Test 3: Invalid age range
 		invalidAge := map[string]interface{}{
 			"name":  "Test User",
 			"email": "test@example.com",
 			"age":   float64(200), // Exceeds maximum
 		}
-		
+
 		ctx.inputs["validator1"] = []interface{}{invalidAge}
 		result, err = schemaExec.Execute(ctx, validatorNode)
 		if err != nil {
 			t.Fatalf("Schema validation failed: %v", err)
 		}
-		
+
 		resultMap = result.(map[string]interface{})
 		if resultMap["valid"] != false {
 			t.Errorf("Expected valid=false for invalid age")
 		}
-		
+
 		// Test 4: Invalid enum value
 		invalidRole := map[string]interface{}{
 			"name":  "Test User",
 			"email": "test@example.com",
 			"role":  "invalid_role", // Not in enum
 		}
-		
+
 		ctx.inputs["validator1"] = []interface{}{invalidRole}
 		result, err = schemaExec.Execute(ctx, validatorNode)
 		if err != nil {
 			t.Fatalf("Schema validation failed: %v", err)
 		}
-		
+
 		resultMap = result.(map[string]interface{})
 		if resultMap["valid"] != false {
 			t.Errorf("Expected valid=false for invalid role")
 		}
-		
+
 		t.Log("✓ Schema validation workflow completed successfully")
 		t.Log("  - Validated user profiles against JSON schema")
 		t.Log("  - Detected missing required fields")

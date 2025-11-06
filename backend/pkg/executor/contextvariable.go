@@ -17,10 +17,10 @@ type ContextVariableExecutor struct{}
 // 1. Legacy: Single value with ContextName and ContextValue
 // 2. New: Multiple typed values with ContextValues array
 func (e *ContextVariableExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsContextVariableData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsContextVariableData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	// New format: multiple typed values
 	if len(data.ContextValues) > 0 {
 		result := make(map[string]interface{})
@@ -71,10 +71,10 @@ func (e *ContextVariableExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *ContextVariableExecutor) Validate(node types.Node) error {
-data, err := types.AsContextVariableData(node.Data)
-if err != nil {
-return err
-}
+	data, err := types.AsContextVariableData(node.Data)
+	if err != nil {
+		return err
+	}
 	// Check if using new format
 	if len(data.ContextValues) > 0 {
 		return nil

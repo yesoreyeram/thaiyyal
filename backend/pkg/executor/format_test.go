@@ -122,7 +122,7 @@ func TestFormatExecutor_CSV(t *testing.T) {
 				map[string]interface{}{"name": "Bob", "age": float64(25)},
 			},
 			includeHeaders: true,
-			want: "age,name\n30,Alice\n25,Bob\n",
+			want:           "age,name\n30,Alice\n25,Bob\n",
 		},
 		{
 			name: "CSV without headers",
@@ -153,7 +153,7 @@ func TestFormatExecutor_CSV(t *testing.T) {
 		{
 			name: "Single object",
 			input: map[string]interface{}{
-				"name": "Single",
+				"name":  "Single",
 				"value": float64(100),
 			},
 			includeHeaders: true,

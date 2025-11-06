@@ -10,7 +10,7 @@ import (
 
 func TestNewProvider(t *testing.T) {
 	ctx := context.Background()
-	
+
 	tests := []struct {
 		name    string
 		config  Config
@@ -55,7 +55,7 @@ func TestNewProvider(t *testing.T) {
 			wantErr: false,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			provider, err := NewProvider(ctx, tt.config)
@@ -63,23 +63,23 @@ func TestNewProvider(t *testing.T) {
 				t.Errorf("NewProvider() error = %v, wantErr %v", err, tt.wantErr)
 				return
 			}
-			
+
 			if err == nil {
 				if provider == nil {
 					t.Error("NewProvider() returned nil provider")
 					return
 				}
-				
+
 				// Verify tracer
 				if tt.config.EnableTracing && provider.Tracer() == nil {
 					t.Error("Tracer() returned nil when tracing is enabled")
 				}
-				
+
 				// Verify meter
 				if tt.config.EnableMetrics && provider.Meter() == nil {
 					t.Error("Meter() returned nil when metrics are enabled")
 				}
-				
+
 				// Clean up
 				if err := provider.Shutdown(ctx); err != nil {
 					t.Errorf("Shutdown() error = %v", err)
@@ -92,13 +92,13 @@ func TestNewProvider(t *testing.T) {
 func TestRecordWorkflowExecution(t *testing.T) {
 	ctx := context.Background()
 	config := DefaultConfig()
-	
+
 	provider, err := NewProvider(ctx, config)
 	if err != nil {
 		t.Fatalf("NewProvider() error = %v", err)
 	}
 	defer provider.Shutdown(ctx)
-	
+
 	tests := []struct {
 		name          string
 		workflowID    string
@@ -121,7 +121,7 @@ func TestRecordWorkflowExecution(t *testing.T) {
 			nodesExecuted: 3,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Should not panic
@@ -133,13 +133,13 @@ func TestRecordWorkflowExecution(t *testing.T) {
 func TestRecordNodeExecution(t *testing.T) {
 	ctx := context.Background()
 	config := DefaultConfig()
-	
+
 	provider, err := NewProvider(ctx, config)
 	if err != nil {
 		t.Fatalf("NewProvider() error = %v", err)
 	}
 	defer provider.Shutdown(ctx)
-	
+
 	tests := []struct {
 		name     string
 		nodeID   string
@@ -169,7 +169,7 @@ func TestRecordNodeExecution(t *testing.T) {
 			success:  true,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Should not panic
@@ -181,13 +181,13 @@ func TestRecordNodeExecution(t *testing.T) {
 func TestRecordHTTPCall(t *testing.T) {
 	ctx := context.Background()
 	config := DefaultConfig()
-	
+
 	provider, err := NewProvider(ctx, config)
 	if err != nil {
 		t.Fatalf("NewProvider() error = %v", err)
 	}
 	defer provider.Shutdown(ctx)
-	
+
 	tests := []struct {
 		name       string
 		method     string
@@ -210,7 +210,7 @@ func TestRecordHTTPCall(t *testing.T) {
 			duration:   100 * time.Millisecond,
 		},
 	}
-	
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			// Should not panic
@@ -222,17 +222,17 @@ func TestRecordHTTPCall(t *testing.T) {
 func TestShutdown(t *testing.T) {
 	ctx := context.Background()
 	config := DefaultConfig()
-	
+
 	provider, err := NewProvider(ctx, config)
 	if err != nil {
 		t.Fatalf("NewProvider() error = %v", err)
 	}
-	
+
 	// First shutdown should succeed
 	if err := provider.Shutdown(ctx); err != nil {
 		t.Errorf("Shutdown() error = %v", err)
 	}
-	
+
 	// Second shutdown should handle already shut down state gracefully
 	// Note: The underlying SDK may return an error when shutting down twice
 	// This is expected behavior and we just verify it doesn't panic
@@ -241,7 +241,7 @@ func TestShutdown(t *testing.T) {
 
 func TestProviderWithNilMetrics(t *testing.T) {
 	ctx := context.Background()
-	
+
 	// Create provider with metrics disabled
 	config := Config{
 		ServiceName:    "test",
@@ -250,13 +250,13 @@ func TestProviderWithNilMetrics(t *testing.T) {
 		EnableTracing:  true,
 		EnableMetrics:  false,
 	}
-	
+
 	provider, err := NewProvider(ctx, config)
 	if err != nil {
 		t.Fatalf("NewProvider() error = %v", err)
 	}
 	defer provider.Shutdown(ctx)
-	
+
 	// These should not panic even with nil metrics
 	provider.RecordWorkflowExecution(ctx, "test", time.Second, true, 1)
 	provider.RecordNodeExecution(ctx, "node1", types.NodeTypeNumber, time.Millisecond, true)

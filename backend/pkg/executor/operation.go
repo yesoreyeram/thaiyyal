@@ -11,10 +11,10 @@ type OperationExecutor struct{}
 
 // Execute performs arithmetic operations on two numeric inputs
 func (e *OperationExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsOperationData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsOperationData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	if data.Op == nil {
 		return nil, fmt.Errorf("operation node missing op")
 	}
@@ -57,10 +57,10 @@ func (e *OperationExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *OperationExecutor) Validate(node types.Node) error {
-data, err := types.AsOperationData(node.Data)
-if err != nil {
-return err
-}
+	data, err := types.AsOperationData(node.Data)
+	if err != nil {
+		return err
+	}
 	if data.Op == nil {
 		return fmt.Errorf("operation node missing op")
 	}

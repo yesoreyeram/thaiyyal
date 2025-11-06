@@ -17,10 +17,10 @@ type FilterExecutor struct{}
 // If input is not an array, passes through the original input with a warning.
 // The expression has access to the 'item' variable representing the current array element.
 func (e *FilterExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsFilterData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsFilterData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	if data.Condition == nil || *data.Condition == "" {
 		return nil, fmt.Errorf("filter node missing condition expression")
 	}
@@ -148,10 +148,10 @@ func (e *FilterExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *FilterExecutor) Validate(node types.Node) error {
-data, err := types.AsFilterData(node.Data)
-if err != nil {
-return err
-}
+	data, err := types.AsFilterData(node.Data)
+	if err != nil {
+		return err
+	}
 	if data.Condition == nil || *data.Condition == "" {
 		return fmt.Errorf("filter node requires a condition expression")
 	}

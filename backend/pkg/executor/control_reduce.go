@@ -34,10 +34,10 @@ type ReduceExecutor struct{}
 //	Max: [5,2,8,1] → Reduce(init=0, expr="item > accumulator ? item : accumulator") → 8
 //	Concat: ["A","B","C"] → Reduce(init="", expr="accumulator + item") → "ABC"
 func (e *ReduceExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsReduceData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsReduceData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("reduce node needs at least 1 input")
@@ -149,10 +149,10 @@ func (e *ReduceExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *ReduceExecutor) Validate(node types.Node) error {
-data, err := types.AsReduceData(node.Data)
-if err != nil {
-return err
-}
+	data, err := types.AsReduceData(node.Data)
+	if err != nil {
+		return err
+	}
 	if data.Expression == nil || *data.Expression == "" {
 		return fmt.Errorf("reduce node requires an 'expression'")
 	}

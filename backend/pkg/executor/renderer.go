@@ -15,7 +15,7 @@ func (e *RendererExecutor) Execute(ctx ExecutionContext, node types.Node) (inter
 	if _, err := types.AsRendererData(node.Data); err != nil {
 		return nil, err
 	}
-	
+
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		// Return nil if no input - frontend will show "No data"

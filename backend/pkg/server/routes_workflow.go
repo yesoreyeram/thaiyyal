@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/yesoreyeram/thaiyyal/backend"
+	workflow "github.com/yesoreyeram/thaiyyal/backend"
 	"github.com/yesoreyeram/thaiyyal/backend/pkg/engine"
 )
 
@@ -27,16 +27,16 @@ type SaveWorkflowResponse struct {
 
 // LoadWorkflowResponse represents the response from loading a workflow
 type LoadWorkflowResponse struct {
-	Success  bool                `json:"success"`
+	Success  bool                   `json:"success"`
 	Workflow *workflow.WorkflowMeta `json:"workflow,omitempty"`
-	Error    string              `json:"error,omitempty"`
+	Error    string                 `json:"error,omitempty"`
 }
 
 // ListWorkflowsResponse represents the response from listing workflows
 type ListWorkflowsResponse struct {
-	Success   bool                      `json:"success"`
+	Success   bool                       `json:"success"`
 	Workflows []workflow.WorkflowSummary `json:"workflows"`
-	Count     int                       `json:"count"`
+	Count     int                        `json:"count"`
 }
 
 // DeleteWorkflowResponse represents the response from deleting a workflow

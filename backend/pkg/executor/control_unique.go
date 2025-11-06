@@ -16,7 +16,7 @@ func (e *UniqueExecutor) Execute(ctx ExecutionContext, node types.Node) (interfa
 	if err != nil {
 		return nil, err
 	}
-	
+
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("unique node needs at least 1 input")

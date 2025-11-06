@@ -15,10 +15,10 @@ type ConditionExecutor struct{}
 // with metadata about whether the condition was met.
 // Supports advanced expressions with node references, variables, and boolean logic.
 func (e *ConditionExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsConditionData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsConditionData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	if data.Condition == nil {
 		return nil, fmt.Errorf("condition node missing condition")
 	}
@@ -68,10 +68,10 @@ func (e *ConditionExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *ConditionExecutor) Validate(node types.Node) error {
-data, err := types.AsConditionData(node.Data)
-if err != nil {
-return err
-}
+	data, err := types.AsConditionData(node.Data)
+	if err != nil {
+		return err
+	}
 	if data.Condition == nil {
 		return fmt.Errorf("condition node missing condition")
 	}

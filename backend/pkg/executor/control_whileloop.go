@@ -14,10 +14,10 @@ type WhileLoopExecutor struct{}
 // This is a simplified implementation that validates the condition.
 // A full implementation would execute a sub-workflow on each iteration.
 func (e *WhileLoopExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsWhileLoopData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsWhileLoopData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	if data.Condition == nil {
 		return nil, fmt.Errorf("while_loop node missing condition")
 	}
@@ -61,10 +61,10 @@ func (e *WhileLoopExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *WhileLoopExecutor) Validate(node types.Node) error {
-data, err := types.AsWhileLoopData(node.Data)
-if err != nil {
-return err
-}
+	data, err := types.AsWhileLoopData(node.Data)
+	if err != nil {
+		return err
+	}
 	if data.Condition == nil {
 		return fmt.Errorf("while_loop node missing condition")
 	}

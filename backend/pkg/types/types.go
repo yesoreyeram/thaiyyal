@@ -125,9 +125,9 @@ type Payload struct {
 
 // Node represents a workflow node with type-safe data
 type Node struct {
-	ID   string              `json:"id"`
-	Type NodeType            `json:"type,omitempty"`
-	Data NodeDataInterface   `json:"data"`
+	ID   string            `json:"id"`
+	Type NodeType          `json:"type,omitempty"`
+	Data NodeDataInterface `json:"data"`
 }
 
 // SwitchCase represents a case in a switch node

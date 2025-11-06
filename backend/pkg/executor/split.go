@@ -12,10 +12,10 @@ type SplitExecutor struct{}
 // Execute runs the Split node
 // Handles splitting single input to multiple paths
 func (e *SplitExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsSplitData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsSplitData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("split node requires at least one input")

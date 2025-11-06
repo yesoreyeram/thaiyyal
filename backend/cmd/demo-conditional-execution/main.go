@@ -12,7 +12,7 @@ import (
 func main() {
 	fmt.Println("=================================================")
 	fmt.Println("Conditional Execution Demo")
-	fmt.Println("=================================================\n")
+	fmt.Println("=================================================")
 
 	// Demo 1: Age-based routing (adult vs minor)
 	demo1AgeBasedRouting()
@@ -83,9 +83,9 @@ func demo1AgeBasedRouting() {
 
 		// Show which nodes DIDN'T execute
 		allNodes := map[string]bool{
-			"profile_api":    true,
-			"sports_api":     true,
-			"education_api":  true,
+			"profile_api":   true,
+			"sports_api":    true,
+			"education_api": true,
 		}
 		fmt.Println("  Skipped nodes:")
 		for nodeID := range allNodes {

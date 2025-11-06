@@ -15,10 +15,10 @@ type Status string
 const (
 	// StatusHealthy indicates the component is healthy
 	StatusHealthy Status = "healthy"
-	
+
 	// StatusUnhealthy indicates the component is unhealthy
 	StatusUnhealthy Status = "unhealthy"
-	
+
 	// StatusDegraded indicates the component is degraded but functional
 	StatusDegraded Status = "degraded"
 )
@@ -42,7 +42,7 @@ type Check struct {
 type Checker struct {
 	checks map[string]*Check
 	mu     sync.RWMutex
-	
+
 	// Service metadata
 	serviceName    string
 	serviceVersion string
@@ -51,12 +51,12 @@ type Checker struct {
 
 // HealthResponse represents the health check response
 type HealthResponse struct {
-	Status         Status                    `json:"status"`
-	ServiceName    string                    `json:"service_name"`
-	ServiceVersion string                    `json:"service_version"`
-	Uptime         string                    `json:"uptime"`
-	Timestamp      time.Time                 `json:"timestamp"`
-	Checks         map[string]CheckResult    `json:"checks,omitempty"`
+	Status         Status                 `json:"status"`
+	ServiceName    string                 `json:"service_name"`
+	ServiceVersion string                 `json:"service_version"`
+	Uptime         string                 `json:"uptime"`
+	Timestamp      time.Time              `json:"timestamp"`
+	Checks         map[string]CheckResult `json:"checks,omitempty"`
 }
 
 // CheckResult represents the result of a single health check
@@ -80,7 +80,7 @@ func NewChecker(serviceName, serviceVersion string) *Checker {
 func (c *Checker) RegisterCheck(name string, checkFunc CheckFunc, timeout time.Duration, critical bool) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	
+
 	c.checks[name] = &Check{
 		Name:      name,
 		CheckFunc: checkFunc,
@@ -97,15 +97,15 @@ func (c *Checker) Check(ctx context.Context) HealthResponse {
 		checks[name] = check
 	}
 	c.mu.RUnlock()
-	
+
 	results := make(map[string]CheckResult)
 	overallStatus := StatusHealthy
-	
+
 	// Run all checks
 	for name, check := range checks {
 		result := c.runCheck(ctx, check)
 		results[name] = result
-		
+
 		// Determine overall status
 		if check.Critical && result.Status == StatusUnhealthy {
 			overallStatus = StatusUnhealthy
@@ -113,7 +113,7 @@ func (c *Checker) Check(ctx context.Context) HealthResponse {
 			overallStatus = StatusDegraded
 		}
 	}
-	
+
 	return HealthResponse{
 		Status:         overallStatus,
 		ServiceName:    c.serviceName,
@@ -128,43 +128,43 @@ func (c *Checker) Check(ctx context.Context) HealthResponse {
 func (c *Checker) runCheck(ctx context.Context, check *Check) CheckResult {
 	check.mu.Lock()
 	defer check.mu.Unlock()
-	
+
 	// Create context with timeout
 	checkCtx, cancel := context.WithTimeout(ctx, check.Timeout)
 	defer cancel()
-	
+
 	// Run the check
 	errChan := make(chan error, 1)
 	go func() {
 		errChan <- check.CheckFunc(checkCtx)
 	}()
-	
+
 	var err error
 	select {
 	case err = <-errChan:
 	case <-checkCtx.Done():
 		err = fmt.Errorf("health check timed out after %v", check.Timeout)
 	}
-	
+
 	// Update check state
 	check.lastChecked = time.Now()
 	check.lastError = err
-	
+
 	if err != nil {
 		check.lastStatus = StatusUnhealthy
 	} else {
 		check.lastStatus = StatusHealthy
 	}
-	
+
 	result := CheckResult{
 		Status:      check.lastStatus,
 		LastChecked: check.lastChecked,
 	}
-	
+
 	if err != nil {
 		result.Error = err.Error()
 	}
-	
+
 	return result
 }
 
@@ -188,9 +188,9 @@ func (c *Checker) Readiness(ctx context.Context) HealthResponse {
 func (c *Checker) HTTPHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		response := c.Check(r.Context())
-		
+
 		w.Header().Set("Content-Type", "application/json")
-		
+
 		// Set status code based on health
 		statusCode := http.StatusOK
 		if response.Status == StatusUnhealthy {
@@ -198,7 +198,7 @@ func (c *Checker) HTTPHandler() http.HandlerFunc {
 		} else if response.Status == StatusDegraded {
 			statusCode = http.StatusOK // Still return 200 for degraded
 		}
-		
+
 		w.WriteHeader(statusCode)
 		json.NewEncoder(w).Encode(response)
 	}
@@ -208,7 +208,7 @@ func (c *Checker) HTTPHandler() http.HandlerFunc {
 func (c *Checker) LivenessHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		response := c.Liveness(r.Context())
-		
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(response)
@@ -219,15 +219,15 @@ func (c *Checker) LivenessHandler() http.HandlerFunc {
 func (c *Checker) ReadinessHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		response := c.Readiness(r.Context())
-		
+
 		w.Header().Set("Content-Type", "application/json")
-		
+
 		// Set status code based on health
 		statusCode := http.StatusOK
 		if response.Status == StatusUnhealthy {
 			statusCode = http.StatusServiceUnavailable
 		}
-		
+
 		w.WriteHeader(statusCode)
 		json.NewEncoder(w).Encode(response)
 	}

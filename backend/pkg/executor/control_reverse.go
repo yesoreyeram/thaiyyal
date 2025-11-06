@@ -16,7 +16,7 @@ func (e *ReverseExecutor) Execute(ctx ExecutionContext, node types.Node) (interf
 	if _, err := types.AsReverseData(node.Data); err != nil {
 		return nil, err
 	}
-	
+
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("reverse node needs at least 1 input")

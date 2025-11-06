@@ -11,10 +11,10 @@ type TextInputExecutor struct{}
 
 // Execute returns the text value from a text input node
 func (e *TextInputExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsTextInputData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsTextInputData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	if data.Text == nil {
 		return nil, fmt.Errorf("text input node missing text")
 	}
@@ -28,10 +28,10 @@ func (e *TextInputExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *TextInputExecutor) Validate(node types.Node) error {
-data, err := types.AsTextInputData(node.Data)
-if err != nil {
-return err
-}
+	data, err := types.AsTextInputData(node.Data)
+	if err != nil {
+		return err
+	}
 	if data.Text == nil {
 		return fmt.Errorf("text input node missing text")
 	}

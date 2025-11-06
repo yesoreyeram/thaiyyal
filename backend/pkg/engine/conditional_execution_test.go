@@ -271,4 +271,3 @@ func TestConditionalExecution_BackwardCompatibility(t *testing.T) {
 		t.Error("Expected backward compatibility with legacy condition field")
 	}
 }
-

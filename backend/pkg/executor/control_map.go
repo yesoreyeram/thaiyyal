@@ -31,10 +31,10 @@ type MapExecutor struct{}
 //	Extract field: [{name:"Alice"}] → Map(field="name") → ["Alice"]
 //	Complex expression: [users] → Map(expr="item.age * 1.1") → [ages with 10% increase]
 func (e *MapExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsMapData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsMapData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("map node needs at least 1 input")
@@ -178,10 +178,10 @@ func (e *MapExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *MapExecutor) Validate(node types.Node) error {
-data, err := types.AsMapData(node.Data)
-if err != nil {
-return err
-}
+	data, err := types.AsMapData(node.Data)
+	if err != nil {
+		return err
+	}
 	hasExpression := data.Expression != nil && *data.Expression != ""
 	hasField := data.Field != nil && *data.Field != ""
 

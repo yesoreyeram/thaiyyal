@@ -11,7 +11,7 @@ func TestRegistry_Register(t *testing.T) {
 	registry := NewRegistry()
 
 	config := &Config{
-		UID:      "test-client",
+		UID:  "test-client",
 		Auth: AuthConfig{Type: AuthTypeNone},
 	}
 
@@ -49,7 +49,7 @@ func TestRegistry_Get(t *testing.T) {
 	registry := NewRegistry()
 
 	config := &Config{
-		UID:      "test-client",
+		UID:  "test-client",
 		Auth: AuthConfig{Type: AuthTypeNone},
 	}
 
@@ -84,7 +84,7 @@ func TestRegistry_Has(t *testing.T) {
 	registry := NewRegistry()
 
 	config := &Config{
-		UID:      "test-client",
+		UID:  "test-client",
 		Auth: AuthConfig{Type: AuthTypeNone},
 	}
 
@@ -123,7 +123,7 @@ func TestRegistry_List(t *testing.T) {
 	// Add clients
 	for i, uid := range []string{"client1", "client2", "client3"} {
 		config := &Config{
-			UID:      uid,
+			UID:  uid,
 			Auth: AuthConfig{Type: AuthTypeNone},
 		}
 		client, err := New(context.Background(), config)
@@ -167,7 +167,7 @@ func TestRegistry_Count(t *testing.T) {
 	// Add clients
 	for i := 1; i <= 3; i++ {
 		config := &Config{
-			UID:      "client" + strconv.Itoa(i),
+			UID:  "client" + strconv.Itoa(i),
 			Auth: AuthConfig{Type: AuthTypeNone},
 		}
 		client, err := New(context.Background(), config)
@@ -188,7 +188,7 @@ func TestRegistry_Clear(t *testing.T) {
 	// Add clients
 	for _, uid := range []string{"client1", "client2", "client3"} {
 		config := &Config{
-			UID:      uid,
+			UID:  uid,
 			Auth: AuthConfig{Type: AuthTypeNone},
 		}
 		client, err := New(context.Background(), config)
@@ -221,7 +221,7 @@ func TestRegistry_Unregister(t *testing.T) {
 	registry := NewRegistry()
 
 	config := &Config{
-		UID:      "test-client",
+		UID:  "test-client",
 		Auth: AuthConfig{Type: AuthTypeNone},
 	}
 
@@ -265,7 +265,7 @@ func TestRegistry_Concurrent(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		go func(id int) {
 			config := &Config{
-				UID:      "client" + strconv.Itoa(id),
+				UID:  "client" + strconv.Itoa(id),
 				Auth: AuthConfig{Type: AuthTypeNone},
 			}
 			client, err := New(context.Background(), config)
@@ -316,7 +316,7 @@ func BenchmarkRegistry_Register(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		config := &Config{
-			UID:      "client" + strconv.Itoa(i),
+			UID:  "client" + strconv.Itoa(i),
 			Auth: AuthConfig{Type: AuthTypeNone},
 		}
 		clients[i], _ = New(context.Background(), config)
@@ -334,7 +334,7 @@ func BenchmarkRegistry_Get(b *testing.B) {
 	// Pre-populate registry
 	for i := 0; i < 100; i++ {
 		config := &Config{
-			UID:      "client" + strconv.Itoa(i),
+			UID:  "client" + strconv.Itoa(i),
 			Auth: AuthConfig{Type: AuthTypeNone},
 		}
 		client, _ := New(context.Background(), config)

@@ -36,10 +36,10 @@ type ExpressionExecutor struct{}
 //	Conditional: 150 → Expression("input > 100 ? 'high' : 'low'") → "high"
 //	Field comparison: {age:25} → Expression("input.age > 18") → true
 func (e *ExpressionExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsExpressionData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsExpressionData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("expression node needs at least 1 input")
@@ -114,10 +114,10 @@ func (e *ExpressionExecutor) NodeType() types.NodeType {
 
 // Validate validates the Expression node configuration
 func (e *ExpressionExecutor) Validate(node types.Node) error {
-data, err := types.AsExpressionData(node.Data)
-if err != nil {
-return err
-}
+	data, err := types.AsExpressionData(node.Data)
+	if err != nil {
+		return err
+	}
 	if node.Type != types.NodeTypeExpression {
 		return fmt.Errorf("invalid node type: expected %s, got %s", types.NodeTypeExpression, node.Type)
 	}

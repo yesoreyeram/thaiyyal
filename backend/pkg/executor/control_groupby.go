@@ -12,10 +12,10 @@ type GroupByExecutor struct{}
 
 // Execute groups the input array and aggregates
 func (e *GroupByExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsGroupByData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsGroupByData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("group_by node needs at least 1 input")
@@ -224,10 +224,10 @@ func (e *GroupByExecutor) NodeType() types.NodeType {
 
 // Validate checks if the node configuration is valid
 func (e *GroupByExecutor) Validate(node types.Node) error {
-data, err := types.AsGroupByData(node.Data)
-if err != nil {
-return err
-}
+	data, err := types.AsGroupByData(node.Data)
+	if err != nil {
+		return err
+	}
 	if data.Field == nil || *data.Field == "" {
 		return fmt.Errorf("group_by node requires non-empty 'field'")
 	}

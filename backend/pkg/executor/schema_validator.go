@@ -18,10 +18,10 @@ func (e *SchemaValidatorExecutor) NodeType() types.NodeType {
 
 // Execute validates input data against the provided JSON schema
 func (e *SchemaValidatorExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsSchemaValidatorData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsSchemaValidatorData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	// Get input from node inputs
 	inputs := ctx.GetNodeInputs(node.ID)
 	var input interface{}
@@ -102,10 +102,10 @@ return nil, err
 
 // Validate checks if the node configuration is valid
 func (e *SchemaValidatorExecutor) Validate(node types.Node) error {
-data, err := types.AsSchemaValidatorData(node.Data)
-if err != nil {
-return err
-}
+	data, err := types.AsSchemaValidatorData(node.Data)
+	if err != nil {
+		return err
+	}
 	// Check if schema is provided
 	if data.Schema == nil {
 		return fmt.Errorf("schema is required")

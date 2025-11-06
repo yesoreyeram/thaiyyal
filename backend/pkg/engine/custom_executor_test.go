@@ -76,7 +76,7 @@ func (e *MultiplyByNExecutor) Execute(ctx executor.ExecutionContext, node types.
 	if !ok {
 		return nil, fmt.Errorf("multiply_by_n node requires 'factor' in data")
 	}
-	
+
 	factor, ok := factorVal.(float64)
 	if !ok {
 		return nil, fmt.Errorf("multiply_by_n 'factor' must be a number, got %T", factorVal)
@@ -101,7 +101,7 @@ func (e *MultiplyByNExecutor) Validate(node types.Node) error {
 	if err != nil {
 		return err
 	}
-	
+
 	if _, ok := data.Fields["factor"]; !ok {
 		return fmt.Errorf("multiply_by_n node requires 'factor' field")
 	}

@@ -15,10 +15,10 @@ type TimeoutExecutor struct{}
 // Enforces time limits on operations
 // Returns partial results or error if operation exceeds timeout
 func (e *TimeoutExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsTimeoutData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsTimeoutData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	// Get timeout configuration
 	timeoutDuration := 30 * time.Second
 	if data.Timeout != nil {

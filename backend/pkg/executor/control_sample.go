@@ -14,10 +14,10 @@ type SampleExecutor struct{}
 
 // Execute gets a sample from the input array
 func (e *SampleExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsSampleData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsSampleData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("sample node needs at least 1 input")
@@ -124,10 +124,10 @@ func (e *SampleExecutor) NodeType() types.NodeType {
 
 // Validate checks if the node configuration is valid
 func (e *SampleExecutor) Validate(node types.Node) error {
-data, err := types.AsSampleData(node.Data)
-if err != nil {
-return err
-}
+	data, err := types.AsSampleData(node.Data)
+	if err != nil {
+		return err
+	}
 	if data.Count != nil {
 		count := 0
 		if countVal, ok := data.Count.(float64); ok {

@@ -13,10 +13,10 @@ type AccumulatorExecutor struct{}
 // Accumulates values over successive calls.
 // The accumulator maintains state across multiple node executions in a workflow.
 func (e *AccumulatorExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsAccumulatorData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsAccumulatorData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	if data.AccumOp == nil {
 		return nil, fmt.Errorf("accumulator node missing accum_op")
 	}
@@ -59,10 +59,10 @@ func (e *AccumulatorExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *AccumulatorExecutor) Validate(node types.Node) error {
-data, err := types.AsAccumulatorData(node.Data)
-if err != nil {
-return err
-}
+	data, err := types.AsAccumulatorData(node.Data)
+	if err != nil {
+		return err
+	}
 	if data.AccumOp == nil {
 		return fmt.Errorf("accumulator node missing accum_op")
 	}

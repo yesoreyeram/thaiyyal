@@ -17,10 +17,10 @@ type RetryExecutor struct{}
 // Implements retry logic with configurable backoff strategies
 // Retries failed operations automatically with exponential, linear, or constant backoff
 func (e *RetryExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsRetryData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsRetryData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	// Get retry configuration with defaults
 	maxAttempts := 3
 	if data.MaxAttempts != nil {

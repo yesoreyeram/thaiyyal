@@ -13,10 +13,10 @@ type FindExecutor struct{}
 
 // Execute finds the first matching element in the array
 func (e *FindExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsFindData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsFindData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("find node needs at least 1 input")
@@ -109,10 +109,10 @@ func (e *FindExecutor) NodeType() types.NodeType {
 
 // Validate checks if the node configuration is valid
 func (e *FindExecutor) Validate(node types.Node) error {
-data, err := types.AsFindData(node.Data)
-if err != nil {
-return err
-}
+	data, err := types.AsFindData(node.Data)
+	if err != nil {
+		return err
+	}
 	if data.Condition == nil || *data.Condition == "" {
 		return fmt.Errorf("find node requires non-empty 'condition' field")
 	}

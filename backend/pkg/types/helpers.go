@@ -57,10 +57,10 @@ func DefaultConfig() Config {
 		// Zero Trust Security - DENY ALL by default (explicit opt-in required)
 		AllowHTTP:          false,      // HTTP DISABLED - must explicitly enable
 		AllowedDomains:     []string{}, // No domains whitelisted (must configure if enabling HTTP)
-		AllowPrivateIPs:    false,       // Block all private IP ranges
-		AllowLocalhost:     false,       // Block localhost
-		AllowLinkLocal:     false,       // Block link-local
-		AllowCloudMetadata: false,       // Block cloud metadata
+		AllowPrivateIPs:    false,      // Block all private IP ranges
+		AllowLocalhost:     false,      // Block localhost
+		AllowLinkLocal:     false,      // Block link-local
+		AllowCloudMetadata: false,      // Block cloud metadata
 
 		// Cache configuration
 		DefaultCacheTTL: 1 * time.Hour,
@@ -158,10 +158,10 @@ func ZeroTrustConfig() Config {
 		// Zero Trust Security - DENY ALL by default
 		AllowHTTP:          false,      // Deny all HTTP access
 		AllowedDomains:     []string{}, // No domains allowed (deny all)
-		AllowPrivateIPs:    false,       // Block all private IP ranges
-		AllowLocalhost:     false,       // Block localhost
-		AllowLinkLocal:     false,       // Block link-local
-		AllowCloudMetadata: false,       // Block cloud metadata
+		AllowPrivateIPs:    false,      // Block all private IP ranges
+		AllowLocalhost:     false,      // Block localhost
+		AllowLinkLocal:     false,      // Block link-local
+		AllowCloudMetadata: false,      // Block cloud metadata
 
 		// Cache configuration - Minimal
 		DefaultCacheTTL: 5 * time.Minute, // Short TTL

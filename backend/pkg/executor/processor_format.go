@@ -17,10 +17,10 @@ type FormatExecutor struct{}
 // Execute runs the Format node
 // Formats structured input data into string output based on the specified output type.
 func (e *FormatExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsFormatData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsFormatData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("format node requires input")
@@ -72,10 +72,10 @@ func (e *FormatExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *FormatExecutor) Validate(node types.Node) error {
-data, err := types.AsFormatData(node.Data)
-if err != nil {
-return err
-}
+	data, err := types.AsFormatData(node.Data)
+	if err != nil {
+		return err
+	}
 	if data.OutputType != nil {
 		outputType := strings.ToUpper(*data.OutputType)
 		validTypes := map[string]bool{

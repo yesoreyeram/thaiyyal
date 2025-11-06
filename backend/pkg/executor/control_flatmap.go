@@ -16,7 +16,7 @@ func (e *FlatMapExecutor) Execute(ctx ExecutionContext, node types.Node) (interf
 	if err != nil {
 		return nil, err
 	}
-	
+
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("flat_map node needs at least 1 input")

@@ -12,10 +12,10 @@ type TextOperationExecutor struct{}
 
 // Execute performs text transformations on string inputs
 func (e *TextOperationExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsTextOperationData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsTextOperationData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	if data.TextOp == nil {
 		return nil, fmt.Errorf("text operation node missing text_op")
 	}
@@ -66,10 +66,10 @@ func (e *TextOperationExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *TextOperationExecutor) Validate(node types.Node) error {
-data, err := types.AsTextOperationData(node.Data)
-if err != nil {
-return err
-}
+	data, err := types.AsTextOperationData(node.Data)
+	if err != nil {
+		return err
+	}
 	if data.TextOp == nil {
 		return fmt.Errorf("text operation node missing text_op")
 	}

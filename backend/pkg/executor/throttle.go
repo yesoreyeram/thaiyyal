@@ -11,7 +11,7 @@ import (
 // ThrottleExecutor executes Throttle nodes
 // Simple delay-based request throttling
 type ThrottleExecutor struct {
-	mu         sync.Mutex
+	mu          sync.Mutex
 	lastRequest map[string]time.Time
 }
 
@@ -25,10 +25,10 @@ func NewThrottleExecutor() *ThrottleExecutor {
 // Execute runs the Throttle node
 // Adds delay between requests based on requests_per_second
 func (e *ThrottleExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsThrottleData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsThrottleData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	inputs := ctx.GetNodeInputs(node.ID)
 	var inputValue interface{}
 	if len(inputs) > 0 {
@@ -85,10 +85,10 @@ func (e *ThrottleExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *ThrottleExecutor) Validate(node types.Node) error {
-data, err := types.AsThrottleData(node.Data)
-if err != nil {
-return err
-}
+	data, err := types.AsThrottleData(node.Data)
+	if err != nil {
+		return err
+	}
 	if data.RequestsPerSecond != nil && *data.RequestsPerSecond <= 0 {
 		return fmt.Errorf("requests_per_second must be positive, got %f", *data.RequestsPerSecond)
 	}

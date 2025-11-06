@@ -17,7 +17,7 @@ func (e *ZipExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Get arrays to zip (can be from inputs or specified as array references)
 	var arrays [][]interface{}
 
@@ -85,7 +85,7 @@ func (e *ZipExecutor) NodeType() types.NodeType {
 
 // Validate checks if the node configuration is valid
 func (e *ZipExecutor) Validate(node types.Node) error {
-// Validate node data type
+	// Validate node data type
 	if _, err := types.AsZipData(node.Data); err != nil {
 		return err
 	}
@@ -102,7 +102,7 @@ func (e *CompactExecutor) Execute(ctx ExecutionContext, node types.Node) (interf
 	if err != nil {
 		return nil, err
 	}
-	
+
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("compact node needs at least 1 input")

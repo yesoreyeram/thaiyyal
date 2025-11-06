@@ -12,10 +12,10 @@ type TransformExecutor struct{}
 // Execute runs the Transform node
 // Transforms data structures between different formats.
 func (e *TransformExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsTransformData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsTransformData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	if data.TransformType == nil {
 		return nil, fmt.Errorf("transform node missing transform_type")
 	}
@@ -60,10 +60,10 @@ func (e *TransformExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *TransformExecutor) Validate(node types.Node) error {
-data, err := types.AsTransformData(node.Data)
-if err != nil {
-return err
-}
+	data, err := types.AsTransformData(node.Data)
+	if err != nil {
+		return err
+	}
 	if data.TransformType == nil {
 		return fmt.Errorf("transform node missing transform_type")
 	}

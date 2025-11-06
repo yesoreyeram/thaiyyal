@@ -112,11 +112,11 @@ func Development() *Config {
 // Production returns a Config optimized for production with strict security.
 func Production() *Config {
 	cfg := Default()
-	cfg.AllowHTTP = false         // Require HTTPS
-	cfg.AllowPrivateIPs = false   // Block private IPs (DENY)
-	cfg.BlockInternalIPs = true   // DEPRECATED: kept for backward compatibility
-	cfg.AllowLocalhost = false    // Block localhost (DENY)
-	cfg.AllowLinkLocal = false    // Block link-local (DENY)
+	cfg.AllowHTTP = false          // Require HTTPS
+	cfg.AllowPrivateIPs = false    // Block private IPs (DENY)
+	cfg.BlockInternalIPs = true    // DEPRECATED: kept for backward compatibility
+	cfg.AllowLocalhost = false     // Block localhost (DENY)
+	cfg.AllowLinkLocal = false     // Block link-local (DENY)
 	cfg.AllowCloudMetadata = false // Block cloud metadata (DENY)
 	cfg.MaxExecutionTime = 5 * time.Minute
 	return cfg

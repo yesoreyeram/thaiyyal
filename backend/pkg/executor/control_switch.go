@@ -12,10 +12,10 @@ type SwitchExecutor struct{}
 // Execute runs the Switch node
 // Handles switch/case node execution
 func (e *SwitchExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsSwitchData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsSwitchData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("switch node requires at least one input")
@@ -70,10 +70,10 @@ func (e *SwitchExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *SwitchExecutor) Validate(node types.Node) error {
-data, err := types.AsSwitchData(node.Data)
-if err != nil {
-return err
-}
+	data, err := types.AsSwitchData(node.Data)
+	if err != nil {
+		return err
+	}
 	// Switch node should have at least one case
 	if len(data.Cases) == 0 {
 		return fmt.Errorf("switch node requires at least one case")

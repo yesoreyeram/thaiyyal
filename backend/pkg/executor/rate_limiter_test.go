@@ -9,24 +9,24 @@ import (
 
 func TestRateLimiterExecutor_Execute(t *testing.T) {
 	tests := []struct {
-		name           string
-		maxRequests    int
-		perDuration    string
-		numRequests    int
+		name            string
+		maxRequests     int
+		perDuration     string
+		numRequests     int
 		expectedMinTime time.Duration
 	}{
 		{
-			name:           "basic rate limiting - 2 requests per second",
-			maxRequests:    2,
-			perDuration:    "1s",
-			numRequests:    4,
+			name:            "basic rate limiting - 2 requests per second",
+			maxRequests:     2,
+			perDuration:     "1s",
+			numRequests:     4,
 			expectedMinTime: 1 * time.Second, // Should take at least 1 second for 4 requests (2 per second)
 		},
 		{
-			name:           "fast rate - 10 requests per 100ms",
-			maxRequests:    10,
-			perDuration:    "100ms",
-			numRequests:    15,
+			name:            "fast rate - 10 requests per 100ms",
+			maxRequests:     10,
+			perDuration:     "100ms",
+			numRequests:     15,
 			expectedMinTime: 100 * time.Millisecond, // Should take at least 100ms for 15 requests (10 per 100ms)
 		},
 	}
@@ -42,8 +42,8 @@ func TestRateLimiterExecutor_Execute(t *testing.T) {
 				ID:   "rate1",
 				Type: types.NodeTypeRateLimiter,
 				Data: types.RateLimiterData{
-					MaxRequests:       &tt.maxRequests,
-					PerDuration:       &tt.perDuration,
+					MaxRequests: &tt.maxRequests,
+					PerDuration: &tt.perDuration,
 				},
 			}
 
@@ -178,10 +178,10 @@ func TestRateLimiterExecutor_PassThrough(t *testing.T) {
 
 func TestThrottleExecutor_Execute(t *testing.T) {
 	tests := []struct {
-		name               string
-		requestsPerSecond  float64
-		numRequests        int
-		expectedMinTime    time.Duration
+		name              string
+		requestsPerSecond float64
+		numRequests       int
+		expectedMinTime   time.Duration
 	}{
 		{
 			name:              "throttle to 10 rps",

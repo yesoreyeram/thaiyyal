@@ -16,7 +16,7 @@ func (e *SliceExecutor) Execute(ctx ExecutionContext, node types.Node) (interfac
 	if err != nil {
 		return nil, err
 	}
-	
+
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("slice node needs at least 1 input")
@@ -122,7 +122,7 @@ func (e *SliceExecutor) NodeType() types.NodeType {
 
 // Validate checks if the node configuration is valid
 func (e *SliceExecutor) Validate(node types.Node) error {
-// Validate node data type
+	// Validate node data type
 	if _, err := types.AsSliceData(node.Data); err != nil {
 		return err
 	}

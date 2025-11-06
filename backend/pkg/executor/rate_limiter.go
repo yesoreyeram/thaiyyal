@@ -17,9 +17,9 @@ type RateLimiterExecutor struct {
 
 // rateLimitBucket tracks requests within a time window
 type rateLimitBucket struct {
-	requests  []time.Time
+	requests    []time.Time
 	maxRequests int
-	window    time.Duration
+	window      time.Duration
 }
 
 // NewRateLimiterExecutor creates a new RateLimiterExecutor
@@ -32,10 +32,10 @@ func NewRateLimiterExecutor() *RateLimiterExecutor {
 // Execute runs the RateLimiter node
 // Enforces rate limits and delays requests as needed
 func (e *RateLimiterExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-data, err := types.AsRateLimiterData(node.Data)
-if err != nil {
-return nil, err
-}
+	data, err := types.AsRateLimiterData(node.Data)
+	if err != nil {
+		return nil, err
+	}
 	inputs := ctx.GetNodeInputs(node.ID)
 	var inputValue interface{}
 	if len(inputs) > 0 {
@@ -83,7 +83,7 @@ return nil, err
 
 	// Check and enforce rate limit
 	now := time.Now()
-	
+
 	e.mu.Lock()
 	// Remove requests outside the current window
 	cutoff := now.Add(-bucket.window)
@@ -138,10 +138,10 @@ func (e *RateLimiterExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *RateLimiterExecutor) Validate(node types.Node) error {
-data, err := types.AsRateLimiterData(node.Data)
-if err != nil {
-return err
-}
+	data, err := types.AsRateLimiterData(node.Data)
+	if err != nil {
+		return err
+	}
 	if data.MaxRequests != nil && *data.MaxRequests <= 0 {
 		return fmt.Errorf("max_requests must be positive")
 	}

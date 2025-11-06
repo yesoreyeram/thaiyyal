@@ -39,8 +39,8 @@ func New(ctx context.Context, config *Config) (*http.Client, error) {
 
 	// Add SSRF protection middleware if any protection is enabled
 	// Note: Protection is DENY BY DEFAULT, so we check if any restrictions apply
-	if !config.Security.AllowPrivateIPs || !config.Security.AllowLocalhost || 
-		!config.Security.AllowLinkLocal || !config.Security.AllowCloudMetadata || 
+	if !config.Security.AllowPrivateIPs || !config.Security.AllowLocalhost ||
+		!config.Security.AllowLinkLocal || !config.Security.AllowCloudMetadata ||
 		len(config.Security.AllowedDomains) > 0 {
 		middlewares = append(middlewares, ssrfProtectionMiddleware(config))
 	}
