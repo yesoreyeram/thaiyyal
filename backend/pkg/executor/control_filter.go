@@ -35,19 +35,35 @@ return nil, err
 	// Check if input is an array (slice)
 	inputArray, ok := input.([]interface{})
 	if !ok {
-		// Not an array - pass through with warning
-		slog.Warn("filter node received non-array input, passing through unchanged",
-			slog.String("node_id", node.ID),
-			slog.String("input_type", fmt.Sprintf("%T", input)),
-		)
+		// Try to extract array from common map structures (e.g., range node output)
+		if inputMap, isMap := input.(map[string]interface{}); isMap {
+			// Try common keys for arrays
+			for _, key := range []string{"range", "array", "items", "data", "values"} {
+				if arr, found := inputMap[key]; found {
+					if arrSlice, isSlice := arr.([]interface{}); isSlice {
+						inputArray = arrSlice
+						ok = true
+						break
+					}
+				}
+			}
+		}
 
-		return map[string]interface{}{
-			"input":         input,
-			"filtered":      input,
-			"is_array":      false,
-			"warning":       "input is not an array, passed through unchanged",
-			"original_type": fmt.Sprintf("%T", input),
-		}, nil
+		// If still not an array - pass through with warning
+		if !ok {
+			slog.Warn("filter node received non-array input, passing through unchanged",
+				slog.String("node_id", node.ID),
+				slog.String("input_type", fmt.Sprintf("%T", input)),
+			)
+
+			return map[string]interface{}{
+				"input":         input,
+				"filtered":      input,
+				"is_array":      false,
+				"warning":       "input is not an array, passed through unchanged",
+				"original_type": fmt.Sprintf("%T", input),
+			}, nil
+		}
 	}
 
 	// Build expression context with access to node results and variables

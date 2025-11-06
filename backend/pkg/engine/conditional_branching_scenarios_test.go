@@ -166,7 +166,6 @@ t.Errorf("Expected output_path='other', got %v", switchResult["output_path"])
 
 // Test 6: Filter with condition (array processing)
 func TestConditionalBranching_Scenario06_FilterArray(t *testing.T) {
-t.Skip("Known issue: range node output format incompatibility with filter input")
 payload := types.Payload{
 Nodes: []types.Node{
 {ID: "range", Type: types.NodeTypeRange, Data: types.RangeData{Start: intPtr(1), End: intPtr(10)}},
@@ -218,12 +217,11 @@ t.Fatalf("Execution failed: %v", err)
 }
 
 partResult := mustGetMapResult(t, result, "partition")
-truePart, ok1 := partResult["true_partition"].([]interface{})
-falsePart, ok2 := partResult["false_partition"].([]interface{})
+truePart, ok1 := partResult["passed"].([]interface{})
+falsePart, ok2 := partResult["failed"].([]interface{})
 
 if !ok1 || !ok2 {
-t.Skip("Partition test skipped - range output not compatible with partition input")
-return
+		t.Fatalf("Partition result missing expected fields. Got: %+v", partResult)
 }
 
 if len(truePart) != 5 || len(falsePart) != 5 {

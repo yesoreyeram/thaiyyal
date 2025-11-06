@@ -27,15 +27,32 @@ return nil, err
 	// Check if input is an array
 	arr, ok := input.([]interface{})
 	if !ok {
-		slog.Warn("partition node received non-array input",
-			slog.String("node_id", node.ID),
-			slog.String("input_type", fmt.Sprintf("%T", input)),
-		)
-		return map[string]interface{}{
-			"error":         "input is not an array",
-			"input":         input,
-			"original_type": fmt.Sprintf("%T", input),
-		}, nil
+		// Try to extract array from common map structures (e.g., range node output)
+		if inputMap, isMap := input.(map[string]interface{}); isMap {
+			// Try common keys for arrays
+			for _, key := range []string{"range", "array", "items", "data", "values"} {
+				if arrVal, found := inputMap[key]; found {
+					if arrSlice, isSlice := arrVal.([]interface{}); isSlice {
+						arr = arrSlice
+						ok = true
+						break
+					}
+				}
+			}
+		}
+
+		// If still not an array - return error
+		if !ok {
+			slog.Warn("partition node received non-array input",
+				slog.String("node_id", node.ID),
+				slog.String("input_type", fmt.Sprintf("%T", input)),
+			)
+			return map[string]interface{}{
+				"error":         "input is not an array",
+				"input":         input,
+				"original_type": fmt.Sprintf("%T", input),
+			}, nil
+		}
 	}
 
 	// Get condition
