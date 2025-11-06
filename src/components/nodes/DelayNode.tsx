@@ -15,22 +15,8 @@ type DelayNodeData = {
   label?: string;
 };
 
-/**
- * DelayNode React Component
- *
- * This component renders a visual node in the workflow editor that pauses execution
- *
- * @param {NodePropsWithOptions<DelayNodeData>} props - Component props
- * @param {string} props.id - Unique identifier for this node instance
- * @param {DelayNodeData} props.data - Node configuration data
- * @param {function} [props.onShowOptions] - Callback to show the options context menu
- * @returns {JSX.Element} A rendered node component
- */
-export function DelayNode({
-  id,
-  data,
-  onShowOptions,
-}: NodePropsWithOptions<DelayNodeData>) {
+export function DelayNode(props: NodePropsWithOptions<DelayNodeData>) {
+  const { id, data, onShowOptions } = props;
   const { setNodes } = useReactFlow();
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -42,22 +28,14 @@ export function DelayNode({
     );
   };
 
-  const handleTitleChange = (newTitle: string) => {
-    setNodes((nds) =>
-      nds.map((n) =>
-        n.id === id ? { ...n, data: { ...n.data, label: newTitle } } : n
-      )
-    );
-  };
-
   const nodeInfo = getNodeInfo("delayNode");
 
   return (
     <NodeWrapper
+      id={id}
       title={String(data?.label || "Delay")}
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
-      onTitleChange={handleTitleChange}
     >
       <Handle
         type="target"

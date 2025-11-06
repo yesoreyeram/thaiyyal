@@ -12,7 +12,11 @@ type BarChartNodeData = {
   orientation?: "vertical" | "horizontal";
 };
 
-export function BarChartNode({ id, data, ...props }: NodeProps<BarChartNodeData>) {
+export function BarChartNode({
+  id,
+  data,
+  ...props
+}: NodeProps<BarChartNodeData>) {
   const { setNodes } = useReactFlow();
 
   const onColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -60,14 +64,6 @@ export function BarChartNode({ id, data, ...props }: NodeProps<BarChartNodeData>
     );
   };
 
-  const handleTitleChange = (newTitle: string) => {
-    setNodes((nds) =>
-      nds.map((n) =>
-        n.id === id ? { ...n, data: { ...n.data, label: newTitle } } : n
-      )
-    );
-  };
-
   const nodeInfo = getNodeInfo("barChartNode");
   // Type assertion is consistent with other nodes in the codebase (see AllNodes.tsx, ArrayNodes.tsx)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -75,12 +71,16 @@ export function BarChartNode({ id, data, ...props }: NodeProps<BarChartNodeData>
 
   return (
     <NodeWrapper
+      id={id}
       title={String(data?.label || "Bar Chart")}
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
-      onTitleChange={handleTitleChange}
     >
-      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-2 h-2 bg-blue-400"
+      />
       <div className="flex flex-col gap-1">
         {/* Orientation selector */}
         <select
@@ -141,7 +141,11 @@ export function BarChartNode({ id, data, ...props }: NodeProps<BarChartNodeData>
           <span className="text-[9px] text-gray-300">Show values</span>
         </label>
       </div>
-      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-2 h-2 bg-green-400"
+      />
     </NodeWrapper>
   );
 }

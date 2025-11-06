@@ -4,21 +4,18 @@ import React from "react";
 import { NodeWrapper } from "./NodeWrapper";
 import { getNodeInfo } from "./nodeInfo";
 
-
 type HttpNodeData = {
   url?: string;
   label?: string;
 };
 
-export function HttpNode({ id, data, onShowOptions }: NodePropsWithOptions<HttpNodeData>) {
+export function HttpNode(props: NodePropsWithOptions<HttpNodeData>) {
+  const { id, data, onShowOptions } = props;
   const { setNodes } = useReactFlow();
-  
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const url = e.target.value;
     setNodes((nds) =>
-      nds.map((n) =>
-        n.id === id ? { ...n, data: { ...n.data, url } } : n
-      )
+      nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, url } } : n))
     );
   };
 
@@ -26,21 +23,29 @@ export function HttpNode({ id, data, onShowOptions }: NodePropsWithOptions<HttpN
 
   return (
     <NodeWrapper
+      id={id}
       title={String(data?.label || "HTTP Request")}
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
-      className="bg-gradient-to-br from-purple-700 to-purple-800 text-white shadow-lg rounded-lg border border-purple-600 hover:border-purple-500 transition-all"
     >
-      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-2 h-2 bg-blue-400"
+      />
       <input
         value={String(data?.url ?? "")}
         type="text"
         onChange={onChange}
-        className="w-36 text-xs border border-purple-600 px-2 py-1 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-2 focus:ring-purple-400 focus:outline-none"
+        className="w-36 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
         placeholder="https://..."
         aria-label="HTTP URL"
       />
-      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-2 h-2 bg-green-400"
+      />
     </NodeWrapper>
   );
 }
