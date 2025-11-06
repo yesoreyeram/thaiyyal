@@ -846,8 +846,12 @@ func (e *Engine) getNode(nodeID string) types.Node {
 // shouldExecuteNode determines if a node should execute based on conditional edges
 // Returns true if:
 // - The node has no incoming edges (orphan/start node)
-// - The node has unconditional incoming edges
-// - At least one conditional edge's condition is satisfied
+// - At least one incoming edge's source has executed AND:
+//   - The edge is unconditional, OR
+//   - The edge's condition is satisfied
+// Returns false if:
+// - All source nodes have been skipped (none executed)
+// - All incoming edges are conditional and none are satisfied
 func (e *Engine) shouldExecuteNode(nodeID string) bool {
 	// Find all edges targeting this node
 	incomingEdges := e.getIncomingEdges(nodeID)
@@ -857,18 +861,24 @@ func (e *Engine) shouldExecuteNode(nodeID string) bool {
 		return true
 	}
 	
-	// Check if any incoming edge's condition is satisfied
+	// Check if any incoming edge allows execution
+	// We need at least one source node to have executed AND either:
+	// 1. The edge is unconditional, OR
+	// 2. The edge's condition is satisfied
+	hasExecutedSource := false
 	hasConditionalEdge := false
 	conditionSatisfied := false
 	
 	for _, edge := range incomingEdges {
-		// Get the source node's result
-		sourceResult, ok := e.GetNodeResult(edge.Source)
-		if !ok {
-			// Source hasn't executed yet - this shouldn't happen in topological order
-			// But if it does, allow execution (unconditional edge)
+		// Check if the source node has executed
+		sourceResult, sourceExecuted := e.GetNodeResult(edge.Source)
+		if !sourceExecuted {
+			// Source hasn't executed (was skipped due to conditional path)
+			// This edge cannot contribute to allowing this node to execute
 			continue
 		}
+		
+		hasExecutedSource = true
 		
 		// Check if this edge has a condition (sourceHandle or legacy condition field)
 		edgeCondition := edge.SourceHandle
@@ -877,7 +887,7 @@ func (e *Engine) shouldExecuteNode(nodeID string) bool {
 		}
 		
 		if edgeCondition == nil {
-			// Unconditional edge - node should execute
+			// Unconditional edge from an executed source - node should execute
 			return true
 		}
 		
@@ -886,8 +896,13 @@ func (e *Engine) shouldExecuteNode(nodeID string) bool {
 		// Check if the condition is satisfied based on source node result
 		if e.isConditionSatisfied(sourceResult, *edgeCondition) {
 			conditionSatisfied = true
-			break // At least one condition satisfied - execute the node
+			// Don't break here - we might find an unconditional edge
 		}
+	}
+	
+	// If no source nodes have executed, don't execute this node
+	if !hasExecutedSource {
+		return false
 	}
 	
 	// If all edges are conditional, at least one must be satisfied
