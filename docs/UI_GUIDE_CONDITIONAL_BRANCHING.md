@@ -424,12 +424,49 @@ For Each User
 
 ---
 
+## Known Issues & Fixes
+
+### Issue: Both Conditional Branches Execute (FIXED)
+
+**Problem:** Prior to commit `[hash]`, when users created conditional workflows following this guide, both conditional branches would execute regardless of the condition result.
+
+**Root Cause:** The frontend was not serializing the `sourceHandle` and `targetHandle` fields when sending the workflow payload to the backend for execution. The backend requires these fields to determine which conditional path should be taken.
+
+**Fix Applied:** Updated `src/app/workflow/page.tsx` line 803-809 to include `sourceHandle` and `targetHandle` in the edge serialization:
+
+```typescript
+edges: edges.map((e) => ({
+  id: e.id,
+  source: e.source,
+  target: e.target,
+  sourceHandle: e.sourceHandle,  // ← ADDED
+  targetHandle: e.targetHandle,  // ← ADDED
+})),
+```
+
+**Verification:** After this fix:
+- ✅ Only the true path executes when condition is met
+- ✅ Only the false path executes when condition is not met  
+- ✅ Transitive dependencies are properly skipped
+- ✅ All 66 conditional execution tests pass
+
+**Testing:** To verify the fix works in your workflow:
+1. Create a simple condition workflow (e.g., age >= 18)
+2. Add different nodes on true and false paths
+3. Execute with age = 25: Only true path nodes should show results
+4. Execute with age = 15: Only false path nodes should show results
+5. Check execution panel - skipped nodes should not appear in results
+
+---
+
 **Questions or Issues?**
 
 If you encounter problems not covered in this guide, please:
 1. Check the Troubleshooting section above
 2. Review the example workflows
-3. Open an issue on GitHub with:
+3. Verify you have the latest version with the sourceHandle fix
+4. Open an issue on GitHub with:
    - Steps to reproduce
    - Expected vs actual behavior
    - Screenshot of your workflow
+   - Workflow JSON payload (from "View JSON" button)
