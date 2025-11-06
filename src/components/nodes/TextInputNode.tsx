@@ -1,6 +1,6 @@
+import React from "react";
 import { NodePropsWithOptions } from "./nodeTypes";
 import { Handle, Position, useReactFlow } from "reactflow";
-import React from "react";
 import { NodeWrapper } from "./NodeWrapper";
 import { getNodeInfo } from "./nodeInfo";
 
@@ -9,13 +9,9 @@ type TextInputNodeData = {
   label?: string;
 };
 
-export function TextInputNode({
-  id,
-  data,
-  onShowOptions,
-}: NodePropsWithOptions<TextInputNodeData>) {
+export function TextInputNode(props: NodePropsWithOptions<TextInputNodeData>) {
+  const { id, data, onShowOptions } = props;
   const { setNodes } = useReactFlow();
-
   const onChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const text = e.target.value;
     setNodes((nds) =>
@@ -27,10 +23,10 @@ export function TextInputNode({
 
   return (
     <NodeWrapper
+      id={id}
       title={String(data?.label || "Text Input")}
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
-      className="bg-gradient-to-br from-emerald-700 to-emerald-800 text-white shadow-lg rounded-lg border border-emerald-600 hover:border-emerald-500 transition-all"
     >
       <Handle
         type="target"
@@ -40,7 +36,7 @@ export function TextInputNode({
       <textarea
         value={String(data?.text ?? "")}
         onChange={onChange}
-        className="w-36 text-xs border border-emerald-600 px-2 py-1 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-2 focus:ring-emerald-400 focus:outline-none resize-none"
+        className="w-36 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
         placeholder="Enter text..."
         aria-label="Text input value"
         rows={3}

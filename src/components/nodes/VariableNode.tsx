@@ -1,6 +1,6 @@
 /**
  * VariableNode Component
- * 
+ *
  * Gets or sets a workflow variable.
  */
 
@@ -18,9 +18,9 @@ type VariableNodeData = {
 
 /**
  * VariableNode React Component
- * 
+ *
  * This component renders a visual node in the workflow editor that manages workflow variables
- * 
+ *
  * @param {NodePropsWithOptions<VariableNodeData>} props - Component props
  * @param {string} props.id - Unique identifier for this node instance
  * @param {VariableNodeData} props.data - Node configuration data
@@ -50,44 +50,36 @@ export function VariableNode({
     );
   };
 
-  const handleTitleChange = (newTitle: string) => {
-    setNodes((nds) =>
-      nds.map((n) =>
-        n.id === id ? { ...n, data: { ...n.data, label: newTitle } } : n
-      )
-    );
-  };
-
   const nodeInfo = getNodeInfo("variableNode");
 
   return (
     <NodeWrapper
+      id={id}
       title={String(data?.label || "Variable")}
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
-      onTitleChange={handleTitleChange}
     >
       <Handle
         type="target"
         position={Position.Left}
         className="w-2 h-2 bg-blue-400"
       />
-      <div className="flex items-center gap-0.5">
-        <input
-          value={String(data?.var_name ?? "")}
-          type="text"
-          onChange={onNameChange}
-          className="w-16 text-[10px] leading-tight border border-gray-600 px-1 py-0.5 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-1 focus:ring-blue-400 focus:outline-none"
-          placeholder="Name"
-        />
+      <div className="flex items-center gap-0.5 w-36">
         <select
           value={String(data?.var_op ?? "get")}
           onChange={onOpChange}
-          className="w-12 text-[10px] leading-tight border border-gray-600 px-1 py-0.5 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-1 focus:ring-blue-400 focus:outline-none"
+          className="w-14 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
         >
           <option value="get">Get</option>
           <option value="set">Set</option>
         </select>
+        <input
+          value={String(data?.var_name ?? "")}
+          type="text"
+          onChange={onNameChange}
+          className="w-22 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
+          placeholder="Name"
+        />
       </div>
       <Handle
         type="source"

@@ -1,14 +1,17 @@
 // Export all node components
+export { NumberNode } from "./NumberNode";
 export { TextInputNode } from "./TextInputNode";
 export { BooleanInputNode } from "./BooleanInputNode";
 export { DateInputNode } from "./DateInputNode";
 export { DateTimeInputNode } from "./DateTimeInputNode";
 export { TextOperationNode } from "./TextOperationNode";
+export { OperationNode } from "./OperationNode";
 export { HttpNode } from "./HttpNode";
 export { ConditionNode } from "./ConditionNode";
 export { FilterNode } from "./FilterNode";
 export { ContextVariableNode, ContextConstantNode } from "./ContextNodes";
 export { BarChartNode } from "./BarChartNode";
+export { VizNode } from "./VizNode";
 export { RendererNode } from "./RendererNode";
 export { ExpressionNode } from "./ExpressionNode";
 
@@ -57,5 +60,6 @@ export { NodeResizeHandle } from "./NodeResizeHandle";
 export { DeleteConfirmDialog } from "./DeleteConfirmDialog";
 export { NodeWrapper } from "./NodeWrapper";
 export { getNodeInfo, nodeInfoMap } from "./nodeInfo";
+export { nodeCategories } from "./categories";
 export type { NodeInfo } from "./nodeInfo";
 export type { NodePropsWithOptions } from "./nodeTypes";

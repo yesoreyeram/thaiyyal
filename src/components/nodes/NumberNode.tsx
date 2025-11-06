@@ -1,37 +1,32 @@
-import { NodePropsWithOptions } from "./nodeTypes";
-import { Handle, Position, useReactFlow } from "reactflow";
+"use client";
 import React from "react";
-import { NodeWrapper } from "./NodeWrapper";
-import { getNodeInfo } from "./nodeInfo";
+import { useReactFlow, Handle, Position } from "reactflow";
+import { NodePropsWithOptions, getNodeInfo, NodeWrapper } from "./";
 
-type DateTimeInputNodeData = {
-  datetime_value?: string;
-  label?: string;
-};
-
-export function DateTimeInputNode(
-  props: NodePropsWithOptions<DateTimeInputNodeData>
-) {
-  const { id, data, onShowOptions } = props;
+export function NumberNode({
+  id,
+  data,
+  onShowOptions,
+  onOpenInfo,
+}: NodePropsWithOptions) {
   const { setNodes } = useReactFlow();
-
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const datetime_value = e.target.value;
+    const v = Number(e.target.value);
     setNodes((nds) =>
       nds.map((n) =>
-        n.id === id ? { ...n, data: { ...n.data, datetime_value } } : n
+        n.id === id ? { ...n, data: { ...n.data, value: v } } : n
       )
     );
   };
 
-  const nodeInfo = getNodeInfo("datetimeInputNode");
-
+  const nodeInfo = getNodeInfo("numberNode");
   return (
     <NodeWrapper
       id={id}
-      title={String(data?.label || "DateTime")}
+      title={String(data?.label || "Number")}
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
+      onOpenInfo={onOpenInfo}
     >
       <Handle
         type="target"
@@ -39,11 +34,10 @@ export function DateTimeInputNode(
         className="w-2 h-2 bg-blue-400"
       />
       <input
-        value={String(data?.datetime_value ?? "")}
-        type="datetime-local"
+        value={typeof data?.value === "number" ? data.value : 0}
+        type="number"
         onChange={onChange}
         className="w-36 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
-        aria-label="DateTime value"
       />
       <Handle
         type="source"

@@ -1707,9 +1707,10 @@ func splitArgumentsRespectingParens(s string) []string {
 		}
 
 		if !inQuotes {
-			if ch == '(' {
+			switch ch {
+			case '(':
 				depth++
-			} else if ch == ')' {
+			case ')':
 				if depth > 0 {
 					depth--
 				}

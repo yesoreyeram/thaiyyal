@@ -17,20 +17,21 @@ import ReactFlow, {
   Edge as RFEdge,
   Connection,
   NodeProps,
-  Handle,
-  Position,
   NodeChange,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import {
+  NumberNode,
   TextInputNode,
   BooleanInputNode,
   DateInputNode,
   DateTimeInputNode,
+  OperationNode,
   TextOperationNode,
   HttpNode,
   ConditionNode,
   FilterNode,
+  VizNode,
   RendererNode,
   ForEachNode,
   WhileLoopNode,
@@ -67,8 +68,7 @@ import {
   TransposeNode,
   NodeContextMenu,
   DeleteConfirmDialog,
-  NodeWrapper,
-  getNodeInfo,
+  nodeCategories,
   NodePropsWithOptions,
 } from "../../components/nodes";
 import { AppNavBar } from "../../components/AppNavBar";
@@ -116,159 +116,6 @@ const withContextMenu = (
   })`;
   return WrappedComponent;
 };
-
-// Original three node components - Updated to use NodeWrapper
-function NumberNode({
-  id,
-  data,
-  onShowOptions,
-  onOpenInfo,
-}: NodePropsWithOptions) {
-  const { setNodes } = useReactFlow();
-  const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const v = Number(e.target.value);
-    setNodes((nds) =>
-      nds.map((n) =>
-        n.id === id ? { ...n, data: { ...n.data, value: v } } : n
-      )
-    );
-  };
-
-  const handleTitleChange = (newTitle: string) => {
-    setNodes((nds) =>
-      nds.map((n) =>
-        n.id === id ? { ...n, data: { ...n.data, label: newTitle } } : n
-      )
-    );
-  };
-
-  const nodeInfo = getNodeInfo("numberNode");
-
-  return (
-    <NodeWrapper
-      title={String(data?.label || "Number")}
-      nodeInfo={nodeInfo}
-      onShowOptions={onShowOptions}
-      onTitleChange={handleTitleChange}
-      onOpenInfo={onOpenInfo}
-    >
-      <Handle
-        type="target"
-        position={Position.Left}
-        className="w-2 h-2 bg-blue-400"
-      />
-      <input
-        value={typeof data?.value === "number" ? data.value : 0}
-        type="number"
-        onChange={onChange}
-        className="w-24 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
-      />
-      <Handle
-        type="source"
-        position={Position.Right}
-        className="w-2 h-2 bg-green-400"
-      />
-    </NodeWrapper>
-  );
-}
-
-function OperationNode({ id, data, onShowOptions }: NodePropsWithOptions) {
-  const { setNodes } = useReactFlow();
-  const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const op = e.target.value;
-    setNodes((nds) =>
-      nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, op } } : n))
-    );
-  };
-
-  const handleTitleChange = (newTitle: string) => {
-    setNodes((nds) =>
-      nds.map((n) =>
-        n.id === id ? { ...n, data: { ...n.data, label: newTitle } } : n
-      )
-    );
-  };
-
-  const nodeInfo = getNodeInfo("opNode");
-
-  return (
-    <NodeWrapper
-      title={String(data?.label || "Operation")}
-      nodeInfo={nodeInfo}
-      onShowOptions={onShowOptions}
-      onTitleChange={handleTitleChange}
-    >
-      <Handle
-        type="target"
-        position={Position.Left}
-        className="w-2 h-2 bg-blue-400"
-      />
-      <select
-        value={typeof data?.op === "string" ? data.op : "add"}
-        onChange={onChange}
-        className="w-24 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
-      >
-        <option value="add">Add</option>
-        <option value="subtract">Subtract</option>
-        <option value="multiply">Multiply</option>
-        <option value="divide">Divide</option>
-      </select>
-      <Handle
-        type="source"
-        position={Position.Right}
-        className="w-2 h-2 bg-green-400"
-      />
-    </NodeWrapper>
-  );
-}
-
-function VizNode({ id, data, onShowOptions }: NodePropsWithOptions) {
-  const { setNodes } = useReactFlow();
-  const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const mode = e.target.value;
-    setNodes((nds) =>
-      nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, mode } } : n))
-    );
-  };
-
-  const handleTitleChange = (newTitle: string) => {
-    setNodes((nds) =>
-      nds.map((n) =>
-        n.id === id ? { ...n, data: { ...n.data, label: newTitle } } : n
-      )
-    );
-  };
-
-  const nodeInfo = getNodeInfo("vizNode");
-
-  return (
-    <NodeWrapper
-      title={String(data?.label || "Visualization")}
-      nodeInfo={nodeInfo}
-      onShowOptions={onShowOptions}
-      onTitleChange={handleTitleChange}
-    >
-      <Handle
-        type="target"
-        position={Position.Left}
-        className="w-2 h-2 bg-blue-400"
-      />
-      <select
-        value={typeof data?.mode === "string" ? data.mode : "text"}
-        onChange={onChange}
-        className="w-24 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
-      >
-        <option value="text">Text</option>
-        <option value="table">Table</option>
-      </select>
-      <Handle
-        type="source"
-        position={Position.Right}
-        className="w-2 h-2 bg-green-400"
-      />
-    </NodeWrapper>
-  );
-}
 
 const initialNodes: RFNode<NodeData>[] = [
   {
@@ -396,336 +243,6 @@ const initialEdges: RFEdge[] = [
   },
 ];
 
-// Node categories configuration
-const nodeCategories = [
-  {
-    name: "Input/Output",
-    nodes: [
-      {
-        type: "number",
-        label: "Number",
-        color: "bg-blue-600",
-        defaultData: { value: 0 },
-      },
-      {
-        type: "text_input",
-        label: "Text Input",
-        color: "bg-green-600",
-        defaultData: { text: "" },
-      },
-      {
-        type: "boolean_input",
-        label: "Boolean",
-        color: "bg-indigo-600",
-        defaultData: { boolean_value: false },
-      },
-      {
-        type: "date_input",
-        label: "Date",
-        color: "bg-cyan-600",
-        defaultData: { date_value: "" },
-      },
-      {
-        type: "datetime_input",
-        label: "DateTime",
-        color: "bg-teal-600",
-        defaultData: { datetime_value: "" },
-      },
-      {
-        type: "http",
-        label: "HTTP",
-        color: "bg-purple-600",
-        defaultData: { url: "" },
-      },
-      {
-        type: "visualization",
-        label: "Visualization",
-        color: "bg-indigo-600",
-        defaultData: { mode: "text" },
-      },
-      {
-        type: "visualization",
-        label: "Bar Chart",
-        color: "bg-violet-600",
-        defaultData: {
-          orientation: "vertical",
-          bar_color: "#3b82f6",
-          bar_width: "medium",
-          show_values: true,
-          max_bars: 20,
-        },
-      },
-      {
-        type: "renderer",
-        label: "Renderer",
-        color: "bg-pink-600",
-        defaultData: {},
-      },
-    ],
-  },
-  {
-    name: "Operations",
-    nodes: [
-      {
-        type: "operation",
-        label: "Math Op",
-        color: "bg-yellow-600",
-        defaultData: { op: "add" },
-      },
-      {
-        type: "text_operation",
-        label: "Text Op",
-        color: "bg-green-600",
-        defaultData: { text_op: "uppercase" },
-      },
-      {
-        type: "expression",
-        label: "Expression",
-        color: "bg-cyan-600",
-        defaultData: { expression: "input * 2" },
-      },
-      {
-        type: "transform",
-        label: "Transform",
-        color: "bg-teal-600",
-        defaultData: { transform_type: "to_array" },
-      },
-      {
-        type: "parse",
-        label: "Parse",
-        color: "bg-purple-600",
-        defaultData: { input_type: "AUTO" },
-      },
-      {
-        type: "extract",
-        label: "Extract",
-        color: "bg-sky-600",
-        defaultData: { field: "" },
-      },
-    ],
-  },
-  {
-    name: "Control Flow",
-    nodes: [
-      {
-        type: "condition",
-        label: "Condition",
-        color: "bg-amber-600",
-        defaultData: { condition: ">0" },
-      },
-      {
-        type: "filter",
-        label: "Filter",
-        color: "bg-purple-600",
-        defaultData: { condition: "item.age > 0" },
-      },
-      {
-        type: "for_each",
-        label: "For Each",
-        color: "bg-orange-600",
-        defaultData: { max_iterations: 1000 },
-      },
-      {
-        type: "while_loop",
-        label: "While Loop",
-        color: "bg-red-600",
-        defaultData: { condition: ">0", max_iterations: 100 },
-      },
-      {
-        type: "switch",
-        label: "Switch",
-        color: "bg-pink-600",
-        defaultData: { cases: [], default_path: "default" },
-      },
-    ],
-  },
-  {
-    name: "Parallel & Join",
-    nodes: [
-      {
-        type: "parallel",
-        label: "Parallel",
-        color: "bg-violet-600",
-        defaultData: { max_concurrency: 10 },
-      },
-      {
-        type: "join",
-        label: "Join",
-        color: "bg-fuchsia-600",
-        defaultData: { join_strategy: "all" },
-      },
-      {
-        type: "split",
-        label: "Split",
-        color: "bg-rose-600",
-        defaultData: { paths: ["path1", "path2"] },
-      },
-    ],
-  },
-  {
-    name: "State & Memory",
-    nodes: [
-      {
-        type: "variable",
-        label: "Variable",
-        color: "bg-sky-600",
-        defaultData: { var_name: "", var_op: "get" },
-      },
-      {
-        type: "accumulator",
-        label: "Accumulator",
-        color: "bg-blue-500",
-        defaultData: { accum_op: "sum" },
-      },
-      {
-        type: "counter",
-        label: "Counter",
-        color: "bg-indigo-500",
-        defaultData: { counter_op: "increment", delta: 1 },
-      },
-      {
-        type: "cache",
-        label: "Cache",
-        color: "bg-purple-500",
-        defaultData: { cache_op: "get", cache_key: "" },
-      },
-    ],
-  },
-  {
-    name: "Error Handling",
-    nodes: [
-      {
-        type: "retry",
-        label: "Retry",
-        color: "bg-red-500",
-        defaultData: {
-          max_attempts: 3,
-          backoff_strategy: "exponential",
-          initial_delay: "1s",
-        },
-      },
-      {
-        type: "try_catch",
-        label: "Try-Catch",
-        color: "bg-orange-500",
-        defaultData: { continue_on_error: true },
-      },
-      {
-        type: "timeout",
-        label: "Timeout",
-        color: "bg-amber-500",
-        defaultData: { timeout: "30s", timeout_action: "error" },
-      },
-    ],
-  },
-  {
-    name: "Utilities",
-    nodes: [
-      {
-        type: "delay",
-        label: "Delay",
-        color: "bg-gray-500",
-        defaultData: { duration: "1s" },
-      },
-    ],
-  },
-  {
-    name: "Array Operations",
-    nodes: [
-      {
-        type: "map",
-        label: "Map",
-        color: "bg-cyan-600",
-        defaultData: { expression: "item * 2" },
-      },
-      {
-        type: "reduce",
-        label: "Reduce",
-        color: "bg-teal-600",
-        defaultData: { expression: "acc + item", initial_value: "0" },
-      },
-      {
-        type: "slice",
-        label: "Slice",
-        color: "bg-emerald-600",
-        defaultData: { start: 0, end: -1 },
-      },
-      {
-        type: "sort",
-        label: "Sort",
-        color: "bg-lime-600",
-        defaultData: { field: "", order: "asc" },
-      },
-      {
-        type: "find",
-        label: "Find",
-        color: "bg-sky-600",
-        defaultData: { expression: "item.id == 1" },
-      },
-      {
-        type: "flat_map",
-        label: "FlatMap",
-        color: "bg-indigo-600",
-        defaultData: { expression: "item.values" },
-      },
-      {
-        type: "group_by",
-        label: "Group By",
-        color: "bg-violet-600",
-        defaultData: { key_field: "category" },
-      },
-      {
-        type: "unique",
-        label: "Unique",
-        color: "bg-fuchsia-600",
-        defaultData: { by_field: "" },
-      },
-      {
-        type: "chunk",
-        label: "Chunk",
-        color: "bg-pink-600",
-        defaultData: { size: 3 },
-      },
-      {
-        type: "reverse",
-        label: "Reverse",
-        color: "bg-rose-600",
-        defaultData: {},
-      },
-      {
-        type: "partition",
-        label: "Partition",
-        color: "bg-orange-600",
-        defaultData: { expression: "item > 0" },
-      },
-      {
-        type: "zip",
-        label: "Zip",
-        color: "bg-yellow-600",
-        defaultData: {},
-      },
-      {
-        type: "sample",
-        label: "Sample",
-        color: "bg-blue-600",
-        defaultData: { count: 1 },
-      },
-      {
-        type: "range",
-        label: "Range",
-        color: "bg-green-600",
-        defaultData: { start: 0, end: 10, step: 1 },
-      },
-      {
-        type: "transpose",
-        label: "Transpose",
-        color: "bg-red-600",
-        defaultData: {},
-      },
-    ],
-  },
-];
-
 function Canvas() {
   const [nodes, setNodes, onNodesChangeBase] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -783,14 +300,15 @@ function Canvas() {
     []
   );
 
-  const handleDeleteNodeDirect = useCallback((nodeId: string) => {
-    setNodes((nds) => nds.filter((n) => n.id !== nodeId));
-    setEdges((eds) =>
-      eds.filter(
-        (e) => e.source !== nodeId && e.target !== nodeId
-      )
-    );
-  }, [setNodes, setEdges]);
+  const handleDeleteNodeDirect = useCallback(
+    (nodeId: string) => {
+      setNodes((nds) => nds.filter((n) => n.id !== nodeId));
+      setEdges((eds) =>
+        eds.filter((e) => e.source !== nodeId && e.target !== nodeId)
+      );
+    },
+    [setNodes, setEdges]
+  );
 
   const payload = useMemo(
     () => ({
@@ -813,29 +331,53 @@ function Canvas() {
 
   const nodeTypes = useMemo(
     () => ({
-      number: withContextMenu(NumberNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      number: withContextMenu(
+        NumberNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      operation: withContextMenu(OperationNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      operation: withContextMenu(
+        OperationNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      visualization: withContextMenu(VizNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      visualization: withContextMenu(
+        VizNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      renderer: withContextMenu(RendererNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      renderer: withContextMenu(
+        RendererNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      text_input: withContextMenu(TextInputNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      text_input: withContextMenu(
+        TextInputNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      boolean_input: withContextMenu(BooleanInputNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      boolean_input: withContextMenu(
+        BooleanInputNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      date_input: withContextMenu(DateInputNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      date_input: withContextMenu(
+        DateInputNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      datetime_input: withContextMenu(DateTimeInputNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      datetime_input: withContextMenu(
+        DateTimeInputNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
       text_operation: withContextMenu(
         TextOperationNode,
@@ -843,113 +385,221 @@ function Canvas() {
         () => setIsPaletteOpen(false),
         handleDeleteNodeDirect
       ),
-      http: withContextMenu(HttpNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      http: withContextMenu(
+        HttpNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      condition: withContextMenu(ConditionNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      condition: withContextMenu(
+        ConditionNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      filter: withContextMenu(FilterNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      filter: withContextMenu(
+        FilterNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      for_each: withContextMenu(ForEachNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      for_each: withContextMenu(
+        ForEachNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      while_loop: withContextMenu(WhileLoopNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      while_loop: withContextMenu(
+        WhileLoopNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      variable: withContextMenu(VariableNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      variable: withContextMenu(
+        VariableNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      extract: withContextMenu(ExtractNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      extract: withContextMenu(
+        ExtractNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      transform: withContextMenu(TransformNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      transform: withContextMenu(
+        TransformNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      parse: withContextMenu(ParseNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      parse: withContextMenu(
+        ParseNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      expression: withContextMenu(ExpressionNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      expression: withContextMenu(
+        ExpressionNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      accumulator: withContextMenu(AccumulatorNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      accumulator: withContextMenu(
+        AccumulatorNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      counter: withContextMenu(CounterNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      counter: withContextMenu(
+        CounterNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      switch: withContextMenu(SwitchNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      switch: withContextMenu(
+        SwitchNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      parallel: withContextMenu(ParallelNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      parallel: withContextMenu(
+        ParallelNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      join: withContextMenu(JoinNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      join: withContextMenu(
+        JoinNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      split: withContextMenu(SplitNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      split: withContextMenu(
+        SplitNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      delay: withContextMenu(DelayNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      delay: withContextMenu(
+        DelayNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      cache: withContextMenu(CacheNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      cache: withContextMenu(
+        CacheNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      retry: withContextMenu(RetryNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      retry: withContextMenu(
+        RetryNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      try_catch: withContextMenu(TryCatchNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      try_catch: withContextMenu(
+        TryCatchNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      timeout: withContextMenu(TimeoutNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      timeout: withContextMenu(
+        TimeoutNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      map: withContextMenu(MapNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      map: withContextMenu(
+        MapNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      reduce: withContextMenu(ReduceNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      reduce: withContextMenu(
+        ReduceNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      slice: withContextMenu(SliceNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      slice: withContextMenu(
+        SliceNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      sort: withContextMenu(SortNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      sort: withContextMenu(
+        SortNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      find: withContextMenu(FindNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      find: withContextMenu(
+        FindNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      flat_map: withContextMenu(FlatMapNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      flat_map: withContextMenu(
+        FlatMapNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      group_by: withContextMenu(GroupByNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      group_by: withContextMenu(
+        GroupByNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      unique: withContextMenu(UniqueNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      unique: withContextMenu(
+        UniqueNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      chunk: withContextMenu(ChunkNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      chunk: withContextMenu(
+        ChunkNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      reverse: withContextMenu(ReverseNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      reverse: withContextMenu(
+        ReverseNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      partition: withContextMenu(PartitionNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      partition: withContextMenu(
+        PartitionNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      zip: withContextMenu(ZipNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      zip: withContextMenu(
+        ZipNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      sample: withContextMenu(SampleNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      sample: withContextMenu(
+        SampleNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      range: withContextMenu(RangeNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      range: withContextMenu(
+        RangeNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
-      transpose: withContextMenu(TransposeNode, handleNodeContextMenu, () =>
-        setIsPaletteOpen(false), handleDeleteNodeDirect
+      transpose: withContextMenu(
+        TransposeNode,
+        handleNodeContextMenu,
+        () => setIsPaletteOpen(false),
+        handleDeleteNodeDirect
       ),
     }),
     [handleNodeContextMenu, handleDeleteNodeDirect]
@@ -1098,15 +748,6 @@ function Canvas() {
       return isNaN(nodeId) ? max : Math.max(max, nodeId);
     }, 0);
     nextNodeId.current = maxId + 1;
-  };
-
-  const handleSave = () => {
-    // TODO: Save workflow
-    console.log("Save workflow", payload);
-  };
-
-  const handleDelete = () => {
-    // TODO: Delete workflow
   };
 
   const handleRun = async () => {
@@ -1276,9 +917,7 @@ function Canvas() {
       <WorkflowNavBar
         workflowTitle={workflowTitle}
         onTitleChange={setWorkflowTitle}
-        onSave={handleSave}
         onShowJSON={() => setShowPayload(true)}
-        onDelete={handleDelete}
         onRun={handleRun}
         onExport={handleExport}
         onImport={handleImport}
@@ -1339,7 +978,6 @@ function Canvas() {
             onDragOver={onDragOver}
             onDrop={onDrop}
             nodeTypes={nodeTypes}
-            proOptions={{ hideAttribution: true }}
             fitView
             className="bg-gray-950"
           />

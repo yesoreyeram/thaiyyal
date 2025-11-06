@@ -9,7 +9,13 @@ interface NodeTopBarProps {
   compact?: boolean;
 }
 
-export function NodeTopBar({ title, onInfo, onOptions, onTitleChange, onDelete }: NodeTopBarProps) {
+export function NodeTopBar({
+  title,
+  onInfo,
+  onOptions,
+  onTitleChange,
+  onDelete,
+}: NodeTopBarProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(title);
   const optionsRef = useRef<HTMLButtonElement>(null);
@@ -79,15 +85,17 @@ export function NodeTopBar({ title, onInfo, onOptions, onTitleChange, onDelete }
           onClick={(e) => e.stopPropagation()}
         />
       ) : (
-        <div 
-          className={`text-[10px] leading-tight font-medium text-gray-100 truncate flex-1 min-w-0 ${onTitleChange ? 'cursor-text hover:text-white' : ''}`}
+        <div
+          className={`text-[10px] leading-tight font-extralight text-white truncate flex-1 min-w-0 ${
+            onTitleChange ? "cursor-text hover:text-white" : ""
+          }`}
           onClick={handleTitleClick}
           title={onTitleChange ? "Click to edit title" : title}
         >
           {title}
         </div>
       )}
-      <div className="flex items-center gap-0.5 flex-shrink-0">
+      <div className="flex items-center gap-0.5 shrink-0">
         {onInfo && (
           <button
             onClick={handleInfoClick}

@@ -44,22 +44,14 @@ export function TryCatchNode({
     );
   };
 
-  const handleTitleChange = (newTitle: string) => {
-    setNodes((nds) =>
-      nds.map((n) =>
-        n.id === id ? { ...n, data: { ...n.data, label: newTitle } } : n
-      )
-    );
-  };
-
   const nodeInfo = getNodeInfo("tryCatchNode");
 
   return (
     <NodeWrapper
+      id={id}
       title={String(data?.label || "Try-Catch")}
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
-      onTitleChange={handleTitleChange}
     >
       <Handle
         type="target"

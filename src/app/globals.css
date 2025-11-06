@@ -65,10 +65,11 @@ body {
 }
 
 .react-flow__attribution {
-  background: rgba(31, 41, 55, 0.8) !important;
-  color: #9ca3af !important;
-  padding: 4px 8px;
-  border-radius: 4px;
+  display: none;
+}
+
+.react-flow__resize-control.line {
+  border: 0 dotted #030712 !important;
 }
 
 /* Toast notification animation */

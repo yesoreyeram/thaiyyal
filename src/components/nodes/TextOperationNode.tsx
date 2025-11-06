@@ -4,7 +4,6 @@ import React from "react";
 import { NodeWrapper } from "./NodeWrapper";
 import { getNodeInfo } from "./nodeInfo";
 
-
 type TextOperationNodeData = {
   text_op?: string;
   separator?: string;
@@ -12,9 +11,13 @@ type TextOperationNodeData = {
   label?: string;
 };
 
-export function TextOperationNode({ id, data, onShowOptions }: NodePropsWithOptions<TextOperationNodeData>) {
+export function TextOperationNode({
+  id,
+  data,
+  onShowOptions,
+}: NodePropsWithOptions<TextOperationNodeData>) {
   const { setNodes } = useReactFlow();
-  
+
   const onOpChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const text_op = e.target.value;
     setNodes((nds) =>
@@ -25,14 +28,18 @@ export function TextOperationNode({ id, data, onShowOptions }: NodePropsWithOpti
   const onSeparatorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const separator = e.target.value;
     setNodes((nds) =>
-      nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, separator } } : n))
+      nds.map((n) =>
+        n.id === id ? { ...n, data: { ...n.data, separator } } : n
+      )
     );
   };
 
   const onRepeatNChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const repeat_n = Number(e.target.value);
     setNodes((nds) =>
-      nds.map((n) => (n.id === id ? { ...n, data: { ...n.data, repeat_n } } : n))
+      nds.map((n) =>
+        n.id === id ? { ...n, data: { ...n.data, repeat_n } } : n
+      )
     );
   };
 
@@ -40,16 +47,20 @@ export function TextOperationNode({ id, data, onShowOptions }: NodePropsWithOpti
 
   return (
     <NodeWrapper
+      id={id}
       title={String(data?.label || "Text Operation")}
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
-      className="bg-gradient-to-br from-emerald-600 to-emerald-700 text-white shadow-lg rounded-lg border border-emerald-500 hover:border-emerald-400 transition-all"
     >
-      <Handle type="target" position={Position.Left} className="w-2 h-2 bg-blue-400" />
+      <Handle
+        type="target"
+        position={Position.Left}
+        className="w-2 h-2 bg-blue-400"
+      />
       <select
         value={String(data?.text_op ?? "uppercase")}
         onChange={onOpChange}
-        className="w-32 text-xs border border-emerald-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-2 focus:ring-emerald-400 focus:outline-none"
+        className="w-36 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
         aria-label="Text operation type"
       >
         <option value="uppercase">Uppercase</option>
@@ -80,7 +91,11 @@ export function TextOperationNode({ id, data, onShowOptions }: NodePropsWithOpti
           aria-label="Repeat count"
         />
       )}
-      <Handle type="source" position={Position.Right} className="w-2 h-2 bg-green-400" />
+      <Handle
+        type="source"
+        position={Position.Right}
+        className="w-2 h-2 bg-green-400"
+      />
     </NodeWrapper>
   );
 }

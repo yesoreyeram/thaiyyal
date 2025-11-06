@@ -50,22 +50,14 @@ export function TimeoutNode({
     );
   };
 
-  const handleTitleChange = (newTitle: string) => {
-    setNodes((nds) =>
-      nds.map((n) =>
-        n.id === id ? { ...n, data: { ...n.data, label: newTitle } } : n
-      )
-    );
-  };
-
   const nodeInfo = getNodeInfo("timeoutNode");
 
   return (
     <NodeWrapper
+      id={id}
       title={String(data?.label || "Timeout")}
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
-      onTitleChange={handleTitleChange}
     >
       <Handle
         type="target"

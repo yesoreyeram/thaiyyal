@@ -4,7 +4,6 @@ import React from "react";
 import { NodeWrapper } from "./NodeWrapper";
 import { getNodeInfo } from "./nodeInfo";
 
-
 type ContextNodeData = {
   context_name?: string;
   context_value?: string | number;
@@ -54,14 +53,14 @@ const configs: Record<"variable" | "constant", ContextNodeConfig> = {
   },
 };
 
-export function BaseContextNode({ 
-  id, 
+export function BaseContextNode({
+  id,
   data,
   config,
   onShowOptions,
 }: NodePropsWithOptions<ContextNodeData> & { config: ContextNodeConfig }) {
   const { setNodes } = useReactFlow();
-  
+
   const onNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const context_name = e.target.value;
     setNodes((nds) =>
@@ -82,18 +81,21 @@ export function BaseContextNode({
 
   const inputClassName = `w-full text-xs border ${config.color.inputBorder} px-2 py-1 rounded bg-gray-900 text-white placeholder-gray-500 focus:ring-2 ${config.color.focusRing} focus:outline-none`;
 
-  const label = data?.label || (config.type === "variable" ? "Variable" : "Constant");
+  const label =
+    data?.label || (config.type === "variable" ? "Variable" : "Constant");
   const templatePrefix = config.type === "variable" ? "variable" : "const";
   const contextName = data?.context_name || "...";
 
-  const nodeInfo = getNodeInfo(config.type === "variable" ? "contextVariableNode" : "contextConstantNode");
+  const nodeInfo = getNodeInfo(
+    config.type === "variable" ? "contextVariableNode" : "contextConstantNode"
+  );
 
   return (
     <NodeWrapper
+      id={id}
       title={label}
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
-      className={`bg-gradient-to-br ${config.color.gradient} text-white shadow-lg rounded-lg border-2 ${config.color.border} ${config.color.borderHover} transition-all`}
     >
       <div className="space-y-1">
         <input
@@ -102,7 +104,9 @@ export function BaseContextNode({
           onChange={onNameChange}
           className={inputClassName}
           placeholder="Name"
-          aria-label={`${config.type === "variable" ? "Variable" : "Constant"} name`}
+          aria-label={`${
+            config.type === "variable" ? "Variable" : "Constant"
+          } name`}
         />
         <input
           value={String(data?.context_value ?? "")}
@@ -110,7 +114,9 @@ export function BaseContextNode({
           onChange={onValueChange}
           className={inputClassName}
           placeholder="Value"
-          aria-label={`${config.type === "variable" ? "Variable" : "Constant"} value`}
+          aria-label={`${
+            config.type === "variable" ? "Variable" : "Constant"
+          } value`}
         />
       </div>
       <div className={`mt-1 text-xs ${config.color.templateText} font-mono`}>

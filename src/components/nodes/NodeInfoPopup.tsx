@@ -66,10 +66,12 @@ export function NodeInfoPopup({
           </svg>
         </button>
       </div>
-      
+
       {/* Content */}
       <div className="p-4">
-        <p className="text-xs text-gray-300 mb-3 leading-relaxed">{description}</p>
+        <p className="text-xs text-gray-300 mb-3 leading-relaxed">
+          {description}
+        </p>
         {inputs.length > 0 && (
           <div className="mb-3">
             <h4 className="text-xs font-semibold text-gray-200 mb-1.5 px-2 py-1 bg-gray-800 border border-gray-700 rounded">
@@ -78,7 +80,7 @@ export function NodeInfoPopup({
             <ul className="text-xs text-gray-300 space-y-1 mt-1.5">
               {inputs.map((input, i) => (
                 <li key={i} className="flex items-start gap-1.5">
-                  <span className="text-blue-400 flex-shrink-0">▸</span>
+                  <span className="text-blue-400 shrink-0">▸</span>
                   <span>{input}</span>
                 </li>
               ))}
@@ -93,7 +95,7 @@ export function NodeInfoPopup({
             <ul className="text-xs text-gray-300 space-y-1 mt-1.5">
               {outputs.map((output, i) => (
                 <li key={i} className="flex items-start gap-1.5">
-                  <span className="text-green-400 flex-shrink-0">▸</span>
+                  <span className="text-green-400 shrink-0">▸</span>
                   <span>{output}</span>
                 </li>
               ))}

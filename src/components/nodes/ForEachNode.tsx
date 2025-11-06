@@ -1,6 +1,6 @@
 /**
  * ForEachNode Component
- * 
+ *
  * Executes a subflow for each element in an input array.
  */
 
@@ -17,9 +17,9 @@ type ForEachNodeData = {
 
 /**
  * ForEachNode React Component
- * 
+ *
  * This component renders a visual node in the workflow editor that iterates over array elements
- * 
+ *
  * @param {NodePropsWithOptions<ForEachNodeData>} props - Component props
  * @param {string} props.id - Unique identifier for this node instance
  * @param {ForEachNodeData} props.data - Node configuration data
@@ -42,22 +42,14 @@ export function ForEachNode({
     );
   };
 
-  const handleTitleChange = (newTitle: string) => {
-    setNodes((nds) =>
-      nds.map((n) =>
-        n.id === id ? { ...n, data: { ...n.data, label: newTitle } } : n
-      )
-    );
-  };
-
   const nodeInfo = getNodeInfo("forEachNode");
 
   return (
     <NodeWrapper
+      id={id}
       title={String(data?.label || "For Each")}
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
-      onTitleChange={handleTitleChange}
     >
       <Handle
         type="target"
@@ -68,7 +60,7 @@ export function ForEachNode({
         value={Number(data?.max_iterations ?? 1000)}
         type="number"
         onChange={onChange}
-        className="w-20 text-[10px] leading-tight border border-gray-600 px-1 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
+        className="w-36 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
         placeholder="Max iter"
         aria-label="Max iterations"
       />
