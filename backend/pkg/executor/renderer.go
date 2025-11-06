@@ -11,6 +11,11 @@ type RendererExecutor struct{}
 
 // Execute passes through the input data unchanged
 func (e *RendererExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+	// Validate node data type
+	if _, err := types.AsRendererData(node.Data); err != nil {
+		return nil, err
+	}
+	
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		// Return nil if no input - frontend will show "No data"
@@ -29,6 +34,10 @@ func (e *RendererExecutor) NodeType() types.NodeType {
 // Validate checks if node configuration is valid
 // Renderer nodes don't require any specific configuration - they auto-detect format
 func (e *RendererExecutor) Validate(node types.Node) error {
+	// Validate node data type
+	if _, err := types.AsRendererData(node.Data); err != nil {
+		return err
+	}
 	// No validation needed - renderer auto-detects format from data
 	return nil
 }

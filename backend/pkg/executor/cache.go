@@ -13,15 +13,19 @@ type CacheExecutor struct{}
 // Execute runs the Cache node
 // Handles cache get/set operations
 func (e *CacheExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-	if node.Data.CacheOp == nil {
+data, err := types.AsCacheData(node.Data)
+if err != nil {
+return nil, err
+}
+	if data.CacheOp == nil {
 		return nil, fmt.Errorf("cache node requires cache_op field")
 	}
-	if node.Data.CacheKey == nil {
+	if data.CacheKey == nil {
 		return nil, fmt.Errorf("cache node requires cache_key field")
 	}
 
-	cacheOp := *node.Data.CacheOp
-	cacheKey := *node.Data.CacheKey
+	cacheOp := *data.CacheOp
+	cacheKey := *data.CacheKey
 
 	switch cacheOp {
 	case "set":
@@ -34,9 +38,9 @@ func (e *CacheExecutor) Execute(ctx ExecutionContext, node types.Node) (interfac
 
 		// Parse TTL
 		var ttlDuration time.Duration
-		if node.Data.TTL != nil {
+		if data.TTL != nil {
 			var err error
-			ttlDuration, err = parseDuration(*node.Data.TTL)
+			ttlDuration, err = parseDuration(*data.TTL)
 			if err != nil {
 				return nil, fmt.Errorf("invalid TTL format: %w", err)
 			}
@@ -51,7 +55,7 @@ func (e *CacheExecutor) Execute(ctx ExecutionContext, node types.Node) (interfac
 			"operation": "set",
 			"key":       cacheKey,
 			"value":     value,
-			"ttl":       node.Data.TTL,
+			"ttl":       data.TTL,
 		}, nil
 
 	case "get":
@@ -95,10 +99,14 @@ func (e *CacheExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *CacheExecutor) Validate(node types.Node) error {
-	if node.Data.CacheOp == nil {
+data, err := types.AsCacheData(node.Data)
+if err != nil {
+return err
+}
+	if data.CacheOp == nil {
 		return fmt.Errorf("cache node requires cache_op field")
 	}
-	if node.Data.CacheKey == nil {
+	if data.CacheKey == nil {
 		return fmt.Errorf("cache node requires cache_key field")
 	}
 	return nil

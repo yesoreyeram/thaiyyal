@@ -18,6 +18,10 @@ type ParseExecutor struct{}
 // Execute runs the Parse node
 // Parses string input into structured data based on the specified input type.
 func (e *ParseExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+data, err := types.AsParseData(node.Data)
+if err != nil {
+return nil, err
+}
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("parse node requires input")
@@ -31,8 +35,8 @@ func (e *ParseExecutor) Execute(ctx ExecutionContext, node types.Node) (interfac
 
 	// Get input type, default to AUTO
 	inputType := "AUTO"
-	if node.Data.InputType != nil {
-		inputType = strings.ToUpper(*node.Data.InputType)
+	if data.InputType != nil {
+		inputType = strings.ToUpper(*data.InputType)
 	}
 
 	// If AUTO, detect the format
@@ -64,8 +68,12 @@ func (e *ParseExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *ParseExecutor) Validate(node types.Node) error {
-	if node.Data.InputType != nil {
-		inputType := strings.ToUpper(*node.Data.InputType)
+data, err := types.AsParseData(node.Data)
+if err != nil {
+return err
+}
+	if data.InputType != nil {
+		inputType := strings.ToUpper(*data.InputType)
 		validTypes := map[string]bool{
 			"AUTO": true,
 			"JSON": true,

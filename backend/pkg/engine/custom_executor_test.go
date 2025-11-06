@@ -60,15 +60,26 @@ func (e *MultiplyByNExecutor) Execute(ctx executor.ExecutionContext, node types.
 		return nil, err
 	}
 
+	// Type assert to CustomExecutorData to access Factor field
+	data, err := types.AsCustomExecutorData(node.Data)
+	if err != nil {
+		return nil, fmt.Errorf("multiply_by_n: %w", err)
+	}
+
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("multiply_by_n node requires at least one input")
 	}
 
-	// Get the multiplier from node data
-	factor := node.Data.Factor
-	if factor == nil {
+	// Get the multiplier from node data fields map
+	factorVal, ok := data.Fields["factor"]
+	if !ok {
 		return nil, fmt.Errorf("multiply_by_n node requires 'factor' in data")
+	}
+	
+	factor, ok := factorVal.(float64)
+	if !ok {
+		return nil, fmt.Errorf("multiply_by_n 'factor' must be a number, got %T", factorVal)
 	}
 
 	// Get the input value
@@ -77,7 +88,7 @@ func (e *MultiplyByNExecutor) Execute(ctx executor.ExecutionContext, node types.
 		return nil, fmt.Errorf("multiply_by_n input must be a number, got %T", inputs[0])
 	}
 
-	result := inputVal * (*factor)
+	result := inputVal * factor
 	return result, nil
 }
 
@@ -86,7 +97,12 @@ func (e *MultiplyByNExecutor) NodeType() types.NodeType {
 }
 
 func (e *MultiplyByNExecutor) Validate(node types.Node) error {
-	if node.Data.Factor == nil {
+	data, err := types.AsCustomExecutorData(node.Data)
+	if err != nil {
+		return err
+	}
+	
+	if _, ok := data.Fields["factor"]; !ok {
 		return fmt.Errorf("multiply_by_n node requires 'factor' field")
 	}
 	return nil
@@ -100,15 +116,23 @@ func (e *ConcatWithPrefixExecutor) Execute(ctx executor.ExecutionContext, node t
 		return nil, err
 	}
 
+	// Type assert to CustomExecutorData to access Prefix field
+	data, err := types.AsCustomExecutorData(node.Data)
+	if err != nil {
+		return nil, fmt.Errorf("concat_prefix: %w", err)
+	}
+
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("concat_prefix node requires at least one input")
 	}
 
-	// Get prefix from node data
+	// Get prefix from node data fields map
 	prefix := ""
-	if node.Data.Prefix != nil {
-		prefix = *node.Data.Prefix
+	if prefixVal, ok := data.Fields["prefix"]; ok {
+		if prefixStr, ok := prefixVal.(string); ok {
+			prefix = prefixStr
+		}
 	}
 
 	// Concatenate all inputs with prefix

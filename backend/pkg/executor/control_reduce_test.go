@@ -22,7 +22,7 @@ func TestReduceExecutor_Sum(t *testing.T) {
 	node := types.Node{
 		ID:   "reduce1",
 		Type: types.NodeTypeReduce,
-		Data: types.NodeData{
+		Data: types.ReduceData{
 			InitialValue: initVal,
 			Expression:   &expr,
 		},
@@ -58,7 +58,7 @@ func TestReduceExecutor_SumObjectFields(t *testing.T) {
 	node := types.Node{
 		ID:   "reduce1",
 		Type: types.NodeTypeReduce,
-		Data: types.NodeData{
+		Data: types.ReduceData{
 			InitialValue: initVal,
 			Expression:   &expr,
 		},
@@ -93,7 +93,7 @@ func TestReduceExecutor_Product(t *testing.T) {
 	node := types.Node{
 		ID:   "reduce1",
 		Type: types.NodeTypeReduce,
-		Data: types.NodeData{
+		Data: types.ReduceData{
 			InitialValue: initVal,
 			Expression:   &expr,
 		},
@@ -128,7 +128,7 @@ func TestReduceExecutor_Max(t *testing.T) {
 	node := types.Node{
 		ID:   "reduce1",
 		Type: types.NodeTypeReduce,
-		Data: types.NodeData{
+		Data: types.ReduceData{
 			InitialValue: initVal,
 			Expression:   &expr,
 		},
@@ -162,7 +162,7 @@ func TestReduceExecutor_DefaultInitialValue(t *testing.T) {
 	node := types.Node{
 		ID:   "reduce1",
 		Type: types.NodeTypeReduce,
-		Data: types.NodeData{
+		Data: types.ReduceData{
 			Expression: &expr,
 			// No InitialValue specified - should default to 0
 		},
@@ -193,7 +193,7 @@ func TestReduceExecutor_NonArrayInput(t *testing.T) {
 	node := types.Node{
 		ID:   "reduce1",
 		Type: types.NodeTypeReduce,
-		Data: types.NodeData{
+		Data: types.ExpressionData{
 			Expression: &expr,
 		},
 	}
@@ -210,7 +210,7 @@ func TestReduceExecutor_Validate(t *testing.T) {
 	// Valid: has expression
 	expr := "accumulator + item"
 	node := types.Node{
-		Data: types.NodeData{Expression: &expr},
+		Data: types.ReduceData{Expression: &expr},
 	}
 	if err := executor.Validate(node); err != nil {
 		t.Errorf("Validation should pass with expression: %v", err)
@@ -218,7 +218,7 @@ func TestReduceExecutor_Validate(t *testing.T) {
 
 	// Invalid: no expression
 	node = types.Node{
-		Data: types.NodeData{},
+		Data: types.ReduceData{},
 	}
 	if err := executor.Validate(node); err == nil {
 		t.Error("Validation should fail without expression")
@@ -227,7 +227,7 @@ func TestReduceExecutor_Validate(t *testing.T) {
 	// Invalid: empty expression
 	emptyExpr := ""
 	node = types.Node{
-		Data: types.NodeData{Expression: &emptyExpr},
+		Data: types.ExpressionData{Expression: &emptyExpr},
 	}
 	if err := executor.Validate(node); err == nil {
 		t.Error("Validation should fail with empty expression")
@@ -247,7 +247,7 @@ func TestReduceExecutor_EmptyArray(t *testing.T) {
 	node := types.Node{
 		ID:   "reduce1",
 		Type: types.NodeTypeReduce,
-		Data: types.NodeData{
+		Data: types.ReduceData{
 			InitialValue: initVal,
 			Expression:   &expr,
 		},

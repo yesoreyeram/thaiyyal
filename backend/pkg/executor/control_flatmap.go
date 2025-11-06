@@ -12,6 +12,11 @@ type FlatMapExecutor struct{}
 
 // Execute flattens nested arrays
 func (e *FlatMapExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+	data, err := types.AsFlatMapData(node.Data)
+	if err != nil {
+		return nil, err
+	}
+	
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("flat_map node needs at least 1 input")
@@ -35,8 +40,8 @@ func (e *FlatMapExecutor) Execute(ctx ExecutionContext, node types.Node) (interf
 
 	// Get field to expand
 	field := ""
-	if node.Data.Field != nil {
-		field = *node.Data.Field
+	if data.Field != nil {
+		field = *data.Field
 	}
 
 	// FlatMap the array
@@ -91,6 +96,10 @@ func (e *FlatMapExecutor) NodeType() types.NodeType {
 
 // Validate checks if the node configuration is valid
 func (e *FlatMapExecutor) Validate(node types.Node) error {
+	// Validate node data type
+	if _, err := types.AsFlatMapData(node.Data); err != nil {
+		return err
+	}
 	// Field is optional
 	return nil
 }

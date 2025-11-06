@@ -15,19 +15,23 @@ type TimeoutExecutor struct{}
 // Enforces time limits on operations
 // Returns partial results or error if operation exceeds timeout
 func (e *TimeoutExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+data, err := types.AsTimeoutData(node.Data)
+if err != nil {
+return nil, err
+}
 	// Get timeout configuration
 	timeoutDuration := 30 * time.Second
-	if node.Data.Timeout != nil {
-		if d, err := parseDuration(*node.Data.Timeout); err == nil {
+	if data.Timeout != nil {
+		if d, err := parseDuration(*data.Timeout); err == nil {
 			timeoutDuration = d
 		} else {
-			return nil, fmt.Errorf("invalid timeout duration: %s", *node.Data.Timeout)
+			return nil, fmt.Errorf("invalid timeout duration: %s", *data.Timeout)
 		}
 	}
 
 	timeoutAction := "error" // "error" or "continue_with_partial"
-	if node.Data.TimeoutAction != nil {
-		timeoutAction = *node.Data.TimeoutAction
+	if data.TimeoutAction != nil {
+		timeoutAction = *data.TimeoutAction
 	}
 
 	// Validate inputs
@@ -87,6 +91,10 @@ func (e *TimeoutExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *TimeoutExecutor) Validate(node types.Node) error {
+	// Validate node data type
+	if _, err := types.AsTimeoutData(node.Data); err != nil {
+		return err
+	}
 	// No required fields for timeout - all have defaults
 	return nil
 }

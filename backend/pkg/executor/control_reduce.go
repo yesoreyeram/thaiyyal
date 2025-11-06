@@ -34,6 +34,10 @@ type ReduceExecutor struct{}
 //	Max: [5,2,8,1] → Reduce(init=0, expr="item > accumulator ? item : accumulator") → 8
 //	Concat: ["A","B","C"] → Reduce(init="", expr="accumulator + item") → "ABC"
 func (e *ReduceExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+data, err := types.AsReduceData(node.Data)
+if err != nil {
+return nil, err
+}
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("reduce node needs at least 1 input")
@@ -48,12 +52,12 @@ func (e *ReduceExecutor) Execute(ctx ExecutionContext, node types.Node) (interfa
 	}
 
 	// Get initial value for accumulator
-	accumulator := node.Data.InitialValue
+	accumulator := data.InitialValue
 	if accumulator == nil {
 		accumulator = float64(0) // Default to 0
 	}
 
-	if node.Data.Expression == nil || *node.Data.Expression == "" {
+	if data.Expression == nil || *data.Expression == "" {
 		return nil, fmt.Errorf("reduce node requires an expression")
 	}
 
@@ -67,7 +71,7 @@ func (e *ReduceExecutor) Execute(ctx ExecutionContext, node types.Node) (interfa
 	failed := 0
 
 	for i, item := range inputArray {
-		result, err := e.evaluateExpression(ctx, node, item, i, inputArray, accumulator)
+		result, err := e.evaluateExpression(ctx, node, *data.Expression, item, i, inputArray, accumulator)
 		if err != nil {
 			slog.Debug("reduce expression evaluation error (continuing)",
 				slog.String("node_id", node.ID),
@@ -92,7 +96,7 @@ func (e *ReduceExecutor) Execute(ctx ExecutionContext, node types.Node) (interfa
 
 	return map[string]interface{}{
 		"result":        accumulator,
-		"initial_value": node.Data.InitialValue,
+		"initial_value": data.InitialValue,
 		"final_value":   accumulator,
 		"input_count":   len(inputArray),
 		"iterations":    successful + failed,
@@ -105,6 +109,7 @@ func (e *ReduceExecutor) Execute(ctx ExecutionContext, node types.Node) (interfa
 func (e *ReduceExecutor) evaluateExpression(
 	ctx ExecutionContext,
 	node types.Node,
+	expressionStr string,
 	item interface{},
 	index int,
 	items []interface{},
@@ -129,7 +134,7 @@ func (e *ReduceExecutor) evaluateExpression(
 	exprCtx.Variables["items"] = items
 
 	// Evaluate the expression
-	result, err := expression.EvaluateExpression(*node.Data.Expression, item, exprCtx)
+	result, err := expression.EvaluateExpression(expressionStr, item, exprCtx)
 	if err != nil {
 		return nil, fmt.Errorf("expression evaluation failed: %w", err)
 	}
@@ -144,7 +149,11 @@ func (e *ReduceExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *ReduceExecutor) Validate(node types.Node) error {
-	if node.Data.Expression == nil || *node.Data.Expression == "" {
+data, err := types.AsReduceData(node.Data)
+if err != nil {
+return err
+}
+	if data.Expression == nil || *data.Expression == "" {
 		return fmt.Errorf("reduce node requires an 'expression'")
 	}
 

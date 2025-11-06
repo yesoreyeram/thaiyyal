@@ -75,7 +75,7 @@ func TestParseExecutor_JSON(t *testing.T) {
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeParse,
-				Data: types.NodeData{
+				Data: types.ParseData{
 					InputType: &inputType,
 				},
 			}
@@ -150,7 +150,7 @@ func TestParseExecutor_CSV(t *testing.T) {
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeParse,
-				Data: types.NodeData{
+				Data: types.ParseData{
 					InputType: &inputType,
 				},
 			}
@@ -207,7 +207,7 @@ func TestParseExecutor_TSV(t *testing.T) {
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeParse,
-				Data: types.NodeData{
+				Data: types.ParseData{
 					InputType: &inputType,
 				},
 			}
@@ -286,7 +286,7 @@ score: 95.5`,
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeParse,
-				Data: types.NodeData{
+				Data: types.ParseData{
 					InputType: &inputType,
 				},
 			}
@@ -336,7 +336,7 @@ func TestParseExecutor_XML(t *testing.T) {
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeParse,
-				Data: types.NodeData{
+				Data: types.ParseData{
 					InputType: &inputType,
 				},
 			}
@@ -450,7 +450,7 @@ func TestParseExecutor_AUTO_Execute(t *testing.T) {
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeParse,
-				Data: types.NodeData{
+				Data: types.ParseData{
 					InputType: &inputType,
 				},
 			}
@@ -475,7 +475,7 @@ func TestParseExecutor_NoInput(t *testing.T) {
 	node := types.Node{
 		ID:   "test-node",
 		Type: types.NodeTypeParse,
-		Data: types.NodeData{},
+		Data: types.ParseData{},
 	}
 
 	_, err := exec.Execute(ctx, node)
@@ -496,7 +496,7 @@ func TestParseExecutor_DefaultInputType(t *testing.T) {
 	node := types.Node{
 		ID:   "test-node",
 		Type: types.NodeTypeParse,
-		Data: types.NodeData{
+		Data: types.ParseData{
 			// InputType not set, should default to AUTO
 		},
 	}
@@ -534,7 +534,7 @@ func TestParseExecutor_Validate(t *testing.T) {
 			exec := &ParseExecutor{}
 			node := types.Node{
 				Type: types.NodeTypeParse,
-				Data: types.NodeData{
+				Data: types.ParseData{
 					InputType: &tt.inputType,
 				},
 			}
@@ -572,7 +572,7 @@ func TestParseExecutor_NonStringInput(t *testing.T) {
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeParse,
-				Data: types.NodeData{
+				Data: types.ParseData{
 					InputType: &inputType,
 				},
 			}

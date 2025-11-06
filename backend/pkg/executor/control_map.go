@@ -31,6 +31,10 @@ type MapExecutor struct{}
 //	Extract field: [{name:"Alice"}] → Map(field="name") → ["Alice"]
 //	Complex expression: [users] → Map(expr="item.age * 1.1") → [ages with 10% increase]
 func (e *MapExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+data, err := types.AsMapData(node.Data)
+if err != nil {
+return nil, err
+}
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("map node needs at least 1 input")
@@ -45,8 +49,8 @@ func (e *MapExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{
 	}
 
 	// Determine transformation mode
-	hasExpression := node.Data.Expression != nil && *node.Data.Expression != ""
-	hasField := node.Data.Field != nil && *node.Data.Field != ""
+	hasExpression := data.Expression != nil && *data.Expression != ""
+	hasField := data.Field != nil && *data.Field != ""
 
 	if !hasExpression && !hasField {
 		// No transformation specified - pass through with warning
@@ -78,10 +82,10 @@ func (e *MapExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{
 
 		if hasField {
 			// Field extraction mode
-			result, err = e.extractField(item, *node.Data.Field)
+			result, err = e.extractField(item, *data.Field)
 		} else if hasExpression {
 			// Expression transformation mode
-			result, err = e.evaluateExpression(ctx, node, item, i, inputArray)
+			result, err = e.evaluateExpression(ctx, node, *data.Expression, item, i, inputArray)
 		}
 
 		if err != nil {
@@ -134,6 +138,7 @@ func (e *MapExecutor) extractField(item interface{}, field string) (interface{},
 func (e *MapExecutor) evaluateExpression(
 	ctx ExecutionContext,
 	node types.Node,
+	expressionStr string,
 	item interface{},
 	index int,
 	items []interface{},
@@ -158,7 +163,7 @@ func (e *MapExecutor) evaluateExpression(
 	// Evaluate the expression
 	// The expression should return a value, not a boolean
 	// We use EvaluateExpression instead of Evaluate (which returns bool)
-	result, err := expression.EvaluateExpression(*node.Data.Expression, item, exprCtx)
+	result, err := expression.EvaluateExpression(expressionStr, item, exprCtx)
 	if err != nil {
 		return nil, fmt.Errorf("expression evaluation failed: %w", err)
 	}
@@ -173,8 +178,12 @@ func (e *MapExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *MapExecutor) Validate(node types.Node) error {
-	hasExpression := node.Data.Expression != nil && *node.Data.Expression != ""
-	hasField := node.Data.Field != nil && *node.Data.Field != ""
+data, err := types.AsMapData(node.Data)
+if err != nil {
+return err
+}
+	hasExpression := data.Expression != nil && *data.Expression != ""
+	hasField := data.Field != nil && *data.Field != ""
 
 	if !hasExpression && !hasField {
 		return fmt.Errorf("map node requires either 'expression' or 'field' to be specified")

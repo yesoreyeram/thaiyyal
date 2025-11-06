@@ -60,7 +60,7 @@ func TestUniqueExecutor_Basic(t *testing.T) {
 				},
 			}
 
-			nodeData := types.NodeData{}
+			nodeData := types.UniqueData{}
 			if tt.field != nil {
 				nodeData.Field = tt.field
 			}
@@ -103,7 +103,7 @@ func TestUniqueExecutor_Validate(t *testing.T) {
 	exec := &UniqueExecutor{}
 	node := types.Node{
 		Type: types.NodeTypeUnique,
-		Data: types.NodeData{},
+		Data: types.UniqueData{},
 	}
 
 	err := exec.Validate(node)

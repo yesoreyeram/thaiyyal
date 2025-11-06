@@ -32,6 +32,10 @@ func NewRateLimiterExecutor() *RateLimiterExecutor {
 // Execute runs the RateLimiter node
 // Enforces rate limits and delays requests as needed
 func (e *RateLimiterExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+data, err := types.AsRateLimiterData(node.Data)
+if err != nil {
+return nil, err
+}
 	inputs := ctx.GetNodeInputs(node.ID)
 	var inputValue interface{}
 	if len(inputs) > 0 {
@@ -40,13 +44,13 @@ func (e *RateLimiterExecutor) Execute(ctx ExecutionContext, node types.Node) (in
 
 	// Get configuration
 	maxRequests := 10
-	if node.Data.MaxRequests != nil {
-		maxRequests = *node.Data.MaxRequests
+	if data.MaxRequests != nil {
+		maxRequests = *data.MaxRequests
 	}
 
 	perDuration := "1s"
-	if node.Data.PerDuration != nil {
-		perDuration = *node.Data.PerDuration
+	if data.PerDuration != nil {
+		perDuration = *data.PerDuration
 	}
 
 	duration, err := parseDuration(perDuration)
@@ -55,8 +59,8 @@ func (e *RateLimiterExecutor) Execute(ctx ExecutionContext, node types.Node) (in
 	}
 
 	strategy := "fixed_window"
-	if node.Data.RateLimitStrategy != nil {
-		strategy = *node.Data.RateLimitStrategy
+	if data.RateLimitStrategy != nil {
+		strategy = *data.RateLimitStrategy
 	}
 
 	// Only fixed_window strategy is implemented for now
@@ -134,16 +138,20 @@ func (e *RateLimiterExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *RateLimiterExecutor) Validate(node types.Node) error {
-	if node.Data.MaxRequests != nil && *node.Data.MaxRequests <= 0 {
+data, err := types.AsRateLimiterData(node.Data)
+if err != nil {
+return err
+}
+	if data.MaxRequests != nil && *data.MaxRequests <= 0 {
 		return fmt.Errorf("max_requests must be positive")
 	}
-	if node.Data.PerDuration != nil {
-		if _, err := parseDuration(*node.Data.PerDuration); err != nil {
+	if data.PerDuration != nil {
+		if _, err := parseDuration(*data.PerDuration); err != nil {
 			return fmt.Errorf("invalid per_duration format: %w", err)
 		}
 	}
-	if node.Data.RateLimitStrategy != nil {
-		strategy := *node.Data.RateLimitStrategy
+	if data.RateLimitStrategy != nil {
+		strategy := *data.RateLimitStrategy
 		if strategy != "fixed_window" && strategy != "sliding_window" && strategy != "token_bucket" {
 			return fmt.Errorf("invalid strategy: %s (must be fixed_window, sliding_window, or token_bucket)", strategy)
 		}

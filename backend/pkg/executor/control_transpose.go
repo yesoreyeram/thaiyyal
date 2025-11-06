@@ -12,6 +12,10 @@ type TransposeExecutor struct{}
 
 // Execute transposes a 2D array
 func (e *TransposeExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+// Validate node data type
+	if _, err := types.AsTransposeData(node.Data); err != nil {
+		return nil, err
+	}
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("transpose node needs at least 1 input")
@@ -101,6 +105,10 @@ func (e *TransposeExecutor) NodeType() types.NodeType {
 
 // Validate checks if the node configuration is valid
 func (e *TransposeExecutor) Validate(node types.Node) error {
+// Validate node data type
+	if _, err := types.AsTransposeData(node.Data); err != nil {
+		return err
+	}
 	// No configuration needed
 	return nil
 }

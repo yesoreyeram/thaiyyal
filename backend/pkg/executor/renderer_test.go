@@ -29,7 +29,7 @@ func TestRendererExecutor_Validate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			executor := &RendererExecutor{}
 			node := types.Node{
-				Data: types.NodeData{},
+				Data: types.RendererData{},
 			}
 			err := executor.Validate(node)
 			if (err != nil) != tt.wantErr {
@@ -95,7 +95,7 @@ func TestRendererExecutor_Execute(t *testing.T) {
 			executor := &RendererExecutor{}
 			node := types.Node{
 				ID:   "renderer1",
-				Data: types.NodeData{},
+				Data: types.RendererData{},
 			}
 
 			ctx := &MockExecutionContext{

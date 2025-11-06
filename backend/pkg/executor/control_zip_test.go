@@ -42,7 +42,7 @@ func TestZipExecutor_Basic(t *testing.T) {
 				},
 			}
 
-			nodeData := types.NodeData{}
+			nodeData := types.ZipData{}
 			if tt.fillMissing != nil {
 				nodeData.FillMissing = tt.fillMissing
 			}
@@ -80,7 +80,7 @@ func TestZipExecutor_Validate(t *testing.T) {
 	exec := &ZipExecutor{}
 	node := types.Node{
 		Type: types.NodeTypeZip,
-		Data: types.NodeData{},
+		Data: types.ZipData{},
 	}
 
 	err := exec.Validate(node)
@@ -134,15 +134,12 @@ func TestCompactExecutor_Basic(t *testing.T) {
 				},
 			}
 
-			nodeData := types.NodeData{}
-			if tt.removeEmpty != nil {
-				nodeData.RemoveEmpty = tt.removeEmpty
-			}
-
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeCompact,
-				Data: nodeData,
+				Data: types.CompactData{
+					RemoveEmpty: tt.removeEmpty,
+				},
 			}
 
 			result, err := exec.Execute(ctx, node)
@@ -172,7 +169,7 @@ func TestCompactExecutor_Validate(t *testing.T) {
 	exec := &CompactExecutor{}
 	node := types.Node{
 		Type: types.NodeTypeCompact,
-		Data: types.NodeData{},
+		Data: types.CompactData{},
 	}
 
 	err := exec.Validate(node)

@@ -56,7 +56,7 @@ func TestChunkExecutor_Basic(t *testing.T) {
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeChunk,
-				Data: types.NodeData{
+				Data: types.ChunkData{
 					Size: tt.size,
 				},
 			}
@@ -100,14 +100,11 @@ func TestChunkExecutor_Validate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			nodeData := types.NodeData{}
-			if tt.size != nil {
-				nodeData.Size = tt.size
-			}
-
 			node := types.Node{
 				Type: types.NodeTypeChunk,
-				Data: nodeData,
+				Data: types.ChunkData{
+					Size: tt.size,
+				},
 			}
 
 			err := exec.Validate(node)

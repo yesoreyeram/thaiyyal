@@ -66,7 +66,7 @@ func TestSliceExecutor_Basic(t *testing.T) {
 				},
 			}
 
-			nodeData := types.NodeData{}
+			nodeData := types.SliceData{}
 			if tt.start != nil {
 				nodeData.Start = tt.start
 			}
@@ -117,7 +117,7 @@ func TestSliceExecutor_NonArrayInput(t *testing.T) {
 	node := types.Node{
 		ID:   "test-node",
 		Type: types.NodeTypeSlice,
-		Data: types.NodeData{
+		Data: types.SliceData{
 			Start: 0.0,
 			End:   2.0,
 		},
@@ -142,7 +142,7 @@ func TestSliceExecutor_Validate(t *testing.T) {
 	exec := &SliceExecutor{}
 	node := types.Node{
 		Type: types.NodeTypeSlice,
-		Data: types.NodeData{},
+		Data: types.SliceData{},
 	}
 
 	err := exec.Validate(node)

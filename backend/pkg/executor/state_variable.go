@@ -13,15 +13,19 @@ type VariableExecutor struct{}
 // Handles variable get/set operations for workflow state.
 // Variables are scoped to a single workflow execution and shared across nodes.
 func (e *VariableExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-	if node.Data.VarName == nil {
+data, err := types.AsVariableData(node.Data)
+if err != nil {
+return nil, err
+}
+	if data.VarName == nil {
 		return nil, fmt.Errorf("variable node missing var_name")
 	}
-	if node.Data.VarOp == nil {
+	if data.VarOp == nil {
 		return nil, fmt.Errorf("variable node missing var_op (get or set)")
 	}
 
-	varName := *node.Data.VarName
-	varOp := *node.Data.VarOp
+	varName := *data.VarName
+	varOp := *data.VarOp
 
 	switch varOp {
 	case "set":
@@ -64,10 +68,14 @@ func (e *VariableExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *VariableExecutor) Validate(node types.Node) error {
-	if node.Data.VarName == nil {
+data, err := types.AsVariableData(node.Data)
+if err != nil {
+return err
+}
+	if data.VarName == nil {
 		return fmt.Errorf("variable node missing var_name")
 	}
-	if node.Data.VarOp == nil {
+	if data.VarOp == nil {
 		return fmt.Errorf("variable node missing var_op")
 	}
 	return nil

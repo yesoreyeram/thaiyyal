@@ -17,11 +17,15 @@ type ContextConstantExecutor struct{}
 // 1. Legacy: Single value with ContextName and ContextValue
 // 2. New: Multiple typed values with ContextValues array
 func (e *ContextConstantExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+data, err := types.AsContextConstantData(node.Data)
+if err != nil {
+return nil, err
+}
 	// New format: multiple typed values
-	if len(node.Data.ContextValues) > 0 {
+	if len(data.ContextValues) > 0 {
 		result := make(map[string]interface{})
 
-		for _, cv := range node.Data.ContextValues {
+		for _, cv := range data.ContextValues {
 			// Convert value based on type
 			convertedValue, err := convertTypedValue(cv.Value, cv.Type)
 			if err != nil {
@@ -40,15 +44,15 @@ func (e *ContextConstantExecutor) Execute(ctx ExecutionContext, node types.Node)
 	}
 
 	// Legacy format: single value (backward compatibility)
-	if node.Data.ContextName == nil {
+	if data.ContextName == nil {
 		return nil, fmt.Errorf("context_constant node missing context_name or context_values")
 	}
-	if node.Data.ContextValue == nil {
+	if data.ContextValue == nil {
 		return nil, fmt.Errorf("context_constant node missing context_value")
 	}
 
-	constName := *node.Data.ContextName
-	constValue := node.Data.ContextValue
+	constName := *data.ContextName
+	constValue := data.ContextValue
 
 	// Store in context constants for interpolation
 	ctx.SetContextConstant(constName, constValue)
@@ -67,15 +71,19 @@ func (e *ContextConstantExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *ContextConstantExecutor) Validate(node types.Node) error {
+data, err := types.AsContextConstantData(node.Data)
+if err != nil {
+return err
+}
 	// Check if using new format
-	if len(node.Data.ContextValues) > 0 {
+	if len(data.ContextValues) > 0 {
 		return nil
 	}
 	// Check legacy format
-	if node.Data.ContextName == nil {
+	if data.ContextName == nil {
 		return fmt.Errorf("context_constant node missing context_name or context_values")
 	}
-	if node.Data.ContextValue == nil {
+	if data.ContextValue == nil {
 		return fmt.Errorf("context_constant node missing context_value")
 	}
 	return nil

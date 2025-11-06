@@ -15,49 +15,49 @@ func TestFilterNode_Integration(t *testing.T) {
 				{
 					ID:   "1",
 					Type: types.NodeTypeTransform,
-					Data: types.NodeData{
+					Data: types.TransformData{
 						TransformType: strPtr("to_array"),
 					},
 				},
 				{
 					ID:   "num1",
 					Type: types.NodeTypeNumber,
-					Data: types.NodeData{
+					Data: types.NumberData{
 						Value: float64Ptr(5),
 					},
 				},
 				{
 					ID:   "num2",
 					Type: types.NodeTypeNumber,
-					Data: types.NodeData{
+					Data: types.NumberData{
 						Value: float64Ptr(15),
 					},
 				},
 				{
 					ID:   "num3",
 					Type: types.NodeTypeNumber,
-					Data: types.NodeData{
+					Data: types.NumberData{
 						Value: float64Ptr(8),
 					},
 				},
 				{
 					ID:   "num4",
 					Type: types.NodeTypeNumber,
-					Data: types.NodeData{
+					Data: types.NumberData{
 						Value: float64Ptr(20),
 					},
 				},
 				{
 					ID:   "filter",
 					Type: types.NodeTypeFilter,
-					Data: types.NodeData{
+					Data: types.ConditionData{
 						Condition: strPtr("variables.item > 10"),
 					},
 				},
 				{
 					ID:   "viz",
 					Type: types.NodeTypeVisualization,
-					Data: types.NodeData{
+					Data: types.VisualizationData{
 						Mode: strPtr("json"),
 					},
 				},
@@ -164,14 +164,14 @@ func TestFilterNode_Integration(t *testing.T) {
 				{
 					ID:   "text",
 					Type: types.NodeTypeTextInput,
-					Data: types.NodeData{
+					Data: types.TextInputData{
 						Text: strPtr("not an array"),
 					},
 				},
 				{
 					ID:   "filter",
 					Type: types.NodeTypeFilter,
-					Data: types.NodeData{
+					Data: types.ConditionData{
 						Condition: strPtr("variables.item > 10"),
 					},
 				},

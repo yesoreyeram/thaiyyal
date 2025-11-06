@@ -64,7 +64,7 @@ func TestTransposeExecutor_Basic(t *testing.T) {
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeTranspose,
-				Data: types.NodeData{},
+				Data: types.TransposeData{},
 			}
 
 			result, err := exec.Execute(ctx, node)
@@ -133,7 +133,7 @@ func TestTransposeExecutor_InvalidInput(t *testing.T) {
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeTranspose,
-				Data: types.NodeData{},
+				Data: types.TransposeData{},
 			}
 
 			result, err := exec.Execute(ctx, node)
@@ -159,7 +159,7 @@ func TestTransposeExecutor_Validate(t *testing.T) {
 	exec := &TransposeExecutor{}
 	node := types.Node{
 		Type: types.NodeTypeTranspose,
-		Data: types.NodeData{},
+		Data: types.TransposeData{},
 	}
 
 	err := exec.Validate(node)

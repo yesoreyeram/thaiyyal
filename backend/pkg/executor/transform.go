@@ -12,7 +12,11 @@ type TransformExecutor struct{}
 // Execute runs the Transform node
 // Transforms data structures between different formats.
 func (e *TransformExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-	if node.Data.TransformType == nil {
+data, err := types.AsTransformData(node.Data)
+if err != nil {
+return nil, err
+}
+	if data.TransformType == nil {
 		return nil, fmt.Errorf("transform node missing transform_type")
 	}
 
@@ -21,7 +25,7 @@ func (e *TransformExecutor) Execute(ctx ExecutionContext, node types.Node) (inte
 		return nil, fmt.Errorf("transform node requires input")
 	}
 
-	transformType := *node.Data.TransformType
+	transformType := *data.TransformType
 
 	switch transformType {
 	case "to_array":
@@ -56,7 +60,11 @@ func (e *TransformExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *TransformExecutor) Validate(node types.Node) error {
-	if node.Data.TransformType == nil {
+data, err := types.AsTransformData(node.Data)
+if err != nil {
+return err
+}
+	if data.TransformType == nil {
 		return fmt.Errorf("transform node missing transform_type")
 	}
 	return nil

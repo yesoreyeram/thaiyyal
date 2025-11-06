@@ -17,6 +17,10 @@ type FormatExecutor struct{}
 // Execute runs the Format node
 // Formats structured input data into string output based on the specified output type.
 func (e *FormatExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+data, err := types.AsFormatData(node.Data)
+if err != nil {
+return nil, err
+}
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("format node requires input")
@@ -26,25 +30,25 @@ func (e *FormatExecutor) Execute(ctx ExecutionContext, node types.Node) (interfa
 
 	// Get output type, default to JSON
 	outputType := "JSON"
-	if node.Data.OutputType != nil {
-		outputType = strings.ToUpper(*node.Data.OutputType)
+	if data.OutputType != nil {
+		outputType = strings.ToUpper(*data.OutputType)
 	}
 
 	// Get formatting options
 	prettyPrint := false
-	if node.Data.PrettyPrint != nil {
-		prettyPrint = *node.Data.PrettyPrint
+	if data.PrettyPrint != nil {
+		prettyPrint = *data.PrettyPrint
 	}
 
 	includeHeaders := true
-	if node.Data.IncludeHeaders != nil {
-		includeHeaders = *node.Data.IncludeHeaders
+	if data.IncludeHeaders != nil {
+		includeHeaders = *data.IncludeHeaders
 	}
 
 	delimiter := ','
-	if node.Data.Delimiter != nil {
-		if len(*node.Data.Delimiter) > 0 {
-			delimiter = rune((*node.Data.Delimiter)[0])
+	if data.Delimiter != nil {
+		if len(*data.Delimiter) > 0 {
+			delimiter = rune((*data.Delimiter)[0])
 		}
 	}
 
@@ -68,8 +72,12 @@ func (e *FormatExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *FormatExecutor) Validate(node types.Node) error {
-	if node.Data.OutputType != nil {
-		outputType := strings.ToUpper(*node.Data.OutputType)
+data, err := types.AsFormatData(node.Data)
+if err != nil {
+return err
+}
+	if data.OutputType != nil {
+		outputType := strings.ToUpper(*data.OutputType)
 		validTypes := map[string]bool{
 			"JSON": true,
 			"CSV":  true,

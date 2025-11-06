@@ -62,7 +62,7 @@ func TestPartitionExecutor_Basic(t *testing.T) {
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypePartition,
-				Data: types.NodeData{
+				Data: types.PartitionData{
 					Condition: &tt.condition,
 				},
 			}
@@ -105,7 +105,7 @@ func TestPartitionExecutor_Validate(t *testing.T) {
 	// Missing condition
 	node := types.Node{
 		Type: types.NodeTypePartition,
-		Data: types.NodeData{},
+		Data: types.PartitionData{},
 	}
 
 	err := exec.Validate(node)
@@ -115,7 +115,12 @@ func TestPartitionExecutor_Validate(t *testing.T) {
 
 	// Valid condition
 	condition := "variables.item > 5"
-	node.Data.Condition = &condition
+	node = types.Node{
+		Type: types.NodeTypePartition,
+		Data: types.PartitionData{
+			Condition: &condition,
+		},
+	}
 	err = exec.Validate(node)
 	if err != nil {
 		t.Errorf("Unexpected validation error: %v", err)

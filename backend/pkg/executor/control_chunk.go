@@ -12,6 +12,10 @@ type ChunkExecutor struct{}
 
 // Execute splits the input array into chunks
 func (e *ChunkExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+data, err := types.AsChunkData(node.Data)
+if err != nil {
+return nil, err
+}
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("chunk node needs at least 1 input")
@@ -35,9 +39,9 @@ func (e *ChunkExecutor) Execute(ctx ExecutionContext, node types.Node) (interfac
 
 	// Get chunk size
 	size := 10 // default
-	if sizeVal, ok := node.Data.Size.(float64); ok {
+	if sizeVal, ok := data.Size.(float64); ok {
 		size = int(sizeVal)
-	} else if sizeVal, ok := node.Data.Size.(int); ok {
+	} else if sizeVal, ok := data.Size.(int); ok {
 		size = sizeVal
 	}
 
@@ -71,11 +75,15 @@ func (e *ChunkExecutor) NodeType() types.NodeType {
 
 // Validate checks if the node configuration is valid
 func (e *ChunkExecutor) Validate(node types.Node) error {
-	if node.Data.Size != nil {
+data, err := types.AsChunkData(node.Data)
+if err != nil {
+return err
+}
+	if data.Size != nil {
 		size := 0
-		if sizeVal, ok := node.Data.Size.(float64); ok {
+		if sizeVal, ok := data.Size.(float64); ok {
 			size = int(sizeVal)
-		} else if sizeVal, ok := node.Data.Size.(int); ok {
+		} else if sizeVal, ok := data.Size.(int); ok {
 			size = sizeVal
 		}
 		if size <= 0 {

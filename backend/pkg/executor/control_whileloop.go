@@ -14,7 +14,11 @@ type WhileLoopExecutor struct{}
 // This is a simplified implementation that validates the condition.
 // A full implementation would execute a sub-workflow on each iteration.
 func (e *WhileLoopExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-	if node.Data.Condition == nil {
+data, err := types.AsWhileLoopData(node.Data)
+if err != nil {
+return nil, err
+}
+	if data.Condition == nil {
 		return nil, fmt.Errorf("while_loop node missing condition")
 	}
 
@@ -25,15 +29,15 @@ func (e *WhileLoopExecutor) Execute(ctx ExecutionContext, node types.Node) (inte
 
 	// Set default max iterations (lower than for_each to prevent infinite loops)
 	maxIter := 100
-	if node.Data.MaxIterations != nil && *node.Data.MaxIterations > 0 {
-		maxIter = *node.Data.MaxIterations
+	if data.MaxIterations != nil && *data.MaxIterations > 0 {
+		maxIter = *data.MaxIterations
 	}
 
 	currentValue := inputs[0]
 	iterationCount := 0
 
 	// Loop while condition is met (with safety limit)
-	for evaluateCondition(*node.Data.Condition, currentValue) && iterationCount < maxIter {
+	for evaluateCondition(*data.Condition, currentValue) && iterationCount < maxIter {
 		iterationCount++
 		// TODO: In a full implementation, execute sub-workflow and update currentValue
 		// For now, we just count iterations without modifying the value
@@ -46,7 +50,7 @@ func (e *WhileLoopExecutor) Execute(ctx ExecutionContext, node types.Node) (inte
 	return map[string]interface{}{
 		"final_value": currentValue,
 		"iterations":  iterationCount,
-		"condition":   *node.Data.Condition,
+		"condition":   *data.Condition,
 	}, nil
 }
 
@@ -57,7 +61,11 @@ func (e *WhileLoopExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *WhileLoopExecutor) Validate(node types.Node) error {
-	if node.Data.Condition == nil {
+data, err := types.AsWhileLoopData(node.Data)
+if err != nil {
+return err
+}
+	if data.Condition == nil {
 		return fmt.Errorf("while_loop node missing condition")
 	}
 	return nil

@@ -329,8 +329,8 @@ func (e *Engine) Execute() (*types.Result, error) {
 		Errors:      []string{},
 	}
 
-	// Step 1: Infer node types if not set
-	e.inferNodeTypes()
+	// Step 1: Nodes are already decoded with type inference in UnmarshalJSON
+	// No need for separate type inference step
 
 	// Step 2: Get execution order using topological sort
 	executionOrder, err := e.graph.TopologicalSort()
@@ -453,10 +453,9 @@ func (e *Engine) executeNode(ctx context.Context, node types.Node) (interface{},
 		return nil, err
 	}
 
-	// Interpolate templates in node data before execution (except for context nodes)
-	if node.Type != types.NodeTypeContextVariable && node.Type != types.NodeTypeContextConstant {
-		e.interpolateNodeData(&node.Data)
-	}
+	// TODO: Template interpolation with new interface-based NodeData
+	// Template interpolation needs to be redesigned for the interface-based approach
+	// For now, interpolation should happen in individual executors if needed
 
 	// Dispatch to appropriate executor via registry
 	result, err := e.registry.Execute(e, node)
@@ -479,126 +478,13 @@ func (e *Engine) executeNode(ctx context.Context, node types.Node) (interface{},
 }
 
 // ============================================================================
-// Type Inference
+// Type Inference (DEPRECATED - now handled in UnmarshalJSON)
 // ============================================================================
 
-// inferNodeTypes determines node types from data if not explicitly set.
-// This allows the frontend to omit node types and have them automatically detected.
-//
-// Type inference is based on the presence of specific fields in NodeData.
-// Some nodes (for_each, while_loop, parallel) require explicit types as they
-// have ambiguous fields.
-func (e *Engine) inferNodeTypes() {
-	for i := range e.nodes {
-		if e.nodes[i].Type != "" {
-			// Type already set, skip inference
-			continue
-		}
-
-		// Infer type from data fields
-		e.nodes[i].Type = inferNodeTypeFromData(e.nodes[i].Data)
-	}
-}
-
-// inferNodeTypeFromData infers a node's type from its data fields.
-// This implements a simple decision tree based on field presence.
-//
-// Returns:
-//   - types.NodeType: Inferred type, or empty string if cannot infer
-func inferNodeTypeFromData(data types.NodeData) types.NodeType {
-	// Basic I/O nodes (checked first as they're most common)
-	if data.Value != nil {
-		return types.NodeTypeNumber
-	}
-	if data.Text != nil {
-		return types.NodeTypeTextInput
-	}
-	if data.BooleanValue != nil {
-		return types.NodeTypeBooleanInput
-	}
-	if data.DateValue != nil {
-		return types.NodeTypeDateInput
-	}
-	if data.DateTimeValue != nil {
-		return types.NodeTypeDateTimeInput
-	}
-	if data.Mode != nil {
-		return types.NodeTypeVisualization
-	}
-
-	// Operation nodes
-	if data.Op != nil {
-		return types.NodeTypeOperation
-	}
-	if data.TextOp != nil {
-		return types.NodeTypeTextOperation
-	}
-	if data.URL != nil {
-		return types.NodeTypeHTTP
-	}
-
-	// Control flow nodes
-	if data.Condition != nil {
-		return types.NodeTypeCondition
-	}
-
-	// State & memory nodes
-	if data.VarName != nil && data.VarOp != nil {
-		return types.NodeTypeVariable
-	}
-	if data.Field != nil || len(data.Fields) > 0 {
-		return types.NodeTypeExtract
-	}
-	if data.TransformType != nil {
-		return types.NodeTypeTransform
-	}
-	if data.AccumOp != nil {
-		return types.NodeTypeAccumulator
-	}
-	if data.CounterOp != nil {
-		return types.NodeTypeCounter
-	}
-
-	// Advanced control flow nodes
-	if len(data.Cases) > 0 {
-		return types.NodeTypeSwitch
-	}
-	if data.JoinStrategy != nil {
-		return types.NodeTypeJoin
-	}
-	if len(data.Paths) > 0 {
-		return types.NodeTypeSplit
-	}
-	if data.Duration != nil {
-		return types.NodeTypeDelay
-	}
-	if data.CacheOp != nil && data.CacheKey != nil {
-		return types.NodeTypeCache
-	}
-
-	// Context nodes
-	if data.ContextName != nil && data.ContextValue != nil {
-		// Default to variable, frontend should specify explicitly
-		// This is a best-effort inference
-		return types.NodeTypeContextVariable
-	}
-
-	// Error handling & resilience nodes
-	if data.MaxAttempts != nil || data.BackoffStrategy != nil {
-		return types.NodeTypeRetry
-	}
-	if data.FallbackValue != nil || data.ContinueOnError != nil {
-		return types.NodeTypeTryCatch
-	}
-	if data.Timeout != nil && data.TimeoutAction != nil {
-		return types.NodeTypeTimeout
-	}
-
-	// Cannot infer type
-	// Note: for_each, while_loop, and parallel require explicit type
-	// as they have ambiguous fields
-	return ""
-}
+// Type inference is now handled automatically during JSON unmarshaling in
+// Node.UnmarshalJSON(). The inferNodeTypes() and inferNodeTypeFromData()
+// functions are no longer needed as type inference happens at decode time.
+// This provides better type safety and cleaner code.
 
 // ============================================================================
 // ExecutionContext Interface Implementation
@@ -924,60 +810,18 @@ func (e *Engine) interpolateValue(value interface{}) interface{} {
 	}
 }
 
-// interpolateNodeData interpolates all string fields in NodeData
-func (e *Engine) interpolateNodeData(data *types.NodeData) {
-	// Check if we have any context to interpolate
-	contextVars := e.state.GetAllContext()
-	if len(contextVars) == 0 {
-		return
-	}
+// ============================================================================
+// Template Interpolation (DEPRECATED - needs redesign for interface-based NodeData)
+// ============================================================================
 
-	// Interpolate string pointer fields
-	if data.Text != nil {
-		interpolated := e.interpolateTemplate(*data.Text)
-		data.Text = &interpolated
-	}
-	if data.URL != nil {
-		interpolated := e.interpolateTemplate(*data.URL)
-		data.URL = &interpolated
-	}
-	if data.Label != nil {
-		interpolated := e.interpolateTemplate(*data.Label)
-		data.Label = &interpolated
-	}
-	if data.VarName != nil {
-		interpolated := e.interpolateTemplate(*data.VarName)
-		data.VarName = &interpolated
-	}
-	if data.Field != nil {
-		interpolated := e.interpolateTemplate(*data.Field)
-		data.Field = &interpolated
-	}
-	if data.CacheKey != nil {
-		interpolated := e.interpolateTemplate(*data.CacheKey)
-		data.CacheKey = &interpolated
-	}
-
-	// Interpolate string arrays
-	if len(data.Fields) > 0 {
-		for i, field := range data.Fields {
-			data.Fields[i] = e.interpolateTemplate(field)
-		}
-	}
-	if len(data.Paths) > 0 {
-		for i, path := range data.Paths {
-			data.Paths[i] = e.interpolateTemplate(path)
-		}
-	}
-
-	// Interpolate interface{} fields that might contain strings
-	if data.InitialValue != nil {
-		data.InitialValue = e.interpolateValue(data.InitialValue)
-	}
-	if data.FallbackValue != nil {
-		data.FallbackValue = e.interpolateValue(data.FallbackValue)
-	}
-}
+// Template interpolation needs to be redesigned for the new interface-based NodeData approach.
+// The previous implementation modified NodeData fields directly, which is not possible with interfaces.
+// Future implementation options:
+// 1. Move interpolation into individual executors when they extract typed data
+// 2. Create a wrapping layer that performs interpolation before passing to executors
+// 3. Use reflection to modify concrete types after type assertion
+//
+// For now, interpolation is disabled. Executors that need it should implement it themselves.
 
 // ============================================================================
 // Helper Methods

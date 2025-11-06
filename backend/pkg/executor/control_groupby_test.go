@@ -64,20 +64,14 @@ func TestGroupByExecutor_Basic(t *testing.T) {
 				},
 			}
 
-			nodeData := types.NodeData{
-				Field: &tt.field,
-			}
-			if tt.aggregate != nil {
-				nodeData.Aggregate = tt.aggregate
-			}
-			if tt.valueField != nil {
-				nodeData.ValueField = tt.valueField
-			}
-
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeGroupBy,
-				Data: nodeData,
+				Data: types.GroupByData{
+					Field:      &tt.field,
+					Aggregate:  tt.aggregate,
+					ValueField: tt.valueField,
+				},
 			}
 
 			result, err := exec.Execute(ctx, node)
@@ -122,20 +116,13 @@ func TestGroupByExecutor_Validate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			nodeData := types.NodeData{}
-			if tt.field != nil {
-				nodeData.Field = tt.field
-			}
-			if tt.aggregate != nil {
-				nodeData.Aggregate = tt.aggregate
-			}
-			if tt.valueField != nil {
-				nodeData.ValueField = tt.valueField
-			}
-
 			node := types.Node{
 				Type: types.NodeTypeGroupBy,
-				Data: nodeData,
+				Data: types.GroupByData{
+					Field:      tt.field,
+					Aggregate:  tt.aggregate,
+					ValueField: tt.valueField,
+				},
 			}
 
 			err := exec.Validate(node)

@@ -17,7 +17,11 @@ type FilterExecutor struct{}
 // If input is not an array, passes through the original input with a warning.
 // The expression has access to the 'item' variable representing the current array element.
 func (e *FilterExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-	if node.Data.Condition == nil || *node.Data.Condition == "" {
+data, err := types.AsFilterData(node.Data)
+if err != nil {
+return nil, err
+}
+	if data.Condition == nil || *data.Condition == "" {
 		return nil, fmt.Errorf("filter node missing condition expression")
 	}
 
@@ -79,7 +83,7 @@ func (e *FilterExecutor) Execute(ctx ExecutionContext, node types.Node) (interfa
 		itemCtx.Variables["index"] = float64(i)
 
 		// Evaluate the condition for this item
-		conditionMet, err := expression.Evaluate(*node.Data.Condition, item, itemCtx)
+		conditionMet, err := expression.Evaluate(*data.Condition, item, itemCtx)
 		if err != nil {
 			// Log evaluation error but continue processing
 			slog.Debug("filter expression evaluation error",
@@ -116,7 +120,7 @@ func (e *FilterExecutor) Execute(ctx ExecutionContext, node types.Node) (interfa
 		"output_count":  len(filtered),
 		"skipped_count": skippedCount,
 		"error_count":   errorCount,
-		"condition":     *node.Data.Condition,
+		"condition":     *data.Condition,
 		"is_array":      true,
 	}, nil
 }
@@ -128,7 +132,11 @@ func (e *FilterExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *FilterExecutor) Validate(node types.Node) error {
-	if node.Data.Condition == nil || *node.Data.Condition == "" {
+data, err := types.AsFilterData(node.Data)
+if err != nil {
+return err
+}
+	if data.Condition == nil || *data.Condition == "" {
 		return fmt.Errorf("filter node requires a condition expression")
 	}
 	return nil

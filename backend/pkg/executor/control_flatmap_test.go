@@ -51,15 +51,12 @@ func TestFlatMapExecutor_Basic(t *testing.T) {
 				},
 			}
 
-			nodeData := types.NodeData{}
-			if tt.field != nil {
-				nodeData.Field = tt.field
-			}
-
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeFlatMap,
-				Data: nodeData,
+				Data: types.FlatMapData{
+					Field: tt.field,
+				},
 			}
 
 			result, err := exec.Execute(ctx, node)
@@ -89,7 +86,7 @@ func TestFlatMapExecutor_Validate(t *testing.T) {
 	exec := &FlatMapExecutor{}
 	node := types.Node{
 		Type: types.NodeTypeFlatMap,
-		Data: types.NodeData{},
+		Data: types.FlatMapData{},
 	}
 
 	err := exec.Validate(node)

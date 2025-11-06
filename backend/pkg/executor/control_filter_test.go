@@ -229,7 +229,7 @@ func TestFilterExecutor_Basic(t *testing.T) {
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeFilter,
-				Data: types.NodeData{
+				Data: types.FilterData{
 					Condition: &tt.condition,
 				},
 			}
@@ -349,7 +349,7 @@ func TestFilterExecutor_ObjectFields(t *testing.T) {
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeFilter,
-				Data: types.NodeData{
+				Data: types.FilterData{
 					Condition: &tt.condition,
 				},
 			}
@@ -431,7 +431,7 @@ func TestFilterExecutor_ComplexConditions(t *testing.T) {
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeFilter,
-				Data: types.NodeData{
+				Data: types.FilterData{
 					Condition: &tt.condition,
 				},
 			}
@@ -525,7 +525,7 @@ func TestFilterExecutor_NonArrayInput(t *testing.T) {
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeFilter,
-				Data: types.NodeData{
+				Data: types.FilterData{
 					Condition: &condition,
 				},
 			}
@@ -566,7 +566,7 @@ func TestFilterExecutor_Validation(t *testing.T) {
 			name: "Valid node",
 			node: types.Node{
 				Type: types.NodeTypeFilter,
-				Data: types.NodeData{
+				Data: types.FilterData{
 					Condition: strPtr("variables.item > 10"),
 				},
 			},
@@ -577,7 +577,7 @@ func TestFilterExecutor_Validation(t *testing.T) {
 			name: "Missing condition",
 			node: types.Node{
 				Type: types.NodeTypeFilter,
-				Data: types.NodeData{},
+				Data: types.FilterData{},
 			},
 			expectError: true,
 			description: "Should reject node without condition",
@@ -586,7 +586,7 @@ func TestFilterExecutor_Validation(t *testing.T) {
 			name: "Empty condition",
 			node: types.Node{
 				Type: types.NodeTypeFilter,
-				Data: types.NodeData{
+				Data: types.FilterData{
 					Condition: strPtr(""),
 				},
 			},
@@ -622,7 +622,7 @@ func TestFilterExecutor_MissingInput(t *testing.T) {
 	node := types.Node{
 		ID:   "test-node",
 		Type: types.NodeTypeFilter,
-		Data: types.NodeData{
+		Data: types.FilterData{
 			Condition: &condition,
 		},
 	}
@@ -664,7 +664,7 @@ func TestFilterExecutor_WithContextVariables(t *testing.T) {
 	node := types.Node{
 		ID:   "test-node",
 		Type: types.NodeTypeFilter,
-		Data: types.NodeData{
+		Data: types.FilterData{
 			Condition: &condition,
 		},
 	}
@@ -705,7 +705,7 @@ func TestFilterExecutor_WithNodeReferences(t *testing.T) {
 	node := types.Node{
 		ID:   "test-node",
 		Type: types.NodeTypeFilter,
-		Data: types.NodeData{
+		Data: types.FilterData{
 			Condition: &condition,
 		},
 	}
@@ -829,7 +829,7 @@ func TestFilterExecutor_DirectFieldAccess(t *testing.T) {
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeFilter,
-				Data: types.NodeData{
+				Data: types.FilterData{
 					Condition: &tt.condition,
 				},
 			}
@@ -891,7 +891,7 @@ func TestFilterExecutor_BackwardCompatibility(t *testing.T) {
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeFilter,
-				Data: types.NodeData{
+				Data: types.FilterData{
 					Condition: &tt.condition,
 				},
 			}
@@ -1018,7 +1018,7 @@ func TestFilterExecutor_ItemSyntax(t *testing.T) {
 			node := types.Node{
 				ID:   "test-node",
 				Type: types.NodeTypeFilter,
-				Data: types.NodeData{
+				Data: types.FilterData{
 					Condition: &tt.condition,
 				},
 			}

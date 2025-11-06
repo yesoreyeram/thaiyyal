@@ -94,7 +94,7 @@ func TestExpressionExecutor_Execute(t *testing.T) {
 			node := types.Node{
 				ID:   "expr1",
 				Type: types.NodeTypeExpression,
-				Data: types.NodeData{
+				Data: types.ExpressionData{
 					Expression: &tt.expression,
 				},
 			}
@@ -124,7 +124,7 @@ func TestExpressionExecutor_Execute_NoExpression(t *testing.T) {
 	node := types.Node{
 		ID:   "expr1",
 		Type: types.NodeTypeExpression,
-		Data: types.NodeData{
+		Data: types.ExpressionData{
 			Expression: &emptyExpr,
 		},
 	}
@@ -163,7 +163,7 @@ func TestExpressionExecutor_Execute_NoInput(t *testing.T) {
 	node := types.Node{
 		ID:   "expr1",
 		Type: types.NodeTypeExpression,
-		Data: types.NodeData{
+		Data: types.ExpressionData{
 			Expression: &expr,
 		},
 	}
@@ -189,7 +189,7 @@ func TestExpressionExecutor_Validate(t *testing.T) {
 			name: "valid expression node",
 			node: types.Node{
 				Type: types.NodeTypeExpression,
-				Data: types.NodeData{
+				Data: types.ExpressionData{
 					Expression: stringPtr("input * 2"),
 				},
 			},
@@ -199,7 +199,7 @@ func TestExpressionExecutor_Validate(t *testing.T) {
 			name: "missing expression",
 			node: types.Node{
 				Type: types.NodeTypeExpression,
-				Data: types.NodeData{
+				Data: types.ExpressionData{
 					Expression: nil,
 				},
 			},
@@ -209,7 +209,7 @@ func TestExpressionExecutor_Validate(t *testing.T) {
 			name: "empty expression",
 			node: types.Node{
 				Type: types.NodeTypeExpression,
-				Data: types.NodeData{
+				Data: types.ExpressionData{
 					Expression: stringPtr(""),
 				},
 			},
@@ -219,7 +219,7 @@ func TestExpressionExecutor_Validate(t *testing.T) {
 			name: "expression too long",
 			node: types.Node{
 				Type: types.NodeTypeExpression,
-				Data: types.NodeData{
+				Data: types.ExpressionData{
 					Expression: stringPtr(string(make([]byte, 10001))),
 				},
 			},
@@ -229,7 +229,7 @@ func TestExpressionExecutor_Validate(t *testing.T) {
 			name: "wrong node type",
 			node: types.Node{
 				Type: types.NodeTypeNumber,
-				Data: types.NodeData{
+				Data: types.ExpressionData{
 					Expression: stringPtr("input * 2"),
 				},
 			},

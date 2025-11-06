@@ -75,7 +75,7 @@ func TestRangeExecutor_Basic(t *testing.T) {
 				},
 			}
 
-			nodeData := types.NodeData{}
+			nodeData := types.RangeData{}
 			if tt.start != nil {
 				nodeData.Start = tt.start
 			}
@@ -141,7 +141,7 @@ func TestRangeExecutor_Validate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			nodeData := types.NodeData{}
+			nodeData := types.RangeData{}
 			if tt.start != nil {
 				nodeData.Start = tt.start
 			}

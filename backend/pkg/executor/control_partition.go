@@ -13,6 +13,10 @@ type PartitionExecutor struct{}
 
 // Execute splits the input array into passed and failed groups
 func (e *PartitionExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+data, err := types.AsPartitionData(node.Data)
+if err != nil {
+return nil, err
+}
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("partition node needs at least 1 input")
@@ -36,8 +40,8 @@ func (e *PartitionExecutor) Execute(ctx ExecutionContext, node types.Node) (inte
 
 	// Get condition
 	condition := ""
-	if node.Data.Condition != nil {
-		condition = *node.Data.Condition
+	if data.Condition != nil {
+		condition = *data.Condition
 	}
 	if condition == "" {
 		return nil, fmt.Errorf("partition node missing required 'condition' string")
@@ -100,7 +104,11 @@ func (e *PartitionExecutor) NodeType() types.NodeType {
 
 // Validate checks if the node configuration is valid
 func (e *PartitionExecutor) Validate(node types.Node) error {
-	if node.Data.Condition == nil || *node.Data.Condition == "" {
+data, err := types.AsPartitionData(node.Data)
+if err != nil {
+return err
+}
+	if data.Condition == nil || *data.Condition == "" {
 		return fmt.Errorf("partition node requires non-empty 'condition' field")
 	}
 	return nil

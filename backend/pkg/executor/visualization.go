@@ -12,6 +12,10 @@ type VisualizationExecutor struct{}
 // Execute acts as a pass-through, returning the input data directly to the frontend
 // The frontend RendererNode will handle the visualization logic
 func (e *VisualizationExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+	// Validate node data type
+	if _, err := types.AsVisualizationData(node.Data); err != nil {
+		return nil, err
+	}
 
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
@@ -30,5 +34,9 @@ func (e *VisualizationExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *VisualizationExecutor) Validate(node types.Node) error {
+	// Validate node data type
+	if _, err := types.AsVisualizationData(node.Data); err != nil {
+		return err
+	}
 	return nil
 }

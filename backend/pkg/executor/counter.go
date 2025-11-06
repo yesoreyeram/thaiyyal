@@ -13,16 +13,20 @@ type CounterExecutor struct{}
 // Handles counter operations (increment, decrement, reset, get).
 // The counter maintains a single numeric value across workflow execution.
 func (e *CounterExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
-	if node.Data.CounterOp == nil {
+data, err := types.AsCounterData(node.Data)
+if err != nil {
+return nil, err
+}
+	if data.CounterOp == nil {
 		return nil, fmt.Errorf("counter node missing counter_op")
 	}
 
-	counterOp := *node.Data.CounterOp
+	counterOp := *data.CounterOp
 	currentCounter := ctx.GetCounter()
 
 	// Initialize counter if configured
-	if node.Data.InitialValue != nil {
-		if val, ok := node.Data.InitialValue.(float64); ok {
+	if data.InitialValue != nil {
+		if val, ok := data.InitialValue.(float64); ok {
 			currentCounter = val
 			ctx.SetCounter(currentCounter)
 		}
@@ -32,24 +36,24 @@ func (e *CounterExecutor) Execute(ctx ExecutionContext, node types.Node) (interf
 	switch counterOp {
 	case "increment":
 		delta := 1.0
-		if node.Data.Delta != nil {
-			delta = *node.Data.Delta
+		if data.Delta != nil {
+			delta = *data.Delta
 		}
 		currentCounter += delta
 		ctx.SetCounter(currentCounter)
 
 	case "decrement":
 		delta := 1.0
-		if node.Data.Delta != nil {
-			delta = *node.Data.Delta
+		if data.Delta != nil {
+			delta = *data.Delta
 		}
 		currentCounter -= delta
 		ctx.SetCounter(currentCounter)
 
 	case "reset":
 		resetValue := 0.0
-		if node.Data.InitialValue != nil {
-			if val, ok := node.Data.InitialValue.(float64); ok {
+		if data.InitialValue != nil {
+			if val, ok := data.InitialValue.(float64); ok {
 				resetValue = val
 			}
 		}
@@ -76,7 +80,11 @@ func (e *CounterExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *CounterExecutor) Validate(node types.Node) error {
-	if node.Data.CounterOp == nil {
+data, err := types.AsCounterData(node.Data)
+if err != nil {
+return err
+}
+	if data.CounterOp == nil {
 		return fmt.Errorf("counter node missing counter_op")
 	}
 	return nil

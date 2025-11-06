@@ -13,6 +13,11 @@ type ZipExecutor struct{}
 
 // Execute combines arrays element-wise into tuples
 func (e *ZipExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+	data, err := types.AsZipData(node.Data)
+	if err != nil {
+		return nil, err
+	}
+	
 	// Get arrays to zip (can be from inputs or specified as array references)
 	var arrays [][]interface{}
 
@@ -26,7 +31,7 @@ func (e *ZipExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{
 	}
 
 	// Check for additional arrays specified in config
-	if arraysConfig, ok := node.Data.Arrays.([]interface{}); ok {
+	if arraysConfig, ok := data.Arrays.([]interface{}); ok {
 		for _, arrRef := range arraysConfig {
 			// TODO: Resolve array references from node results/variables
 			// For now, we expect arrays to be passed directly
@@ -41,7 +46,7 @@ func (e *ZipExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{
 	}
 
 	// Get fill value for shorter arrays
-	fillMissing := node.Data.FillMissing
+	fillMissing := data.FillMissing
 
 	// Find maximum length
 	maxLen := 0
@@ -80,6 +85,10 @@ func (e *ZipExecutor) NodeType() types.NodeType {
 
 // Validate checks if the node configuration is valid
 func (e *ZipExecutor) Validate(node types.Node) error {
+// Validate node data type
+	if _, err := types.AsZipData(node.Data); err != nil {
+		return err
+	}
 	// Arrays can be provided via inputs or config
 	return nil
 }
@@ -89,6 +98,11 @@ type CompactExecutor struct{}
 
 // Execute removes null, undefined, and optionally empty values
 func (e *CompactExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+	data, err := types.AsCompactData(node.Data)
+	if err != nil {
+		return nil, err
+	}
+	
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("compact node needs at least 1 input")
@@ -112,8 +126,8 @@ func (e *CompactExecutor) Execute(ctx ExecutionContext, node types.Node) (interf
 
 	// Get remove_empty option (default: false)
 	removeEmpty := false
-	if node.Data.RemoveEmpty != nil {
-		removeEmpty = *node.Data.RemoveEmpty
+	if data.RemoveEmpty != nil {
+		removeEmpty = *data.RemoveEmpty
 	}
 
 	// Compact the array
@@ -162,6 +176,10 @@ func (e *CompactExecutor) NodeType() types.NodeType {
 
 // Validate checks if the node configuration is valid
 func (e *CompactExecutor) Validate(node types.Node) error {
+	// Validate node data type
+	if _, err := types.AsCompactData(node.Data); err != nil {
+		return err
+	}
 	// No required fields
 	return nil
 }

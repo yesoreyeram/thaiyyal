@@ -40,6 +40,10 @@ type ForEachExecutor struct{}
 //	Each iteration: variables.item = {"name":"Alice"}, variables.index = 0
 //	Output: {iterations: 2, successful: 2, failed: 0}
 func (e *ForEachExecutor) Execute(ctx ExecutionContext, node types.Node) (interface{}, error) {
+data, err := types.AsForEachData(node.Data)
+if err != nil {
+return nil, err
+}
 	inputs := ctx.GetNodeInputs(node.ID)
 	if len(inputs) == 0 {
 		return nil, fmt.Errorf("for_each node needs at least 1 input")
@@ -53,8 +57,8 @@ func (e *ForEachExecutor) Execute(ctx ExecutionContext, node types.Node) (interf
 
 	// Set default max iterations
 	maxIter := 1000
-	if node.Data.MaxIterations != nil && *node.Data.MaxIterations > 0 {
-		maxIter = *node.Data.MaxIterations
+	if data.MaxIterations != nil && *data.MaxIterations > 0 {
+		maxIter = *data.MaxIterations
 	}
 
 	// Limit iterations to prevent resource exhaustion
@@ -147,6 +151,10 @@ func (e *ForEachExecutor) NodeType() types.NodeType {
 
 // Validate checks if node configuration is valid
 func (e *ForEachExecutor) Validate(node types.Node) error {
+	// Validate node data type
+	if _, err := types.AsForEachData(node.Data); err != nil {
+		return err
+	}
 	// No required configuration for simple iterator
 	// Max iterations is optional
 	return nil

@@ -64,7 +64,7 @@ func TestSampleExecutor_Basic(t *testing.T) {
 				},
 			}
 
-			nodeData := types.NodeData{}
+			nodeData := types.SampleData{}
 			if tt.count != nil {
 				nodeData.Count = tt.count
 			}
@@ -120,7 +120,7 @@ func TestSampleExecutor_Validate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			nodeData := types.NodeData{}
+			nodeData := types.SampleData{}
 			if tt.count != nil {
 				nodeData.Count = tt.count
 			}
