@@ -43,25 +43,18 @@ type NodeComponentMap = Record<string, ComponentType<NodePropsWithOptions>>;
 const withContextMenu = (
   Component: ComponentType<Nodes.NodePropsWithOptions>,
   handleContextMenu: (nodeId: string, x: number, y: number) => void,
-  closePalette: () => void,
   handleDelete: (nodeId: string) => void
 ) => {
   const WrappedComponent = (props: NodeProps<NodeData>) => {
     const onShowOptions = (x: number, y: number) => {
       handleContextMenu(props.id, x, y);
     };
-    const onOpenInfo = () => {
-      closePalette();
-    };
-    const onDelete = () => {
-      handleDelete(props.id);
-    };
     return (
       <Component
         {...(props as Nodes.NodePropsWithOptions)}
         onShowOptions={onShowOptions}
-        onOpenInfo={onOpenInfo}
-        onDelete={onDelete}
+        onOpenInfo={() => {}}
+        onDelete={() => handleDelete(props.id)}
       />
     );
   };
@@ -204,7 +197,7 @@ function Canvas() {
         [key]: withContextMenu(
           Component,
           handleNodeContextMenu,
-          () => setIsPaletteOpen(false),
+          // () => setIsPaletteOpen(false),
           handleDeleteNodeDirect
         ),
       }),
@@ -563,7 +556,7 @@ function Canvas() {
             </>
           )}
           <ReactFlow
-            nodes={nodes}
+            nodes={nodes.map((n) => ({ ...n, dragHandle: ".__dragger" }))}
             edges={edges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}

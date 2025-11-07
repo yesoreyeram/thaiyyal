@@ -17,21 +17,23 @@
         "label": "Route by Status",
         "cases": [
           {
-            "when": "==200",
-            "value": 200,
+            "when": "input == 200",
             "output_path": "success"
           },
           {
-            "when": "==404",
-            "value": 404,
+            "when": "input == 404",
             "output_path": "not_found"
           },
           {
-            "when": ">=500",
+            "when": "input >=500",
             "output_path": "server_error"
+          },
+          {
+            "when": "default",
+            "output_path": "other",
+            "is_default": true
           }
-        ],
-        "default_path": "other"
+        ]
       }
     },
     {

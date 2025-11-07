@@ -87,11 +87,11 @@ func TestConditionalExecution_SwitchRouting(t *testing.T) {
 			{ID: "status_code", Type: types.NodeTypeNumber, Data: types.NumberData{Value: float64Ptr(200)}},
 			{ID: "router", Type: types.NodeTypeSwitch, Data: types.SwitchData{
 				Cases: []types.SwitchCase{
-					{When: "==200", Value: float64(200), OutputPath: strPtr("success")},
-					{When: "==404", Value: float64(404), OutputPath: strPtr("not_found")},
-					{When: ">=500", OutputPath: strPtr("error")},
+					{When: "input == 200", OutputPath: strPtr("success")},
+					{When: "input == 404", OutputPath: strPtr("not_found")},
+					{When: "input >= 500", OutputPath: strPtr("error")},
+					{When: "default", OutputPath: strPtr("other"), IsDefault: true},
 				},
-				DefaultPath: strPtr("other"),
 			}},
 			{ID: "success_handler", Type: types.NodeTypeTextInput, Data: types.TextInputData{Text: strPtr("Success")}},
 			{ID: "error_handler", Type: types.NodeTypeTextInput, Data: types.TextInputData{Text: strPtr("Error")}},

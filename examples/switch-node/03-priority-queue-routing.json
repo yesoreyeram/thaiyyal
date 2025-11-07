@@ -1,0 +1,154 @@
+{
+  "name": "Priority Queue Routing",
+  "description": "Route tasks to different processing queues based on priority level",
+  "nodes": [
+    {
+      "id": "task_priority",
+      "type": "number",
+      "data": {
+        "value": 8,
+        "label": "Task Priority (1-10)"
+      }
+    },
+    {
+      "id": "priority_router",
+      "type": "switch",
+      "data": {
+        "label": "Priority Queue Router",
+        "cases": [
+          {
+            "when": "input >=9",
+            "output_path": "critical"
+          },
+          {
+            "when": "input >=7",
+            "output_path": "high"
+          },
+          {
+            "when": "input >=4",
+            "output_path": "medium"
+          },
+          {
+            "when": "input >=1",
+            "output_path": "low"
+          },
+          {
+            "when": "default",
+            "output_path": "invalid",
+            "is_default": true
+          }
+        ]
+      }
+    },
+    {
+      "id": "critical_queue",
+      "type": "text_input",
+      "data": {
+        "text": "\ud83d\udd34 CRITICAL QUEUE: Immediate processing - SLA: 5 minutes",
+        "label": "Critical Queue"
+      }
+    },
+    {
+      "id": "high_queue",
+      "type": "text_input",
+      "data": {
+        "text": "\ud83d\udfe0 HIGH QUEUE: Priority processing - SLA: 30 minutes",
+        "label": "High Queue"
+      }
+    },
+    {
+      "id": "medium_queue",
+      "type": "text_input",
+      "data": {
+        "text": "\ud83d\udfe1 MEDIUM QUEUE: Standard processing - SLA: 2 hours",
+        "label": "Medium Queue"
+      }
+    },
+    {
+      "id": "low_queue",
+      "type": "text_input",
+      "data": {
+        "text": "\ud83d\udfe2 LOW QUEUE: Batch processing - SLA: 24 hours",
+        "label": "Low Queue"
+      }
+    },
+    {
+      "id": "invalid_queue",
+      "type": "text_input",
+      "data": {
+        "text": "\u26a0\ufe0f INVALID PRIORITY: Task rejected",
+        "label": "Invalid Priority"
+      }
+    },
+    {
+      "id": "display",
+      "type": "visualization",
+      "data": {
+        "mode": "json",
+        "label": "Queue Assignment"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "task_priority",
+      "target": "priority_router"
+    },
+    {
+      "id": "e2",
+      "source": "priority_router",
+      "sourceHandle": "critical",
+      "target": "critical_queue"
+    },
+    {
+      "id": "e3",
+      "source": "priority_router",
+      "sourceHandle": "high",
+      "target": "high_queue"
+    },
+    {
+      "id": "e4",
+      "source": "priority_router",
+      "sourceHandle": "medium",
+      "target": "medium_queue"
+    },
+    {
+      "id": "e5",
+      "source": "priority_router",
+      "sourceHandle": "low",
+      "target": "low_queue"
+    },
+    {
+      "id": "e6",
+      "source": "priority_router",
+      "sourceHandle": "invalid",
+      "target": "invalid_queue"
+    },
+    {
+      "id": "e7",
+      "source": "critical_queue",
+      "target": "display"
+    },
+    {
+      "id": "e8",
+      "source": "high_queue",
+      "target": "display"
+    },
+    {
+      "id": "e9",
+      "source": "medium_queue",
+      "target": "display"
+    },
+    {
+      "id": "e10",
+      "source": "low_queue",
+      "target": "display"
+    },
+    {
+      "id": "e11",
+      "source": "invalid_queue",
+      "target": "display"
+    }
+  ]
+}

@@ -132,9 +132,9 @@ type Node struct {
 
 // SwitchCase represents a case in a switch node
 type SwitchCase struct {
-	When       string      `json:"when"`                  // condition or value to match
-	Value      interface{} `json:"value,omitempty"`       // value to match (for value matching)
-	OutputPath *string     `json:"output_path,omitempty"` // output port name
+	When       string  `json:"when"`                  // expression to evaluate (e.g., "input > 50", "variables.x == 10")
+	OutputPath *string `json:"output_path,omitempty"` // output port name (required for non-default cases)
+	IsDefault  bool    `json:"is_default,omitempty"`  // true if this is the default case (must be last in array)
 }
 
 // ContextVariableValue represents a typed value in a context variable/constant node

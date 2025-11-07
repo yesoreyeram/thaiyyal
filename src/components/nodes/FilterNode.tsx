@@ -43,7 +43,7 @@ export function FilterNode({
         value={String(data?.condition ?? "item.age > 0")}
         type="text"
         onChange={onConditionChange}
-        className="w-36 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
+        className="w-full text-xs border px-1.5 py-0.5 rounded focus:ring-1 focus:outline-none dark:scheme-dark border-gray-600 bg-gray-900 text-white focus:ring-blue-400"
         placeholder="item.age >= 18"
         aria-label="Filter condition"
       />

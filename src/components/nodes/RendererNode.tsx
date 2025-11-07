@@ -1,115 +1,18 @@
-import { NodeProps, Handle, Position } from "reactflow";
+import { Handle, Position } from "reactflow";
 import { NodeWrapper } from "./NodeWrapper";
 import { getNodeInfo } from "./nodeInfo";
+import { NodePropsWithOptions } from "./nodeTypes";
 
-type RendererNodeData = {
-  label?: string;
-  _executionData?: unknown;
-};
+const nodeInfo = getNodeInfo("rendererNode");
 
-export function RendererNode(props: NodeProps<RendererNodeData>) {
+type Props = NodePropsWithOptions<{ _executionData?: unknown }>;
+
+export function RendererNode(props: Props) {
   const { id, data } = props;
-  const nodeInfo = getNodeInfo("rendererNode");
+
   // Type assertion is consistent with other nodes in the codebase
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onShowOptions = (props as any).onShowOptions;
-
-  // Helper to check if data is empty/null/undefined
-  const isEmptyData = (data: unknown): boolean => {
-    return !data && data !== 0 && data !== false;
-  };
-
-  // Auto-detect the best rendering mode based on data type and structure
-  const inferRenderMode = (executionData: unknown): string => {
-    if (isEmptyData(executionData)) {
-      return "text";
-    }
-
-    if (typeof executionData === "boolean") {
-      return typeof executionData;
-    }
-
-    if (
-      typeof executionData === "number" ||
-      typeof executionData === "bigint"
-    ) {
-      return "number";
-    }
-
-    // If it's a string, check if it's JSON, CSV, TSV, or XML
-    if (typeof executionData === "string") {
-      const trimmed = executionData.trim();
-
-      // Check for JSON
-      if (
-        (trimmed.startsWith("{") && trimmed.endsWith("}")) ||
-        (trimmed.startsWith("[") && trimmed.endsWith("]"))
-      ) {
-        try {
-          JSON.parse(trimmed);
-          return "json";
-        } catch {
-          // Not valid JSON, continue checking
-        }
-      }
-
-      // Check for XML
-      if (trimmed.startsWith("<") && trimmed.endsWith(">")) {
-        return "xml";
-      }
-
-      // Check for CSV/TSV (has multiple lines with separators)
-      const lines = trimmed.split("\n");
-      if (lines.length > 1) {
-        const firstLine = lines[0];
-        const commas = (firstLine.match(/,/g) || []).length;
-        const tabs = (firstLine.match(/\t/g) || []).length;
-
-        if (tabs > 0 && tabs >= commas) {
-          return "tsv";
-        } else if (commas > 0) {
-          return "csv";
-        }
-      }
-
-      return "text";
-    }
-
-    // If it's an array
-    if (Array.isArray(executionData)) {
-      if (executionData.length === 0) {
-        return "json";
-      }
-
-      const firstItem = executionData[0];
-
-      // Check if it's array of objects with 'label' and 'value' for bar chart
-      if (typeof firstItem === "object" && firstItem !== null) {
-        const obj = firstItem as Record<string, unknown>;
-        if (
-          ("label" in obj || "name" in obj) &&
-          "value" in obj &&
-          typeof obj.value === "number"
-        ) {
-          return "bar_chart";
-        }
-
-        // Array of objects - use table
-        return "table";
-      }
-
-      // Array of primitives - use table with "values" column
-      return "table";
-    }
-
-    // If it's an object
-    if (typeof executionData === "object" && executionData !== null) {
-      return "json";
-    }
-
-    // Primitives (number, boolean) - use text
-    return "text";
-  };
 
   // Render different formats based on auto-detected mode
   const renderData = () => {
@@ -462,23 +365,109 @@ export function RendererNode(props: NodeProps<RendererNodeData>) {
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
     >
-      <Handle
-        type="target"
-        position={Position.Left}
-        className="w-2 h-2 bg-blue-400"
-      />
+      <Handle type="target" position={Position.Left} className="w-2 h-2" />
 
       <div className="flex flex-col gap-1">
-        <div className="w-36 border border-gray-600 rounded bg-gray-900 mt-1">
+        <div className="border border-gray-600 rounded bg-gray-900 mt-1 p-1">
           {renderData()}
         </div>
       </div>
 
-      <Handle
-        type="source"
-        position={Position.Right}
-        className="w-2 h-2 bg-green-400"
-      />
+      <Handle type="source" position={Position.Right} className="w-2 h-2" />
     </NodeWrapper>
   );
 }
+
+// Helper to check if data is empty/null/undefined
+const isEmptyData = (data: unknown): boolean => {
+  return !data && data !== 0 && data !== false;
+};
+
+// Auto-detect the best rendering mode based on data type and structure
+const inferRenderMode = (executionData: unknown): string => {
+  if (isEmptyData(executionData)) {
+    return "text";
+  }
+
+  if (typeof executionData === "boolean") {
+    return typeof executionData;
+  }
+
+  if (typeof executionData === "number" || typeof executionData === "bigint") {
+    return "number";
+  }
+
+  // If it's a string, check if it's JSON, CSV, TSV, or XML
+  if (typeof executionData === "string") {
+    const trimmed = executionData.trim();
+
+    // Check for JSON
+    if (
+      (trimmed.startsWith("{") && trimmed.endsWith("}")) ||
+      (trimmed.startsWith("[") && trimmed.endsWith("]"))
+    ) {
+      try {
+        JSON.parse(trimmed);
+        return "json";
+      } catch {
+        // Not valid JSON, continue checking
+      }
+    }
+
+    // Check for XML
+    if (trimmed.startsWith("<") && trimmed.endsWith(">")) {
+      return "xml";
+    }
+
+    // Check for CSV/TSV (has multiple lines with separators)
+    const lines = trimmed.split("\n");
+    if (lines.length > 1) {
+      const firstLine = lines[0];
+      const commas = (firstLine.match(/,/g) || []).length;
+      const tabs = (firstLine.match(/\t/g) || []).length;
+
+      if (tabs > 0 && tabs >= commas) {
+        return "tsv";
+      } else if (commas > 0) {
+        return "csv";
+      }
+    }
+
+    return "text";
+  }
+
+  // If it's an array
+  if (Array.isArray(executionData)) {
+    if (executionData.length === 0) {
+      return "json";
+    }
+
+    const firstItem = executionData[0];
+
+    // Check if it's array of objects with 'label' and 'value' for bar chart
+    if (typeof firstItem === "object" && firstItem !== null) {
+      const obj = firstItem as Record<string, unknown>;
+      if (
+        ("label" in obj || "name" in obj) &&
+        "value" in obj &&
+        typeof obj.value === "number"
+      ) {
+        return "bar_chart";
+      }
+
+      // Array of objects - use table
+      return "table";
+    }
+
+    // Array of primitives - use table with "values" column
+    return "table";
+  }
+
+  // If it's an object
+  if (typeof executionData === "object" && executionData !== null) {
+    return "json";
+  }
+
+  // Primitives (number, boolean) - use text
+  return "text";
+};

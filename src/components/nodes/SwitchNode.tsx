@@ -1,12 +1,18 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 import { Handle, Position, useReactFlow } from "reactflow";
+import { Trash } from "lucide-react";
 import { NodePropsWithOptions } from "./nodeTypes";
 import { NodeWrapper } from "./NodeWrapper";
 import { getNodeInfo } from "./nodeInfo";
 
+type SwitchCase = {
+  when: string;
+  output_path?: string;
+  is_default?: boolean;
+};
+
 type SwitchNodeData = {
-  cases?: Array<{ when: string; value?: unknown; output_path?: string }>;
-  default_path?: string;
+  cases?: SwitchCase[];
   label?: string;
 };
 
@@ -16,14 +22,97 @@ export function SwitchNode({
   onShowOptions,
 }: NodePropsWithOptions<SwitchNodeData>) {
   const { setNodes } = useReactFlow();
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
-  const onDefaultPathChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const default_path = e.target.value;
-    setNodes((nds) =>
-      nds.map((n) =>
-        n.id === id ? { ...n, data: { ...n.data, default_path } } : n
-      )
-    );
+  const cases = data?.cases || [];
+  const nonDefaultCases = cases.filter((c) => !c.is_default);
+  const defaultCase = cases.find((c) => c.is_default);
+
+  const updateCases = useCallback(
+    (newCases: SwitchCase[]) => {
+      setNodes((nds) =>
+        nds.map((n) =>
+          n.id === id ? { ...n, data: { ...n.data, cases: newCases } } : n
+        )
+      );
+    },
+    [id, setNodes]
+  );
+
+  const addCase = () => {
+    const newCase: SwitchCase = {
+      when: "",
+      output_path: "case_" + (nonDefaultCases.length + 1),
+    };
+    const updatedCases = defaultCase
+      ? [...nonDefaultCases, newCase, defaultCase]
+      : [...nonDefaultCases, newCase];
+    updateCases(updatedCases);
+  };
+
+  const updateCaseWhen = (caseIndex: number, value: string) => {
+    const updatedCases = [...cases];
+    // Auto-generate output_path using case index if not set
+    const outputPath =
+      updatedCases[caseIndex].output_path || `case_${caseIndex + 1}`;
+    updatedCases[caseIndex] = {
+      ...updatedCases[caseIndex],
+      when: value,
+      output_path: outputPath,
+    };
+    updateCases(updatedCases);
+  };
+
+  const deleteCase = (caseIndex: number) => {
+    const updatedCases = cases.filter((_, i) => i !== caseIndex);
+    updateCases(updatedCases);
+  };
+
+  // Drag-and-drop handlers
+  const handleDragStart = (e: React.DragEvent, caseIndex: number) => {
+    if (cases[caseIndex].is_default) return; // Don't allow dragging default case
+    setDraggedIndex(caseIndex);
+    e.dataTransfer.effectAllowed = "move";
+    // Prevent ReactFlow from handling this drag
+    e.stopPropagation();
+  };
+
+  const handleDragOver = (e: React.DragEvent, caseIndex: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (draggedIndex === null || draggedIndex === caseIndex) return;
+    if (cases[caseIndex].is_default) return; // Don't allow dropping on default case
+
+    setDragOverIndex(caseIndex);
+  };
+
+  const handleDragEnd = (e: React.DragEvent) => {
+    e.stopPropagation();
+
+    if (
+      draggedIndex === null ||
+      dragOverIndex === null ||
+      draggedIndex === dragOverIndex
+    ) {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    // Reorder cases
+    const updatedCases = [...cases];
+    const [draggedCase] = updatedCases.splice(draggedIndex, 1);
+    updatedCases.splice(dragOverIndex, 0, draggedCase);
+
+    updateCases(updatedCases);
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverIndex(null);
   };
 
   const nodeInfo = getNodeInfo("switchNode");
@@ -35,24 +124,93 @@ export function SwitchNode({
       nodeInfo={nodeInfo}
       onShowOptions={onShowOptions}
     >
-      <Handle
-        type="target"
-        position={Position.Left}
-        className="w-2 h-2 bg-blue-400"
-      />
-      <input
-        value={String(data?.default_path ?? "default")}
-        type="text"
-        onChange={onDefaultPathChange}
-        className="w-36 text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
-        placeholder="Default path"
-      />
-      <div className="text-xs mt-1">Cases: {data?.cases?.length ?? 0}</div>
-      <Handle
-        type="source"
-        position={Position.Right}
-        className="w-2 h-2 bg-green-400"
-      />
+      <Handle type="target" position={Position.Left} className="w-2 h-2" />
+      <div className="overflow-y-auto space-y-1">
+        {cases.map((c, caseIndex) => {
+          if (c.is_default) return null;
+          const isDragging = draggedIndex === caseIndex;
+          const isDragOver = dragOverIndex === caseIndex;
+          return (
+            <div
+              key={caseIndex}
+              draggable={!c.is_default}
+              onDragStart={(e) => handleDragStart(e, caseIndex)}
+              onDragOver={(e) => handleDragOver(e, caseIndex)}
+              onDragEnd={handleDragEnd}
+              onDragLeave={handleDragLeave}
+              className={`relative flex items-center gap-1 p-1 bg-gray-900 text-white border rounded transition-all ${
+                isDragging
+                  ? "opacity-50 border-blue-500"
+                  : isDragOver
+                  ? "border-blue-400 border-2"
+                  : "border-gray-600 hover:border-blue-400"
+              }`}
+              style={{ cursor: c.is_default ? "default" : "grab" }}
+            >
+              <div className="shrink-0 text-gray-500 text-xs cursor-grab active:cursor-grabbing select-none">
+                ⋮⋮
+              </div>
+              <input
+                type="text"
+                value={c.when}
+                onChange={(e) => updateCaseWhen(caseIndex, e.target.value)}
+                onMouseDown={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
+                placeholder="input > 50"
+                className="w-full text-xs border-0 border-gray-600 px-1 py-0.5 bg-transparent text-white focus:border-blue-400 focus:outline-none"
+              />
+              <button
+                onMouseDown={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  deleteCase(caseIndex);
+                }}
+                className="shrink-0 red-400 text-xs px-1"
+                title="Delete case"
+                aria-label="Delete case"
+              >
+                <Trash size={8} />
+              </button>
+              <Handle
+                type="source"
+                id={c.output_path || `case_${caseIndex}`}
+                position={Position.Right}
+                style={{
+                  // position: "absolute",
+                  top: "50%",
+                }}
+                className="w-2! h-2!"
+              />
+            </div>
+          );
+        })}
+        {defaultCase && (
+          <div className="noDrag relative flex items-center gap-1 p-1 bg-gray-700 rounded cursor-default">
+            <div className="flex-1 text-xs border-0 border-gray-600 px-1 py-0.5 bg-transparent text-white focus:border-blue-400">
+              default
+            </div>
+            <Handle
+              type="source"
+              id={defaultCase.output_path || "default"}
+              position={Position.Right}
+              style={{
+                position: "absolute",
+                right: "-4px",
+                top: "50%",
+                transform: "translateY(-50%)",
+              }}
+              className="w-2! h-2!"
+            />
+          </div>
+        )}
+        <button
+          onClick={addCase}
+          className="w-full text-xs border border-dashed border-gray-600 px-2 py-1 rounded bg-gray-800 text-gray-400 hover:text-white hover:border-blue-400 transition-colors"
+        >
+          + Add Case
+        </button>
+      </div>
     </NodeWrapper>
   );
 }

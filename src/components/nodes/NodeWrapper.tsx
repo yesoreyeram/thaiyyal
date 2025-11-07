@@ -81,7 +81,7 @@ export function NodeWrapper(props: NodeWrapperProps) {
           onTitleChange={handleTitleChange}
           onDelete={onDelete}
         />
-        {children}
+        <div className="font-extralight scheme-dark w-50">{children}</div>
       </div>
       {enableResize && <NodeResizeHandle onResize={() => {}} />}
       {showInfo && nodeInfo && (

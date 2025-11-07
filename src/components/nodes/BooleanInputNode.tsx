@@ -9,9 +9,11 @@ type BooleanInputNodeData = {
   label?: string;
 };
 
-export function BooleanInputNode(
-  props: NodePropsWithOptions<BooleanInputNodeData>
-) {
+type Props = NodePropsWithOptions<BooleanInputNodeData>;
+
+const nodeInfo = getNodeInfo("booleanInputNode");
+
+export function BooleanInputNode(props: Props) {
   const { id, data, onShowOptions } = props;
   const { setNodes } = useReactFlow();
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -22,9 +24,6 @@ export function BooleanInputNode(
       )
     );
   };
-
-  const nodeInfo = getNodeInfo("booleanInputNode");
-
   return (
     <NodeWrapper
       id={id}
@@ -42,10 +41,11 @@ export function BooleanInputNode(
           checked={data?.boolean_value ?? false}
           type="checkbox"
           onChange={onChange}
-          className="text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-gray-900 focus:ring-1 focus:ring-blue-400 focus:outline-none"
+          className="text-xs border px-1.5 py-0.5 rounded focus:ring-1 focus:outline-none dark:scheme-dark border-gray-600  bg-gray-900 text-white focus:ring-blue-400 "
           aria-label="Boolean value"
+          style={{ colorScheme: "dark" }}
         />
-        <span className="text-xs text-gray-300">
+        <span className="text-xs text-white font-extralight">
           {data?.boolean_value ? "True" : "False"}
         </span>
       </div>
