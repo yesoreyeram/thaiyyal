@@ -1,0 +1,154 @@
+{
+  "name": "HTTP Status Code Routing",
+  "description": "Route HTTP responses to different handlers based on status code",
+  "nodes": [
+    {
+      "id": "status_code",
+      "type": "number",
+      "data": {
+        "value": 404,
+        "label": "HTTP Status Code"
+      }
+    },
+    {
+      "id": "status_router",
+      "type": "switch",
+      "data": {
+        "label": "Status Code Router",
+        "cases": [
+          {
+            "when": "200 OK",
+            "value": 200,
+            "output_path": "success"
+          },
+          {
+            "when": "201 Created",
+            "value": 201,
+            "output_path": "created"
+          },
+          {
+            "when": "404 Not Found",
+            "value": 404,
+            "output_path": "not_found"
+          },
+          {
+            "when": "500 Server Error",
+            "value": 500,
+            "output_path": "error"
+          }
+        ],
+        "default_path": "unknown"
+      }
+    },
+    {
+      "id": "success_handler",
+      "type": "text_input",
+      "data": {
+        "text": "✅ Success! Processing response...",
+        "label": "Success Handler"
+      }
+    },
+    {
+      "id": "created_handler",
+      "type": "text_input",
+      "data": {
+        "text": "✅ Resource created successfully",
+        "label": "Created Handler"
+      }
+    },
+    {
+      "id": "not_found_handler",
+      "type": "text_input",
+      "data": {
+        "text": "⚠️ Not found - retry with alternate endpoint",
+        "label": "Not Found Handler"
+      }
+    },
+    {
+      "id": "error_handler",
+      "type": "text_input",
+      "data": {
+        "text": "❌ Server error - log and alert ops team",
+        "label": "Error Handler"
+      }
+    },
+    {
+      "id": "unknown_handler",
+      "type": "text_input",
+      "data": {
+        "text": "❓ Unknown status - fallback processing",
+        "label": "Unknown Handler"
+      }
+    },
+    {
+      "id": "display",
+      "type": "visualization",
+      "data": {
+        "mode": "json",
+        "label": "Final Result"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e1",
+      "source": "status_code",
+      "target": "status_router"
+    },
+    {
+      "id": "e2",
+      "source": "status_router",
+      "sourceHandle": "success",
+      "target": "success_handler"
+    },
+    {
+      "id": "e3",
+      "source": "status_router",
+      "sourceHandle": "created",
+      "target": "created_handler"
+    },
+    {
+      "id": "e4",
+      "source": "status_router",
+      "sourceHandle": "not_found",
+      "target": "not_found_handler"
+    },
+    {
+      "id": "e5",
+      "source": "status_router",
+      "sourceHandle": "error",
+      "target": "error_handler"
+    },
+    {
+      "id": "e6",
+      "source": "status_router",
+      "sourceHandle": "unknown",
+      "target": "unknown_handler"
+    },
+    {
+      "id": "e7",
+      "source": "success_handler",
+      "target": "display"
+    },
+    {
+      "id": "e8",
+      "source": "created_handler",
+      "target": "display"
+    },
+    {
+      "id": "e9",
+      "source": "not_found_handler",
+      "target": "display"
+    },
+    {
+      "id": "e10",
+      "source": "error_handler",
+      "target": "display"
+    },
+    {
+      "id": "e11",
+      "source": "unknown_handler",
+      "target": "display"
+    }
+  ]
+}
