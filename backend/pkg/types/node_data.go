@@ -1,5 +1,7 @@
 package types
 
+import "fmt"
+
 // ============================================================================
 // NodeData Interface - Type-safe node data
 // ============================================================================
@@ -523,14 +525,40 @@ func (d FormatData) Validate() error {
 // SwitchData contains data for switch nodes
 type SwitchData struct {
 	CommonData
-	Cases       []SwitchCase `json:"cases,omitempty"`
-	DefaultPath *string      `json:"default_path,omitempty"`
+	Cases []SwitchCase `json:"cases,omitempty"`
 }
 
 func (d SwitchData) Validate() error {
 	if len(d.Cases) == 0 {
 		return ErrMissingRequiredField("cases")
 	}
+	
+	// Must have exactly one default case, and it must be last
+	defaultCount := 0
+	lastIndex := len(d.Cases) - 1
+	
+	for i, c := range d.Cases {
+		if c.IsDefault {
+			defaultCount++
+			if i != lastIndex {
+				return fmt.Errorf("default case must be the last case in the array (found at index %d, but last index is %d)", i, lastIndex)
+			}
+			// Default case doesn't need output_path
+		} else {
+			// Non-default cases must have output_path
+			if c.OutputPath == nil || *c.OutputPath == "" {
+				return fmt.Errorf("case at index %d must have output_path (non-default cases require output_path)", i)
+			}
+		}
+	}
+	
+	if defaultCount == 0 {
+		return fmt.Errorf("switch node must have exactly one default case (found 0)")
+	}
+	if defaultCount > 1 {
+		return fmt.Errorf("switch node must have exactly one default case (found %d)", defaultCount)
+	}
+	
 	return nil
 }
 
