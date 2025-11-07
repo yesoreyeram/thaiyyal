@@ -180,7 +180,13 @@ export function PlaygroundResultsPanel({
                 Response Body
               </h3>
               <pre className="text-xs text-gray-300 bg-gray-950 rounded p-3 overflow-x-auto font-mono">
-                {JSON.stringify(resultData.data, null, 2)}
+                {(() => {
+                  try {
+                    return JSON.stringify(resultData.data, null, 2);
+                  } catch (error) {
+                    return `Error formatting response: ${error instanceof Error ? error.message : "Unknown error"}`;
+                  }
+                })()}
               </pre>
             </div>
           </div>

@@ -74,10 +74,9 @@ export default function PlaygroundPage() {
           request: {
             method,
             url: baseUrl + url,
-            headers: headers.reduce(
-              (acc, h) => ({ ...acc, [h.key]: h.value }),
-              {}
-            ),
+            headers: headers
+              .filter((h) => h.key.trim() !== "")
+              .reduce((acc, h) => ({ ...acc, [h.key]: h.value }), {}),
           },
         },
       };
