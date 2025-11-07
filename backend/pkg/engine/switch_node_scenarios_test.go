@@ -903,7 +903,7 @@ func TestSwitchNode_PreservesValueType(t *testing.T) {
 	}
 }
 
-// Helper functions - use package-level functions to avoid redeclaration
+// Helper functions - using package-level helpers from other test files
 
 func floatPtr(f float64) *float64 {
 	return &f
