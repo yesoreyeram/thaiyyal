@@ -73,7 +73,7 @@ export function NodeTopBar({
 
   return (
     <div>
-      <div className="flex items-center justify-between gap-1 mb-0.5 pb-0.5 border-b border-white/10 bg-black/20 -mx-2 -mt-1 px-1.5 pt-0.5 rounded-t">
+      <div className="drag-handle flex items-center justify-between gap-1 mb-0.5 pb-0.5 border-b border-white/10 bg-black/20 -mx-2 -mt-1 px-1.5 pt-0.5 rounded-t cursor-move">
         {isEditing ? (
           <input
             ref={inputRef}

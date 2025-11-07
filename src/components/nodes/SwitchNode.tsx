@@ -141,7 +141,7 @@ export function SwitchNode({
               onDragOver={(e) => handleDragOver(e, caseIndex)}
               onDragEnd={handleDragEnd}
               onDragLeave={handleDragLeave}
-              className={`noDrag relative flex items-center gap-1 p-1 bg-gray-800 border rounded transition-all ${
+              className={`relative flex items-center gap-1 p-1 bg-gray-800 border rounded transition-all ${
                 isDragging 
                   ? 'opacity-50 border-blue-500' 
                   : isDragOver 
@@ -204,14 +204,14 @@ export function SwitchNode({
         {/* Add case button */}
         <button
           onClick={addCase}
-          className="noDrag w-full text-xs border border-dashed border-gray-600 px-2 py-1 rounded bg-gray-800 text-gray-400 hover:text-white hover:border-blue-400 transition-colors"
+          className="w-full text-xs border border-dashed border-gray-600 px-2 py-1 rounded bg-gray-800 text-gray-400 hover:text-white hover:border-blue-400 transition-colors"
         >
           + Add Case
         </button>
         
         {/* Default case - not draggable, more compact */}
         {defaultCase && (
-          <div className="noDrag relative flex items-center gap-1 p-1 bg-gray-700 border-2 border-yellow-600/50 rounded">
+          <div className="relative flex items-center gap-1 p-1 bg-gray-700 border-2 border-yellow-600/50 rounded">
             {/* Default label - not editable */}
             <div className="flex-1 text-xs text-yellow-400 font-semibold px-1">
               default
