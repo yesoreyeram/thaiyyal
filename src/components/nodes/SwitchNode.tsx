@@ -49,9 +49,16 @@ export function SwitchNode({
     updateCases(updatedCases);
   };
 
-  const updateCase = (caseIndex: number, field: keyof SwitchCase, value: string) => {
+  const updateCaseWhen = (caseIndex: number, value: string) => {
     const updatedCases = [...cases];
-    updatedCases[caseIndex] = { ...updatedCases[caseIndex], [field]: value };
+    // Auto-generate output_path from when expression if not set
+    const outputPath = updatedCases[caseIndex].output_path || 
+                       `case_${caseIndex + 1}`;
+    updatedCases[caseIndex] = { 
+      ...updatedCases[caseIndex], 
+      when: value,
+      output_path: outputPath
+    };
     updateCases(updatedCases);
   };
 
@@ -102,7 +109,7 @@ export function SwitchNode({
   // Calculate handle positions (52px header + 8px padding + accumulated heights)
   const headerHeight = 52;
   const padding = 8;
-  const caseHeight = 45; // approximate height per case row
+  const caseHeight = 28; // Single row height (reduced from 45)
   const buttonHeight = 28;
   let currentY = headerHeight + padding;
 
@@ -124,58 +131,46 @@ export function SwitchNode({
         {cases.map((c, caseIndex) => {
           if (c.is_default) return null; // Skip default, render separately below
           
-          const handleY = currentY + 22; // Center of the case row
+          const handleY = currentY + 14; // Center of the case row (single row now)
           currentY += caseHeight;
           
           return (
             <div
               key={caseIndex}
-              className={`relative flex flex-col gap-1 p-1 bg-gray-800 border border-gray-600 rounded hover:border-blue-400 transition-colors ${
+              className={`relative flex items-center gap-1 p-1 bg-gray-800 border border-gray-600 rounded hover:border-blue-400 transition-colors ${
                 draggedIndex === caseIndex ? "opacity-50" : ""
               }`}
             >
-              <div className="flex items-center gap-1">
-                {/* Drag handle - only draggable part */}
-                <div
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, caseIndex)}
-                  onDragOver={(e) => handleDragOver(e, caseIndex)}
-                  onDragEnd={handleDragEnd}
-                  className="flex-shrink-0 cursor-move text-gray-500 hover:text-gray-300 px-1 text-xs"
-                  title="Drag to reorder"
-                >
-                  ⋮⋮
-                </div>
-                
-                {/* Expression input */}
-                <input
-                  type="text"
-                  value={c.when}
-                  onChange={(e) => updateCase(caseIndex, "when", e.target.value)}
-                  placeholder="e.g., input > 50"
-                  className="flex-1 text-xs border-0 border-b border-gray-600 px-1 py-0.5 bg-transparent text-white focus:border-blue-400 focus:outline-none"
-                  onClick={(e) => e.stopPropagation()}
-                />
-                
-                {/* Delete button */}
-                <button
-                  onClick={() => deleteCase(caseIndex)}
-                  className="flex-shrink-0 text-red-400 hover:text-red-300 text-sm font-bold px-1"
-                  title="Delete case"
-                >
-                  ×
-                </button>
+              {/* Drag handle - only draggable part */}
+              <div
+                draggable
+                onDragStart={(e) => handleDragStart(e, caseIndex)}
+                onDragOver={(e) => handleDragOver(e, caseIndex)}
+                onDragEnd={handleDragEnd}
+                className="flex-shrink-0 cursor-move text-gray-500 hover:text-gray-300 px-1 text-xs"
+                title="Drag to reorder"
+              >
+                ⋮⋮
               </div>
               
-              {/* Output path - second row, smaller */}
+              {/* Expression input */}
               <input
                 type="text"
-                value={c.output_path || ""}
-                onChange={(e) => updateCase(caseIndex, "output_path", e.target.value)}
-                placeholder="output path"
-                className="text-xs border-0 border-b border-gray-600 px-1 py-0.5 ml-5 bg-transparent text-gray-400 focus:border-blue-400 focus:outline-none focus:text-white"
+                value={c.when}
+                onChange={(e) => updateCaseWhen(caseIndex, e.target.value)}
+                placeholder="e.g., input > 50"
+                className="flex-1 text-xs border-0 border-b border-gray-600 px-1 py-0.5 bg-transparent text-white focus:border-blue-400 focus:outline-none"
                 onClick={(e) => e.stopPropagation()}
               />
+              
+              {/* Delete button with trash icon */}
+              <button
+                onClick={() => deleteCase(caseIndex)}
+                className="flex-shrink-0 text-red-400 hover:text-red-300 text-xs px-1"
+                title="Delete case"
+              >
+                🗑️
+              </button>
               
               {/* Dynamic handle for this case - positioned relative to NodeWrapper */}
               <Handle
