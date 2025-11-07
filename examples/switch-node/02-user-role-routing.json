@@ -2,35 +2,130 @@
   "name": "User Role-Based Routing",
   "description": "Route users to appropriate interfaces based on their role",
   "nodes": [
-    {"id": "user_role", "type": "text_input", "data": {"text": "admin", "label": "User Role"}},
+    {
+      "id": "user_role",
+      "type": "text_input",
+      "data": {
+        "text": "admin",
+        "label": "User Role"
+      }
+    },
     {
       "id": "role_router",
       "type": "switch",
       "data": {
         "label": "Role-Based Router",
         "cases": [
-          {"when": "admin", "value": "admin", "output_path": "admin_panel"},
-          {"when": "moderator", "value": "moderator", "output_path": "mod_tools"},
-          {"when": "user", "value": "user", "output_path": "user_dashboard"}
-        ],
-        "default_path": "guest_view"
+          {
+            "when": "input == \"admin\"",
+            "output_path": "admin_panel"
+          },
+          {
+            "when": "input == \"moderator\"",
+            "output_path": "mod_tools"
+          },
+          {
+            "when": "input == \"user\"",
+            "output_path": "user_dashboard"
+          },
+          {
+            "when": "default",
+            "output_path": "guest_view",
+            "is_default": true
+          }
+        ]
       }
     },
-    {"id": "admin_panel", "type": "text_input", "data": {"text": "🔐 Admin Panel: Full system access", "label": "Admin Panel"}},
-    {"id": "mod_tools", "type": "text_input", "data": {"text": "🛡️ Moderator Tools: Content moderation", "label": "Moderator Tools"}},
-    {"id": "user_dashboard", "type": "text_input", "data": {"text": "👤 User Dashboard: Personal profile", "label": "User Dashboard"}},
-    {"id": "guest_view", "type": "text_input", "data": {"text": "👁️ Guest View: Public content only", "label": "Guest View"}},
-    {"id": "display", "type": "visualization", "data": {"mode": "json", "label": "Interface"}}
+    {
+      "id": "admin_panel",
+      "type": "text_input",
+      "data": {
+        "text": "\ud83d\udd10 Admin Panel: Full system access",
+        "label": "Admin Panel"
+      }
+    },
+    {
+      "id": "mod_tools",
+      "type": "text_input",
+      "data": {
+        "text": "\ud83d\udee1\ufe0f Moderator Tools: Content moderation",
+        "label": "Moderator Tools"
+      }
+    },
+    {
+      "id": "user_dashboard",
+      "type": "text_input",
+      "data": {
+        "text": "\ud83d\udc64 User Dashboard: Personal profile",
+        "label": "User Dashboard"
+      }
+    },
+    {
+      "id": "guest_view",
+      "type": "text_input",
+      "data": {
+        "text": "\ud83d\udc41\ufe0f Guest View: Public content only",
+        "label": "Guest View"
+      }
+    },
+    {
+      "id": "display",
+      "type": "visualization",
+      "data": {
+        "mode": "json",
+        "label": "Interface"
+      }
+    }
   ],
   "edges": [
-    {"id": "e1", "source": "user_role", "target": "role_router"},
-    {"id": "e2", "source": "role_router", "sourceHandle": "admin_panel", "target": "admin_panel"},
-    {"id": "e3", "source": "role_router", "sourceHandle": "mod_tools", "target": "mod_tools"},
-    {"id": "e4", "source": "role_router", "sourceHandle": "user_dashboard", "target": "user_dashboard"},
-    {"id": "e5", "source": "role_router", "sourceHandle": "guest_view", "target": "guest_view"},
-    {"id": "e6", "source": "admin_panel", "target": "display"},
-    {"id": "e7", "source": "mod_tools", "target": "display"},
-    {"id": "e8", "source": "user_dashboard", "target": "display"},
-    {"id": "e9", "source": "guest_view", "target": "display"}
+    {
+      "id": "e1",
+      "source": "user_role",
+      "target": "role_router"
+    },
+    {
+      "id": "e2",
+      "source": "role_router",
+      "sourceHandle": "admin_panel",
+      "target": "admin_panel"
+    },
+    {
+      "id": "e3",
+      "source": "role_router",
+      "sourceHandle": "mod_tools",
+      "target": "mod_tools"
+    },
+    {
+      "id": "e4",
+      "source": "role_router",
+      "sourceHandle": "user_dashboard",
+      "target": "user_dashboard"
+    },
+    {
+      "id": "e5",
+      "source": "role_router",
+      "sourceHandle": "guest_view",
+      "target": "guest_view"
+    },
+    {
+      "id": "e6",
+      "source": "admin_panel",
+      "target": "display"
+    },
+    {
+      "id": "e7",
+      "source": "mod_tools",
+      "target": "display"
+    },
+    {
+      "id": "e8",
+      "source": "user_dashboard",
+      "target": "display"
+    },
+    {
+      "id": "e9",
+      "source": "guest_view",
+      "target": "display"
+    }
   ]
 }

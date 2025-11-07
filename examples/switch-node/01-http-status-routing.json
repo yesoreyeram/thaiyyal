@@ -17,34 +17,34 @@
         "label": "Status Code Router",
         "cases": [
           {
-            "when": "200 OK",
-            "value": 200,
+            "when": "input == 200",
             "output_path": "success"
           },
           {
-            "when": "201 Created",
-            "value": 201,
+            "when": "input == 201",
             "output_path": "created"
           },
           {
-            "when": "404 Not Found",
-            "value": 404,
+            "when": "input == 404",
             "output_path": "not_found"
           },
           {
-            "when": "500 Server Error",
-            "value": 500,
+            "when": "input == 500",
             "output_path": "error"
+          },
+          {
+            "when": "default",
+            "output_path": "unknown",
+            "is_default": true
           }
-        ],
-        "default_path": "unknown"
+        ]
       }
     },
     {
       "id": "success_handler",
       "type": "text_input",
       "data": {
-        "text": "✅ Success! Processing response...",
+        "text": "\u2705 Success! Processing response...",
         "label": "Success Handler"
       }
     },
@@ -52,7 +52,7 @@
       "id": "created_handler",
       "type": "text_input",
       "data": {
-        "text": "✅ Resource created successfully",
+        "text": "\u2705 Resource created successfully",
         "label": "Created Handler"
       }
     },
@@ -60,7 +60,7 @@
       "id": "not_found_handler",
       "type": "text_input",
       "data": {
-        "text": "⚠️ Not found - retry with alternate endpoint",
+        "text": "\u26a0\ufe0f Not found - retry with alternate endpoint",
         "label": "Not Found Handler"
       }
     },
@@ -68,7 +68,7 @@
       "id": "error_handler",
       "type": "text_input",
       "data": {
-        "text": "❌ Server error - log and alert ops team",
+        "text": "\u274c Server error - log and alert ops team",
         "label": "Error Handler"
       }
     },
@@ -76,7 +76,7 @@
       "id": "unknown_handler",
       "type": "text_input",
       "data": {
-        "text": "❓ Unknown status - fallback processing",
+        "text": "\u2753 Unknown status - fallback processing",
         "label": "Unknown Handler"
       }
     },

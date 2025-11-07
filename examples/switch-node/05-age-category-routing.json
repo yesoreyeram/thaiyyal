@@ -2,35 +2,130 @@
   "name": "Age Category Routing",
   "description": "Categorize and route based on age groups using range conditions",
   "nodes": [
-    {"id": "age_input", "type": "number", "data": {"value": 35, "label": "User Age"}},
+    {
+      "id": "age_input",
+      "type": "number",
+      "data": {
+        "value": 35,
+        "label": "User Age"
+      }
+    },
     {
       "id": "age_router",
       "type": "switch",
       "data": {
         "label": "Age Category Router",
         "cases": [
-          {"when": "<18", "output_path": "minor"},
-          {"when": "<65", "output_path": "adult"},
-          {"when": ">=65", "output_path": "senior"}
-        ],
-        "default_path": "invalid"
+          {
+            "when": "input <18",
+            "output_path": "minor"
+          },
+          {
+            "when": "input <65",
+            "output_path": "adult"
+          },
+          {
+            "when": "input >=65",
+            "output_path": "senior"
+          },
+          {
+            "when": "default",
+            "output_path": "invalid",
+            "is_default": true
+          }
+        ]
       }
     },
-    {"id": "minor_handler", "type": "text_input", "data": {"text": "👶 MINOR: Age < 18 - Educational content", "label": "Minor Handler"}},
-    {"id": "adult_handler", "type": "text_input", "data": {"text": "👨 ADULT: Age 18-64 - Full access", "label": "Adult Handler"}},
-    {"id": "senior_handler", "type": "text_input", "data": {"text": "👴 SENIOR: Age 65+ - Senior discount", "label": "Senior Handler"}},
-    {"id": "invalid_handler", "type": "text_input", "data": {"text": "⚠️ INVALID: Age validation failed", "label": "Invalid Age"}},
-    {"id": "display", "type": "visualization", "data": {"mode": "json", "label": "Category Result"}}
+    {
+      "id": "minor_handler",
+      "type": "text_input",
+      "data": {
+        "text": "\ud83d\udc76 MINOR: Age < 18 - Educational content",
+        "label": "Minor Handler"
+      }
+    },
+    {
+      "id": "adult_handler",
+      "type": "text_input",
+      "data": {
+        "text": "\ud83d\udc68 ADULT: Age 18-64 - Full access",
+        "label": "Adult Handler"
+      }
+    },
+    {
+      "id": "senior_handler",
+      "type": "text_input",
+      "data": {
+        "text": "\ud83d\udc74 SENIOR: Age 65+ - Senior discount",
+        "label": "Senior Handler"
+      }
+    },
+    {
+      "id": "invalid_handler",
+      "type": "text_input",
+      "data": {
+        "text": "\u26a0\ufe0f INVALID: Age validation failed",
+        "label": "Invalid Age"
+      }
+    },
+    {
+      "id": "display",
+      "type": "visualization",
+      "data": {
+        "mode": "json",
+        "label": "Category Result"
+      }
+    }
   ],
   "edges": [
-    {"id": "e1", "source": "age_input", "target": "age_router"},
-    {"id": "e2", "source": "age_router", "sourceHandle": "minor", "target": "minor_handler"},
-    {"id": "e3", "source": "age_router", "sourceHandle": "adult", "target": "adult_handler"},
-    {"id": "e4", "source": "age_router", "sourceHandle": "senior", "target": "senior_handler"},
-    {"id": "e5", "source": "age_router", "sourceHandle": "invalid", "target": "invalid_handler"},
-    {"id": "e6", "source": "minor_handler", "target": "display"},
-    {"id": "e7", "source": "adult_handler", "target": "display"},
-    {"id": "e8", "source": "senior_handler", "target": "display"},
-    {"id": "e9", "source": "invalid_handler", "target": "display"}
+    {
+      "id": "e1",
+      "source": "age_input",
+      "target": "age_router"
+    },
+    {
+      "id": "e2",
+      "source": "age_router",
+      "sourceHandle": "minor",
+      "target": "minor_handler"
+    },
+    {
+      "id": "e3",
+      "source": "age_router",
+      "sourceHandle": "adult",
+      "target": "adult_handler"
+    },
+    {
+      "id": "e4",
+      "source": "age_router",
+      "sourceHandle": "senior",
+      "target": "senior_handler"
+    },
+    {
+      "id": "e5",
+      "source": "age_router",
+      "sourceHandle": "invalid",
+      "target": "invalid_handler"
+    },
+    {
+      "id": "e6",
+      "source": "minor_handler",
+      "target": "display"
+    },
+    {
+      "id": "e7",
+      "source": "adult_handler",
+      "target": "display"
+    },
+    {
+      "id": "e8",
+      "source": "senior_handler",
+      "target": "display"
+    },
+    {
+      "id": "e9",
+      "source": "invalid_handler",
+      "target": "display"
+    }
   ]
 }

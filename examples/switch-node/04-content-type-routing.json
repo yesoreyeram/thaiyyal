@@ -2,39 +2,153 @@
   "name": "Content-Type Routing",
   "description": "Route data to appropriate parser based on content type",
   "nodes": [
-    {"id": "content_type", "type": "text_input", "data": {"text": "application/json", "label": "Content-Type Header"}},
+    {
+      "id": "content_type",
+      "type": "text_input",
+      "data": {
+        "text": "application/json",
+        "label": "Content-Type Header"
+      }
+    },
     {
       "id": "type_router",
       "type": "switch",
       "data": {
         "label": "Content-Type Router",
         "cases": [
-          {"when": "JSON", "value": "application/json", "output_path": "json_parser"},
-          {"when": "XML", "value": "application/xml", "output_path": "xml_parser"},
-          {"when": "CSV", "value": "text/csv", "output_path": "csv_parser"},
-          {"when": "Plain Text", "value": "text/plain", "output_path": "text_parser"}
-        ],
-        "default_path": "raw_handler"
+          {
+            "when": "input == \"application/json\"",
+            "output_path": "json_parser"
+          },
+          {
+            "when": "input == \"application/xml\"",
+            "output_path": "xml_parser"
+          },
+          {
+            "when": "input == \"text/csv\"",
+            "output_path": "csv_parser"
+          },
+          {
+            "when": "input == \"text/plain\"",
+            "output_path": "text_parser"
+          },
+          {
+            "when": "default",
+            "output_path": "raw_handler",
+            "is_default": true
+          }
+        ]
       }
     },
-    {"id": "json_parser", "type": "text_input", "data": {"text": "📄 JSON Parser: Parse as JSON object", "label": "JSON Parser"}},
-    {"id": "xml_parser", "type": "text_input", "data": {"text": "📋 XML Parser: Parse as XML document", "label": "XML Parser"}},
-    {"id": "csv_parser", "type": "text_input", "data": {"text": "📊 CSV Parser: Parse as CSV with headers", "label": "CSV Parser"}},
-    {"id": "text_parser", "type": "text_input", "data": {"text": "📝 Text Parser: Process as plain text", "label": "Text Parser"}},
-    {"id": "raw_handler", "type": "text_input", "data": {"text": "🔧 Raw Handler: Store as binary/unknown", "label": "Raw Handler"}},
-    {"id": "display", "type": "visualization", "data": {"mode": "json", "label": "Parser Selection"}}
+    {
+      "id": "json_parser",
+      "type": "text_input",
+      "data": {
+        "text": "\ud83d\udcc4 JSON Parser: Parse as JSON object",
+        "label": "JSON Parser"
+      }
+    },
+    {
+      "id": "xml_parser",
+      "type": "text_input",
+      "data": {
+        "text": "\ud83d\udccb XML Parser: Parse as XML document",
+        "label": "XML Parser"
+      }
+    },
+    {
+      "id": "csv_parser",
+      "type": "text_input",
+      "data": {
+        "text": "\ud83d\udcca CSV Parser: Parse as CSV with headers",
+        "label": "CSV Parser"
+      }
+    },
+    {
+      "id": "text_parser",
+      "type": "text_input",
+      "data": {
+        "text": "\ud83d\udcdd Text Parser: Process as plain text",
+        "label": "Text Parser"
+      }
+    },
+    {
+      "id": "raw_handler",
+      "type": "text_input",
+      "data": {
+        "text": "\ud83d\udd27 Raw Handler: Store as binary/unknown",
+        "label": "Raw Handler"
+      }
+    },
+    {
+      "id": "display",
+      "type": "visualization",
+      "data": {
+        "mode": "json",
+        "label": "Parser Selection"
+      }
+    }
   ],
   "edges": [
-    {"id": "e1", "source": "content_type", "target": "type_router"},
-    {"id": "e2", "source": "type_router", "sourceHandle": "json_parser", "target": "json_parser"},
-    {"id": "e3", "source": "type_router", "sourceHandle": "xml_parser", "target": "xml_parser"},
-    {"id": "e4", "source": "type_router", "sourceHandle": "csv_parser", "target": "csv_parser"},
-    {"id": "e5", "source": "type_router", "sourceHandle": "text_parser", "target": "text_parser"},
-    {"id": "e6", "source": "type_router", "sourceHandle": "raw_handler", "target": "raw_handler"},
-    {"id": "e7", "source": "json_parser", "target": "display"},
-    {"id": "e8", "source": "xml_parser", "target": "display"},
-    {"id": "e9", "source": "csv_parser", "target": "display"},
-    {"id": "e10", "source": "text_parser", "target": "display"},
-    {"id": "e11", "source": "raw_handler", "target": "display"}
+    {
+      "id": "e1",
+      "source": "content_type",
+      "target": "type_router"
+    },
+    {
+      "id": "e2",
+      "source": "type_router",
+      "sourceHandle": "json_parser",
+      "target": "json_parser"
+    },
+    {
+      "id": "e3",
+      "source": "type_router",
+      "sourceHandle": "xml_parser",
+      "target": "xml_parser"
+    },
+    {
+      "id": "e4",
+      "source": "type_router",
+      "sourceHandle": "csv_parser",
+      "target": "csv_parser"
+    },
+    {
+      "id": "e5",
+      "source": "type_router",
+      "sourceHandle": "text_parser",
+      "target": "text_parser"
+    },
+    {
+      "id": "e6",
+      "source": "type_router",
+      "sourceHandle": "raw_handler",
+      "target": "raw_handler"
+    },
+    {
+      "id": "e7",
+      "source": "json_parser",
+      "target": "display"
+    },
+    {
+      "id": "e8",
+      "source": "xml_parser",
+      "target": "display"
+    },
+    {
+      "id": "e9",
+      "source": "csv_parser",
+      "target": "display"
+    },
+    {
+      "id": "e10",
+      "source": "text_parser",
+      "target": "display"
+    },
+    {
+      "id": "e11",
+      "source": "raw_handler",
+      "target": "display"
+    }
   ]
 }
