@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useCallback } from "react";
 import { Handle, Position, useReactFlow } from "reactflow";
 import { NodePropsWithOptions } from "./nodeTypes";
 import { NodeWrapper } from "./NodeWrapper";
@@ -21,7 +21,6 @@ export function SwitchNode({
   onShowOptions,
 }: NodePropsWithOptions<SwitchNodeData>) {
   const { setNodes } = useReactFlow();
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   const cases = data?.cases || [];
   const nonDefaultCases = cases.filter((c) => !c.is_default);
@@ -67,41 +66,22 @@ export function SwitchNode({
     updateCases(updatedCases);
   };
 
-  const handleDragStart = (e: React.DragEvent, caseIndex: number) => {
-    e.stopPropagation();
-    setDraggedIndex(caseIndex);
-  };
-
-  const handleDragOver = (e: React.DragEvent, caseIndex: number) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (draggedIndex === null || draggedIndex === caseIndex) return;
-    
-    // Don't allow dragging over default case
-    if (cases[caseIndex]?.is_default) return;
-
+  const moveCaseUp = (caseIndex: number) => {
+    if (caseIndex === 0 || cases[caseIndex].is_default) return;
     const updatedCases = [...cases];
-    const draggedCase = updatedCases[draggedIndex];
-    
-    // Remove dragged item
-    updatedCases.splice(draggedIndex, 1);
-    // Insert at new position
-    updatedCases.splice(caseIndex, 0, draggedCase);
-    
-    // Ensure default stays last
-    const defaultIdx = updatedCases.findIndex((c) => c.is_default);
-    if (defaultIdx !== -1 && defaultIdx !== updatedCases.length - 1) {
-      const def = updatedCases.splice(defaultIdx, 1)[0];
-      updatedCases.push(def);
-    }
-    
+    [updatedCases[caseIndex - 1], updatedCases[caseIndex]] = 
+      [updatedCases[caseIndex], updatedCases[caseIndex - 1]];
     updateCases(updatedCases);
-    setDraggedIndex(caseIndex);
   };
 
-  const handleDragEnd = (e: React.DragEvent) => {
-    e.stopPropagation();
-    setDraggedIndex(null);
+  const moveCaseDown = (caseIndex: number) => {
+    if (caseIndex >= cases.length - 1 || cases[caseIndex].is_default) return;
+    // Don't move past default case
+    if (cases[caseIndex + 1]?.is_default) return;
+    const updatedCases = [...cases];
+    [updatedCases[caseIndex], updatedCases[caseIndex + 1]] = 
+      [updatedCases[caseIndex + 1], updatedCases[caseIndex]];
+    updateCases(updatedCases);
   };
 
   const nodeInfo = getNodeInfo("switchNode");
@@ -124,23 +104,42 @@ export function SwitchNode({
         {cases.map((c, caseIndex) => {
           if (c.is_default) return null; // Skip default, render separately below
           
+          const isFirst = caseIndex === 0;
+          const isLast = caseIndex === cases.length - 2; // -2 because last is default
+          
           return (
             <div
               key={caseIndex}
-              draggable
-              onDragStart={(e) => handleDragStart(e, caseIndex)}
-              onDragOver={(e) => handleDragOver(e, caseIndex)}
-              onDragEnd={handleDragEnd}
-              className={`noDrag relative flex items-center gap-1 p-1 bg-gray-800 border border-gray-600 rounded hover:border-blue-400 transition-colors ${
-                draggedIndex === caseIndex ? "opacity-50" : ""
-              }`}
+              className="noDrag relative flex items-center gap-1 p-1 bg-gray-800 border border-gray-600 rounded hover:border-blue-400 transition-colors"
             >
-              {/* Drag handle indicator */}
-              <div
-                className="flex-shrink-0 cursor-move text-gray-500 hover:text-gray-300 px-1 text-xs"
-                title="Drag to reorder"
-              >
-                ⋮⋮
+              {/* Reorder buttons */}
+              <div className="flex flex-col flex-shrink-0">
+                <button
+                  onClick={() => moveCaseUp(caseIndex)}
+                  disabled={isFirst}
+                  className={`text-xs leading-none ${
+                    isFirst
+                      ? "text-gray-700 cursor-not-allowed"
+                      : "text-gray-400 hover:text-white cursor-pointer"
+                  }`}
+                  title="Move up"
+                  aria-label="Move case up"
+                >
+                  ▲
+                </button>
+                <button
+                  onClick={() => moveCaseDown(caseIndex)}
+                  disabled={isLast}
+                  className={`text-xs leading-none ${
+                    isLast
+                      ? "text-gray-700 cursor-not-allowed"
+                      : "text-gray-400 hover:text-white cursor-pointer"
+                  }`}
+                  title="Move down"
+                  aria-label="Move case down"
+                >
+                  ▼
+                </button>
               </div>
               
               {/* Expression input */}
