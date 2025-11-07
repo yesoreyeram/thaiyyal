@@ -6,7 +6,7 @@ import { HTTPRequestBuilder } from "../../components/playground/HTTPRequestBuild
 import { PlaygroundResultsPanel } from "../../components/playground/PlaygroundResultsPanel";
 
 export default function PlaygroundPage() {
-  const [isResultsPanelOpen, setIsResultsPanelOpen] = useState(false);
+  const [requestTitle, setRequestTitle] = useState("New Request");
   const [isExecuting, setIsExecuting] = useState(false);
   const [result, setResult] = useState<unknown>(null);
   const [error, setError] = useState<string | null>(null);
@@ -53,7 +53,6 @@ export default function PlaygroundPage() {
   };
 
   const handleRun = async () => {
-    setIsResultsPanelOpen(true);
     setIsExecuting(true);
     setResult(null);
     setError(null);
@@ -67,6 +66,7 @@ export default function PlaygroundPage() {
         headers: {
           "content-type": "application/json",
           "content-length": "123",
+          "x-request-id": "mock-id-" + Date.now(),
         },
         data: {
           message: "Mock response data",
@@ -86,10 +86,88 @@ export default function PlaygroundPage() {
     }, 1500);
   };
 
-  const handleCloseResultsPanel = () => {
-    setIsResultsPanelOpen(false);
-    setResult(null);
-    setError(null);
+  const handleSave = () => {
+    // TODO: Implement save functionality
+    console.log("Save request");
+  };
+
+  const handleExport = () => {
+    const exportData = {
+      title: requestTitle,
+      baseUrl,
+      authMethod,
+      authUsername,
+      authPassword,
+      bearerToken,
+      timeout: timeoutSeconds,
+      method,
+      url,
+      body,
+      headers,
+      queryParams,
+      paginationEnabled,
+      pageSize,
+      pageParam,
+      parseResponse,
+      jsonPath,
+    };
+
+    const jsonString = JSON.stringify(exportData, null, 2);
+    const blob = new Blob([jsonString], { type: "application/json" });
+    const urlObj = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = urlObj;
+    link.download = `${requestTitle.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_request.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(urlObj);
+  };
+
+  const handleImport = (data: unknown) => {
+    try {
+      const importedData = data as {
+        title?: string;
+        baseUrl?: string;
+        authMethod?: "none" | "basic" | "bearer";
+        authUsername?: string;
+        authPassword?: string;
+        bearerToken?: string;
+        timeout?: string;
+        method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+        url?: string;
+        body?: string;
+        headers?: Array<{ key: string; value: string }>;
+        queryParams?: Array<{ key: string; value: string }>;
+        paginationEnabled?: boolean;
+        pageSize?: string;
+        pageParam?: string;
+        parseResponse?: boolean;
+        jsonPath?: string;
+      };
+
+      if (importedData.title) setRequestTitle(importedData.title);
+      if (importedData.baseUrl) setBaseUrl(importedData.baseUrl);
+      if (importedData.authMethod) setAuthMethod(importedData.authMethod);
+      if (importedData.authUsername) setAuthUsername(importedData.authUsername);
+      if (importedData.authPassword) setAuthPassword(importedData.authPassword);
+      if (importedData.bearerToken) setBearerToken(importedData.bearerToken);
+      if (importedData.timeout) setTimeoutSeconds(importedData.timeout);
+      if (importedData.method) setMethod(importedData.method);
+      if (importedData.url) setUrl(importedData.url);
+      if (importedData.body) setBody(importedData.body);
+      if (importedData.headers) setHeaders(importedData.headers);
+      if (importedData.queryParams) setQueryParams(importedData.queryParams);
+      if (importedData.paginationEnabled !== undefined)
+        setPaginationEnabled(importedData.paginationEnabled);
+      if (importedData.pageSize) setPageSize(importedData.pageSize);
+      if (importedData.pageParam) setPageParam(importedData.pageParam);
+      if (importedData.parseResponse !== undefined)
+        setParseResponse(importedData.parseResponse);
+      if (importedData.jsonPath) setJsonPath(importedData.jsonPath);
+    } catch {
+      alert("Failed to import request configuration");
+    }
   };
 
   return (
@@ -98,10 +176,18 @@ export default function PlaygroundPage() {
         onNewWorkflow={handleNewWorkflow}
         onOpenWorkflow={handleOpenWorkflow}
       />
-      <PlaygroundNavBar onRun={handleRun} isRunning={isExecuting} />
+      <PlaygroundNavBar
+        requestTitle={requestTitle}
+        onTitleChange={setRequestTitle}
+        onRun={handleRun}
+        isRunning={isExecuting}
+        onSave={handleSave}
+        onExport={handleExport}
+        onImport={handleImport}
+      />
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 overflow-hidden">
           <HTTPRequestBuilder
             baseUrl={baseUrl}
             onBaseUrlChange={setBaseUrl}
@@ -135,15 +221,15 @@ export default function PlaygroundPage() {
             onParseResponseChange={setParseResponse}
             jsonPath={jsonPath}
             onJsonPathChange={setJsonPath}
+            onRun={handleRun}
           />
         </div>
 
+        {/* Results panel always visible */}
         <PlaygroundResultsPanel
-          isOpen={isResultsPanelOpen}
           isLoading={isExecuting}
           result={result}
           error={error}
-          onClose={handleCloseResultsPanel}
           height={resultsPanelHeight}
           onHeightChange={setResultsPanelHeight}
         />
