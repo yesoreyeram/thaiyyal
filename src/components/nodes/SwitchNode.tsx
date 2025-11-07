@@ -51,7 +51,7 @@ export function SwitchNode({
 
   const updateCaseWhen = (caseIndex: number, value: string) => {
     const updatedCases = [...cases];
-    // Auto-generate output_path from when expression if not set
+    // Auto-generate output_path using case index if not set
     const outputPath = updatedCases[caseIndex].output_path || 
                        `case_${caseIndex + 1}`;
     updatedCases[caseIndex] = { 
@@ -168,6 +168,7 @@ export function SwitchNode({
                 onClick={() => deleteCase(caseIndex)}
                 className="flex-shrink-0 text-red-400 hover:text-red-300 text-xs px-1"
                 title="Delete case"
+                aria-label="Delete case"
               >
                 🗑️
               </button>
