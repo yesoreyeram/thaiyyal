@@ -131,7 +131,7 @@ export function SwitchNode({
               onDragStart={(e) => handleDragStart(e, caseIndex)}
               onDragOver={(e) => handleDragOver(e, caseIndex)}
               onDragEnd={handleDragEnd}
-              className={`relative flex items-center gap-1 p-1 bg-gray-800 border border-gray-600 rounded hover:border-blue-400 transition-colors ${
+              className={`noDrag relative flex items-center gap-1 p-1 bg-gray-800 border border-gray-600 rounded hover:border-blue-400 transition-colors ${
                 draggedIndex === caseIndex ? "opacity-50" : ""
               }`}
             >
@@ -148,8 +148,7 @@ export function SwitchNode({
                 type="text"
                 value={c.when}
                 onChange={(e) => updateCaseWhen(caseIndex, e.target.value)}
-                onMouseDown={(e) => e.stopPropagation()}
-                onDragStart={(e) => e.stopPropagation()}
+                draggable={false}
                 placeholder="e.g., input > 50"
                 className="flex-1 text-xs border-0 border-b border-gray-600 px-1 py-0.5 bg-transparent text-white focus:border-blue-400 focus:outline-none"
               />
@@ -160,7 +159,6 @@ export function SwitchNode({
                   e.stopPropagation();
                   deleteCase(caseIndex);
                 }}
-                onMouseDown={(e) => e.stopPropagation()}
                 className="flex-shrink-0 text-red-400 hover:text-red-300 text-xs px-1"
                 title="Delete case"
                 aria-label="Delete case"
@@ -188,14 +186,14 @@ export function SwitchNode({
         {/* Add case button */}
         <button
           onClick={addCase}
-          className="w-full text-xs border border-dashed border-gray-600 px-2 py-1 rounded bg-gray-800 text-gray-400 hover:text-white hover:border-blue-400 transition-colors"
+          className="noDrag w-full text-xs border border-dashed border-gray-600 px-2 py-1 rounded bg-gray-800 text-gray-400 hover:text-white hover:border-blue-400 transition-colors"
         >
           + Add Case
         </button>
         
         {/* Default case - not draggable, more compact */}
         {defaultCase && (
-          <div className="relative flex items-center gap-1 p-1 bg-gray-700 border-2 border-yellow-600/50 rounded">
+          <div className="noDrag relative flex items-center gap-1 p-1 bg-gray-700 border-2 border-yellow-600/50 rounded">
             {/* Default label - not editable */}
             <div className="flex-1 text-xs text-yellow-400 font-semibold px-1">
               default
