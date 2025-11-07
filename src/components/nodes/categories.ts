@@ -136,7 +136,11 @@ export const nodeCategories = [
         type: "switch",
         label: "Switch",
         color: "bg-pink-600",
-        defaultData: { cases: [], default_path: "default" },
+        defaultData: { 
+          cases: [
+            { when: "default", output_path: "default", is_default: true }
+          ]
+        },
       },
     ],
   },

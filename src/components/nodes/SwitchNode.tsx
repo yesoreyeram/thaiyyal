@@ -60,12 +60,14 @@ export function SwitchNode({
     updateCases(updatedCases);
   };
 
-  const handleDragStart = (index: number) => {
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    e.stopPropagation();
     setDraggedIndex(index);
   };
 
   const handleDragOver = (e: React.DragEvent, index: number) => {
     e.preventDefault();
+    e.stopPropagation();
     if (draggedIndex === null || draggedIndex === index) return;
     
     // Don't allow dragging over default case
@@ -90,7 +92,8 @@ export function SwitchNode({
     setDraggedIndex(index);
   };
 
-  const handleDragEnd = () => {
+  const handleDragEnd = (e: React.DragEvent) => {
+    e.stopPropagation();
     setDraggedIndex(null);
   };
 
@@ -109,51 +112,41 @@ export function SwitchNode({
         className="w-2 h-2 bg-blue-400"
       />
       
-      <div className="w-80 max-h-96 overflow-y-auto space-y-2 p-2">
+      <div className="w-80 max-h-96 overflow-y-auto space-y-1 p-2">
         {/* Non-default cases */}
         {nonDefaultCases.map((c, i) => (
           <div
             key={i}
-            draggable
-            onDragStart={() => handleDragStart(i)}
-            onDragOver={(e) => handleDragOver(e, i)}
-            onDragEnd={handleDragEnd}
-            className={`relative border rounded-lg p-2 bg-gray-800 border-gray-600 hover:border-blue-400 transition-colors cursor-move ${
+            className={`relative flex items-center gap-1 p-1 bg-gray-800 border border-gray-600 rounded hover:border-blue-400 transition-colors ${
               draggedIndex === i ? "opacity-50" : ""
             }`}
           >
-            {/* Drag handle icon */}
-            <div className="absolute left-1 top-1 text-gray-500 text-xs">
+            {/* Drag handle - only draggable part */}
+            <div
+              draggable
+              onDragStart={(e) => handleDragStart(e, i)}
+              onDragOver={(e) => handleDragOver(e, i)}
+              onDragEnd={handleDragEnd}
+              className="flex-shrink-0 cursor-move text-gray-500 hover:text-gray-300 px-1 text-xs"
+              title="Drag to reorder"
+            >
               ⋮⋮
             </div>
             
-            {/* Case number */}
-            <div className="text-xs text-gray-400 mb-1 ml-4">
-              Case {i + 1}
-            </div>
-            
-            {/* When expression */}
+            {/* Expression input */}
             <input
               type="text"
               value={c.when}
               onChange={(e) => updateCase(i, "when", e.target.value)}
               placeholder="e.g., input > 50"
-              className="w-full text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none mb-1"
-            />
-            
-            {/* Output path */}
-            <input
-              type="text"
-              value={c.output_path || ""}
-              onChange={(e) => updateCase(i, "output_path", e.target.value)}
-              placeholder="Output path"
-              className="w-full text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
+              className="flex-1 text-xs border-0 border-b border-gray-600 px-1 py-0.5 bg-transparent text-white focus:border-blue-400 focus:outline-none"
+              onClick={(e) => e.stopPropagation()}
             />
             
             {/* Delete button */}
             <button
               onClick={() => deleteCase(i)}
-              className="absolute top-1 right-1 text-red-400 hover:text-red-300 text-sm font-bold"
+              className="flex-shrink-0 text-red-400 hover:text-red-300 text-sm font-bold px-1"
               title="Delete case"
             >
               ×
@@ -164,8 +157,7 @@ export function SwitchNode({
               type="source"
               id={c.output_path || `case_${i}`}
               position={Position.Right}
-              style={{ top: `${30 + i * 80}px` }}
-              className="w-2 h-2 bg-blue-500"
+              className="!absolute !right-0 !top-1/2 !-translate-y-1/2 w-2 h-2 bg-blue-500"
             />
           </div>
         ))}
@@ -173,49 +165,26 @@ export function SwitchNode({
         {/* Add case button */}
         <button
           onClick={addCase}
-          className="w-full text-xs border border-dashed border-gray-600 px-2 py-2 rounded bg-gray-800 text-gray-400 hover:text-white hover:border-blue-400 transition-colors"
+          className="w-full text-xs border border-dashed border-gray-600 px-2 py-1 rounded bg-gray-800 text-gray-400 hover:text-white hover:border-blue-400 transition-colors"
         >
           + Add Case
         </button>
         
-        {/* Default case - not draggable */}
+        {/* Default case - not draggable, more compact */}
         {defaultCase && (
-          <div className="relative border-2 rounded-lg p-2 bg-gray-700 border-gray-500">
-            <div className="text-xs text-yellow-400 mb-1 font-semibold">
-              🔒 Default Case (always last)
+          <div className="relative flex items-center gap-1 p-1 bg-gray-700 border-2 border-yellow-600/50 rounded">
+            {/* Default label - not editable */}
+            <div className="flex-shrink-0 text-xs text-yellow-400 font-semibold px-1">
+              default
             </div>
-            
-            {/* When label (not editable) */}
-            <div className="text-xs px-2 py-1 rounded bg-gray-800 text-gray-400 mb-1">
-              {defaultCase.when || "default"}
-            </div>
-            
-            {/* Output path */}
-            <input
-              type="text"
-              value={defaultCase.output_path || ""}
-              onChange={(e) =>
-                updateCase(cases.length - 1, "output_path", e.target.value)
-              }
-              placeholder="Default output path"
-              className="w-full text-xs border border-gray-600 px-2 py-1 rounded bg-gray-900 text-white focus:ring-1 focus:ring-yellow-400 focus:outline-none"
-            />
             
             {/* Default handle */}
             <Handle
               type="source"
               id={defaultCase.output_path || "default"}
               position={Position.Right}
-              style={{ bottom: "10px" }}
-              className="w-2 h-2 bg-yellow-500"
+              className="!absolute !right-0 !top-1/2 !-translate-y-1/2 w-2 h-2 bg-yellow-500"
             />
-          </div>
-        )}
-        
-        {/* Show message if no default case */}
-        {!defaultCase && (
-          <div className="text-xs text-red-400 p-2 border border-red-400 rounded bg-red-900/20">
-            ⚠️ Warning: Default case required
           </div>
         )}
       </div>
