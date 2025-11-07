@@ -571,6 +571,7 @@ function Canvas() {
             onDragOver={onDragOver}
             onDrop={onDrop}
             nodeTypes={nodeTypes}
+            nodesDraggable={false}
             fitView
             className="bg-gray-950"
           />
