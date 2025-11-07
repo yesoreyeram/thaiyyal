@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { Handle, Position, useReactFlow } from "reactflow";
 import { NodePropsWithOptions } from "./nodeTypes";
 import { NodeWrapper } from "./NodeWrapper";
@@ -21,6 +21,8 @@ export function SwitchNode({
   onShowOptions,
 }: NodePropsWithOptions<SwitchNodeData>) {
   const { setNodes } = useReactFlow();
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
 
   const cases = data?.cases || [];
   const nonDefaultCases = cases.filter((c) => !c.is_default);
@@ -66,22 +68,46 @@ export function SwitchNode({
     updateCases(updatedCases);
   };
 
-  const moveCaseUp = (caseIndex: number) => {
-    if (caseIndex === 0 || cases[caseIndex].is_default) return;
-    const updatedCases = [...cases];
-    [updatedCases[caseIndex - 1], updatedCases[caseIndex]] = 
-      [updatedCases[caseIndex], updatedCases[caseIndex - 1]];
-    updateCases(updatedCases);
+  // Drag-and-drop handlers
+  const handleDragStart = (e: React.DragEvent, caseIndex: number) => {
+    if (cases[caseIndex].is_default) return; // Don't allow dragging default case
+    setDraggedIndex(caseIndex);
+    e.dataTransfer.effectAllowed = "move";
+    // Prevent ReactFlow from handling this drag
+    e.stopPropagation();
   };
 
-  const moveCaseDown = (caseIndex: number) => {
-    if (caseIndex >= cases.length - 1 || cases[caseIndex].is_default) return;
-    // Don't move past default case
-    if (cases[caseIndex + 1]?.is_default) return;
+  const handleDragOver = (e: React.DragEvent, caseIndex: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (draggedIndex === null || draggedIndex === caseIndex) return;
+    if (cases[caseIndex].is_default) return; // Don't allow dropping on default case
+    
+    setDragOverIndex(caseIndex);
+  };
+
+  const handleDragEnd = (e: React.DragEvent) => {
+    e.stopPropagation();
+    
+    if (draggedIndex === null || dragOverIndex === null || draggedIndex === dragOverIndex) {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    // Reorder cases
     const updatedCases = [...cases];
-    [updatedCases[caseIndex], updatedCases[caseIndex + 1]] = 
-      [updatedCases[caseIndex + 1], updatedCases[caseIndex]];
+    const [draggedCase] = updatedCases.splice(draggedIndex, 1);
+    updatedCases.splice(dragOverIndex, 0, draggedCase);
+    
     updateCases(updatedCases);
+    setDraggedIndex(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragLeave = () => {
+    setDragOverIndex(null);
   };
 
   const nodeInfo = getNodeInfo("switchNode");
@@ -104,42 +130,32 @@ export function SwitchNode({
         {cases.map((c, caseIndex) => {
           if (c.is_default) return null; // Skip default, render separately below
           
-          const isFirst = caseIndex === 0;
-          const isLast = caseIndex === cases.length - 2; // -2 because last is default
+          const isDragging = draggedIndex === caseIndex;
+          const isDragOver = dragOverIndex === caseIndex;
           
           return (
             <div
               key={caseIndex}
-              className="noDrag relative flex items-center gap-1 p-1 bg-gray-800 border border-gray-600 rounded hover:border-blue-400 transition-colors"
+              draggable={!c.is_default}
+              onDragStart={(e) => handleDragStart(e, caseIndex)}
+              onDragOver={(e) => handleDragOver(e, caseIndex)}
+              onDragEnd={handleDragEnd}
+              onDragLeave={handleDragLeave}
+              className={`noDrag relative flex items-center gap-1 p-1 bg-gray-800 border rounded transition-all ${
+                isDragging 
+                  ? 'opacity-50 border-blue-500' 
+                  : isDragOver 
+                  ? 'border-blue-400 border-2' 
+                  : 'border-gray-600 hover:border-blue-400'
+              }`}
+              style={{ cursor: c.is_default ? 'default' : 'grab' }}
             >
-              {/* Reorder buttons */}
-              <div className="flex flex-col flex-shrink-0">
-                <button
-                  onClick={() => moveCaseUp(caseIndex)}
-                  disabled={isFirst}
-                  className={`text-xs leading-none ${
-                    isFirst
-                      ? "text-gray-700 cursor-not-allowed"
-                      : "text-gray-400 hover:text-white cursor-pointer"
-                  }`}
-                  title="Move up"
-                  aria-label="Move case up"
-                >
-                  ▲
-                </button>
-                <button
-                  onClick={() => moveCaseDown(caseIndex)}
-                  disabled={isLast}
-                  className={`text-xs leading-none ${
-                    isLast
-                      ? "text-gray-700 cursor-not-allowed"
-                      : "text-gray-400 hover:text-white cursor-pointer"
-                  }`}
-                  title="Move down"
-                  aria-label="Move case down"
-                >
-                  ▼
-                </button>
+              {/* Drag handle icon */}
+              <div 
+                className="flex-shrink-0 text-gray-500 text-xs cursor-grab active:cursor-grabbing select-none"
+                style={{ cursor: 'grab' }}
+              >
+                ⋮⋮
               </div>
               
               {/* Expression input */}
@@ -147,13 +163,16 @@ export function SwitchNode({
                 type="text"
                 value={c.when}
                 onChange={(e) => updateCaseWhen(caseIndex, e.target.value)}
-                draggable={false}
+                onMouseDown={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
                 placeholder="e.g., input > 50"
                 className="flex-1 text-xs border-0 border-b border-gray-600 px-1 py-0.5 bg-transparent text-white focus:border-blue-400 focus:outline-none"
               />
               
               {/* Delete button with trash icon */}
               <button
+                onMouseDown={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
                 onClick={(e) => {
                   e.stopPropagation();
                   deleteCase(caseIndex);
