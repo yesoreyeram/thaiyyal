@@ -14,6 +14,10 @@ export function AppNavBar({ onNewWorkflow, onOpenWorkflow }: AppNavBarProps) {
     router.push("/");
   };
 
+  const handlePlaygroundClick = () => {
+    router.push("/playground");
+  };
+
   return (
     <div className="h-12 bg-gray-950 border-b border-gray-800 flex items-center justify-between px-4">
       <div className="flex items-center gap-3">
@@ -26,6 +30,15 @@ export function AppNavBar({ onNewWorkflow, onOpenWorkflow }: AppNavBarProps) {
           <span className="bg-linear-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
             Thaiyyal
           </span>
+        </button>
+        <button
+          onClick={handlePlaygroundClick}
+          className="px-3 py-1.5 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white rounded transition-all text-sm font-medium flex items-center gap-1.5"
+          title="HTTP Playground"
+          aria-label="HTTP Playground"
+        >
+          <span>🧪</span>
+          <span>Playground</span>
         </button>
       </div>
       <div className="flex items-center gap-3">
