@@ -37,7 +37,7 @@ export function NumberNode({
         value={typeof data?.value === "number" ? data.value : 0}
         type="number"
         onChange={onChange}
-        className="w-full text-xs border border-gray-600 px-1.5 py-0.5 rounded bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
+        className="w-full text-xs border border-gray-600 px-1.5 py-0.5 rounded font-extralight  bg-gray-900 text-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
       />
       <Handle
         type="source"

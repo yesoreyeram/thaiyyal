@@ -10,7 +10,7 @@ export const nodeCategories = [
       },
       {
         type: "text_input",
-        label: "Text Input",
+        label: "String",
         color: "bg-green-600",
         defaultData: { text: "" },
       },
@@ -28,7 +28,7 @@ export const nodeCategories = [
       },
       {
         type: "datetime_input",
-        label: "DateTime",
+        label: "Date Time",
         color: "bg-teal-600",
         defaultData: { datetime_value: "" },
       },
@@ -61,6 +61,45 @@ export const nodeCategories = [
         label: "Renderer",
         color: "bg-pink-600",
         defaultData: {},
+      },
+    ],
+  },
+  {
+    name: "Control Flow",
+    nodes: [
+      {
+        type: "condition",
+        label: "Condition",
+        color: "bg-amber-600",
+        defaultData: { condition: ">0" },
+      },
+      {
+        type: "filter",
+        label: "Filter",
+        color: "bg-purple-600",
+        defaultData: { condition: "item.age > 0" },
+      },
+      {
+        type: "for_each",
+        label: "For Each",
+        color: "bg-orange-600",
+        defaultData: { max_iterations: 1000 },
+      },
+      {
+        type: "while_loop",
+        label: "While Loop",
+        color: "bg-red-600",
+        defaultData: { condition: ">0", max_iterations: 100 },
+      },
+      {
+        type: "switch",
+        label: "Switch",
+        color: "bg-pink-600",
+        defaultData: {
+          cases: [
+            { when: "default", output_path: "default", is_default: true },
+          ],
+        },
       },
     ],
   },
@@ -105,45 +144,7 @@ export const nodeCategories = [
       },
     ],
   },
-  {
-    name: "Control Flow",
-    nodes: [
-      {
-        type: "condition",
-        label: "Condition",
-        color: "bg-amber-600",
-        defaultData: { condition: ">0" },
-      },
-      {
-        type: "filter",
-        label: "Filter",
-        color: "bg-purple-600",
-        defaultData: { condition: "item.age > 0" },
-      },
-      {
-        type: "for_each",
-        label: "For Each",
-        color: "bg-orange-600",
-        defaultData: { max_iterations: 1000 },
-      },
-      {
-        type: "while_loop",
-        label: "While Loop",
-        color: "bg-red-600",
-        defaultData: { condition: ">0", max_iterations: 100 },
-      },
-      {
-        type: "switch",
-        label: "Switch",
-        color: "bg-pink-600",
-        defaultData: { 
-          cases: [
-            { when: "default", output_path: "default", is_default: true }
-          ]
-        },
-      },
-    ],
-  },
+
   {
     name: "Parallel & Join",
     nodes: [
