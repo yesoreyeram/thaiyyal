@@ -101,7 +101,6 @@ func TestConditionalBranching_Scenario04_SwitchMultipleCases(t *testing.T) {
 			{ID: "switch", Type: types.NodeTypeSwitch, Data: types.SwitchData{
 				Cases: []types.SwitchCase{
 					{When: "input == 200", OutputPath: strPtr("success")},
-					{When: "default", OutputPath: strPtr("default"), IsDefault: true},
 					{When: "input == 404", OutputPath: strPtr("not_found")},
 					{When: "input == 500", OutputPath: strPtr("error")},
 					{When: "default", OutputPath: strPtr("unknown"), IsDefault: true},
@@ -138,7 +137,6 @@ func TestConditionalBranching_Scenario05_SwitchDefault(t *testing.T) {
 			{ID: "switch", Type: types.NodeTypeSwitch, Data: types.SwitchData{
 				Cases: []types.SwitchCase{
 					{When: "input == 200", OutputPath: strPtr("success")},
-					{When: "default", OutputPath: strPtr("default"), IsDefault: true},
 					{When: "input == 404", OutputPath: strPtr("not_found")},
 					{When: "default", OutputPath: strPtr("other"), IsDefault: true},
 				},
@@ -544,7 +542,6 @@ func TestConditionalBranching_Scenario23_SwitchRanges(t *testing.T) {
 			{ID: "sw", Type: types.NodeTypeSwitch, Data: types.SwitchData{
 				Cases: []types.SwitchCase{
 					{When: "input < 32", OutputPath: strPtr("freezing")},
-					{When: "default", OutputPath: strPtr("default"), IsDefault: true},
 					{When: "input >= 32", OutputPath: strPtr("not_freezing")},
 					{When: "default", OutputPath: strPtr("default"), IsDefault: true},
 				},
@@ -643,9 +640,9 @@ func TestConditionalBranching_Scenario28_SwitchFirstMatch(t *testing.T) {
 			{ID: "val", Type: types.NodeTypeNumber, Data: types.NumberData{Value: float64Ptr(15)}},
 			{ID: "sw", Type: types.NodeTypeSwitch, Data: types.SwitchData{
 				Cases: []types.SwitchCase{
-					{When: ">10", OutputPath: strPtr("first")},
+					{When: "input > 10", OutputPath: strPtr("first")},
+					{When: "input > 5", OutputPath: strPtr("second")},
 					{When: "default", OutputPath: strPtr("default"), IsDefault: true},
-					{When: ">5", OutputPath: strPtr("second")},
 				},
 			}},
 		},
@@ -681,7 +678,10 @@ func TestConditionalBranching_Scenario30_SwitchValuePreservation(t *testing.T) {
 		Nodes: []types.Node{
 			{ID: "val", Type: types.NodeTypeNumber, Data: types.NumberData{Value: float64Ptr(100)}},
 			{ID: "sw", Type: types.NodeTypeSwitch, Data: types.SwitchData{
-				Cases: []types.SwitchCase{{When: "==100"}},
+				Cases: []types.SwitchCase{
+					{When: "input == 100", OutputPath: strPtr("match")},
+					{When: "default", OutputPath: strPtr("default"), IsDefault: true},
+				},
 			}},
 		},
 		Edges: []types.Edge{{Source: "val", Target: "sw"}},
@@ -884,9 +884,9 @@ func TestConditionalBranching_Scenario41_SwitchStrings(t *testing.T) {
 			{ID: "status", Type: types.NodeTypeTextInput, Data: types.TextInputData{Text: strPtr("success")}},
 			{ID: "sw", Type: types.NodeTypeSwitch, Data: types.SwitchData{
 				Cases: []types.SwitchCase{
-					{When: "==success", OutputPath: strPtr("ok")},
+					{When: "input == \"success\"", OutputPath: strPtr("ok")},
+					{When: "input == \"error\"", OutputPath: strPtr("fail")},
 					{When: "default", OutputPath: strPtr("default"), IsDefault: true},
-					{When: "==error", OutputPath: strPtr("fail")},
 				},
 			}},
 		},
