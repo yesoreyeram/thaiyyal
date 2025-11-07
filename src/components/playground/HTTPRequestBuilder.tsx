@@ -1,16 +1,16 @@
 "use client";
 import React, { useState } from "react";
-import {
-  Input,
-  Select,
-  Tabs,
-  Checkbox,
-  KeyValueEditor,
-  CodeEditor,
-} from "../../ui";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { PlusIcon, XIcon } from "lucide-react";
 
 interface HTTPRequestBuilderProps {
-  // HTTP Client Config
   baseUrl: string;
   onBaseUrlChange: (value: string) => void;
   authMethod: "none" | "basic" | "bearer";
@@ -23,8 +23,6 @@ interface HTTPRequestBuilderProps {
   onBearerTokenChange: (value: string) => void;
   timeout: string;
   onTimeoutChange: (value: string) => void;
-
-  // HTTP Request
   method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   onMethodChange: (value: "GET" | "POST" | "PUT" | "PATCH" | "DELETE") => void;
   url: string;
@@ -37,22 +35,16 @@ interface HTTPRequestBuilderProps {
   onQueryParamsChange: (
     params: Array<{ key: string; value: string }>
   ) => void;
-
-  // Pagination
   paginationEnabled: boolean;
   onPaginationEnabledChange: (enabled: boolean) => void;
   pageSize: string;
   onPageSizeChange: (value: string) => void;
   pageParam: string;
   onPageParamChange: (value: string) => void;
-
-  // Response Parsing
   parseResponse: boolean;
   onParseResponseChange: (enabled: boolean) => void;
   jsonPath: string;
   onJsonPathChange: (value: string) => void;
-
-  // Run handler
   onRun: () => void;
 }
 
@@ -81,25 +73,10 @@ export function HTTPRequestBuilder(props: HTTPRequestBuilderProps) {
           .join("&")
       : "");
 
-  const tabs = [
-    { id: "query", label: "Query Params", count: props.queryParams.length },
-    { id: "headers", label: "Headers", count: props.headers.length },
-    {
-      id: "body",
-      label: "Body",
-      count: 0,
-      hidden: props.method === "GET" || props.method === "DELETE",
-    },
-    { id: "auth", label: "Auth", count: 0 },
-    { id: "client", label: "HTTP Client", count: 0 },
-    { id: "pagination", label: "Pagination", count: 0 },
-    { id: "parsing", label: "Response Parsing", count: 0 },
-  ];
-
   return (
     <div className="h-full flex flex-col" onKeyDown={handleKeyDown}>
       {/* Method and URL Row */}
-      <div className="p-4 border-b border-gray-800">
+      <div className="p-4 border-b">
         <div className="flex gap-3 items-center">
           <Select
             value={props.method}
@@ -108,22 +85,20 @@ export function HTTPRequestBuilder(props: HTTPRequestBuilderProps) {
                 e.target.value as "GET" | "POST" | "PUT" | "PATCH" | "DELETE"
               )
             }
-            className="!w-auto px-4 font-medium"
-            options={[
-              { value: "GET", label: "GET" },
-              { value: "POST", label: "POST" },
-              { value: "PUT", label: "PUT" },
-              { value: "PATCH", label: "PATCH" },
-              { value: "DELETE", label: "DELETE" },
-            ]}
-          />
+            className="w-32"
+          >
+            <option value="GET">GET</option>
+            <option value="POST">POST</option>
+            <option value="PUT">PUT</option>
+            <option value="PATCH">PATCH</option>
+            <option value="DELETE">DELETE</option>
+          </Select>
           <div className="flex-1 flex flex-col gap-1">
             <Input
               type="text"
               value={props.baseUrl + props.url}
               onChange={(e) => {
                 const value = e.target.value;
-                // Try to split into base URL and path
                 try {
                   if (
                     value.startsWith("http://") ||
@@ -136,14 +111,13 @@ export function HTTPRequestBuilder(props: HTTPRequestBuilderProps) {
                     props.onUrlChange(value);
                   }
                 } catch {
-                  // If URL parsing fails, just set as URL
                   props.onUrlChange(value);
                 }
               }}
               placeholder="https://api.example.com/endpoint"
             />
             {fullUrl && fullUrl !== props.baseUrl + props.url && (
-              <div className="text-xs text-gray-500 px-1">
+              <div className="text-xs text-muted-foreground px-1">
                 Full URL: {fullUrl}
               </div>
             )}
@@ -152,198 +126,342 @@ export function HTTPRequestBuilder(props: HTTPRequestBuilderProps) {
       </div>
 
       {/* Tabs */}
-      <Tabs tabs={tabs} activeTab={activeTab} onChange={setActiveTab} className="px-4 pt-2" />
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
+        <TabsList className="w-full justify-start rounded-none border-b bg-transparent px-4">
+          <TabsTrigger value="query" className="relative">
+            Query Params
+            {props.queryParams.length > 0 && (
+              <Badge variant="secondary" className="ml-1.5 text-xs">
+                {props.queryParams.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger value="headers" className="relative">
+            Headers
+            {props.headers.length > 0 && (
+              <Badge variant="secondary" className="ml-1.5 text-xs">
+                {props.headers.length}
+              </Badge>
+            )}
+          </TabsTrigger>
+          {props.method !== "GET" && props.method !== "DELETE" && (
+            <TabsTrigger value="body">Body</TabsTrigger>
+          )}
+          <TabsTrigger value="auth">Auth</TabsTrigger>
+          <TabsTrigger value="client">HTTP Client</TabsTrigger>
+          <TabsTrigger value="pagination">Pagination</TabsTrigger>
+          <TabsTrigger value="parsing">Response Parsing</TabsTrigger>
+        </TabsList>
 
-      {/* Tab Content */}
-      <div className="flex-1 overflow-auto p-4 bg-gray-950">
-        {/* Query Params Tab */}
-        {activeTab === "query" && (
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium text-gray-300">
-              Query Parameters
-            </h3>
-            <KeyValueEditor
-              items={props.queryParams}
-              onChange={props.onQueryParamsChange}
-              keyPlaceholder="Parameter name"
-              valuePlaceholder="Parameter value"
-              emptyMessage='No query parameters. Click "+ Add" to add one.'
-            />
-          </div>
-        )}
+        <div className="flex-1 overflow-auto p-4">
+          {/* Query Params Tab */}
+          <TabsContent value="query" className="mt-0 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-medium">Query Parameters</h3>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  props.onQueryParamsChange([
+                    ...props.queryParams,
+                    { key: "", value: "" },
+                  ])
+                }
+              >
+                <PlusIcon className="h-4 w-4 mr-1" />
+                Add
+              </Button>
+            </div>
+            {props.queryParams.length === 0 ? (
+              <div className="text-sm text-muted-foreground text-center py-8">
+                No query parameters. Click &quot;Add&quot; to add one.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {props.queryParams.map((param, index) => (
+                  <div key={index} className="flex gap-2 items-center">
+                    <Input
+                      type="text"
+                      value={param.key}
+                      onChange={(e) => {
+                        const newParams = [...props.queryParams];
+                        newParams[index] = { key: e.target.value, value: param.value };
+                        props.onQueryParamsChange(newParams);
+                      }}
+                      placeholder="Key"
+                      className="flex-1"
+                    />
+                    <Input
+                      type="text"
+                      value={param.value}
+                      onChange={(e) => {
+                        const newParams = [...props.queryParams];
+                        newParams[index] = { key: param.key, value: e.target.value };
+                        props.onQueryParamsChange(newParams);
+                      }}
+                      placeholder="Value"
+                      className="flex-1"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        props.onQueryParamsChange(
+                          props.queryParams.filter((_, i) => i !== index)
+                        );
+                      }}
+                    >
+                      <XIcon className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
 
-        {/* Headers Tab */}
-        {activeTab === "headers" && (
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium text-gray-300">Headers</h3>
-            <KeyValueEditor
-              items={props.headers}
-              onChange={props.onHeadersChange}
-              keyPlaceholder="Header name"
-              valuePlaceholder="Header value"
-              emptyMessage='No headers. Click "+ Add" to add one.'
-            />
-          </div>
-        )}
+          {/* Headers Tab */}
+          <TabsContent value="headers" className="mt-0 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-medium">Headers</h3>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() =>
+                  props.onHeadersChange([
+                    ...props.headers,
+                    { key: "", value: "" },
+                  ])
+                }
+              >
+                <PlusIcon className="h-4 w-4 mr-1" />
+                Add
+              </Button>
+            </div>
+            {props.headers.length === 0 ? (
+              <div className="text-sm text-muted-foreground text-center py-8">
+                No headers. Click &quot;Add&quot; to add one.
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {props.headers.map((header, index) => (
+                  <div key={index} className="flex gap-2 items-center">
+                    <Input
+                      type="text"
+                      value={header.key}
+                      onChange={(e) => {
+                        const newHeaders = [...props.headers];
+                        newHeaders[index] = { key: e.target.value, value: header.value };
+                        props.onHeadersChange(newHeaders);
+                      }}
+                      placeholder="Header name"
+                      className="flex-1"
+                    />
+                    <Input
+                      type="text"
+                      value={header.value}
+                      onChange={(e) => {
+                        const newHeaders = [...props.headers];
+                        newHeaders[index] = { key: header.key, value: e.target.value };
+                        props.onHeadersChange(newHeaders);
+                      }}
+                      placeholder="Header value"
+                      className="flex-1"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        props.onHeadersChange(
+                          props.headers.filter((_, i) => i !== index)
+                        );
+                      }}
+                    >
+                      <XIcon className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
 
-        {/* Body Tab */}
-        {activeTab === "body" && (
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium text-gray-300">Request Body</h3>
-            <CodeEditor
+          {/* Body Tab */}
+          <TabsContent value="body" className="mt-0 space-y-4">
+            <h3 className="text-sm font-medium">Request Body</h3>
+            <Textarea
               value={props.body}
               onChange={(e) => props.onBodyChange(e.target.value)}
               placeholder='{"key": "value"}'
               rows={15}
-              language="json"
+              className="font-mono text-sm"
             />
-          </div>
-        )}
+          </TabsContent>
 
-        {/* Auth Tab */}
-        {activeTab === "auth" && (
-          <div className="space-y-4">
-            <h3 className="text-sm font-medium text-gray-300">Authentication</h3>
-            <Select
-              label="Auth Type"
-              value={props.authMethod}
-              onChange={(e) =>
-                props.onAuthMethodChange(
-                  e.target.value as "none" | "basic" | "bearer"
-                )
-              }
-              options={[
-                { value: "none", label: "No Authentication" },
-                { value: "basic", label: "Basic Auth" },
-                { value: "bearer", label: "Bearer Token" },
-              ]}
-            />
+          {/* Auth Tab */}
+          <TabsContent value="auth" className="mt-0 space-y-4">
+            <h3 className="text-sm font-medium">Authentication</h3>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Auth Type</Label>
+                <Select
+                  value={props.authMethod}
+                  onChange={(e) =>
+                    props.onAuthMethodChange(
+                      e.target.value as "none" | "basic" | "bearer"
+                    )
+                  }
+                >
+                  <option value="none">No Authentication</option>
+                  <option value="basic">Basic Auth</option>
+                  <option value="bearer">Bearer Token</option>
+                </Select>
+              </div>
 
-            {props.authMethod === "basic" && (
-              <div className="space-y-3 pl-4 border-l-2 border-blue-500">
+              {props.authMethod === "basic" && (
+                <div className="space-y-4 pl-4 border-l-2 border-primary">
+                  <div className="space-y-2">
+                    <Label>Username</Label>
+                    <Input
+                      type="text"
+                      value={props.authUsername}
+                      onChange={(e) => props.onAuthUsernameChange(e.target.value)}
+                      placeholder="username"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Password</Label>
+                    <Input
+                      type="password"
+                      value={props.authPassword}
+                      onChange={(e) => props.onAuthPasswordChange(e.target.value)}
+                      placeholder="password"
+                    />
+                  </div>
+                </div>
+              )}
+
+              {props.authMethod === "bearer" && (
+                <div className="pl-4 border-l-2 border-primary">
+                  <div className="space-y-2">
+                    <Label>Bearer Token</Label>
+                    <Input
+                      type="password"
+                      value={props.bearerToken}
+                      onChange={(e) => props.onBearerTokenChange(e.target.value)}
+                      placeholder="your-token-here"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          {/* HTTP Client Tab */}
+          <TabsContent value="client" className="mt-0 space-y-4">
+            <h3 className="text-sm font-medium">HTTP Client Settings</h3>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Base URL</Label>
                 <Input
-                  label="Username"
                   type="text"
-                  value={props.authUsername}
-                  onChange={(e) => props.onAuthUsernameChange(e.target.value)}
-                  placeholder="username"
-                />
-                <Input
-                  label="Password"
-                  type="password"
-                  value={props.authPassword}
-                  onChange={(e) => props.onAuthPasswordChange(e.target.value)}
-                  placeholder="password"
+                  value={props.baseUrl}
+                  onChange={(e) => props.onBaseUrlChange(e.target.value)}
+                  placeholder="https://api.example.com"
                 />
               </div>
-            )}
-
-            {props.authMethod === "bearer" && (
-              <div className="pl-4 border-l-2 border-blue-500">
+              <div className="space-y-2">
+                <Label>Timeout (seconds)</Label>
                 <Input
-                  label="Bearer Token"
-                  type="password"
-                  value={props.bearerToken}
-                  onChange={(e) => props.onBearerTokenChange(e.target.value)}
-                  placeholder="your-token-here"
-                />
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* HTTP Client Tab */}
-        {activeTab === "client" && (
-          <div className="space-y-4">
-            <h3 className="text-sm font-medium text-gray-300">
-              HTTP Client Settings
-            </h3>
-            <Input
-              label="Base URL"
-              type="text"
-              value={props.baseUrl}
-              onChange={(e) => props.onBaseUrlChange(e.target.value)}
-              placeholder="https://api.example.com"
-            />
-            <Input
-              label="Timeout (seconds)"
-              type="number"
-              value={props.timeout}
-              onChange={(e) => props.onTimeoutChange(e.target.value)}
-              placeholder="30"
-              min="1"
-              max="300"
-            />
-          </div>
-        )}
-
-        {/* Pagination Tab */}
-        {activeTab === "pagination" && (
-          <div className="space-y-4">
-            <h3 className="text-sm font-medium text-gray-300">
-              Pagination Options
-            </h3>
-            <Checkbox
-              id="pagination-enabled"
-              checked={props.paginationEnabled}
-              onChange={(e) =>
-                props.onPaginationEnabledChange(e.target.checked)
-              }
-              label="Enable Pagination"
-            />
-
-            {props.paginationEnabled && (
-              <div className="space-y-3 pl-4 border-l-2 border-blue-500">
-                <Input
-                  label="Page Size"
                   type="number"
-                  value={props.pageSize}
-                  onChange={(e) => props.onPageSizeChange(e.target.value)}
-                  placeholder="10"
+                  value={props.timeout}
+                  onChange={(e) => props.onTimeoutChange(e.target.value)}
+                  placeholder="30"
                   min="1"
-                  max="1000"
-                />
-                <Input
-                  label="Page Parameter Name"
-                  type="text"
-                  value={props.pageParam}
-                  onChange={(e) => props.onPageParamChange(e.target.value)}
-                  placeholder="page"
+                  max="300"
                 />
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          </TabsContent>
 
-        {/* Response Parsing Tab */}
-        {activeTab === "parsing" && (
-          <div className="space-y-4">
-            <h3 className="text-sm font-medium text-gray-300">
-              Response Parsing
-            </h3>
-            <Checkbox
-              id="parse-response"
-              checked={props.parseResponse}
-              onChange={(e) => props.onParseResponseChange(e.target.checked)}
-              label="Parse JSON Response"
-            />
-
-            {props.parseResponse && (
-              <div className="pl-4 border-l-2 border-blue-500">
-                <Input
-                  label="JSON Path (optional)"
-                  type="text"
-                  value={props.jsonPath}
-                  onChange={(e) => props.onJsonPathChange(e.target.value)}
-                  placeholder="$.data.items"
-                  className="font-mono"
-                  helperText="Extract specific data from response using JSON path notation"
+          {/* Pagination Tab */}
+          <TabsContent value="pagination" className="mt-0 space-y-4">
+            <h3 className="text-sm font-medium">Pagination Options</h3>
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="pagination-enabled"
+                  checked={props.paginationEnabled}
+                  onChange={(e) =>
+                    props.onPaginationEnabledChange(e.target.checked)
+                  }
+                  className="h-4 w-4"
                 />
+                <Label htmlFor="pagination-enabled">Enable Pagination</Label>
               </div>
-            )}
-          </div>
-        )}
-      </div>
+
+              {props.paginationEnabled && (
+                <div className="space-y-4 pl-4 border-l-2 border-primary">
+                  <div className="space-y-2">
+                    <Label>Page Size</Label>
+                    <Input
+                      type="number"
+                      value={props.pageSize}
+                      onChange={(e) => props.onPageSizeChange(e.target.value)}
+                      placeholder="10"
+                      min="1"
+                      max="1000"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Page Parameter Name</Label>
+                    <Input
+                      type="text"
+                      value={props.pageParam}
+                      onChange={(e) => props.onPageParamChange(e.target.value)}
+                      placeholder="page"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
+          {/* Response Parsing Tab */}
+          <TabsContent value="parsing" className="mt-0 space-y-4">
+            <h3 className="text-sm font-medium">Response Parsing</h3>
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="parse-response"
+                  checked={props.parseResponse}
+                  onChange={(e) => props.onParseResponseChange(e.target.checked)}
+                  className="h-4 w-4"
+                />
+                <Label htmlFor="parse-response">Parse JSON Response</Label>
+              </div>
+
+              {props.parseResponse && (
+                <div className="pl-4 border-l-2 border-primary">
+                  <div className="space-y-2">
+                    <Label>JSON Path (optional)</Label>
+                    <Input
+                      type="text"
+                      value={props.jsonPath}
+                      onChange={(e) => props.onJsonPathChange(e.target.value)}
+                      placeholder="$.data.items"
+                      className="font-mono"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Extract specific data from response using JSON path notation
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+        </div>
+      </Tabs>
     </div>
   );
 }
