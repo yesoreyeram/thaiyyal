@@ -176,21 +176,30 @@ export function PlaygroundResultsPanel({
 
         {!isLoading && resultData && activeTab === "response" && (
           <div className="space-y-2">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-gray-400">Response Body</span>
-              <span className="text-xs text-gray-500">
-                Size: {JSON.stringify(resultData.data).length} bytes
-              </span>
-            </div>
-            <pre className="text-xs text-gray-300 bg-gray-950 rounded p-3 overflow-x-auto font-mono border border-gray-800">
-              {(() => {
-                try {
-                  return JSON.stringify(resultData.data, null, 2);
-                } catch (error) {
-                  return `Error formatting response: ${error instanceof Error ? error.message : "Unknown error"}`;
-                }
-              })()}
-            </pre>
+            {(() => {
+              try {
+                const stringifiedData = JSON.stringify(resultData.data, null, 2);
+                return (
+                  <>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs text-gray-400">Response Body</span>
+                      <span className="text-xs text-gray-500">
+                        Size: {JSON.stringify(resultData.data).length} bytes
+                      </span>
+                    </div>
+                    <pre className="text-xs text-gray-300 bg-gray-950 rounded p-3 overflow-x-auto font-mono border border-gray-800">
+                      {stringifiedData}
+                    </pre>
+                  </>
+                );
+              } catch (error) {
+                return (
+                  <pre className="text-xs text-red-400 bg-gray-950 rounded p-3 overflow-x-auto">
+                    Error formatting response: {error instanceof Error ? error.message : "Unknown error"}
+                  </pre>
+                );
+              }
+            })()}
           </div>
         )}
 

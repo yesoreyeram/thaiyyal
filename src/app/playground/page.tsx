@@ -117,7 +117,7 @@ export default function PlaygroundPage() {
     const urlObj = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = urlObj;
-    link.download = `${requestTitle.replace(/[^a-z0-9]/gi, "_").toLowerCase()}_request.json`;
+    link.download = `${requestTitle.replace(/[<>:"/\\|?*]/g, "_").toLowerCase()}_request.json`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
