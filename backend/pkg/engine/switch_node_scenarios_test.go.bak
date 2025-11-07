@@ -21,7 +21,7 @@ func TestSwitchNode_HTTPStatusRouting(t *testing.T) {
 			statusCode:      200,
 			expectedMatched: true,
 			expectedPath:    "success",
-			expectedCase:    "input == 200",
+			expectedCase:    "200 OK",
 			description:     "200 status should route to success handler",
 		},
 		{
@@ -29,7 +29,7 @@ func TestSwitchNode_HTTPStatusRouting(t *testing.T) {
 			statusCode:      201,
 			expectedMatched: true,
 			expectedPath:    "created",
-			expectedCase:    "input == 201",
+			expectedCase:    "201 Created",
 			description:     "201 status should route to created handler",
 		},
 		{
@@ -37,7 +37,7 @@ func TestSwitchNode_HTTPStatusRouting(t *testing.T) {
 			statusCode:      404,
 			expectedMatched: true,
 			expectedPath:    "not_found",
-			expectedCase:    "input == 404",
+			expectedCase:    "404 Not Found",
 			description:     "404 status should route to retry logic",
 		},
 		{
@@ -45,7 +45,7 @@ func TestSwitchNode_HTTPStatusRouting(t *testing.T) {
 			statusCode:      500,
 			expectedMatched: true,
 			expectedPath:    "error",
-			expectedCase:    "input == 500",
+			expectedCase:    "500 Server Error",
 			description:     "500 status should route to error handler",
 		},
 		{
@@ -73,12 +73,12 @@ func TestSwitchNode_HTTPStatusRouting(t *testing.T) {
 						Type: types.NodeTypeSwitch,
 						Data: types.SwitchData{
 							Cases: []types.SwitchCase{
-								{When: "input == 200", OutputPath: strPtr("success")},
-								{When: "input == 201", OutputPath: strPtr("created")},
-								{When: "input == 404", OutputPath: strPtr("not_found")},
-								{When: "input == 500", OutputPath: strPtr("error")},
-								{When: "default", OutputPath: strPtr("unknown"), IsDefault: true},
+								{When: "200 OK", Value: float64(200), OutputPath: strPtr("success")},
+								{When: "201 Created", Value: float64(201), OutputPath: strPtr("created")},
+								{When: "404 Not Found", Value: float64(404), OutputPath: strPtr("not_found")},
+								{When: "500 Server Error", Value: float64(500), OutputPath: strPtr("error")},
 							},
+							DefaultPath: strPtr("unknown"),
 						},
 					},
 				},
@@ -232,12 +232,12 @@ func TestSwitchNode_GradeAssignment(t *testing.T) {
 						Type: types.NodeTypeSwitch,
 						Data: types.SwitchData{
 							Cases: []types.SwitchCase{
-								{When: "input >= 90", OutputPath: strPtr("A")},
-								{When: "input >= 80", OutputPath: strPtr("B")},
-								{When: "input >= 70", OutputPath: strPtr("C")},
-								{When: "input >= 60", OutputPath: strPtr("D")},
-								{When: "default", OutputPath: strPtr("F"), IsDefault: true},
+								{When: ">=90", OutputPath: strPtr("A")},
+								{When: ">=80", OutputPath: strPtr("B")},
+								{When: ">=70", OutputPath: strPtr("C")},
+								{When: ">=60", OutputPath: strPtr("D")},
 							},
+							DefaultPath: strPtr("F"),
 						},
 					},
 				},
@@ -323,11 +323,11 @@ func TestSwitchNode_UserRoleRouting(t *testing.T) {
 						Type: types.NodeTypeSwitch,
 						Data: types.SwitchData{
 							Cases: []types.SwitchCase{
-								{When: "input == \"admin\"", OutputPath: strPtr("admin_panel")},
-								{When: "input == \"moderator\"", OutputPath: strPtr("mod_tools")},
-								{When: "input == \"user\"", OutputPath: strPtr("user_dashboard")},
-								{When: "default", OutputPath: strPtr("login"), IsDefault: true},
+								{When: "admin", Value: "admin", OutputPath: strPtr("admin_panel")},
+								{When: "moderator", Value: "moderator", OutputPath: strPtr("mod_tools")},
+								{When: "user", Value: "user", OutputPath: strPtr("user_dashboard")},
 							},
+							DefaultPath: strPtr("login"),
 						},
 					},
 				},
@@ -413,12 +413,12 @@ func TestSwitchNode_ContentTypeRouting(t *testing.T) {
 						Type: types.NodeTypeSwitch,
 						Data: types.SwitchData{
 							Cases: []types.SwitchCase{
-								{When: "input == \"application/json\"", OutputPath: strPtr("json_parser")},
-								{When: "input == \"application/xml\"", OutputPath: strPtr("xml_parser")},
-								{When: "input == \"text/csv\"", OutputPath: strPtr("csv_parser")},
-								{When: "input == \"text/plain\"", OutputPath: strPtr("text_parser")},
-								{When: "default", OutputPath: strPtr("raw_handler"), IsDefault: true},
+								{When: "JSON", Value: "application/json", OutputPath: strPtr("json_parser")},
+								{When: "XML", Value: "application/xml", OutputPath: strPtr("xml_parser")},
+								{When: "CSV", Value: "text/csv", OutputPath: strPtr("csv_parser")},
+								{When: "Text", Value: "text/plain", OutputPath: strPtr("text_parser")},
 							},
+							DefaultPath: strPtr("raw_handler"),
 						},
 					},
 				},
@@ -534,12 +534,12 @@ func TestSwitchNode_PriorityQueueRouting(t *testing.T) {
 						Type: types.NodeTypeSwitch,
 						Data: types.SwitchData{
 							Cases: []types.SwitchCase{
-								{When: "input >= 9", OutputPath: strPtr("critical")},
-								{When: "input >= 7", OutputPath: strPtr("high")},
-								{When: "input >= 4", OutputPath: strPtr("medium")},
-								{When: "input >= 1", OutputPath: strPtr("low")},
-								{When: "default", OutputPath: strPtr("invalid"), IsDefault: true},
+								{When: ">=9", OutputPath: strPtr("critical")},
+								{When: ">=7", OutputPath: strPtr("high")},
+								{When: ">=4", OutputPath: strPtr("medium")},
+								{When: ">=1", OutputPath: strPtr("low")},
 							},
+							DefaultPath: strPtr("invalid"),
 						},
 					},
 				},
@@ -607,10 +607,10 @@ func TestSwitchNode_BooleanRouting(t *testing.T) {
 						Type: types.NodeTypeSwitch,
 						Data: types.SwitchData{
 							Cases: []types.SwitchCase{
-								{When: "input == true", OutputPath: strPtr("enabled")},
-								{When: "input == false", OutputPath: strPtr("disabled")},
-								{When: "default", OutputPath: strPtr("error"), IsDefault: true},
+								{When: "true", Value: true, OutputPath: strPtr("enabled")},
+								{When: "false", Value: false, OutputPath: strPtr("disabled")},
 							},
+							DefaultPath: strPtr("error"),
 						},
 					},
 				},
@@ -657,10 +657,9 @@ func TestSwitchNode_FirstMatchWins(t *testing.T) {
 				Type: types.NodeTypeSwitch,
 				Data: types.SwitchData{
 					Cases: []types.SwitchCase{
-						{When: "input > 10", OutputPath: strPtr("first")},   // Matches
-						{When: "input > 40", OutputPath: strPtr("second")},  // Also matches but shouldn't be used
-						{When: "input > 50", OutputPath: strPtr("third")},   // Doesn't match
-						{When: "default", OutputPath: strPtr("default"), IsDefault: true},
+						{When: ">10", OutputPath: strPtr("first")},   // Matches
+						{When: ">40", OutputPath: strPtr("second")},  // Also matches but shouldn't be used
+						{When: ">50", OutputPath: strPtr("third")},   // Doesn't match
 					},
 				},
 			},
@@ -689,8 +688,8 @@ func TestSwitchNode_FirstMatchWins(t *testing.T) {
 
 	// Verify the case field contains the first match
 	if caseField, ok := switchResult["case"].(string); ok {
-		if caseField != "input > 10" {
-			t.Errorf("Expected case='input > 10', got '%s'", caseField)
+		if caseField != ">10" {
+			t.Errorf("Expected case='>10', got '%s'", caseField)
 		}
 	}
 }
@@ -711,11 +710,11 @@ func TestSwitchNode_WithMultipleInputs(t *testing.T) {
 				Type: types.NodeTypeSwitch,
 				Data: types.SwitchData{
 					Cases: []types.SwitchCase{
-						{When: "input < 25", OutputPath: strPtr("low")},
-						{When: "input >= 25", OutputPath: strPtr("medium")},
-						{When: "input >= 75", OutputPath: strPtr("high")},
-						{When: "default", OutputPath: strPtr("unknown"), IsDefault: true},
+						{When: "<25", OutputPath: strPtr("low")},
+						{When: ">=25", OutputPath: strPtr("medium")},
+						{When: ">=75", OutputPath: strPtr("high")},
 					},
+					DefaultPath: strPtr("unknown"),
 				},
 			},
 		},
@@ -759,10 +758,9 @@ func TestSwitchNode_NestedInWorkflow(t *testing.T) {
 				Type: types.NodeTypeSwitch,
 				Data: types.SwitchData{
 					Cases: []types.SwitchCase{
-						{When: "input < 18", OutputPath: strPtr("minor")},
-						{When: "input < 65", OutputPath: strPtr("adult")},
-						{When: "input >= 65", OutputPath: strPtr("senior")},
-						{When: "default", OutputPath: strPtr("default"), IsDefault: true},
+						{When: "<18", OutputPath: strPtr("minor")},
+						{When: "<65", OutputPath: strPtr("adult")},
+						{When: ">=65", OutputPath: strPtr("senior")},
 					},
 				},
 			},
@@ -872,9 +870,9 @@ func TestSwitchNode_PreservesValueType(t *testing.T) {
 						Type: types.NodeTypeSwitch,
 						Data: types.SwitchData{
 							Cases: []types.SwitchCase{
-								{When: "input != null", OutputPath: strPtr("matched")},
-								{When: "default", OutputPath: strPtr("default"), IsDefault: true},
+								{When: "any", Value: tt.value, OutputPath: strPtr("matched")},
 							},
+							DefaultPath: strPtr("default"),
 						},
 					},
 				},
