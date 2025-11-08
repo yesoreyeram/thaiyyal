@@ -1,5 +1,5 @@
 import React from "react";
-import { TextArea } from "./../../ui/TextArea";
+import { TextArea } from "../ui/NodeTextArea";
 import { NodePropsWithOptions } from "./nodeTypes";
 import { Handle, Position, useReactFlow } from "reactflow";
 import { NodeWrapper } from "./NodeWrapper";

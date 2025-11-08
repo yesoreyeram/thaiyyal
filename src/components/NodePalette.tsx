@@ -88,15 +88,15 @@ export function NodePalette({
   return (
     <div
       ref={paletteRef}
-      className="h-full bg-gray-900 border-r border-gray-700 w-64 flex flex-col"
+      className="h-full bg-white dark:bg-black border-r border-gray-300 dark:border-gray-700 w-64 flex flex-col"
     >
       {/* Header with Search */}
-      <div className="bg-gray-900 border-b border-gray-700 p-3">
+      <div className="bg-white dark:bg-black border-b border-gray-300 dark:border-gray-700 p-3">
         <div className="flex items-center justify-between mb-2">
-          <div className="text-sm font-bold text-white">Nodes</div>
+          <div className="text-sm font-bold text-black dark:text-white">Nodes</div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
             title="Close Sidebar"
           >
             <svg
@@ -123,7 +123,7 @@ export function NodePalette({
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search nodes..."
-          className="w-full px-3 py-1.5 text-sm bg-gray-800 border border-gray-600 rounded text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-1.5 text-sm bg-gray-50 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded text-black dark:text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-gray-400 dark:focus:ring-gray-600"
         />
       </div>
 
@@ -137,13 +137,13 @@ export function NodePalette({
           filteredCategories.map((category) => (
             <div
               key={category.name}
-              className="border-b border-gray-800 last:border-b-0"
+              className="border-b border-gray-200 dark:border-gray-800 last:border-b-0"
             >
               <button
                 onClick={() => toggleCategory(category.name)}
-                className="w-full p-3 flex items-center justify-between hover:bg-gray-800 transition-colors"
+                className="w-full p-3 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
               >
-                <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide">
+                <div className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
                   {category.name}
                 </div>
                 <svg
@@ -176,7 +176,7 @@ export function NodePalette({
                       onClick={() =>
                         handleAddNode(config.type, config.defaultData)
                       }
-                      className="bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded text-sm transition-all text-left flex items-center gap-2 cursor-move"
+                      className="bg-gray-100 dark:bg-gray-900 hover:bg-gray-200 dark:hover:bg-gray-800 text-black dark:text-white px-3 py-2 rounded text-sm transition-all text-left flex items-center gap-2 cursor-move border border-gray-300 dark:border-gray-700"
                       title="Click to add or drag to canvas"
                     >
                       <span className="text-xs">⋮⋮</span>
@@ -191,7 +191,7 @@ export function NodePalette({
       </div>
 
       {/* Footer hint */}
-      <div className="border-t border-gray-800 px-3 py-2 text-xs text-gray-500">
+      <div className="border-t border-gray-300 dark:border-gray-800 px-3 py-2 text-xs text-gray-600 dark:text-gray-500">
         Click to add • Drag to place
       </div>
     </div>

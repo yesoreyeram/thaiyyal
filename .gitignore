@@ -59,7 +59,7 @@ backend/examples
 
 # Backend static files (generated from frontend build)
 /backend/pkg/server/static/*
-!/backend/pkg/server/static/README.md
+!/backend/pkg/server/static/.gitkeep
 
 # Playwright E2E test artifacts
 /test-results/
