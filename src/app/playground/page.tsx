@@ -57,33 +57,75 @@ export default function PlaygroundPage() {
     setResult(null);
     setError(null);
 
-    // Mock execution - simulate API call
-    setTimeout(() => {
-      // Mock successful response
-      const mockResponse = {
-        status: 200,
-        statusText: "OK",
-        headers: {
-          "content-type": "application/json",
-          "content-length": "123",
-          "x-request-id": "mock-id-" + Date.now(),
-        },
-        data: {
-          message: "Mock response data",
-          timestamp: new Date().toISOString(),
-          request: {
-            method,
-            url: baseUrl + url,
-            headers: headers
-              .filter((h) => h.key.trim() !== "")
-              .reduce((acc, h) => ({ ...acc, [h.key]: h.value }), {}),
-          },
-        },
+    try {
+      // Build complete URL with base URL, path, and query parameters
+      const fullUrl = baseUrl + url;
+      const urlObj = new URL(fullUrl);
+      
+      // Add query parameters
+      queryParams
+        .filter((param) => param.key.trim() !== "")
+        .forEach((param) => {
+          urlObj.searchParams.append(param.key, param.value);
+        });
+
+      // Build headers object
+      const requestHeaders: Record<string, string> = {};
+      headers
+        .filter((h) => h.key.trim() !== "")
+        .forEach((h) => {
+          requestHeaders[h.key] = h.value;
+        });
+
+      // Add authentication headers
+      if (authMethod === "basic" && authUsername && authPassword) {
+        const credentials = btoa(`${authUsername}:${authPassword}`);
+        requestHeaders["Authorization"] = `Basic ${credentials}`;
+      } else if (authMethod === "bearer" && bearerToken) {
+        requestHeaders["Authorization"] = `Bearer ${bearerToken}`;
+      }
+
+      // Prepare request body
+      const requestBody = {
+        method,
+        url: urlObj.toString(),
+        headers: requestHeaders,
+        body: ["POST", "PUT", "PATCH"].includes(method) ? body : undefined,
+        timeout: parseInt(timeoutSeconds) * 1000,
       };
 
-      setResult(mockResponse);
+      // Execute the HTTP request via API
+      const response = await fetch("/api/playground/execute", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      const responseData = await response.json();
+
+      if (!response.ok) {
+        // Handle error response
+        setError(
+          responseData.message || "Request failed with status " + response.status
+        );
+        setIsExecuting(false);
+        return;
+      }
+
+      // Set successful response
+      setResult(responseData);
       setIsExecuting(false);
-    }, 1500);
+    } catch (err) {
+      // Handle client-side errors
+      setError(
+        err instanceof Error
+          ? err.message
+          : "An unexpected error occurred while executing the request"
+      );
+      setIsExecuting(false);
+    }
   };
 
   const handleSave = () => {
