@@ -11,9 +11,7 @@ import (
 // staticFiles contains the embedded frontend files from the Next.js build
 // These files should be built and copied before building the Go binary
 //
-//go:embed static
-//go:embed static/_next
-//go:embed static/_not-found
+//go:embed static/*
 var staticFiles embed.FS
 
 // getStaticFS returns a filesystem for the embedded static files

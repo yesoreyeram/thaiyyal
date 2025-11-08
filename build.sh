@@ -1,6 +1,6 @@
 #!/bin/bash
 # Build script for Thaiyyal workflow engine
-# This script builds the frontend and copies files to backend static directory
+# This script builds the frontend and backend
 
 set -e
 
@@ -8,30 +8,20 @@ echo "🏗️  Building Thaiyyal Workflow Engine"
 echo "=================================="
 echo
 
-# Step 1: Build frontend
-echo "📦 Building frontend..."
+# Step 1: Build frontend and copy to backend static directory
+echo "📦 Building frontend and copying to backend..."
 npm run build
-echo "✅ Frontend build complete"
+echo "✅ Frontend build complete and files copied to backend/pkg/server/static"
 echo
 
-# Step 2: Prepare backend static directory
-echo "📂 Preparing backend static directory..."
-mkdir -p backend/pkg/server/static
-
-# Step 3: Copy frontend build output
-echo "📋 Copying frontend files to backend..."
-cp -r .next/standalone/.next/server/app/*.html backend/pkg/server/static/ 2>/dev/null || true
-cp -r .next/static backend/pkg/server/static/_next 2>/dev/null || true
-cp -r public/* backend/pkg/server/static/ 2>/dev/null || true
-echo "✅ Frontend files copied"
-echo
-
-# Step 4: Build backend
+# Step 2: Build backend
 echo "🔨 Building backend..."
 cd backend/cmd/server
-go build -o ../../../server .
+go build -o ../../../thaiyyal-server .
 cd ../../..
 echo "✅ Backend build complete"
 echo
 
-echo "🎉 Build complete! Run './server' to start the application."
+echo "🎉 Build complete!"
+echo "   Run './thaiyyal-server' to start the application."
+echo "   Server will be available at http://localhost:8080"
