@@ -75,18 +75,23 @@ export function ExecutionPanel({
 
   if (!isOpen) return null;
 
+  // Use height prop if > 0, otherwise use 100% for fixed layout
+  const heightStyle = height > 0 ? { height: `${height}px` } : { height: "100%" };
+
   return (
     <div
-      className="bg-gray-900 border-t border-gray-800 flex flex-col"
-      style={{ height: `${height}px` }}
+      className="bg-gray-900 flex flex-col"
+      style={heightStyle}
     >
-      {/* Resize Handle */}
-      <div
-        className={`h-1 bg-gray-800 hover:bg-blue-500 cursor-ns-resize transition-colors ${
-          isDragging ? "bg-blue-500" : ""
-        }`}
-        onMouseDown={handleMouseDown}
-      />
+      {/* Resize Handle - only show if height control is enabled */}
+      {height > 0 && (
+        <div
+          className={`h-1 bg-gray-800 hover:bg-blue-500 cursor-ns-resize transition-colors border-t border-gray-700 ${
+            isDragging ? "bg-blue-500" : ""
+          }`}
+          onMouseDown={handleMouseDown}
+        />
+      )}
 
       {/* Header */}
       <div className="h-10 bg-gray-950 border-b border-gray-800 flex items-center justify-between px-4">
@@ -126,13 +131,16 @@ export function ExecutionPanel({
               Cancel
             </button>
           )}
-          <button
-            onClick={onClose}
-            className="px-2 py-1 text-gray-400 hover:text-white transition-colors"
-            title="Close Panel"
-          >
-            ✕
-          </button>
+          {/* Only show close button if height control is enabled (draggable mode) */}
+          {height > 0 && (
+            <button
+              onClick={onClose}
+              className="px-2 py-1 text-gray-400 hover:text-white transition-colors"
+              title="Close Panel"
+            >
+              ✕
+            </button>
+          )}
         </div>
       </div>
 

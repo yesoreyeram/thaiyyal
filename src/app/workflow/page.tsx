@@ -106,13 +106,11 @@ function Canvas() {
   } | null>(null);
 
   // Execution panel state
-  const [isExecutionPanelOpen, setIsExecutionPanelOpen] = useState(false);
   const [isExecuting, setIsExecuting] = useState(false);
   const [executionResult, setExecutionResult] =
     useState<ExecutionResult | null>(null);
   const [executionError, setExecutionError] = useState<string | null>(null);
   const [executionDetails, setExecutionDetails] = useState<string | null>(null);
-  const [executionPanelHeight, setExecutionPanelHeight] = useState(250);
   const abortControllerRef = useRef<AbortController | null>(null);
   const { project, getNodes } = useReactFlow();
   const nextNodeId = useRef(1);
@@ -378,8 +376,7 @@ function Canvas() {
   };
 
   const handleRun = async () => {
-    // Open execution panel
-    setIsExecutionPanelOpen(true);
+    // Panel is always visible, just update execution state
     setIsExecuting(true);
     setExecutionResult(null);
     setExecutionError(null);
@@ -433,7 +430,7 @@ function Canvas() {
   };
 
   const handleCloseExecutionPanel = () => {
-    setIsExecutionPanelOpen(false);
+    // Clear execution results (panel stays visible)
     setExecutionResult(null);
     setExecutionError(null);
     setExecutionDetails(null);
@@ -608,6 +605,11 @@ function Canvas() {
                 label="New Workflow"
               />
               <SidebarMenuItem
+                onClick={handleOpenWorkflow}
+                icon={<UploadIcon className="w-4 h-4" />}
+                label="Open Workflow"
+              />
+              <SidebarMenuItem
                 onClick={handleRun}
                 icon={<PlayIcon className="w-4 h-4" />}
                 label="Run Workflow"
@@ -712,52 +714,73 @@ function Canvas() {
           </div>
         </div>
 
-        {/* Canvas Area */}
-        <div className="flex-1 flex overflow-hidden">
-          {isPaletteOpen && (
-            <NodePalette
-              isOpen={isPaletteOpen}
-              onClose={() => setIsPaletteOpen(false)}
-              categories={Nodes.nodeCategories}
-              onAddNode={addNode}
-            />
-          )}
-          <div className="flex-1 relative">
-            {!isPaletteOpen && (
-              <button
-                onClick={() => setIsPaletteOpen(true)}
-                className="absolute left-4 top-4 z-10 bg-gray-800 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg shadow-lg transition-all border border-gray-700 hover:border-gray-600 text-sm font-medium flex items-center gap-1.5"
-                title="Show Nodes Panel"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                  className="w-4 h-4"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-                  />
-                </svg>
-                <span>Show Nodes</span>
-              </button>
+        {/* Canvas Area with Execution Panel Below (70/30 split) */}
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Workflow Editor - 70% height */}
+          <div className="flex overflow-hidden" style={{ height: "70%" }}>
+            {isPaletteOpen && (
+              <NodePalette
+                isOpen={isPaletteOpen}
+                onClose={() => setIsPaletteOpen(false)}
+                categories={Nodes.nodeCategories}
+                onAddNode={addNode}
+              />
             )}
-            <ReactFlow
-              nodes={nodes.map((n) => ({ ...n, dragHandle: ".__dragger" }))}
-              edges={edges}
-              onNodesChange={onNodesChange}
-              onEdgesChange={onEdgesChange}
-              onConnect={onConnect}
-              onDragOver={onDragOver}
-              onDrop={onDrop}
-              nodeTypes={nodeTypes}
-              fitView
-              className="bg-gray-950"
+            <div className="flex-1 relative">
+              {!isPaletteOpen && (
+                <button
+                  onClick={() => setIsPaletteOpen(true)}
+                  className="absolute left-4 top-4 z-10 bg-gray-800 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg shadow-lg transition-all border border-gray-700 hover:border-gray-600 text-sm font-medium flex items-center gap-1.5"
+                  title="Show Nodes Panel"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={2}
+                    stroke="currentColor"
+                    className="w-4 h-4"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                    />
+                  </svg>
+                  <span>Show Nodes</span>
+                </button>
+              )}
+              <ReactFlow
+                nodes={nodes.map((n) => ({ ...n, dragHandle: ".__dragger" }))}
+                edges={edges}
+                onNodesChange={onNodesChange}
+                onEdgesChange={onEdgesChange}
+                onConnect={onConnect}
+                onDragOver={onDragOver}
+                onDrop={onDrop}
+                nodeTypes={nodeTypes}
+                fitView
+                className="bg-gray-950"
+              />
+            </div>
+          </div>
+
+          {/* Execution Panel - 30% height, always visible */}
+          <div className="border-t border-gray-700" style={{ height: "30%" }}>
+            <ExecutionPanel
+              isOpen={true}
+              isLoading={isExecuting}
+              result={executionResult}
+              error={executionError}
+              details={executionDetails}
+              onCancel={handleCancelExecution}
+              onClose={handleCloseExecutionPanel}
+              height={0} // Height controlled by parent
+              onHeightChange={() => {}} // Not used in fixed layout
             />
+            {!isExecutionPanelOpen && !isExecuting && !executionResult && !executionError && (
+              <WorkflowStatusBar nodeCount={nodes.length} edgeCount={edges.length} />
+            )}
           </div>
         </div>
       </div>
@@ -786,20 +809,6 @@ function Canvas() {
           onConfirm={confirmDelete}
           onCancel={() => setDeleteConfirm(null)}
         />
-      )}
-      <ExecutionPanel
-        isOpen={isExecutionPanelOpen}
-        isLoading={isExecuting}
-        result={executionResult}
-        error={executionError}
-        details={executionDetails}
-        onCancel={handleCancelExecution}
-        onClose={handleCloseExecutionPanel}
-        height={executionPanelHeight}
-        onHeightChange={setExecutionPanelHeight}
-      />
-      {!isExecutionPanelOpen && (
-        <WorkflowStatusBar nodeCount={nodes.length} edgeCount={edges.length} />
       )}
     </div>
   );
