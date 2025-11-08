@@ -22,8 +22,32 @@ import ReactFlow, {
 } from "reactflow";
 import "reactflow/dist/style.css";
 import * as Nodes from "../../components/nodes";
-import { AppNavBar } from "../../components/AppNavBar";
-import { WorkflowNavBar } from "../../components/WorkflowNavBar";
+import {
+  HomeIcon,
+  FileIcon,
+  PlusIcon,
+  PlayIcon,
+  SaveIcon,
+  DownloadIcon,
+  UploadIcon,
+  SettingsIcon,
+  FileJsonIcon,
+} from "lucide-react";
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarGroupContent,
+  SidebarMenuItem,
+  SidebarToggle,
+  useSidebar,
+} from "../../components/ui/sidebar";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
 import { WorkflowStatusBar } from "../../components/WorkflowStatusBar";
 import { NodePalette } from "../../components/NodePalette";
 import { JSONPayloadModal } from "../../components/JSONPayloadModal";
@@ -321,6 +345,12 @@ function Canvas() {
 
   const handleOpenWorkflow = () => setShowExamplesModal(true);
 
+  const handleSaveWorkflow = () => {
+    // Placeholder for save functionality
+    // In the future, this could save to localStorage or backend
+    console.log("Saving workflow:", workflowTitle, payload);
+  };
+
   const handleSelectExample = (example: WorkflowExample) => {
     // Load the example workflow
     const exampleNodes = example.nodes as RFNode<NodeData>[];
@@ -451,6 +481,28 @@ function Canvas() {
     nextNodeId.current = maxId + 1;
   };
 
+  const handleImportClick = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          try {
+            const jsonData = JSON.parse(event.target?.result as string);
+            handleImport(jsonData);
+          } catch (error) {
+            console.error("Error parsing JSON:", error);
+          }
+        };
+        reader.readAsText(file);
+      }
+    };
+    input.click();
+  };
+
   const handleDeleteNode = (nodeId: string) => {
     const node = nodes.find((n) => n.id === nodeId);
     if (node) {
@@ -502,71 +554,211 @@ function Canvas() {
     }
   }, [executionResult, setNodes]);
 
+  const { isCollapsed } = useSidebar();
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [titleInput, setTitleInput] = useState(workflowTitle);
+
+  const handleSaveTitle = () => {
+    setWorkflowTitle(titleInput);
+    setIsEditingTitle(false);
+  };
+
+  const handleCancelEditTitle = () => {
+    setTitleInput(workflowTitle);
+    setIsEditingTitle(false);
+  };
+
   return (
-    <div className="h-screen flex flex-col bg-gray-950">
-      <AppNavBar
-        onNewWorkflow={handleNewWorkflow}
-        onOpenWorkflow={handleOpenWorkflow}
-      />
-      <WorkflowNavBar
-        workflowTitle={workflowTitle}
-        onTitleChange={setWorkflowTitle}
-        onShowJSON={() => setShowPayload(true)}
-        onRun={handleRun}
-        onExport={handleExport}
-        onImport={handleImport}
-      />
-      <div className="flex-1 flex overflow-hidden">
-        {isPaletteOpen && (
-          <NodePalette
-            isOpen={isPaletteOpen}
-            onClose={() => setIsPaletteOpen(false)}
-            categories={Nodes.nodeCategories}
-            onAddNode={addNode}
+    <div className="h-screen flex bg-gray-950">
+      {/* Sidebar Navigation */}
+      <Sidebar>
+        <SidebarHeader>
+          {!isCollapsed && (
+            <span className="text-sm font-semibold text-black dark:text-white">
+              ⚡ Thaiyyal
+            </span>
+          )}
+          {isCollapsed && (
+            <span className="text-sm font-semibold text-black dark:text-white">
+              ⚡
+            </span>
+          )}
+        </SidebarHeader>
+
+        <SidebarContent>
+          {/* Navigation Group */}
+          <SidebarGroup>
+            {!isCollapsed && (
+              <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+            )}
+            <SidebarGroupContent>
+              <SidebarMenuItem href="/" icon={<HomeIcon className="w-4 h-4" />} label="Home" />
+              <SidebarMenuItem href="/playground" icon={<FileJsonIcon className="w-4 h-4" />} label="Playground" />
+              <SidebarMenuItem href="/workflow" icon={<FileIcon className="w-4 h-4" />} label="Workflows" active />
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          {/* Actions Group */}
+          <SidebarGroup>
+            {!isCollapsed && <SidebarGroupLabel>Actions</SidebarGroupLabel>}
+            <SidebarGroupContent>
+              <SidebarMenuItem
+                onClick={handleNewWorkflow}
+                icon={<PlusIcon className="w-4 h-4" />}
+                label="New Workflow"
+              />
+              <SidebarMenuItem
+                onClick={handleRun}
+                icon={<PlayIcon className="w-4 h-4" />}
+                label="Run Workflow"
+              />
+              <SidebarMenuItem
+                onClick={() => setShowPayload(true)}
+                icon={<FileJsonIcon className="w-4 h-4" />}
+                label="Show JSON"
+              />
+              <SidebarMenuItem
+                onClick={handleSaveWorkflow}
+                icon={<SaveIcon className="w-4 h-4" />}
+                label="Save"
+              />
+              <SidebarMenuItem
+                onClick={handleExport}
+                icon={<DownloadIcon className="w-4 h-4" />}
+                label="Export"
+              />
+              <SidebarMenuItem
+                onClick={handleImportClick}
+                icon={<UploadIcon className="w-4 h-4" />}
+                label="Import"
+              />
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+
+        <SidebarFooter>
+          <SidebarMenuItem
+            icon={<SettingsIcon className="w-4 h-4" />}
+            label="Settings"
           />
-        )}
-        <div className="flex-1 relative">
-          {isPaletteOpen ? (
-            <> </>
-          ) : (
-            <>
-              <button
-                onClick={() => setIsPaletteOpen(!isPaletteOpen)}
-                className="absolute left-4 top-4 z-10 bg-gray-800 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg shadow-lg transition-all border border-gray-700 hover:border-gray-600 text-sm font-medium flex items-center gap-1.5"
-                title={"Show Nodes Panel"}
-              >
-                <>
+        </SidebarFooter>
+
+        <SidebarToggle />
+      </Sidebar>
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Workflow Title Bar */}
+        <div className="flex items-center justify-between h-12 px-4 border-b border-gray-700 bg-black">
+          <div className="flex items-center gap-3">
+            {isEditingTitle ? (
+              <div className="flex items-center gap-2">
+                <Input
+                  value={titleInput}
+                  onChange={(e) => setTitleInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") handleSaveTitle();
+                    if (e.key === "Escape") handleCancelEditTitle();
+                  }}
+                  className="h-8 w-64 bg-gray-900 border-gray-700 text-white"
+                  autoFocus
+                />
+                <Button
+                  onClick={handleSaveTitle}
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 text-white hover:bg-gray-800"
+                >
+                  ✓
+                </Button>
+                <Button
+                  onClick={handleCancelEditTitle}
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 text-white hover:bg-gray-800"
+                >
+                  ✕
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <h1 className="text-sm font-medium text-white">{workflowTitle}</h1>
+                <Button
+                  onClick={() => {
+                    setTitleInput(workflowTitle);
+                    setIsEditingTitle(true);
+                  }}
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 px-2 text-gray-400 hover:text-white hover:bg-gray-800"
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
-                    strokeWidth={2}
+                    strokeWidth={1.5}
                     stroke="currentColor"
-                    className="w-4 h-4"
+                    className="w-3 h-3"
                   >
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                      d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
                     />
                   </svg>
-                  <span>Show Nodes</span>
-                </>
-              </button>
-            </>
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Canvas Area */}
+        <div className="flex-1 flex overflow-hidden">
+          {isPaletteOpen && (
+            <NodePalette
+              isOpen={isPaletteOpen}
+              onClose={() => setIsPaletteOpen(false)}
+              categories={Nodes.nodeCategories}
+              onAddNode={addNode}
+            />
           )}
-          <ReactFlow
-            nodes={nodes.map((n) => ({ ...n, dragHandle: ".__dragger" }))}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            onDragOver={onDragOver}
-            onDrop={onDrop}
-            nodeTypes={nodeTypes}
-            fitView
-            className="bg-gray-950"
-          />
+          <div className="flex-1 relative">
+            {!isPaletteOpen && (
+              <button
+                onClick={() => setIsPaletteOpen(true)}
+                className="absolute left-4 top-4 z-10 bg-gray-800 hover:bg-gray-700 text-white px-3 py-1.5 rounded-lg shadow-lg transition-all border border-gray-700 hover:border-gray-600 text-sm font-medium flex items-center gap-1.5"
+                title="Show Nodes Panel"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="w-4 h-4"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+                  />
+                </svg>
+                <span>Show Nodes</span>
+              </button>
+            )}
+            <ReactFlow
+              nodes={nodes.map((n) => ({ ...n, dragHandle: ".__dragger" }))}
+              edges={edges}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              onConnect={onConnect}
+              onDragOver={onDragOver}
+              onDrop={onDrop}
+              nodeTypes={nodeTypes}
+              fitView
+              className="bg-gray-950"
+            />
+          </div>
         </div>
       </div>
       <JSONPayloadModal
@@ -616,7 +808,9 @@ function Canvas() {
 export default function Page() {
   return (
     <ReactFlowProvider>
-      <Canvas />
+      <SidebarProvider defaultCollapsed={false}>
+        <Canvas />
+      </SidebarProvider>
     </ReactFlowProvider>
   );
 }
