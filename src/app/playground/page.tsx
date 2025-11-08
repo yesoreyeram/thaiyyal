@@ -226,8 +226,9 @@ export default function PlaygroundPage() {
         onImport={handleImport}
       />
 
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <div className="flex-1 overflow-hidden">
+      <div className="flex-1 flex overflow-hidden">
+        {/* Left half - Form */}
+        <div className="w-1/2 overflow-auto border-r">
           <HTTPRequestBuilder
             baseUrl={baseUrl}
             onBaseUrlChange={setBaseUrl}
@@ -265,14 +266,14 @@ export default function PlaygroundPage() {
           />
         </div>
 
-        {/* Results panel always visible */}
-        <PlaygroundResultsPanel
-          isLoading={isExecuting}
-          result={result}
-          error={error}
-          height={resultsPanelHeight}
-          onHeightChange={setResultsPanelHeight}
-        />
+        {/* Right half - Results panel */}
+        <div className="w-1/2 flex flex-col">
+          <PlaygroundResultsPanel
+            isLoading={isExecuting}
+            result={result}
+            error={error}
+          />
+        </div>
       </div>
     </div>
   );
