@@ -778,9 +778,6 @@ function Canvas() {
               height={0} // Height controlled by parent
               onHeightChange={() => {}} // Not used in fixed layout
             />
-            {!isExecutionPanelOpen && !isExecuting && !executionResult && !executionError && (
-              <WorkflowStatusBar nodeCount={nodes.length} edgeCount={edges.length} />
-            )}
           </div>
         </div>
       </div>
