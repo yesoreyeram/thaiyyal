@@ -1,16 +1,41 @@
 "use client";
 import React, { useState } from "react";
-import { AppNavBar } from "../../components/AppNavBar";
-import { PlaygroundNavBar } from "../../components/PlaygroundNavBar";
+import {
+  HomeIcon,
+  FlaskConicalIcon,
+  FileIcon,
+  PlusIcon,
+  PlayIcon,
+  SaveIcon,
+  DownloadIcon,
+  UploadIcon,
+  SettingsIcon,
+} from "lucide-react";
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarHeader,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarGroupContent,
+  SidebarMenuItem,
+  SidebarToggle,
+  useSidebar,
+} from "../../components/ui/sidebar";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
 import { HTTPRequestBuilder } from "../../components/playground/HTTPRequestBuilder";
 import { PlaygroundResultsPanel } from "../../components/playground/PlaygroundResultsPanel";
 
-export default function PlaygroundPage() {
+function PlaygroundContent() {
   const [requestTitle, setRequestTitle] = useState("New Request");
   const [isExecuting, setIsExecuting] = useState(false);
   const [result, setResult] = useState<unknown>(null);
   const [error, setError] = useState<string | null>(null);
   const [resultsPanelHeight, setResultsPanelHeight] = useState(250);
+  const { isCollapsed } = useSidebar();
 
   // HTTP Request Configuration State
   const [baseUrl, setBaseUrl] = useState("");
@@ -44,6 +69,10 @@ export default function PlaygroundPage() {
   const [parseResponse, setParseResponse] = useState(true);
   const [jsonPath, setJsonPath] = useState("");
 
+  const handleHome = () => {
+    window.location.href = "/";
+  };
+
   const handleNewWorkflow = () => {
     window.location.href = "/workflow";
   };
@@ -51,6 +80,8 @@ export default function PlaygroundPage() {
   const handleOpenWorkflow = () => {
     window.location.href = "/workflow";
   };
+
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleRun = async () => {
     setIsExecuting(true);
@@ -210,71 +241,216 @@ export default function PlaygroundPage() {
     }
   };
 
+  const handleImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const json = JSON.parse(event.target?.result as string);
+        handleImport(json);
+      } catch {
+        alert(
+          "Failed to parse JSON file. Please ensure it is a valid JSON file."
+        );
+      }
+    };
+    reader.readAsText(file);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
   return (
-    <div className="h-screen flex flex-col bg-gray-950">
-      <AppNavBar
-        onNewWorkflow={handleNewWorkflow}
-        onOpenWorkflow={handleOpenWorkflow}
-      />
-      <PlaygroundNavBar
-        requestTitle={requestTitle}
-        onTitleChange={setRequestTitle}
-        onRun={handleRun}
-        isRunning={isExecuting}
-        onSave={handleSave}
-        onExport={handleExport}
-        onImport={handleImport}
+    <div className="h-screen flex bg-white dark:bg-black">
+      {/* Collapsible Sidebar */}
+      <Sidebar>
+        <SidebarToggle />
+        <SidebarHeader>
+          <div className="flex items-center gap-2">
+            <span className="text-xl">⚡</span>
+            {!isCollapsed && (
+              <span className="font-bold text-black dark:text-white">
+                Thaiyyal
+              </span>
+            )}
+          </div>
+        </SidebarHeader>
+
+        <SidebarContent>
+          <SidebarGroup>
+            <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenuItem
+                icon={<HomeIcon className="h-5 w-5" />}
+                label="Home"
+                onClick={handleHome}
+              />
+              <SidebarMenuItem
+                icon={<FlaskConicalIcon className="h-5 w-5" />}
+                label="Playground"
+                onClick={() => {}}
+                active={true}
+              />
+              <SidebarMenuItem
+                icon={<FileIcon className="h-5 w-5" />}
+                label="Workflows"
+                onClick={handleOpenWorkflow}
+              />
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          <SidebarGroup>
+            <SidebarGroupLabel>Actions</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenuItem
+                icon={<PlusIcon className="h-5 w-5" />}
+                label="New Workflow"
+                onClick={handleNewWorkflow}
+              />
+              <SidebarMenuItem
+                icon={<PlayIcon className="h-5 w-5" />}
+                label="Run Request"
+                onClick={handleRun}
+              />
+              <SidebarMenuItem
+                icon={<SaveIcon className="h-5 w-5" />}
+                label="Save Request"
+                onClick={handleSave}
+              />
+              <SidebarMenuItem
+                icon={<DownloadIcon className="h-5 w-5" />}
+                label="Export"
+                onClick={handleExport}
+              />
+              <SidebarMenuItem
+                icon={<UploadIcon className="h-5 w-5" />}
+                label="Import"
+                onClick={handleImportClick}
+              />
+            </SidebarGroupContent>
+          </SidebarGroup>
+        </SidebarContent>
+
+        <SidebarFooter>
+          <SidebarMenuItem
+            icon={<SettingsIcon className="h-5 w-5" />}
+            label="Settings"
+            onClick={() => {}}
+          />
+        </SidebarFooter>
+      </Sidebar>
+
+      {/* Hidden file input for import */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".json,application/json"
+        onChange={handleFileChange}
+        className="hidden"
       />
 
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left half - Form */}
-        <div className="w-1/2 overflow-auto border-r">
-          <HTTPRequestBuilder
-            baseUrl={baseUrl}
-            onBaseUrlChange={setBaseUrl}
-            authMethod={authMethod}
-            onAuthMethodChange={setAuthMethod}
-            authUsername={authUsername}
-            onAuthUsernameChange={setAuthUsername}
-            authPassword={authPassword}
-            onAuthPasswordChange={setAuthPassword}
-            bearerToken={bearerToken}
-            onBearerTokenChange={setBearerToken}
-            timeout={timeoutSeconds}
-            onTimeoutChange={setTimeoutSeconds}
-            method={method}
-            onMethodChange={setMethod}
-            url={url}
-            onUrlChange={setUrl}
-            body={body}
-            onBodyChange={setBody}
-            headers={headers}
-            onHeadersChange={setHeaders}
-            queryParams={queryParams}
-            onQueryParamsChange={setQueryParams}
-            paginationEnabled={paginationEnabled}
-            onPaginationEnabledChange={setPaginationEnabled}
-            pageSize={pageSize}
-            onPageSizeChange={setPageSize}
-            pageParam={pageParam}
-            onPageParamChange={setPageParam}
-            parseResponse={parseResponse}
-            onParseResponseChange={setParseResponse}
-            jsonPath={jsonPath}
-            onJsonPathChange={setJsonPath}
-            onRun={handleRun}
-          />
+      {/* Main content area */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Top bar with request title and run button */}
+        <div className="h-14 border-b border-gray-300 dark:border-gray-700 bg-white dark:bg-black flex items-center justify-between px-6">
+          <div className="flex items-center gap-4">
+            <Input
+              type="text"
+              value={requestTitle}
+              onChange={(e) => setRequestTitle(e.target.value)}
+              className="h-9 w-64 font-medium bg-white dark:bg-black"
+              placeholder="Request name"
+            />
+            <span className="text-xs text-gray-600 dark:text-gray-400">
+              Press <kbd className="px-1.5 py-0.5 rounded bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-700 text-xs">Ctrl+Enter</kbd> to run
+            </span>
+          </div>
+
+          <Button
+            onClick={handleRun}
+            disabled={isExecuting}
+            size="default"
+            className="font-semibold bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200"
+          >
+            {isExecuting ? (
+              <>
+                <span className="h-4 w-4 mr-2 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                Running...
+              </>
+            ) : (
+              <>
+                <PlayIcon className="h-4 w-4 mr-2 fill-current" />
+                Run
+              </>
+            )}
+          </Button>
         </div>
 
-        {/* Right half - Results panel */}
-        <div className="w-1/2 flex flex-col">
-          <PlaygroundResultsPanel
-            isLoading={isExecuting}
-            result={result}
-            error={error}
-          />
+        <div className="flex-1 flex overflow-hidden">
+          {/* Left half - Form */}
+          <div className="w-1/2 overflow-auto border-r border-gray-300 dark:border-gray-700">
+            <HTTPRequestBuilder
+              baseUrl={baseUrl}
+              onBaseUrlChange={setBaseUrl}
+              authMethod={authMethod}
+              onAuthMethodChange={setAuthMethod}
+              authUsername={authUsername}
+              onAuthUsernameChange={setAuthUsername}
+              authPassword={authPassword}
+              onAuthPasswordChange={setAuthPassword}
+              bearerToken={bearerToken}
+              onBearerTokenChange={setBearerToken}
+              timeout={timeoutSeconds}
+              onTimeoutChange={setTimeoutSeconds}
+              method={method}
+              onMethodChange={setMethod}
+              url={url}
+              onUrlChange={setUrl}
+              body={body}
+              onBodyChange={setBody}
+              headers={headers}
+              onHeadersChange={setHeaders}
+              queryParams={queryParams}
+              onQueryParamsChange={setQueryParams}
+              paginationEnabled={paginationEnabled}
+              onPaginationEnabledChange={setPaginationEnabled}
+              pageSize={pageSize}
+              onPageSizeChange={setPageSize}
+              pageParam={pageParam}
+              onPageParamChange={setPageParam}
+              parseResponse={parseResponse}
+              onParseResponseChange={setParseResponse}
+              jsonPath={jsonPath}
+              onJsonPathChange={setJsonPath}
+              onRun={handleRun}
+            />
+          </div>
+
+          {/* Right half - Results panel */}
+          <div className="w-1/2 flex flex-col">
+            <PlaygroundResultsPanel
+              isLoading={isExecuting}
+              result={result}
+              error={error}
+            />
+          </div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PlaygroundPage() {
+  return (
+    <SidebarProvider defaultCollapsed={false}>
+      <PlaygroundContent />
+    </SidebarProvider>
   );
 }
