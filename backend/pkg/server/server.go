@@ -146,6 +146,9 @@ func (s *Server) registerRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/api/v1/httpclient/register", s.handleRegisterHTTPClient)
 	mux.HandleFunc("/api/v1/httpclient/list", s.handleListHTTPClients)
 
+	// Playground endpoint
+	mux.HandleFunc("/api/v1/playground/execute", s.handlePlaygroundExecute)
+
 	// Static file serving (should be last to act as catch-all)
 	mux.HandleFunc("/", s.handleStaticFiles)
 }

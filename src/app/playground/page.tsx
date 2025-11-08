@@ -85,17 +85,17 @@ export default function PlaygroundPage() {
         requestHeaders["Authorization"] = `Bearer ${bearerToken}`;
       }
 
-      // Prepare request body
+      // Prepare request body for Go backend API
       const requestBody = {
         method,
         url: urlObj.toString(),
         headers: requestHeaders,
         body: ["POST", "PUT", "PATCH"].includes(method) ? body : undefined,
-        timeout: parseInt(timeoutSeconds) * 1000,
+        timeout: parseInt(timeoutSeconds), // timeout in seconds
       };
 
-      // Execute the HTTP request via API
-      const response = await fetch("/api/playground/execute", {
+      // Execute the HTTP request via Go backend API
+      const response = await fetch("/api/v1/playground/execute", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -105,11 +105,9 @@ export default function PlaygroundPage() {
 
       const responseData = await response.json();
 
-      if (!response.ok) {
-        // Handle error response
-        setError(
-          responseData.message || "Request failed with status " + response.status
-        );
+      // Check if there's an error in the response
+      if (responseData.error) {
+        setError(responseData.error);
         setIsExecuting(false);
         return;
       }
