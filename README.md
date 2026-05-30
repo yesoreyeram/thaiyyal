@@ -48,6 +48,10 @@ A powerful, secure, and extensible visual workflow engine that combines a Next.j
 
 ## 📚 Documentation
 
+### Planning & Specifications
+- [**Master Specification**](SPECIFICATION.md) - **NEW** - Comprehensive product & technical specification
+- [**Product Requirements**](PRODUCT_REQUIREMENTS.md) - **NEW** - User-focused product requirements document
+
 ### Getting Started
 - [Quick Start Guide](#quick-start)
 - [Installation](#installation)
@@ -548,6 +552,10 @@ Multiple health check endpoints for monitoring:
 - **Health**: Comprehensive checks with dependency status
 
 ## 📚 Documentation
+
+### Planning & Specifications
+- [**Master Specification**](SPECIFICATION.md) - **NEW** - Comprehensive product & technical specification
+- [**Product Requirements**](PRODUCT_REQUIREMENTS.md) - **NEW** - User-focused product requirements document
 
 ### Getting Started
 - [Quick Start Guide](#quick-start)
